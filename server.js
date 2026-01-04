@@ -346,7 +346,16 @@ function aiRoutes(app) {
     // Proxy AI request → Flask
     app.post("/api/ai/precheck", authenticate, async (req, res) => {
         try {
-            const response = await fetch("http://127.0.0.1:8000/ai/precheck", {
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 60_000); // 60s
+            if (!req.body?.text || req.body.text.length < 3) {
+                return res.status(400).json({ error: "Symptoms required" });
+            }
+            if (!response.ok) {
+                throw new Error(`AI error ${response.status}`);
+            }
+
+            const response = await fetch("https://abhijit75-clinical-bert-ai.hf.space/ai/precheck", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(req.body)
@@ -369,8 +378,17 @@ function aiRoutes(app) {
 
         } catch (err) {
             logger.error("AI service error:", err);
-            res.status(500).json({ error: "AI service unavailable" });
+
+            return res.json({
+                input: req.body.text,
+                severity: "unknown",
+                recommendation: "AI service temporarily unavailable. Please try again later.",
+                top_conditions: [],
+                disclaimer: "AI system offline",
+                offline: true
+            });
         }
+
     });
 }
 
