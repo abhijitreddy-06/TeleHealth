@@ -986,7 +986,7 @@
                     </div>
                 </div>
 
-                <button class="analyze-btn" id="analyzeBtn" onclick="runPrecheck()">
+                <button class="analyze-btn" id="analyzeBtn">
                     <i class="fas fa-search"></i>
                     <span>Analyze Symptoms</span>
                 </button>
@@ -1077,6 +1077,8 @@
             html.setAttribute('data-theme', savedTheme);
             updateThemeIcon(savedTheme);
         }
+            const analyzeBtn = document.getElementById("analyzeBtn");
+            analyzeBtn.addEventListener("click", runPrecheck);
 
         function toggleTheme() {
             const currentTheme = html.getAttribute('data-theme');
