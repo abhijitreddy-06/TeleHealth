@@ -198,7 +198,7 @@
         .video-container {
             display: grid;
             grid-template-columns: 1fr 380px;
-            grid-template-rows: 1fr 90px;
+            grid-template-rows: 1fr 80px;
             height: calc(100vh - 64px);
             gap: 16px;
             padding: 16px;
@@ -231,13 +231,15 @@
             display: block;
         }
 
-        /* Local Video - PiP */
+        /* Local Video - PiP (Desktop - Made smaller) */
         .video-local {
             position: absolute;
             bottom: 16px;
             right: 16px;
-            width: 240px;
-            height: 180px;
+            width: 200px;
+            /* Reduced from 240px */
+            height: 150px;
+            /* Reduced from 180px */
             border-radius: var(--radius);
             overflow: hidden;
             border: 3px solid var(--primary);
@@ -476,32 +478,34 @@
             font-weight: 500;
         }
 
-        /* Controls Bar */
+        /* Controls Bar (Desktop - Made smaller) */
         .controls-bar {
             grid-column: 1 / -1;
             grid-row: 2;
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 24px;
-            padding: 16px;
+            gap: 20px;
+            padding: 12px;
             background: var(--surface);
             border-radius: var(--radius);
             border: 1px solid var(--border);
             margin-top: 0;
-            height: 90px;
+            height: 80px;
         }
 
         .control-group {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
         }
 
         .control-btn {
-            width: 56px;
-            height: 56px;
+            width: 48px;
+            /* Reduced from 56px */
+            height: 48px;
+            /* Reduced from 56px */
             border-radius: 50%;
             border: none;
             background: var(--surface-light);
@@ -510,7 +514,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
+            /* Reduced from 20px */
             transition: var(--transition);
             position: relative;
             box-shadow: var(--shadow);
@@ -537,7 +542,7 @@
         }
 
         .control-label {
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
             color: var(--text-secondary);
             text-transform: uppercase;
@@ -587,6 +592,28 @@
 
         .text-center {
             text-align: center;
+        }
+
+        /* Mobile Close Button */
+        .mobile-close-btn {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: var(--error);
+            color: white;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: var(--transition);
+            margin-left: auto;
+        }
+
+        .mobile-close-btn:hover {
+            background: #dc2626;
+            transform: rotate(90deg);
         }
 
         /* Scrollbar Styling */
@@ -685,16 +712,14 @@
                 position: relative;
             }
 
-            /* Local Video PiP - Mobile (Increased height and placed above controls) */
+            /* Local Video PiP - Mobile (Fixed to avoid controls overlap) */
             .video-local {
                 position: absolute;
-                bottom: 160px;
-                /* Increased to be above controls */
+                bottom: 100px;
+                /* Increased to avoid controls overlap */
                 right: 10px;
-                width: 160px;
-                /* Increased width */
-                height: 120px;
-                /* Increased height */
+                width: 140px;
+                height: 105px;
                 border-width: 2px;
                 z-index: 25;
             }
@@ -741,7 +766,7 @@
                 font-size: 11px;
             }
 
-            /* Controls Bar - Mobile */
+            /* Controls Bar - Mobile (Fixed position) */
             .controls-bar {
                 position: fixed;
                 bottom: 0;
@@ -749,45 +774,45 @@
                 right: 0;
                 background: var(--surface);
                 border-top: 1px solid var(--border);
-                padding: 15px;
-                gap: 20px;
+                padding: 12px;
+                gap: 16px;
                 border-radius: 0;
                 margin-top: 0;
                 z-index: 100;
                 box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-                height: 90px;
+                height: 80px;
             }
 
             .control-btn {
-                width: 55px;
-                height: 55px;
-                font-size: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 18px;
             }
 
             .control-label {
-                font-size: 11px;
+                font-size: 10px;
             }
 
-            /* Notes Panel - Mobile (Sliding Drawer) */
+            /* Notes Panel - Mobile (Half Screen with X button) */
             .notes-panel {
                 position: fixed;
-                top: 0;
+                top: auto;
+                bottom: 0;
                 left: 0;
                 right: 0;
-                bottom: 0;
                 background: var(--surface);
                 border-top: 1px solid var(--border);
                 box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
                 z-index: 1000;
-                height: 100vh;
+                height: 50vh;
+                /* Half the screen */
                 transform: translateY(100%);
                 transition: transform 0.3s ease-out;
                 display: flex;
                 flex-direction: column;
-                border-radius: 0;
+                border-radius: var(--radius-lg) var(--radius-lg) 0 0;
                 padding: 16px;
-                padding-top: 60px;
-                /* Space for close button */
+                padding-bottom: 20px;
             }
 
             .notes-panel.active {
@@ -797,13 +822,11 @@
             .notes-header {
                 padding: 0 0 12px 0;
                 margin-bottom: 12px;
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                padding: 16px;
-                background: var(--surface);
-                border-bottom: 1px solid var(--border);
+                position: relative;
+            }
+
+            .mobile-close-btn {
+                display: flex;
             }
 
             .notes-title {
@@ -823,26 +846,25 @@
             .notes-textarea {
                 padding: 12px;
                 font-size: 15px;
-                min-height: calc(100vh - 180px);
+                min-height: calc(50vh - 140px);
+                /* Adjust based on header/footer */
                 flex: 1;
             }
 
             .notes-footer {
                 padding: 12px 0 0 0;
                 font-size: 12px;
-                margin-top: 16px;
+                margin-top: 12px;
             }
 
-            /* Toggle Notes Button - Mobile (Left side, larger) */
+            /* Toggle Notes Button - Mobile */
             .toggle-notes-btn {
                 position: fixed;
-                bottom: 110px;
+                bottom: 90px;
+                /* Positioned above controls */
                 left: 10px;
-                /* Changed from right to left */
-                width: 60px;
-                /* Increased width */
-                height: 60px;
-                /* Increased height */
+                width: 56px;
+                height: 56px;
                 border-radius: 50%;
                 background: var(--primary);
                 color: white;
@@ -851,8 +873,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 24px;
-                /* Increased icon size */
+                font-size: 22px;
                 box-shadow: var(--shadow-xl);
                 z-index: 40;
                 transition: all 0.3s ease;
@@ -865,11 +886,6 @@
 
             .toggle-notes-btn.active {
                 background: var(--error);
-                transform: rotate(180deg);
-            }
-
-            .toggle-notes-btn.active i {
-                transform: rotate(45deg);
             }
         }
 
@@ -890,9 +906,10 @@
             }
 
             .video-local {
-                width: 140px;
-                height: 105px;
-                bottom: 150px;
+                width: 120px;
+                height: 90px;
+                bottom: 90px;
+                /* Adjusted for smaller screens */
                 right: 8px;
             }
 
@@ -903,27 +920,31 @@
             }
 
             .controls-bar {
-                padding: 12px;
-                gap: 16px;
-                height: 85px;
+                padding: 10px;
+                gap: 12px;
+                height: 75px;
             }
 
             .control-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 18px;
+                width: 46px;
+                height: 46px;
+                font-size: 16px;
             }
 
             .control-label {
-                font-size: 10px;
+                font-size: 9px;
             }
 
             .toggle-notes-btn {
-                bottom: 105px;
+                bottom: 85px;
                 left: 8px;
-                width: 56px;
-                height: 56px;
-                font-size: 22px;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .notes-panel {
+                height: 50vh;
             }
         }
 
@@ -938,43 +959,30 @@
             }
 
             .video-local {
-                width: 120px;
-                height: 90px;
+                width: 100px;
+                height: 75px;
                 bottom: 20px;
                 right: 20px;
             }
 
             .notes-panel {
-                flex: 1;
-                height: 100%;
-                transform: translateX(100%);
+                height: 80vh;
+                width: 300px;
                 left: auto;
                 right: 0;
-                bottom: 0;
-                top: 0;
-                width: 300px;
-                height: 100vh;
-                padding-top: 16px;
+                transform: translateX(100%);
+                border-radius: var(--radius-lg) 0 0 var(--radius-lg);
             }
 
             .notes-panel.active {
                 transform: translateX(0);
             }
 
-            .notes-header {
-                position: relative;
-                padding: 0 0 12px 0;
-                margin-bottom: 12px;
-            }
-
             .notes-textarea {
-                min-height: calc(100vh - 220px);
+                min-height: calc(80vh - 140px);
             }
 
             .controls-bar {
-                bottom: 0;
-                left: 0;
-                right: 0;
                 height: 70px;
             }
 
@@ -992,27 +1000,9 @@
                 display: none !important;
             }
 
-            /* Compact layout for desktop */
-            .video-container {
-                gap: 12px;
-                padding: 12px;
-            }
-
-            .controls-bar {
-                gap: 20px;
-                padding: 12px;
-                height: 80px;
-                border-radius: var(--radius);
-            }
-
-            .control-btn {
-                width: 52px;
-                height: 52px;
-                font-size: 18px;
-            }
-
-            .notes-panel {
-                padding: 16px;
+            /* Hide mobile close button in desktop */
+            .mobile-close-btn {
+                display: none !important;
             }
         }
 
@@ -1028,13 +1018,18 @@
             }
 
             .video-local {
-                width: 260px;
-                height: 195px;
+                width: 220px;
+                height: 165px;
             }
 
             .controls-bar {
                 gap: 24px;
-                padding: 16px;
+                padding: 14px;
+            }
+
+            .control-btn {
+                width: 52px;
+                height: 52px;
             }
         }
 
@@ -1050,8 +1045,8 @@
             }
 
             .video-local {
-                width: 280px;
-                height: 210px;
+                width: 240px;
+                height: 180px;
                 bottom: 20px;
                 right: 20px;
             }
@@ -1145,6 +1140,9 @@
                     <button class="notes-action-btn" id="saveNotes" title="Save notes">
                         <i class="fas fa-save"></i>
                     </button>
+                    <button class="mobile-close-btn" id="mobileCloseNotes" title="Close notes">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
             </div>
             <textarea id="notesText" class="notes-textarea" placeholder="Enter consultation notes here...
@@ -1205,6 +1203,7 @@
             // UI Elements for mobile
             const notesPanel = document.getElementById('notesPanel');
             const toggleNotesBtn = document.getElementById('toggleNotesBtn');
+            const mobileCloseNotes = document.getElementById('mobileCloseNotes');
             const videoLocal = document.querySelector('.video-local');
             const isMobile = window.innerWidth <= 768;
 
@@ -1215,54 +1214,13 @@
 
                 // Toggle notes panel with smooth animation
                 toggleNotesBtn.addEventListener('click', function () {
-                    const isActive = notesPanel.classList.toggle('active');
-                    toggleNotesBtn.classList.toggle('active', isActive);
-
-                    // Change icon
-                    const icon = toggleNotesBtn.querySelector('i');
-                    if (isActive) {
-                        icon.className = 'fas fa-times';
-                        toggleNotesBtn.title = 'Hide notes';
-                        // Prevent body scrolling when notes are open
-                        document.body.style.overflow = 'hidden';
-                    } else {
-                        icon.className = 'fas fa-notes-medical';
-                        toggleNotesBtn.title = 'Show notes';
-                        // Restore body scrolling
-                        document.body.style.overflow = '';
-                    }
-
-                    // Adjust local video position
-                    adjustLocalVideoPosition();
+                    openNotesPanel();
                 });
 
-                // Close notes when clicking on close button in notes header
-                const notesActions = document.querySelector('.notes-actions');
-                if (notesActions) {
-                    // Add close functionality to save button on mobile
-                    const saveBtn = document.getElementById('saveNotes');
-                    const originalSaveNotes = saveBtn.onclick;
-
-                    saveBtn.addEventListener('click', function (e) {
-                        if (isMobile && notesPanel.classList.contains('active')) {
-                            // Execute original save function if it exists
-                            if (typeof originalSaveNotes === 'function') {
-                                originalSaveNotes.call(this, e);
-                            }
-
-                            // Close notes panel after a short delay
-                            setTimeout(() => {
-                                notesPanel.classList.remove('active');
-                                toggleNotesBtn.classList.remove('active');
-                                const icon = toggleNotesBtn.querySelector('i');
-                                icon.className = 'fas fa-notes-medical';
-                                toggleNotesBtn.title = 'Show notes';
-                                document.body.style.overflow = '';
-                                adjustLocalVideoPosition();
-                            }, 300);
-                        }
-                    });
-                }
+                // Close notes panel with X button
+                mobileCloseNotes.addEventListener('click', function () {
+                    closeNotesPanel();
+                });
 
                 // Close notes panel when clicking outside on mobile
                 document.addEventListener('click', function (event) {
@@ -1270,29 +1228,52 @@
                         !notesPanel.contains(event.target) &&
                         event.target !== toggleNotesBtn &&
                         !toggleNotesBtn.contains(event.target)) {
-                        notesPanel.classList.remove('active');
-                        toggleNotesBtn.classList.remove('active');
-                        const icon = toggleNotesBtn.querySelector('i');
-                        icon.className = 'fas fa-notes-medical';
-                        toggleNotesBtn.title = 'Show notes';
-                        document.body.style.overflow = '';
-                        adjustLocalVideoPosition();
+                        closeNotesPanel();
                     }
                 });
+
+                // Function to open notes panel
+                function openNotesPanel() {
+                    notesPanel.classList.add('active');
+                    toggleNotesBtn.classList.add('active');
+                    toggleNotesBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    toggleNotesBtn.title = 'Hide notes';
+                    document.body.style.overflow = 'hidden';
+
+                    // Adjust local video position
+                    adjustLocalVideoPosition();
+                }
+
+                // Function to close notes panel
+                function closeNotesPanel() {
+                    notesPanel.classList.remove('active');
+                    toggleNotesBtn.classList.remove('active');
+                    toggleNotesBtn.innerHTML = '<i class="fas fa-notes-medical"></i>';
+                    toggleNotesBtn.title = 'Show notes';
+                    document.body.style.overflow = '';
+
+                    // Adjust local video position
+                    adjustLocalVideoPosition();
+                }
 
                 // Adjust local video position based on notes panel state
                 function adjustLocalVideoPosition() {
                     if (!videoLocal) return;
 
                     const controlsBar = document.querySelector('.controls-bar');
-                    const controlsHeight = controlsBar ? controlsBar.offsetHeight : 90;
+                    const controlsHeight = controlsBar ? controlsBar.offsetHeight : 80;
 
                     if (notesPanel.classList.contains('active')) {
-                        // When notes are open, move local video higher
-                        videoLocal.style.bottom = '20px';
+                        // When notes are open (50vh), position local video higher
+                        // Calculate space above notes panel
+                        const notesHeight = window.innerHeight * 0.5; // 50vh
+                        const availableSpace = window.innerHeight - notesHeight - controlsHeight;
+
+                        // Position in the middle of available space above notes
+                        const videoBottom = notesHeight + (availableSpace / 2) - 60;
+                        videoLocal.style.bottom = `${Math.max(20, videoBottom)}px`;
                     } else {
                         // When notes are closed, position above controls
-                        const toggleBtnHeight = toggleNotesBtn ? toggleNotesBtn.offsetHeight : 0;
                         const bottomPosition = controlsHeight + 20;
                         videoLocal.style.bottom = `${bottomPosition}px`;
                     }
@@ -1304,6 +1285,13 @@
                 // Adjust on resize
                 window.addEventListener('resize', function () {
                     adjustLocalVideoPosition();
+                });
+
+                // Also adjust when orientation changes
+                window.addEventListener('orientationchange', function () {
+                    setTimeout(function () {
+                        adjustLocalVideoPosition();
+                    }, 300);
                 });
             }
 
