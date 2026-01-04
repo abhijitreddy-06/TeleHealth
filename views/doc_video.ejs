@@ -197,11 +197,11 @@
         /* Main Video Layout - Desktop Optimized */
         .video-container {
             display: grid;
-            grid-template-columns: 1fr 400px;
-            grid-template-rows: 1fr auto;
+            grid-template-columns: 1fr 380px;
+            grid-template-rows: 1fr 90px;
             height: calc(100vh - 64px);
-            gap: 20px;
-            padding: 20px;
+            gap: 16px;
+            padding: 16px;
             position: relative;
             max-width: 1800px;
             margin: 0 auto;
@@ -234,10 +234,10 @@
         /* Local Video - PiP */
         .video-local {
             position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 260px;
-            height: 195px;
+            bottom: 16px;
+            right: 16px;
+            width: 240px;
+            height: 180px;
             border-radius: var(--radius);
             overflow: hidden;
             border: 3px solid var(--primary);
@@ -369,7 +369,7 @@
             grid-row: 1;
             background: var(--surface);
             border-radius: var(--radius-lg);
-            padding: 24px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             border: 1px solid var(--border);
@@ -382,8 +382,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
             border-bottom: 1px solid var(--border);
         }
 
@@ -454,7 +454,7 @@
             justify-content: space-between;
             align-items: center;
             margin-top: 16px;
-            padding-top: 16px;
+            padding-top: 12px;
             border-top: 1px solid var(--border);
             font-size: 13px;
             color: var(--text-secondary);
@@ -483,24 +483,25 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 32px;
-            padding: 20px;
+            gap: 24px;
+            padding: 16px;
             background: var(--surface);
-            border-radius: var(--radius-lg);
+            border-radius: var(--radius);
             border: 1px solid var(--border);
             margin-top: 0;
+            height: 90px;
         }
 
         .control-group {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         .control-btn {
-            width: 60px;
-            height: 60px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             border: none;
             background: var(--surface-light);
@@ -509,7 +510,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
             transition: var(--transition);
             position: relative;
             box-shadow: var(--shadow);
@@ -681,16 +682,19 @@
                 min-height: 0;
                 border-radius: 0;
                 box-shadow: none;
+                position: relative;
             }
 
-            /* Local Video PiP - Mobile (Moved Higher) */
+            /* Local Video PiP - Mobile (Increased height and placed above controls) */
             .video-local {
                 position: absolute;
-                bottom: 140px;
-                /* Increased from 120px to clear the buttons */
+                bottom: 160px;
+                /* Increased to be above controls */
                 right: 10px;
-                width: 130px;
-                height: 97px;
+                width: 160px;
+                /* Increased width */
+                height: 120px;
+                /* Increased height */
                 border-width: 2px;
                 z-index: 25;
             }
@@ -767,20 +771,23 @@
             /* Notes Panel - Mobile (Sliding Drawer) */
             .notes-panel {
                 position: fixed;
-                bottom: 0;
+                top: 0;
                 left: 0;
                 right: 0;
+                bottom: 0;
                 background: var(--surface);
                 border-top: 1px solid var(--border);
                 box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-                z-index: 50;
-                height: 45vh;
+                z-index: 1000;
+                height: 100vh;
                 transform: translateY(100%);
-                transition: transform 0.3s ease;
+                transition: transform 0.3s ease-out;
                 display: flex;
                 flex-direction: column;
                 border-radius: 0;
                 padding: 16px;
+                padding-top: 60px;
+                /* Space for close button */
             }
 
             .notes-panel.active {
@@ -790,6 +797,13 @@
             .notes-header {
                 padding: 0 0 12px 0;
                 margin-bottom: 12px;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                padding: 16px;
+                background: var(--surface);
+                border-bottom: 1px solid var(--border);
             }
 
             .notes-title {
@@ -809,22 +823,26 @@
             .notes-textarea {
                 padding: 12px;
                 font-size: 15px;
-                min-height: 150px;
+                min-height: calc(100vh - 180px);
+                flex: 1;
             }
 
             .notes-footer {
                 padding: 12px 0 0 0;
                 font-size: 12px;
+                margin-top: 16px;
             }
 
-            /* Toggle Notes Button - Mobile */
+            /* Toggle Notes Button - Mobile (Left side, larger) */
             .toggle-notes-btn {
                 position: fixed;
                 bottom: 110px;
-                /* Adjusted to not block local video */
-                right: 10px;
-                width: 48px;
-                height: 48px;
+                left: 10px;
+                /* Changed from right to left */
+                width: 60px;
+                /* Increased width */
+                height: 60px;
+                /* Increased height */
                 border-radius: 50%;
                 background: var(--primary);
                 color: white;
@@ -833,15 +851,25 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                font-size: 20px;
+                font-size: 24px;
+                /* Increased icon size */
                 box-shadow: var(--shadow-xl);
                 z-index: 40;
-                transition: var(--transition);
+                transition: all 0.3s ease;
             }
 
             .toggle-notes-btn:hover {
                 transform: scale(1.1);
                 background: var(--primary-hover);
+            }
+
+            .toggle-notes-btn.active {
+                background: var(--error);
+                transform: rotate(180deg);
+            }
+
+            .toggle-notes-btn.active i {
+                transform: rotate(45deg);
             }
         }
 
@@ -862,9 +890,9 @@
             }
 
             .video-local {
-                width: 110px;
-                height: 82px;
-                bottom: 130px;
+                width: 140px;
+                height: 105px;
+                bottom: 150px;
                 right: 8px;
             }
 
@@ -892,10 +920,10 @@
 
             .toggle-notes-btn {
                 bottom: 105px;
-                right: 8px;
-                width: 44px;
-                height: 44px;
-                font-size: 18px;
+                left: 8px;
+                width: 56px;
+                height: 56px;
+                font-size: 22px;
             }
         }
 
@@ -910,8 +938,8 @@
             }
 
             .video-local {
-                width: 100px;
-                height: 75px;
+                width: 120px;
+                height: 90px;
                 bottom: 20px;
                 right: 20px;
             }
@@ -926,10 +954,21 @@
                 top: 0;
                 width: 300px;
                 height: 100vh;
+                padding-top: 16px;
             }
 
             .notes-panel.active {
                 transform: translateX(0);
+            }
+
+            .notes-header {
+                position: relative;
+                padding: 0 0 12px 0;
+                margin-bottom: 12px;
+            }
+
+            .notes-textarea {
+                min-height: calc(100vh - 220px);
             }
 
             .controls-bar {
@@ -941,49 +980,80 @@
 
             .toggle-notes-btn {
                 bottom: 80px;
-                right: 10px;
+                left: 10px;
             }
         }
 
         /* Desktop Optimizations */
-        @media (min-width: 1200px) {
+        @media (min-width: 769px) {
+
+            /* Hide toggle notes button in desktop view */
+            .toggle-notes-btn {
+                display: none !important;
+            }
+
+            /* Compact layout for desktop */
             .video-container {
-                grid-template-columns: 1fr 450px;
-                gap: 24px;
-                padding: 24px;
-            }
-
-            .notes-panel {
-                padding: 28px;
-            }
-
-            .video-local {
-                width: 300px;
-                height: 225px;
+                gap: 12px;
+                padding: 12px;
             }
 
             .controls-bar {
-                gap: 40px;
-                padding: 24px;
+                gap: 20px;
+                padding: 12px;
+                height: 80px;
+                border-radius: var(--radius);
+            }
+
+            .control-btn {
+                width: 52px;
+                height: 52px;
+                font-size: 18px;
+            }
+
+            .notes-panel {
+                padding: 16px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .video-container {
+                grid-template-columns: 1fr 380px;
+                gap: 16px;
+                padding: 16px;
+            }
+
+            .notes-panel {
+                padding: 20px;
+            }
+
+            .video-local {
+                width: 260px;
+                height: 195px;
+            }
+
+            .controls-bar {
+                gap: 24px;
+                padding: 16px;
             }
         }
 
         @media (min-width: 1600px) {
             .video-container {
-                grid-template-columns: 1fr 500px;
-                gap: 28px;
-                padding: 28px;
+                grid-template-columns: 1fr 400px;
+                gap: 20px;
+                padding: 20px;
             }
 
             .notes-panel {
-                padding: 32px;
+                padding: 24px;
             }
 
             .video-local {
-                width: 340px;
-                height: 255px;
-                bottom: 30px;
-                right: 30px;
+                width: 280px;
+                height: 210px;
+                bottom: 20px;
+                right: 20px;
             }
         }
     </style>
@@ -1138,31 +1208,61 @@
             const videoLocal = document.querySelector('.video-local');
             const isMobile = window.innerWidth <= 768;
 
-            // Create toggle notes button if it doesn't exist (for mobile)
-            if (isMobile && !toggleNotesBtn) {
-                const toggleBtn = document.createElement('button');
-                toggleBtn.className = 'toggle-notes-btn';
-                toggleBtn.id = 'toggleNotesBtn';
-                toggleBtn.title = 'Show notes';
-                toggleBtn.innerHTML = '<i class="fas fa-notes-medical"></i>';
-                document.querySelector('.video-container').appendChild(toggleBtn);
-            }
+            // Mobile-specific UI setup
+            if (isMobile) {
+                // Make notes panel slide smoothly
+                notesPanel.style.transition = 'transform 0.3s ease-out';
 
-            // Toggle notes panel on mobile
-            if (isMobile && toggleNotesBtn) {
+                // Toggle notes panel with smooth animation
                 toggleNotesBtn.addEventListener('click', function () {
-                    notesPanel.classList.toggle('active');
-                    const icon = notesPanel.classList.contains('active') ? 'fa-times' : 'fa-notes-medical';
-                    toggleNotesBtn.innerHTML = `<i class="fas ${icon}"></i>`;
-                    toggleNotesBtn.title = notesPanel.classList.contains('active') ? 'Hide notes' : 'Show notes';
+                    const isActive = notesPanel.classList.toggle('active');
+                    toggleNotesBtn.classList.toggle('active', isActive);
 
-                    // Adjust local video position when notes are open
-                    if (notesPanel.classList.contains('active')) {
-                        videoLocal.style.bottom = 'calc(45vh + 10px)';
+                    // Change icon
+                    const icon = toggleNotesBtn.querySelector('i');
+                    if (isActive) {
+                        icon.className = 'fas fa-times';
+                        toggleNotesBtn.title = 'Hide notes';
+                        // Prevent body scrolling when notes are open
+                        document.body.style.overflow = 'hidden';
                     } else {
-                        videoLocal.style.bottom = '140px';
+                        icon.className = 'fas fa-notes-medical';
+                        toggleNotesBtn.title = 'Show notes';
+                        // Restore body scrolling
+                        document.body.style.overflow = '';
                     }
+
+                    // Adjust local video position
+                    adjustLocalVideoPosition();
                 });
+
+                // Close notes when clicking on close button in notes header
+                const notesActions = document.querySelector('.notes-actions');
+                if (notesActions) {
+                    // Add close functionality to save button on mobile
+                    const saveBtn = document.getElementById('saveNotes');
+                    const originalSaveNotes = saveBtn.onclick;
+
+                    saveBtn.addEventListener('click', function (e) {
+                        if (isMobile && notesPanel.classList.contains('active')) {
+                            // Execute original save function if it exists
+                            if (typeof originalSaveNotes === 'function') {
+                                originalSaveNotes.call(this, e);
+                            }
+
+                            // Close notes panel after a short delay
+                            setTimeout(() => {
+                                notesPanel.classList.remove('active');
+                                toggleNotesBtn.classList.remove('active');
+                                const icon = toggleNotesBtn.querySelector('i');
+                                icon.className = 'fas fa-notes-medical';
+                                toggleNotesBtn.title = 'Show notes';
+                                document.body.style.overflow = '';
+                                adjustLocalVideoPosition();
+                            }, 300);
+                        }
+                    });
+                }
 
                 // Close notes panel when clicking outside on mobile
                 document.addEventListener('click', function (event) {
@@ -1171,58 +1271,41 @@
                         event.target !== toggleNotesBtn &&
                         !toggleNotesBtn.contains(event.target)) {
                         notesPanel.classList.remove('active');
-                        toggleNotesBtn.innerHTML = '<i class="fas fa-notes-medical"></i>';
+                        toggleNotesBtn.classList.remove('active');
+                        const icon = toggleNotesBtn.querySelector('i');
+                        icon.className = 'fas fa-notes-medical';
                         toggleNotesBtn.title = 'Show notes';
-                        videoLocal.style.bottom = '140px';
-                    }
-                });
-            }
-
-            // Adjust local video position on resize for mobile
-            function adjustLocalVideoPosition() {
-                if (window.innerWidth <= 768) {
-                    const controlsHeight = document.querySelector('.controls-bar').offsetHeight;
-                    const toggleBtnHeight = toggleNotesBtn ? toggleNotesBtn.offsetHeight : 0;
-
-                    // Calculate safe position above controls and toggle button
-                    let bottomPosition = controlsHeight + 20;
-                    if (toggleNotesBtn && window.getComputedStyle(toggleNotesBtn).display !== 'none') {
-                        bottomPosition += toggleBtnHeight + 10;
-                    }
-
-                    videoLocal.style.bottom = `${bottomPosition}px`;
-
-                    // Adjust if notes panel is open
-                    if (notesPanel.classList.contains('active')) {
-                        const notesHeight = notesPanel.offsetHeight;
-                        videoLocal.style.bottom = `${notesHeight + 10}px`;
-                    }
-                }
-            }
-
-            // Adjust layout on orientation change and resize
-            window.addEventListener('orientationchange', function () {
-                setTimeout(function () {
-                    window.dispatchEvent(new Event('resize'));
-                }, 300);
-            });
-
-            window.addEventListener('resize', adjustLocalVideoPosition);
-
-            // Hide notes panel when controls are tapped on mobile
-            const controlButtons = document.querySelectorAll('.control-btn');
-            controlButtons.forEach(btn => {
-                btn.addEventListener('click', function () {
-                    if (isMobile && notesPanel.classList.contains('active')) {
-                        notesPanel.classList.remove('active');
-                        if (toggleNotesBtn) {
-                            toggleNotesBtn.innerHTML = '<i class="fas fa-notes-medical"></i>';
-                            toggleNotesBtn.title = 'Show notes';
-                        }
+                        document.body.style.overflow = '';
                         adjustLocalVideoPosition();
                     }
                 });
-            });
+
+                // Adjust local video position based on notes panel state
+                function adjustLocalVideoPosition() {
+                    if (!videoLocal) return;
+
+                    const controlsBar = document.querySelector('.controls-bar');
+                    const controlsHeight = controlsBar ? controlsBar.offsetHeight : 90;
+
+                    if (notesPanel.classList.contains('active')) {
+                        // When notes are open, move local video higher
+                        videoLocal.style.bottom = '20px';
+                    } else {
+                        // When notes are closed, position above controls
+                        const toggleBtnHeight = toggleNotesBtn ? toggleNotesBtn.offsetHeight : 0;
+                        const bottomPosition = controlsHeight + 20;
+                        videoLocal.style.bottom = `${bottomPosition}px`;
+                    }
+                }
+
+                // Initial adjustment
+                adjustLocalVideoPosition();
+
+                // Adjust on resize
+                window.addEventListener('resize', function () {
+                    adjustLocalVideoPosition();
+                });
+            }
 
             // Your existing JavaScript code remains exactly the same
             let localStream = null;
