@@ -681,7 +681,42 @@ function authRoutes(app) {
             res.status(500).send("Internal Server Error");
         }
     });
+    app.post("/doc_signup", async (req, res) => {
+        const { phone, password, confirmpassword } = req.body;
 
+        if (!password || password.length < 6)
+            return res.send(`<script>alert('Password must be at least 6 characters.');location='/doc_signup'</script>`);
+
+        if (password !== confirmpassword)
+            return res.send(`<script>alert('Passwords must match.');location='/doc_signup'</script>`);
+
+        const exists = await db.query(
+            "SELECT docid FROM doc_login WHERE phone=$1",
+            [phone]
+        );
+        if (exists.rows.length)
+            return res.send(`<script>alert('Account already exists');location='/doc_signup'</script>`);
+
+        const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(saltRounds));
+        const result = await db.query(
+            "INSERT INTO doc_login (phone,password) VALUES ($1,$2) RETURNING docid",
+            [phone, hash]
+        );
+
+        const token = jwt.sign(
+            {
+                id: result.rows[0].docid,   // ✅ FIXED
+                phone,
+                role: "doctor"
+            },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRES_IN }
+        );
+
+        res.cookie("token", token, cookieOptions);
+        res.setHeader('Cache-Control', 'no-cache, no-store');
+        res.redirect("/doc_profile");
+    });
     // Doctor Login
     app.post("/doc_login", async (req, res) => {
         const { phone, password } = req.body;
