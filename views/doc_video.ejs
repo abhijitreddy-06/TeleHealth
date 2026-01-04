@@ -1070,6 +1070,21 @@
         z-index: 100;
     }
 }
+@media (max-width: 768px) {
+    .video-local {
+        position: fixed;              /* ✅ KEY FIX */
+        right: 10px;
+        bottom: 96px;                 /* space for controls */
+        width: 140px;
+        height: 105px;
+        z-index: 150;                 /* above controls */
+        border-width: 2px;
+        pointer-events: auto;
+    }
+}
+.controls-bar {
+    touch-action: manipulation;
+}
 
     </style>
 </head>
