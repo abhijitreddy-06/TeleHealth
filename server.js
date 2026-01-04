@@ -689,7 +689,7 @@ function authRoutes(app) {
 
         if (password !== confirmpassword)
             return res.send(`<script>alert('Passwords must match.');location='/doc_signup'</script>`);
-
+        try {
         const exists = await db.query(
             "SELECT docid FROM doc_login WHERE phone=$1",
             [phone]
@@ -697,7 +697,7 @@ function authRoutes(app) {
         if (exists.rows.length)
             return res.send(`<script>alert('Account already exists');location='/doc_signup'</script>`);
 
-        const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(saltRounds));
+        const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
         const result = await db.query(
             "INSERT INTO doc_login (phone,password) VALUES ($1,$2) RETURNING docid",
             [phone, hash]
@@ -716,6 +716,10 @@ function authRoutes(app) {
         res.cookie("token", token, cookieOptions);
         res.setHeader('Cache-Control', 'no-cache, no-store');
         res.redirect("/doc_profile");
+    } catch (err) {
+
+        res.status(500).send("Internal Server Error");
+    }
     });
     // Doctor Login
     app.post("/doc_login", async (req, res) => {
