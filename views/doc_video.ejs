@@ -1051,6 +1051,26 @@
                 right: 20px;
             }
         }
+        /* ===== FIX: Ensure PiP never overlaps controls ===== */
+@media (max-width: 768px) {
+    .video-local {
+        bottom: auto; /* ❌ remove static bottom */
+        right: 10px;
+        z-index: 50;
+    }
+
+    /* Ensure toggle button always clickable */
+    .toggle-notes-btn {
+        z-index: 200;
+        pointer-events: auto;
+    }
+
+    /* Controls should not block clicks above */
+    .controls-bar {
+        z-index: 100;
+    }
+}
+
     </style>
 </head>
 
@@ -1666,6 +1686,79 @@
             });
         });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const notesPanel = document.getElementById('notesPanel');
+            const toggleNotesBtn = document.getElementById('toggleNotesBtn');
+            const mobileCloseNotes = document.getElementById('mobileCloseNotes');
+            const videoLocal = document.querySelector('.video-local');
+            const controlsBar = document.querySelector('.controls-bar');
+
+            const isMobile = window.innerWidth <= 768;
+
+            if (!isMobile) return;
+
+            /* ---------- SAFE POSITIONING ---------- */
+            function positionLocalVideo() {
+                if (!videoLocal || !controlsBar) return;
+
+                const controlsHeight = controlsBar.offsetHeight || 80;
+
+                if (notesPanel.classList.contains('active')) {
+                    const notesHeight = window.innerHeight * 0.5;
+                    videoLocal.style.bottom = `${notesHeight + 20}px`;
+                } else {
+                    videoLocal.style.bottom = `${controlsHeight + 16}px`;
+                }
+            }
+
+            positionLocalVideo();
+            window.addEventListener('resize', positionLocalVideo);
+            window.addEventListener('orientationchange', () =>
+                setTimeout(positionLocalVideo, 300)
+            );
+
+            /* ---------- NOTES OPEN ---------- */
+            toggleNotesBtn.addEventListener('click', function (e) {
+                e.stopPropagation();   // ✅ CRITICAL FIX
+                openNotes();
+            });
+
+            mobileCloseNotes.addEventListener('click', function (e) {
+                e.stopPropagation();
+                closeNotes();
+            });
+
+            function openNotes() {
+                notesPanel.classList.add('active');
+                toggleNotesBtn.classList.add('active');
+                toggleNotesBtn.innerHTML = '<i class="fas fa-times"></i>';
+                document.body.style.overflow = 'hidden';
+                positionLocalVideo();
+            }
+
+            function closeNotes() {
+                notesPanel.classList.remove('active');
+                toggleNotesBtn.classList.remove('active');
+                toggleNotesBtn.innerHTML = '<i class="fas fa-notes-medical"></i>';
+                document.body.style.overflow = '';
+                positionLocalVideo();
+            }
+
+            /* ---------- CLICK OUTSIDE (SAFE) ---------- */
+            document.addEventListener('click', function (e) {
+                if (
+                    notesPanel.classList.contains('active') &&
+                    !notesPanel.contains(e.target) &&
+                    !toggleNotesBtn.contains(e.target)
+                ) {
+                    closeNotes();
+                }
+            });
+        });
+    </script>
+
 </body>
 
 </html>
