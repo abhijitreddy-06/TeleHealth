@@ -27,7 +27,6 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const PROJECT_ROOT = __dirname;
 
-// Get port from environment or default to 3000
 const port = process.env.PORT || 3000;
 
 // ==============================================
@@ -63,12 +62,9 @@ if (process.env.NODE_ENV !== 'production') {
 // ==============================================
 // SUPABASE CONFIGURATION
 // ==============================================
-console.log("🔧 Supabase Configuration Check:");
-console.log("   URL:", process.env.SUPABASE_URL ? "✅ Set" : "❌ Missing");
-console.log("   Service Key:", process.env.SUPABASE_SERVICE_KEY ? "✅ Set (first 10 chars): " + process.env.SUPABASE_SERVICE_KEY.substring(0, 10) + "..." : "❌ Missing");
 const supabaseService = createClient(
     process.env.SUPABASE_URL || "",
-    process.env.SUPABASE_SERVICE_KEY || "", // Use service key explicitly
+    process.env.SUPABASE_SERVICE_KEY || "", 
     {
         auth: {
             autoRefreshToken: false,
@@ -76,8 +72,8 @@ const supabaseService = createClient(
         }
     }
 );
-// Test Supabase connection
-// Test Supabase connection
+
+// Function to generate signed URL for a file
 async function generateSignedUrl(filePath) {
     try {
         // Generate signed URL that expires in 1 hour
@@ -93,51 +89,12 @@ async function generateSignedUrl(filePath) {
     }
 }
 
-// Test Supabase connection
-async function testSupabaseConnection() {
-    try {
-        console.log("🔍 Testing Supabase connection...");
-
-        // List buckets
-        const { data: buckets, error: bucketsError } = await supabaseService.storage
-            .listBuckets();
-
-        if (bucketsError) {
-            console.error("❌ Supabase storage error:", bucketsError.message);
-            return;
-        }
-
-        console.log("✅ Supabase storage buckets:", buckets.map(b => b.name));
-
-        // Check if 'uploads' bucket exists and is public
-        const uploadsBucket = buckets?.find(b => b.name === 'uploads');
-
-        if (!uploadsBucket) {
-            console.log("❌ 'uploads' bucket not found!");
-        } else {
-            console.log(`✅ 'uploads' bucket exists (public: ${uploadsBucket.public})`);
-
-            if (!uploadsBucket.public) {
-                console.warn("⚠️ WARNING: 'uploads' bucket is NOT public. Files won't be accessible via URL.");
-                console.warn("   Go to Supabase Dashboard → Storage → 'uploads' bucket → Toggle 'Public' to ON");
-            } else {
-                console.log("✅ Bucket is public - files will be accessible");
-            }
-        }
-
-    } catch (error) {
-        console.error("❌ Supabase connection test failed:", error.message);
-    }
-}
-// Run the test
-testSupabaseConnection();
-
 // ==============================================
 // DATABASE CONFIGURATION (POOLING)
 // ==============================================
 
 const db = new Pool({
-    connectionString: process.env.DATABASE_URL || "postgresql://postgres:Abhi.data@localhost:5432/CottonCure",
+    connectionString: process.env.DATABASE_URL ,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     max: 20,
     idleTimeoutMillis: 30000,
@@ -155,25 +112,6 @@ db.connect()
         console.error("Failed to connect to PostgreSQL:", err.stack);
     });
 
-// ==============================================
-// MIDDLEWARE SETUP
-// ==============================================
-
-// Security middleware
-// In server.js, update helmet configuration:
-// app.use(helmet({
-//     contentSecurityPolicy: {
-//         directives: {
-//             defaultSrc: ["'self'"],
-//             styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
-//             scriptSrc: ["'self'", "'unsafe-inline'"],
-//             imgSrc: ["'self'", "data:", "https:"],
-//             connectSrc: ["'self'", "http://127.0.0.1:8000", "ws://localhost:3000"],
-//             fontSrc: ["'self'", "https://fonts.gstatic.com"],
-//         }
-//     },
-//     crossOriginEmbedderPolicy: false
-// }));
 
 // CORS configuration for frontend-backend separation
 app.use(cors({
@@ -217,11 +155,12 @@ app.set("views", path.join(PROJECT_ROOT, "views"));
 // Cookie configuration
 const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', // true for HTTPS
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax', // 'None' for cross-site
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    secure: process.env.NODE_ENV === 'production', 
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax', 
+    maxAge: 7 * 24 * 60 * 60 * 1000, 
     path: '/'
 };
+
 // ==============================================
 // SOCKET.IO SETUP
 // ==============================================
@@ -313,11 +252,11 @@ function blockAfterLogin(req, res, next) {
 // ==============================================
 // MULTER CONFIGURATION (for form file uploads)
 // ==============================================
-const storage = multer.memoryStorage(); // Store in memory for Supabase upload
+const storage = multer.memoryStorage(); 
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB limit
+        fileSize: 10 * 1024 * 1024, 
     },
     fileFilter: (req, file, cb) => {
         const allowedTypes = /jpeg|jpg|png|pdf|doc|docx/;
@@ -450,15 +389,12 @@ function appointmentRoutes(app) {
     );
 
     // User Appointments (API)
-    // User Appointments (API)
     app.get(
         "/api/appointments/user",
         authenticate,
         authorize("user"),
         async (req, res) => {
             try {
-               
-
                 const result = await db.query(
                     `SELECT a.id, a.appointment_date, a.appointment_time,
                         a.status, a.room_id, 
@@ -473,13 +409,10 @@ function appointmentRoutes(app) {
                     [req.user.id]
                 );
 
-               
-
-                // Make sure we return JSON
                 res.setHeader('Content-Type', 'application/json');
 
                 if (result.rows.length === 0) {
-                    return res.json([]); // Return empty array
+                    return res.json([]); 
                 }
 
                 res.json(result.rows);
@@ -528,7 +461,6 @@ function appointmentRoutes(app) {
     );
 
     // Doctor Appointments (API)
-    // Doctor Appointments (API)
     app.get(
         "/api/appointments/doctor",
         authenticate,
@@ -536,7 +468,6 @@ function appointmentRoutes(app) {
         async (req, res) => {
             try {
                
-
                 const result = await db.query(
                     `SELECT a.id, a.appointment_date, a.appointment_time,
                         a.status, a.room_id, 
@@ -550,13 +481,10 @@ function appointmentRoutes(app) {
                     [req.user.id]
                 );
 
-         
-
-                // Make sure we return JSON
                 res.setHeader('Content-Type', 'application/json');
 
                 if (result.rows.length === 0) {
-                    return res.json([]); // Return empty array
+                    return res.json([]); 
                 }
 
                 res.json(result.rows);
@@ -614,7 +542,6 @@ function appointmentRoutes(app) {
     );
 }
 
-// Auth Routes
 // Auth Routes
 function authRoutes(app) {
     // User Signup
@@ -687,7 +614,6 @@ function authRoutes(app) {
   
             res.cookie("token", token, cookieOptions);
 
-            // Test: Add a meta refresh as fallback
             res.send(`
                 <!DOCTYPE html>
                 <html>
@@ -708,6 +634,7 @@ function authRoutes(app) {
             res.status(500).send("Internal Server Error");
         }
     });
+    // Doctor Signup
     app.post("/doc_signup", async (req, res) => {
         const { phone, password, confirmpassword } = req.body;
 
@@ -732,7 +659,7 @@ function authRoutes(app) {
 
         const token = jwt.sign(
             {
-                id: result.rows[0].docid,   // ✅ FIXED
+                id: result.rows[0].docid,   
                 phone,
                 role: "doctor"
             },
@@ -1073,7 +1000,6 @@ function protectedRoutes(app, PROJECT_ROOT) {
         res.sendFile(path.join(PROJECT_ROOT, "public/pages/appointments.html"));
     });
 
-    // In protectedRoutes function, CHANGE TO:
     app.get("/user_video_dashboard", authenticate, authorize("user"), (req, res) => {
         res.render("user_video_dashboard");
     });
@@ -1090,8 +1016,6 @@ function protectedRoutes(app, PROJECT_ROOT) {
     app.get("/doc_home", authenticate, authorize("doctor"), (req, res) => {
         res.sendFile(path.join(PROJECT_ROOT, "public/pages/doc_home.html"));
     });
-
-
 
     app.get("/records", authenticate, authorize("user"), (req, res) => {
         res.sendFile(path.join(PROJECT_ROOT, "public/pages/records.html"));
@@ -1201,12 +1125,8 @@ function userVideoRoutes(app) {
     );
 }
 
-// Vault Routes (with Supabase storage)
-// Vault Routes (with Supabase storage) - UPDATED
-// Vault Routes (with Supabase storage) - UPDATED
+// Vault Routes 
 function vaultRoutes(app) {
-    // User: upload record - SIMPLIFIED
-    // User: upload record - FIXED VERSION
     app.post(
         "/vault/upload",
         authenticate,
@@ -1216,20 +1136,11 @@ function vaultRoutes(app) {
             if (!req.file) return res.status(400).send("No file uploaded");
 
             try {
-                console.log("📤 Upload attempt for user:", req.user.id);
-                console.log("📄 File details:", {
-                    originalname: req.file.originalname,
-                    mimetype: req.file.mimetype,
-                    size: req.file.size
-                });
 
                 // Clean filename and create path
                 const safeFileName = req.file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
                 const fileName = `${Date.now()}-${safeFileName}`;
                 const filePath = `user_${req.user.id}/${fileName}`;
-
-                console.log("📍 File path for storage:", filePath);
-                console.log("🔧 MIME type:", req.file.mimetype);
 
                 // 1. Upload to Supabase Storage
                 const { data: uploadData, error: uploadError } = await supabaseService.storage
@@ -1258,16 +1169,14 @@ function vaultRoutes(app) {
                     });
                 }
 
-                console.log("✅ File uploaded to storage:", uploadData);
-
                 // 2. Generate public URL
                 const publicUrl = `${process.env.SUPABASE_URL}/storage/v1/object/public/uploads/${filePath}`;
-                console.log("🔗 Public URL:", publicUrl);
+                
 
                 // 3. Test if URL is accessible
                 try {
                     const testResponse = await fetch(publicUrl, { method: 'HEAD' });
-                    console.log("✅ URL accessibility test:", testResponse.status);
+                   
                 } catch (testError) {
                     console.warn("⚠️ URL test failed:", testError.message);
                 }
@@ -1288,9 +1197,6 @@ function vaultRoutes(app) {
                         ]
                     );
 
-                    console.log("💾 Database record created with ID:", dbResult.rows[0].id);
-
-                    // 5. Return success response
                     res.json({
                         success: true,
                         message: "File uploaded successfully",
@@ -1302,12 +1208,10 @@ function vaultRoutes(app) {
                 } catch (dbError) {
                     console.error("❌ Database insert error:", dbError);
 
-                    // Try to delete the uploaded file since DB insert failed
                     try {
                         await supabaseService.storage
                             .from('uploads')
                             .remove([filePath]);
-                        console.log("🗑️ Removed orphaned file from storage");
                     } catch (cleanupError) {
                         console.error("⚠️ Failed to cleanup storage file:", cleanupError);
                     }
@@ -1319,7 +1223,7 @@ function vaultRoutes(app) {
                 }
 
             } catch (err) {
-                console.error("❌ Vault upload error:", err);
+               
                 res.status(500).json({
                     error: "Server error",
                     details: err.message
@@ -1345,7 +1249,7 @@ function vaultRoutes(app) {
 
                 res.json(result.rows);
             } catch (err) {
-                console.error("List records error:", err);
+         
                 res.status(500).json({ error: "Failed to load records" });
             }
         }
@@ -1357,7 +1261,7 @@ function vaultRoutes(app) {
         authenticate,
         async (req, res) => {
             try {
-                console.log("📥 Download request for ID:", req.params.id);
+        
 
                 // Get file from database
                 const result = await db.query(
@@ -1392,7 +1296,7 @@ function vaultRoutes(app) {
                     }
                 }
 
-                console.log("🔗 Redirecting to:", record.file_path);
+            
 
                 // Set download headers
                 res.setHeader('Content-Disposition', `attachment; filename="${record.file_name}"`);
@@ -1401,7 +1305,7 @@ function vaultRoutes(app) {
                 res.redirect(record.file_path);
 
             } catch (err) {
-                console.error("❌ Download error:", err);
+                
                 res.status(500).send("Download failed");
             }
         }
@@ -1414,7 +1318,7 @@ function vaultRoutes(app) {
         async (req, res) => {
             try {
                 const fileId = req.params.id;
-                console.log("🚀 Direct download for file ID:", fileId);
+          
 
                 // Get file info
                 const fileInfo = await db.query(
@@ -1453,13 +1357,13 @@ function vaultRoutes(app) {
                     return res.status(404).json({ error: 'File URL not found' });
                 }
 
-                console.log("📡 Fetching file from:", record.file_path);
+          
 
                 // Try to fetch the file
                 const response = await fetch(record.file_path);
 
                 if (!response.ok) {
-                    console.error("❌ Fetch failed:", response.status, response.statusText);
+                
 
                     // Check if the file exists in the bucket
                     const { data: fileExists } = await supabaseService.storage
@@ -1468,7 +1372,7 @@ function vaultRoutes(app) {
                             search: record.file_name
                         });
 
-                    console.log("🔍 File exists check:", fileExists);
+        
 
                     return res.status(404).json({
                         error: 'File not accessible',
@@ -1490,7 +1394,7 @@ function vaultRoutes(app) {
                 res.send(Buffer.from(fileBuffer));
 
             } catch (error) {
-                console.error("❌ Direct download error:", error);
+    
                 res.status(500).json({
                     error: 'Download failed',
                     message: error.message
@@ -1498,104 +1402,7 @@ function vaultRoutes(app) {
             }
         }
     );
-    // Test if file is accessible
-    app.get(
-        "/api/vault/test/:id",
-        authenticate,
-        async (req, res) => {
-            try {
-                const result = await db.query(
-                    `SELECT file_path, file_name
-                     FROM medical_records
-                     WHERE id = $1 AND user_id = $2`,
-                    [req.params.id, req.user.id]
-                );
 
-                if (!result.rows.length) {
-                    return res.json({ error: "File not found" });
-                }
-
-                const record = result.rows[0];
-
-                // Test if URL is accessible
-                let isAccessible = false;
-                let testError = null;
-
-                try {
-                    const response = await fetch(record.file_path, { method: 'HEAD' });
-                    isAccessible = response.ok;
-                } catch (error) {
-                    testError = error.message;
-                }
-
-                res.json({
-                    file: record,
-                    isAccessible,
-                    testError,
-                    bucketStatus: "uploads (public)"
-                });
-
-            } catch (err) {
-                res.json({ error: err.message });
-            }
-        }
-    );
-    // Debug: List files in user folder
-    app.get(
-        "/debug/list-files/:userId",
-        authenticate,
-        async (req, res) => {
-            try {
-                const userId = req.params.userId || req.user.id;
-                const folderPath = `user_${userId}`;
-
-                console.log("📁 Listing files in:", folderPath);
-
-                const { data: files, error } = await supabaseService.storage
-                    .from('uploads')
-                    .list(folderPath);
-
-                if (error) {
-                    console.error("❌ List error:", error);
-                    return res.json({
-                        error: error.message,
-                        folderPath,
-                        exists: false
-                    });
-                }
-
-                // Get details of each file
-                const fileDetails = await Promise.all(
-                    (files || []).map(async (file) => {
-                        const filePath = `${folderPath}/${file.name}`;
-                        const { data: urlData } = supabaseService.storage
-                            .from('uploads')
-                            .getPublicUrl(filePath);
-
-                        return {
-                            name: file.name,
-                            path: filePath,
-                            url: urlData.publicUrl,
-                            size: file.metadata?.size,
-                            mimeType: file.metadata?.mimetype,
-                            updated: file.updated_at
-                        };
-                    })
-                );
-
-                res.json({
-                    folderPath,
-                    exists: true,
-                    fileCount: fileDetails.length,
-                    files: fileDetails
-                });
-
-            } catch (error) {
-                console.error("❌ List files error:", error);
-                res.json({ error: error.message });
-            }
-        }
-    );
 }
 
 // Video Routes
@@ -1664,9 +1471,7 @@ function videoRoutes(app) {
 }
 
 // Video Dashboard Routes
-// Video Dashboard Routes
-// Video Dashboard Routes - MPA Style
-// Video Dashboard Routes - MPA Style
+
 function videoDashboardRoutes(app) {
     /* =====================================
        DOCTOR VIDEO DASHBOARD (MPA)
@@ -1774,32 +1579,28 @@ function videoDashboardRoutes(app) {
 }
 
 // Video Socket Function
-// Video Socket Function - UPDATED
-// Video Socket Function - UPDATED
 function videoSocket(io) {
     io.on("connection", socket => {
-        console.log(`Socket connected: ${socket.id}`);
+      
 
         socket.on("join-room", ({ roomId, role }) => {
             socket.join(roomId);
             socket.roomId = roomId;
             socket.role = role;
-            console.log(`Socket ${socket.id} (${role}) joined room ${roomId}`);
+           
 
-            // Notify the other participant
             if (role === "user") {
                 socket.to(roomId).emit("user-ready");
             }
         });
 
         socket.on("signal", ({ roomId, ...payload }) => {
-            console.log(`Signal from ${socket.id} in room ${roomId}:`, payload);
+ 
             socket.to(roomId).emit("signal", payload);
         });
 
-        // Add this new event handler for when doctor ends call
         socket.on("doctor-end-call", async ({ roomId, appointmentId, notes }) => {
-            console.log(`Doctor ending call in room ${roomId}`);
+          
 
             try {
                 // Check if appointment exists and is valid
@@ -1889,8 +1690,6 @@ function videoSocket(io) {
     });
 }
 // Prescription PDF Routes
-// Prescription PDF Routes - ENSURE THIS EXISTS
-// Prescription PDF Routes - UPDATED
 function prescriptionRoutes(app) {
     app.get("/api/prescription/download/:roomId",
         authenticate,
@@ -1898,9 +1697,6 @@ function prescriptionRoutes(app) {
             try {
                 const { roomId } = req.params;
 
-
-
-                // First, let's check if the user has access to this room
                 let appointmentQuery;
                 if (req.user.role === "user") {
                     appointmentQuery = await db.query(
@@ -2232,10 +2028,6 @@ userVideoRoutes(app);
 vaultRoutes(app);
 prescriptionRoutes(app);
 protectedRoutes(app, PROJECT_ROOT);
-
-// ==============================================
-// HEALTH CHECK ENDPOINT
-// ==============================================
 
 // ==============================================
 // ERROR HANDLING MIDDLEWARE
