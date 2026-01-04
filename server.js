@@ -345,27 +345,35 @@ function aiRoutes(app) {
 
     // Proxy AI request → Flask
     app.post("/api/ai/precheck", authenticate, async (req, res) => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 60_000); // 60s timeout
+
         try {
-            const controller = new AbortController();
-            const timeout = setTimeout(() => controller.abort(), 60_000); // 60s
-            if (!req.body?.text || req.body.text.length < 3) {
+            if (!req.body?.text || req.body.text.trim().length < 3) {
                 return res.status(400).json({ error: "Symptoms required" });
             }
+
+            const response = await fetch(
+                "https://abhijit75-clinical-bert-ai.hf.space/ai/precheck",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: req.body.text }),
+                    signal: controller.signal
+                }
+            );
+
+            clearTimeout(timeout);
+
             if (!response.ok) {
                 throw new Error(`AI error ${response.status}`);
             }
-
-            const response = await fetch("https://abhijit75-clinical-bert-ai.hf.space/ai/precheck", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(req.body)
-            });
 
             const data = await response.json();
 
             await db.query(
                 `INSERT INTO ai_prechecks (user_id, symptoms, ai_response, severity)
-                 VALUES ($1, $2, $3, $4)`,
+             VALUES ($1, $2, $3, $4)`,
                 [
                     req.user.id,
                     req.body.text,
@@ -374,13 +382,14 @@ function aiRoutes(app) {
                 ]
             );
 
-            res.json(data);
+            return res.json(data);
 
         } catch (err) {
+            clearTimeout(timeout);
             logger.error("AI service error:", err);
 
             return res.json({
-                input: req.body.text,
+                input: req.body?.text || "",
                 severity: "unknown",
                 recommendation: "AI service temporarily unavailable. Please try again later.",
                 top_conditions: [],
@@ -388,8 +397,8 @@ function aiRoutes(app) {
                 offline: true
             });
         }
-
     });
+
 }
 
 // Appointment Routes
