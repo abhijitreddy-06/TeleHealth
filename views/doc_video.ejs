@@ -83,7 +83,7 @@
             font-size: 16px;
         }
 
-        /* Header - Mobile Optimized */
+        /* Header */
         header {
             background: var(--surface);
             border-bottom: 1px solid var(--border);
@@ -91,7 +91,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
-            height: 70px;
+            height: 64px;
         }
 
         .navbar {
@@ -107,19 +107,18 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            flex-shrink: 0;
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 20px;
+            font-size: 18px;
         }
 
         .logo-text {
@@ -134,38 +133,33 @@
         .call-info {
             display: flex;
             align-items: center;
-            gap: 15px;
-            flex-shrink: 1;
-            min-width: 0;
+            gap: 20px;
         }
 
         .patient-badge {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 10px 16px;
+            padding: 8px 16px;
             background: var(--surface-light);
             border-radius: var(--radius);
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 500;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 200px;
         }
 
         .patient-badge i {
             color: var(--primary);
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .timer {
             background: linear-gradient(135deg, var(--primary), var(--accent));
-            padding: 10px 18px;
+            padding: 8px 16px;
             border-radius: var(--radius);
             color: white;
             font-weight: 600;
-            font-size: 16px;
+            font-size: 15px;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -173,20 +167,15 @@
             white-space: nowrap;
         }
 
-        .timer i {
-            font-size: 16px;
-        }
-
         .header-controls {
             display: flex;
             align-items: center;
             gap: 10px;
-            flex-shrink: 0;
         }
 
         .icon-btn {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             border: none;
             background: var(--surface-light);
@@ -196,8 +185,7 @@
             align-items: center;
             justify-content: center;
             transition: var(--transition);
-            font-size: 20px;
-            flex-shrink: 0;
+            font-size: 18px;
         }
 
         .icon-btn:hover {
@@ -206,22 +194,30 @@
             transform: translateY(-1px);
         }
 
-        /* Main Video Layout - Mobile First */
+        /* Main Video Layout - Desktop Optimized */
         .video-container {
-            display: flex;
-            flex-direction: column;
-            height: calc(100vh - 70px);
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            grid-template-rows: 1fr auto;
+            height: calc(100vh - 64px);
+            gap: 20px;
+            padding: 20px;
             position: relative;
-            overflow: hidden;
+            max-width: 1800px;
+            margin: 0 auto;
+            width: 100%;
         }
 
         /* Main Video Area */
         .video-main {
-            flex: 1;
-            min-height: 0;
+            grid-column: 1;
+            grid-row: 1;
             background: #020617;
-            position: relative;
+            border-radius: var(--radius-lg);
             overflow: hidden;
+            position: relative;
+            box-shadow: var(--shadow-xl);
+            min-height: 0;
         }
 
         [data-theme="light"] .video-main {
@@ -238,10 +234,10 @@
         /* Local Video - PiP */
         .video-local {
             position: absolute;
-            bottom: 120px;
+            bottom: 20px;
             right: 20px;
-            width: 200px;
-            height: 150px;
+            width: 260px;
+            height: 195px;
             border-radius: var(--radius);
             overflow: hidden;
             border: 3px solid var(--primary);
@@ -264,13 +260,13 @@
 
         .video-label {
             position: absolute;
-            bottom: -40px;
+            bottom: -36px;
             left: 0;
             right: 0;
             background: var(--overlay);
             color: white;
-            padding: 10px;
-            font-size: 16px;
+            padding: 8px 12px;
+            font-size: 14px;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -289,29 +285,26 @@
             flex-direction: column;
             gap: 12px;
             z-index: 20;
-            width: calc(100% - 40px);
         }
 
         .connection-status {
             background: var(--overlay);
-            padding: 15px 20px;
+            padding: 12px 16px;
             border-radius: var(--radius);
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             backdrop-filter: blur(10px);
             border: 1px solid var(--border);
-            width: 100%;
-            max-width: 400px;
+            max-width: 320px;
         }
 
         .status-indicator {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             background: var(--success);
             animation: pulse 2s infinite;
-            flex-shrink: 0;
         }
 
         @keyframes pulse {
@@ -327,7 +320,7 @@
         }
 
         #statusText {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 500;
             white-space: nowrap;
             overflow: hidden;
@@ -337,20 +330,19 @@
 
         .participant-info {
             background: var(--overlay);
-            padding: 15px 20px;
+            padding: 12px 16px;
             border-radius: var(--radius);
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
             backdrop-filter: blur(10px);
             border: 1px solid var(--border);
-            width: 100%;
-            max-width: 400px;
+            max-width: 320px;
         }
 
         .participant-avatar {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), var(--accent));
             display: flex;
@@ -358,73 +350,66 @@
             justify-content: center;
             color: white;
             font-weight: 600;
-            font-size: 20px;
-            flex-shrink: 0;
+            font-size: 18px;
         }
 
         #participantName {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
         }
 
         #callStatus {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--text-secondary);
         }
 
         /* Notes Panel */
         .notes-panel {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            grid-column: 2;
+            grid-row: 1;
             background: var(--surface);
-            border-top: 1px solid var(--border);
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-            z-index: 50;
-            height: 45vh;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
+            border-radius: var(--radius-lg);
+            padding: 24px;
             display: flex;
             flex-direction: column;
-        }
-
-        .notes-panel.active {
-            transform: translateY(0);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            min-height: 0;
         }
 
         .notes-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
             border-bottom: 1px solid var(--border);
-            background: var(--surface);
         }
 
         .notes-title {
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 600;
             color: var(--text-primary);
         }
 
         .notes-title i {
             color: var(--primary);
-            font-size: 22px;
+            font-size: 20px;
         }
 
         .notes-actions {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .notes-action-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: var(--radius);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
             border: 1px solid var(--border);
             background: var(--surface-light);
             color: var(--text-secondary);
@@ -433,7 +418,7 @@
             align-items: center;
             justify-content: center;
             transition: var(--transition);
-            font-size: 18px;
+            font-size: 16px;
         }
 
         .notes-action-btn:hover {
@@ -447,62 +432,63 @@
             width: 100%;
             background: var(--surface-light);
             color: var(--text-primary);
-            border: none;
-            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 16px;
             font-family: inherit;
-            font-size: 18px;
+            font-size: 15px;
             line-height: 1.6;
             resize: none;
             transition: var(--transition);
-            min-height: 150px;
+            min-height: 200px;
         }
 
         .notes-textarea:focus {
             outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
         .notes-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 20px;
+            margin-top: 16px;
+            padding-top: 16px;
             border-top: 1px solid var(--border);
-            font-size: 16px;
+            font-size: 13px;
             color: var(--text-secondary);
-            background: var(--surface);
         }
 
         .auto-save {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .auto-save i {
             color: var(--success);
-            font-size: 18px;
+            font-size: 14px;
         }
 
         .char-count {
-            font-size: 16px;
+            font-size: 13px;
             font-weight: 500;
         }
 
-        /* Controls Bar - Mobile Optimized */
+        /* Controls Bar */
         .controls-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: var(--surface);
-            border-top: 1px solid var(--border);
-            padding: 20px;
+            grid-column: 1 / -1;
+            grid-row: 2;
             display: flex;
-            justify-content: space-around;
+            justify-content: center;
             align-items: center;
-            z-index: 100;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-            height: 100px;
+            gap: 32px;
+            padding: 20px;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            margin-top: 0;
         }
 
         .control-group {
@@ -510,12 +496,11 @@
             flex-direction: column;
             align-items: center;
             gap: 8px;
-            flex: 1;
         }
 
         .control-btn {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             border: none;
             background: var(--surface-light);
@@ -524,7 +509,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
+            font-size: 22px;
             transition: var(--transition);
             position: relative;
             box-shadow: var(--shadow);
@@ -551,37 +536,11 @@
         }
 
         .control-label {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.5px;
-        }
-
-        /* Toggle Notes Button */
-        .toggle-notes-btn {
-            position: fixed;
-            bottom: 120px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--primary);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: var(--shadow-xl);
-            z-index: 40;
-            transition: var(--transition);
-        }
-
-        .toggle-notes-btn:hover {
-            transform: scale(1.1);
-            background: var(--primary-hover);
         }
 
         /* Loading State */
@@ -601,7 +560,7 @@
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         @keyframes spin {
@@ -612,7 +571,7 @@
 
         .video-loading p {
             color: var(--text-secondary);
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 500;
         }
 
@@ -631,322 +590,21 @@
 
         /* Scrollbar Styling */
         .notes-textarea::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
 
         .notes-textarea::-webkit-scrollbar-track {
             background: rgba(0, 0, 0, 0.1);
-            border-radius: 4px;
+            border-radius: 3px;
         }
 
         .notes-textarea::-webkit-scrollbar-thumb {
             background: var(--primary);
-            border-radius: 4px;
+            border-radius: 3px;
         }
 
         .notes-textarea::-webkit-scrollbar-thumb:hover {
             background: var(--primary-hover);
-        }
-
-        /* Responsive Design - Tablet and Desktop */
-        @media (min-width: 768px) {
-            .video-container {
-                display: grid;
-                grid-template-columns: 1fr 400px;
-                grid-template-rows: 1fr auto;
-                height: calc(100vh - 70px);
-                gap: 16px;
-                padding: 16px;
-            }
-
-            .video-main {
-                grid-column: 1;
-                grid-row: 1;
-                border-radius: var(--radius-lg);
-                box-shadow: var(--shadow-xl);
-            }
-
-            .notes-panel {
-                position: static;
-                grid-column: 2;
-                grid-row: 1;
-                border-radius: var(--radius-lg);
-                border: 1px solid var(--border);
-                box-shadow: var(--shadow);
-                height: auto;
-                transform: none;
-                margin-top: 0;
-            }
-
-            .notes-panel.active {
-                transform: none;
-            }
-
-            .toggle-notes-btn {
-                display: none;
-            }
-
-            .controls-bar {
-                position: static;
-                grid-column: 1 / -1;
-                grid-row: 2;
-                border-radius: var(--radius-lg);
-                border: 1px solid var(--border);
-                margin-top: 16px;
-                height: auto;
-                padding: 16px;
-                box-shadow: none;
-            }
-
-            .control-btn {
-                width: 56px;
-                height: 56px;
-                font-size: 20px;
-            }
-
-            .video-local {
-                width: 240px;
-                height: 180px;
-                bottom: 120px;
-                right: 24px;
-            }
-
-            .video-label {
-                font-size: 12px;
-                padding: 4px 8px;
-                bottom: -28px;
-            }
-
-            .navbar {
-                padding: 0 24px;
-            }
-
-            .patient-badge {
-                font-size: 14px;
-                padding: 8px 16px;
-            }
-
-            .timer {
-                font-size: 14px;
-                padding: 8px 20px;
-            }
-
-            .icon-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
-            }
-        }
-
-        @media (min-width: 1200px) {
-            .video-container {
-                grid-template-columns: 1fr 450px;
-                padding: 24px;
-                gap: 24px;
-            }
-
-            .notes-panel {
-                padding: 32px;
-            }
-
-            .controls-bar {
-                padding: 24px;
-                gap: 32px;
-            }
-        }
-
-        /* Mobile-specific adjustments */
-        @media (max-width: 767px) {
-            header {
-                height: 60px;
-            }
-
-            .navbar {
-                padding: 0 15px;
-            }
-
-            .logo-icon {
-                width: 36px;
-                height: 36px;
-                font-size: 18px;
-            }
-
-            .logo-text {
-                font-size: 18px;
-            }
-
-            .patient-badge {
-                padding: 8px 12px;
-                font-size: 14px;
-                max-width: 150px;
-            }
-
-            .patient-badge span {
-                display: none;
-            }
-
-            .patient-badge i {
-                font-size: 16px;
-            }
-
-            .timer {
-                padding: 8px 12px;
-                font-size: 14px;
-            }
-
-            .icon-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 18px;
-            }
-
-            .video-container {
-                height: calc(100vh - 60px);
-            }
-
-            .video-local {
-                width: 140px;
-                height: 105px;
-                bottom: 110px;
-                right: 15px;
-            }
-
-            .video-label {
-                font-size: 14px;
-                padding: 8px;
-                bottom: -35px;
-            }
-
-            .controls-bar {
-                padding: 15px;
-                height: 90px;
-            }
-
-            .control-btn {
-                width: 60px;
-                height: 60px;
-                font-size: 22px;
-            }
-
-            .control-label {
-                font-size: 12px;
-            }
-
-            .toggle-notes-btn {
-                bottom: 110px;
-                width: 50px;
-                height: 50px;
-                font-size: 20px;
-            }
-
-            .status-overlay {
-                top: 15px;
-                left: 15px;
-                width: calc(100% - 30px);
-            }
-
-            .connection-status,
-            .participant-info {
-                padding: 12px 15px;
-            }
-
-            #statusText {
-                font-size: 14px;
-            }
-
-            .participant-avatar {
-                width: 40px;
-                height: 40px;
-                font-size: 18px;
-            }
-
-            #participantName {
-                font-size: 16px;
-            }
-
-            #callStatus {
-                font-size: 12px;
-            }
-
-            .notes-header {
-                padding: 15px;
-            }
-
-            .notes-title {
-                font-size: 18px;
-            }
-
-            .notes-title i {
-                font-size: 20px;
-            }
-
-            .notes-action-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 16px;
-            }
-
-            .notes-textarea {
-                padding: 15px;
-                font-size: 16px;
-            }
-
-            .notes-footer {
-                padding: 12px 15px;
-                font-size: 14px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .logo-text {
-                display: none;
-            }
-
-            .patient-badge {
-                max-width: 40px;
-                padding: 8px;
-            }
-
-            .timer {
-                padding: 8px 10px;
-                font-size: 13px;
-            }
-
-            .video-local {
-                width: 120px;
-                height: 90px;
-                bottom: 105px;
-                right: 10px;
-            }
-
-            .video-label {
-                font-size: 12px;
-                padding: 6px;
-                bottom: -30px;
-            }
-
-            .controls-bar {
-                padding: 10px;
-                height: 85px;
-            }
-
-            .control-btn {
-                width: 55px;
-                height: 55px;
-                font-size: 20px;
-            }
-
-            .control-label {
-                font-size: 11px;
-            }
-
-            .toggle-notes-btn {
-                bottom: 100px;
-                right: 10px;
-                width: 45px;
-                height: 45px;
-                font-size: 18px;
-            }
         }
 
         /* Prevent text size adjustment on orientation change */
@@ -961,6 +619,372 @@
         .control-btn,
         .icon-btn {
             touch-action: manipulation;
+        }
+
+        /* ============= MOBILE VIEW ============= */
+        @media (max-width: 768px) {
+            .video-container {
+                display: flex;
+                flex-direction: column;
+                height: calc(100vh - 60px);
+                gap: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+
+            header {
+                height: 60px;
+            }
+
+            .navbar {
+                padding: 0 15px;
+            }
+
+            .logo-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+
+            .logo-text {
+                font-size: 18px;
+            }
+
+            .patient-badge {
+                padding: 6px 10px;
+                font-size: 13px;
+                max-width: 120px;
+            }
+
+            .patient-badge span {
+                display: none;
+            }
+
+            .patient-badge i {
+                font-size: 14px;
+            }
+
+            .timer {
+                padding: 6px 10px;
+                font-size: 13px;
+            }
+
+            .icon-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 16px;
+            }
+
+            /* Video Main Area - Mobile */
+            .video-main {
+                flex: 1;
+                min-height: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            /* Local Video PiP - Mobile (Moved Higher) */
+            .video-local {
+                position: absolute;
+                bottom: 140px;
+                /* Increased from 120px to clear the buttons */
+                right: 10px;
+                width: 130px;
+                height: 97px;
+                border-width: 2px;
+                z-index: 25;
+            }
+
+            .video-label {
+                font-size: 12px;
+                padding: 6px 8px;
+                bottom: -28px;
+            }
+
+            /* Status Overlay - Mobile */
+            .status-overlay {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                flex-direction: row;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .connection-status,
+            .participant-info {
+                padding: 8px 12px;
+                max-width: none;
+                flex: 1;
+                min-width: 0;
+            }
+
+            #statusText {
+                font-size: 13px;
+            }
+
+            .participant-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 14px;
+            }
+
+            #participantName {
+                font-size: 14px;
+            }
+
+            #callStatus {
+                font-size: 11px;
+            }
+
+            /* Controls Bar - Mobile */
+            .controls-bar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: var(--surface);
+                border-top: 1px solid var(--border);
+                padding: 15px;
+                gap: 20px;
+                border-radius: 0;
+                margin-top: 0;
+                z-index: 100;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+                height: 90px;
+            }
+
+            .control-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 20px;
+            }
+
+            .control-label {
+                font-size: 11px;
+            }
+
+            /* Notes Panel - Mobile (Sliding Drawer) */
+            .notes-panel {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: var(--surface);
+                border-top: 1px solid var(--border);
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+                z-index: 50;
+                height: 45vh;
+                transform: translateY(100%);
+                transition: transform 0.3s ease;
+                display: flex;
+                flex-direction: column;
+                border-radius: 0;
+                padding: 16px;
+            }
+
+            .notes-panel.active {
+                transform: translateY(0);
+            }
+
+            .notes-header {
+                padding: 0 0 12px 0;
+                margin-bottom: 12px;
+            }
+
+            .notes-title {
+                font-size: 16px;
+            }
+
+            .notes-title i {
+                font-size: 18px;
+            }
+
+            .notes-action-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 15px;
+            }
+
+            .notes-textarea {
+                padding: 12px;
+                font-size: 15px;
+                min-height: 150px;
+            }
+
+            .notes-footer {
+                padding: 12px 0 0 0;
+                font-size: 12px;
+            }
+
+            /* Toggle Notes Button - Mobile */
+            .toggle-notes-btn {
+                position: fixed;
+                bottom: 110px;
+                /* Adjusted to not block local video */
+                right: 10px;
+                width: 48px;
+                height: 48px;
+                border-radius: 50%;
+                background: var(--primary);
+                color: white;
+                border: none;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                box-shadow: var(--shadow-xl);
+                z-index: 40;
+                transition: var(--transition);
+            }
+
+            .toggle-notes-btn:hover {
+                transform: scale(1.1);
+                background: var(--primary-hover);
+            }
+        }
+
+        /* Extra Small Mobile */
+        @media (max-width: 480px) {
+            .logo-text {
+                display: none;
+            }
+
+            .patient-badge {
+                max-width: 40px;
+                padding: 6px;
+            }
+
+            .timer {
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+
+            .video-local {
+                width: 110px;
+                height: 82px;
+                bottom: 130px;
+                right: 8px;
+            }
+
+            .video-label {
+                font-size: 11px;
+                padding: 5px;
+                bottom: -24px;
+            }
+
+            .controls-bar {
+                padding: 12px;
+                gap: 16px;
+                height: 85px;
+            }
+
+            .control-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 18px;
+            }
+
+            .control-label {
+                font-size: 10px;
+            }
+
+            .toggle-notes-btn {
+                bottom: 105px;
+                right: 8px;
+                width: 44px;
+                height: 44px;
+                font-size: 18px;
+            }
+        }
+
+        /* Small Landscape Mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .video-container {
+                flex-direction: row;
+            }
+
+            .video-main {
+                flex: 2;
+            }
+
+            .video-local {
+                width: 100px;
+                height: 75px;
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .notes-panel {
+                flex: 1;
+                height: 100%;
+                transform: translateX(100%);
+                left: auto;
+                right: 0;
+                bottom: 0;
+                top: 0;
+                width: 300px;
+                height: 100vh;
+            }
+
+            .notes-panel.active {
+                transform: translateX(0);
+            }
+
+            .controls-bar {
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 70px;
+            }
+
+            .toggle-notes-btn {
+                bottom: 80px;
+                right: 10px;
+            }
+        }
+
+        /* Desktop Optimizations */
+        @media (min-width: 1200px) {
+            .video-container {
+                grid-template-columns: 1fr 450px;
+                gap: 24px;
+                padding: 24px;
+            }
+
+            .notes-panel {
+                padding: 28px;
+            }
+
+            .video-local {
+                width: 300px;
+                height: 225px;
+            }
+
+            .controls-bar {
+                gap: 40px;
+                padding: 24px;
+            }
+        }
+
+        @media (min-width: 1600px) {
+            .video-container {
+                grid-template-columns: 1fr 500px;
+                gap: 28px;
+                padding: 28px;
+            }
+
+            .notes-panel {
+                padding: 32px;
+            }
+
+            .video-local {
+                width: 340px;
+                height: 255px;
+                bottom: 30px;
+                right: 30px;
+            }
         }
     </style>
 </head>
@@ -1111,7 +1135,18 @@
             // UI Elements for mobile
             const notesPanel = document.getElementById('notesPanel');
             const toggleNotesBtn = document.getElementById('toggleNotesBtn');
-            const isMobile = window.innerWidth <= 767;
+            const videoLocal = document.querySelector('.video-local');
+            const isMobile = window.innerWidth <= 768;
+
+            // Create toggle notes button if it doesn't exist (for mobile)
+            if (isMobile && !toggleNotesBtn) {
+                const toggleBtn = document.createElement('button');
+                toggleBtn.className = 'toggle-notes-btn';
+                toggleBtn.id = 'toggleNotesBtn';
+                toggleBtn.title = 'Show notes';
+                toggleBtn.innerHTML = '<i class="fas fa-notes-medical"></i>';
+                document.querySelector('.video-container').appendChild(toggleBtn);
+            }
 
             // Toggle notes panel on mobile
             if (isMobile && toggleNotesBtn) {
@@ -1120,6 +1155,13 @@
                     const icon = notesPanel.classList.contains('active') ? 'fa-times' : 'fa-notes-medical';
                     toggleNotesBtn.innerHTML = `<i class="fas ${icon}"></i>`;
                     toggleNotesBtn.title = notesPanel.classList.contains('active') ? 'Hide notes' : 'Show notes';
+
+                    // Adjust local video position when notes are open
+                    if (notesPanel.classList.contains('active')) {
+                        videoLocal.style.bottom = 'calc(45vh + 10px)';
+                    } else {
+                        videoLocal.style.bottom = '140px';
+                    }
                 });
 
                 // Close notes panel when clicking outside on mobile
@@ -1131,16 +1173,41 @@
                         notesPanel.classList.remove('active');
                         toggleNotesBtn.innerHTML = '<i class="fas fa-notes-medical"></i>';
                         toggleNotesBtn.title = 'Show notes';
+                        videoLocal.style.bottom = '140px';
                     }
                 });
             }
 
-            // Adjust layout on orientation change
+            // Adjust local video position on resize for mobile
+            function adjustLocalVideoPosition() {
+                if (window.innerWidth <= 768) {
+                    const controlsHeight = document.querySelector('.controls-bar').offsetHeight;
+                    const toggleBtnHeight = toggleNotesBtn ? toggleNotesBtn.offsetHeight : 0;
+
+                    // Calculate safe position above controls and toggle button
+                    let bottomPosition = controlsHeight + 20;
+                    if (toggleNotesBtn && window.getComputedStyle(toggleNotesBtn).display !== 'none') {
+                        bottomPosition += toggleBtnHeight + 10;
+                    }
+
+                    videoLocal.style.bottom = `${bottomPosition}px`;
+
+                    // Adjust if notes panel is open
+                    if (notesPanel.classList.contains('active')) {
+                        const notesHeight = notesPanel.offsetHeight;
+                        videoLocal.style.bottom = `${notesHeight + 10}px`;
+                    }
+                }
+            }
+
+            // Adjust layout on orientation change and resize
             window.addEventListener('orientationchange', function () {
                 setTimeout(function () {
                     window.dispatchEvent(new Event('resize'));
                 }, 300);
             });
+
+            window.addEventListener('resize', adjustLocalVideoPosition);
 
             // Hide notes panel when controls are tapped on mobile
             const controlButtons = document.querySelectorAll('.control-btn');
@@ -1148,8 +1215,11 @@
                 btn.addEventListener('click', function () {
                     if (isMobile && notesPanel.classList.contains('active')) {
                         notesPanel.classList.remove('active');
-                        toggleNotesBtn.innerHTML = '<i class="fas fa-notes-medical"></i>';
-                        toggleNotesBtn.title = 'Show notes';
+                        if (toggleNotesBtn) {
+                            toggleNotesBtn.innerHTML = '<i class="fas fa-notes-medical"></i>';
+                            toggleNotesBtn.title = 'Show notes';
+                        }
+                        adjustLocalVideoPosition();
                     }
                 });
             });
