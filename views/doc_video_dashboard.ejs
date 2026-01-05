@@ -637,7 +637,125 @@
         [data-theme="dark"] .status-container {
             background-color: rgba(56, 189, 248, 0.2);
         }
-    </style>
+    /* ===============================
+   STRICT SIMPLE FOOTER OVERRIDE
+   =============================== */
+
+.simple-footer {
+    all: unset;
+    display: block;
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--border);
+    padding: 0.6rem 5%;          /* compact height */
+    margin-top: auto;
+}
+
+/* GRID LAYOUT – DESKTOP SAFE */
+.simple-footer .footer-content {
+    all: unset;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+}
+
+/* LEFT */
+.simple-footer .footer-left {
+    display: flex;
+    align-items: center;
+}
+
+.simple-footer .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.simple-footer .footer-logo i {
+    color: var(--secondary);
+    font-size: 1.2rem;
+}
+
+/* CENTER TEXT */
+.simple-footer .footer-center {
+    text-align: center;
+}
+
+.simple-footer .copyright {
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.simple-footer .footer-name {
+    color: var(--text-dark);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.simple-footer .footer-name:hover {
+    text-decoration: underline;
+}
+
+/* RIGHT ICONS */
+.simple-footer .footer-right {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.simple-footer .footer-socials a {
+    color: var(--text-dark);
+    font-size: 1.4rem; /* BIG icons */
+    text-decoration: none;
+}
+
+.simple-footer .footer-socials a:hover {
+    opacity: 0.7;
+}
+
+/* ===============================
+   MOBILE – SMALLER HEIGHT
+   =============================== */
+@media (max-width: 768px) {
+    .simple-footer {
+        padding: 0.5rem 5%;     /* reduced height */
+    }
+
+    .simple-footer .footer-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .simple-footer .footer-center {
+        text-align: center;
+    }
+
+    .simple-footer .footer-right {
+        justify-content: center;
+    }
+
+    .simple-footer .copyright {
+        font-size: 0.8rem;
+    }
+
+    .simple-footer .footer-socials a {
+        font-size: 1.3rem;
+    }
+}
+a,
+a:hover,
+a:focus,
+a:active,
+a:visited {
+    text-decoration: none !important;
+}
+</style>
 </head>
 
 <body>
@@ -824,27 +942,36 @@
     </main>
 
     <!-- ================= FOOTER ================= -->
-    <footer class="simple-footer">
-        <div class="footer-content">
-            <div class="footer-left">
-                <a href="/user_home" class="footer-logo">
-                    <i class="fas fa-heartbeat"></i>
-                    <span>TeleHealth</span>
-                </a>
-                <div class="copyright">
-                    © 2026 Website by Abhijit Reddy ❤️. All rights reserved.
-                </div>
-            </div>
-
-            <div class="footer-links">
-                <a href="">Privacy Policy</a>
-                <span class="separator">|</span>
-                <a href="">Terms of Service</a>
-                <span class="separator">|</span>
-                <a href="/contact">Contact</a>
-            </div>
+<footer class="simple-footer">
+    <div class="footer-content">
+        <!-- LEFT -->
+        <div class="footer-left">
+            <a href="/user_home" class="footer-logo">
+                <i class="fas fa-heartbeat"></i>
+                <span>TeleHealth</span>
+            </a>
         </div>
-    </footer>
+<!-- CENTER -->
+<div class="footer-center">
+    <span class="copyright">
+        © 2026 Built by
+        <a href="https://abhijitreddy-portfolio.netlify.app/" target="_blank" rel="noopener" class="footer-name">
+            Abhijit Reddy
+        </a>.
+    </span>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="footer-right footer-socials">
+            <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" aria-label="LinkedIn">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://github.com/abhijitreddy-06" target="_blank" aria-label="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+        </div>
+        </div>
+        </footer>
 
     <!-- ================= SCRIPTS ================= -->
     <script>
@@ -940,113 +1067,8 @@
             if (!roomId) return;
             window.location.href = `/doc_video/${roomId}`;
         }
-    </script>
-<script>
-    (function () {
-        // -------------------------------
-        // 1. Create Loader HTML + CSS
-        // -------------------------------
-        const style = document.createElement("style");
-        style.innerHTML = `
-    #global-loader {
-      position: fixed;
-      inset: 0;
-      background: #ffffff;
-      z-index: 99999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-
-    #global-loader.hidden {
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    #global-loader .spinner {
-      width: 46px;
-      height: 46px;
-      border: 4px solid #e5e7eb;
-      border-top-color: #2563eb;
-      border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-      margin-bottom: 12px;
-    }
-
-    #global-loader p {
-      font-size: 14px;
-      color: #374151;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  `;
-        document.head.appendChild(style);
-
-        const loader = document.createElement("div");
-        loader.id = "global-loader";
-        loader.innerHTML = `
-    <div class="spinner"></div>
-    <p>Loading, please wait…</p>
-  `;
-        document.body.appendChild(loader);
-
-        // -------------------------------
-        // 2. Hide loader when page loaded
-        // -------------------------------
-        window.addEventListener("load", () => {
-            loader.classList.add("hidden");
-            setTimeout(() => loader.remove(), 400);
-        });
-
-        // -------------------------------
-        // 3. Show loader on link navigation
-        // -------------------------------
-        document.addEventListener("click", (e) => {
-            const link = e.target.closest("a");
-
-            if (!link) return;
-            if (link.target === "_blank") return;
-            if (link.href.startsWith("mailto:")) return;
-            if (link.href.startsWith("tel:")) return;
-            if (link.hasAttribute("download")) return;
-
-            loader.classList.remove("hidden");
-            loader.style.display = "flex";
-        });
-
-        // -------------------------------
-        // 4. Show loader on form submit
-        // -------------------------------
-        document.addEventListener("submit", () => {
-            loader.classList.remove("hidden");
-            loader.style.display = "flex";
-        });
-
-        // -------------------------------
-        // 5. Slow network hint (optional)
-        // -------------------------------
-        if (navigator.connection && navigator.connection.effectiveType) {
-            if (navigator.connection.effectiveType.includes("2g")) {
-                loader.querySelector("p").innerText =
-                    "Slow network detected… loading";
-            }
-        }
-
-        // -------------------------------
-        // 6. Safety fallback (10s)
-        // -------------------------------
-        setTimeout(() => {
-            if (document.body.contains(loader)) {
-                loader.remove();
-            }
-        }, 10000);
-    })();
 </script>
+
 
 </body>
 

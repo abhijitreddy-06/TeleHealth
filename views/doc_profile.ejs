@@ -526,99 +526,126 @@
             color: var(--text-dark);
             opacity: 0.9;
         }
-    </style>
-<style>
-    /* Simple Footer */
+    /* ===============================
+   STRICT SIMPLE FOOTER OVERRIDE
+   =============================== */
+
+.simple-footer {
+    all: unset;
+    display: block;
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--border);
+    padding: 0.6rem 5%;          /* compact height */
+    margin-top: auto;
+}
+
+/* GRID LAYOUT – DESKTOP SAFE */
+.simple-footer .footer-content {
+    all: unset;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+}
+
+/* LEFT */
+.simple-footer .footer-left {
+    display: flex;
+    align-items: center;
+}
+
+.simple-footer .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.simple-footer .footer-logo i {
+    color: var(--secondary);
+    font-size: 1.2rem;
+}
+
+/* CENTER TEXT */
+.simple-footer .footer-center {
+    text-align: center;
+}
+
+.simple-footer .copyright {
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.simple-footer .footer-name {
+    color: var(--text-dark);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.simple-footer .footer-name:hover {
+    text-decoration: underline;
+}
+
+/* RIGHT ICONS */
+.simple-footer .footer-right {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.simple-footer .footer-socials a {
+    color: var(--text-dark);
+    font-size: 1.4rem; /* BIG icons */
+    text-decoration: none;
+}
+
+.simple-footer .footer-socials a:hover {
+    opacity: 0.7;
+}
+
+/* ===============================
+   MOBILE – SMALLER HEIGHT
+   =============================== */
+@media (max-width: 768px) {
     .simple-footer {
-        background-color: var(--card-bg);
-        border-top: 1px solid var(--border);
-        padding: 1.5rem 5%;
+        padding: 0.5rem 5%;     /* reduced height */
+    }
+
+    .simple-footer .footer-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .simple-footer .footer-center {
         text-align: center;
-        margin-top: auto;
     }
 
-    .footer-content {
-        max-width: 1400px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 1rem;
+    .simple-footer .footer-right {
+        justify-content: center;
     }
 
-    .footer-left {
-        display: flex;
-        align-items: center;
-        gap: 0.8rem;
+    .simple-footer .copyright {
+        font-size: 0.8rem;
     }
 
-    .footer-logo {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: var(--primary);
-        font-weight: 600;
-        text-decoration: none;
+    .simple-footer .footer-socials a {
+        font-size: 1.3rem;
     }
-
-    .footer-logo i {
-        color: var(--secondary);
-        font-size: 1.2rem;
-    }
-
-    .copyright {
-        color: var(--text-medium);
-        font-size: 0.9rem;
-    }
-
-    .footer-links {
-        display: flex;
-        gap: 1.5rem;
-        align-items: center;
-    }
-
-    .footer-links a {
-        color: var(--text-medium);
-        text-decoration: none;
-        font-size: 0.9rem;
-        transition: var(--transition);
-    }
-
-    .footer-links a:hover {
-        color: var(--primary);
-    }
-
-    .footer-links .separator {
-        color: var(--border);
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-        .simple-footer {
-            padding: 1rem 5%;
-        }
-
-        .footer-content {
-            flex-direction: column;
-            gap: 0.8rem;
-            text-align: center;
-        }
-
-        .footer-links {
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 1rem;
-        }
-
-        .separator {
-            display: none;
-        }
-
-        .footer-links a {
-            font-size: 0.85rem;
-        }
-    }
+}
+a,
+a:hover,
+a:focus,
+a:active,
+a:visited {
+    text-decoration: none !important;
+}
 </style>
+
 </head>
 
 <body>
@@ -742,13 +769,7 @@
                 </div>
             </div>
     
-            <div class="footer-links">
-                <a href="">Privacy Policy</a>
-                <span class="separator">|</span>
-                <a href="">Terms of Service</a>
-                <span class="separator">|</span>
-                <a href="/contact">Contact</a>
-            </div>
+
         </div>
     </footer>
     <script defer>

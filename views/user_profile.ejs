@@ -523,33 +523,38 @@
             color: var(--text-dark);
             opacity: 0.9;
         }
-    </style>
-    <style>
-        /* Simple Footer */
+
+        /* ===============================
+   STRICT SIMPLE FOOTER OVERRIDE
+   =============================== */
+
         .simple-footer {
+            all: unset;
+            display: block;
             background-color: var(--card-bg);
             border-top: 1px solid var(--border);
-            padding: 1.5rem 5%;
-            text-align: center;
+            padding: 0.6rem 5%;
+            /* compact height */
             margin-top: auto;
         }
-    
-        .footer-content {
+
+        /* GRID LAYOUT – DESKTOP SAFE */
+        .simple-footer .footer-content {
+            all: unset;
             max-width: 1400px;
             margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
             align-items: center;
-            gap: 1rem;
         }
-    
-        .footer-left {
+
+        /* LEFT */
+        .simple-footer .footer-left {
             display: flex;
             align-items: center;
-            gap: 0.8rem;
         }
-    
-        .footer-logo {
+
+        .simple-footer .footer-logo {
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -557,69 +562,96 @@
             font-weight: 600;
             text-decoration: none;
         }
-    
-        .footer-logo i {
+
+        .simple-footer .footer-logo i {
             color: var(--secondary);
             font-size: 1.2rem;
         }
-    
-        .copyright {
-            color: var(--text-medium);
+
+        /* CENTER TEXT */
+        .simple-footer .footer-center {
+            text-align: center;
+        }
+
+        .simple-footer .copyright {
+            color: var(--text-dark);
             font-size: 0.9rem;
+            white-space: nowrap;
         }
-    
-        .footer-links {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-    
-        .footer-links a {
-            color: var(--text-medium);
+
+        .simple-footer .footer-name {
+            color: var(--text-dark);
+            font-weight: 600;
             text-decoration: none;
-            font-size: 0.9rem;
-            transition: var(--transition);
         }
-    
-        .footer-links a:hover {
-            color: var(--primary);
+
+        .simple-footer .footer-name:hover {
+            text-decoration: underline;
         }
-    
-        .footer-links .separator {
-            color: var(--border);
+
+        /* RIGHT ICONS */
+        .simple-footer .footer-right {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
         }
-    
-        /* Responsive adjustments */
+
+        .simple-footer .footer-socials a {
+            color: var(--text-dark);
+            font-size: 1.4rem;
+            /* BIG icons */
+            text-decoration: none;
+        }
+
+        .simple-footer .footer-socials a:hover {
+            opacity: 0.7;
+        }
+
+        /* ===============================
+   MOBILE – SMALLER HEIGHT
+   =============================== */
         @media (max-width: 768px) {
             .simple-footer {
-                padding: 1rem 5%;
+                padding: 0.5rem 5%;
+                /* reduced height */
             }
-    
-            .footer-content {
+
+            .simple-footer .footer-content {
+                display: flex;
                 flex-direction: column;
-                gap: 0.8rem;
+                gap: 0.3rem;
+            }
+
+            .simple-footer .footer-center {
                 text-align: center;
             }
-    
-            .footer-links {
-                flex-wrap: wrap;
+
+            .simple-footer .footer-right {
                 justify-content: center;
-                gap: 1rem;
             }
-    
-            .separator {
-                display: none;
+
+            .simple-footer .copyright {
+                font-size: 0.8rem;
             }
-    
-            .footer-links a {
-                font-size: 0.85rem;
+
+            .simple-footer .footer-socials a {
+                font-size: 1.3rem;
             }
         }
+
+        a,
+        a:hover,
+        a:focus,
+        a:active,
+        a:visited {
+            text-decoration: none !important;
+        }
     </style>
+
 </head>
 
 <body>
-    
+
     <header>
         <nav class="navbar">
             <a href="/user_home" class="logo">
@@ -655,12 +687,12 @@
         <button class="close-menu" id="closeMenu">
             <i class="fas fa-times"></i>
         </button>
-                <a href="/user_home" class="active"><i class="fas fa-home"></i> Home</a>
-                <a href="/predict"><i class="fas fa-robot"></i>AI Pre Advice</a>
-                <a href="/user_video_dashboard"><i class="fas fa-video"></i>video</a>
-                <a href="/appointments"><i class="fas fa-user-md"></i>Appointments</a>
-                <a href="/records"><i class="fas fa-folder"></i> My Records</a>
-                <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
+        <a href="/user_home" class="active"><i class="fas fa-home"></i> Home</a>
+        <a href="/predict"><i class="fas fa-robot"></i>AI Pre Advice</a>
+        <a href="/user_video_dashboard"><i class="fas fa-video"></i>video</a>
+        <a href="/appointments"><i class="fas fa-user-md"></i>Appointments</a>
+        <a href="/records"><i class="fas fa-folder"></i> My Records</a>
+        <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
     </div>
 
     <!-- Profile Section -->
@@ -736,22 +768,32 @@
 
     <footer class="simple-footer">
         <div class="footer-content">
+            <!-- LEFT -->
             <div class="footer-left">
                 <a href="/user_home" class="footer-logo">
                     <i class="fas fa-heartbeat"></i>
                     <span>TeleHealth</span>
-                    </a>
-                    <div class="copyright">
-                        © 2026 Website by Abhijit Reddy ❤️. All rights reserved.
-                </div>
+                </a>
+            </div>
+            <!-- CENTER -->
+            <div class="footer-center">
+                <span class="copyright">
+                    © 2026 Built by
+                    <a href="https://abhijitreddy-portfolio.netlify.app/" target="_blank" rel="noopener"
+                        class="footer-name">
+                        Abhijit Reddy
+                    </a>.
+                </span>
             </div>
 
-            <div class="footer-links">
-                <a href="">Privacy Policy</a>
-                <span class="separator">|</span>
-                <a href="">Terms of Service</a>
-                <span class="separator">|</span>
-                <a href="/contact">Contact</a>
+            <!-- RIGHT -->
+            <div class="footer-right footer-socials">
+                <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="https://github.com/abhijitreddy-06" target="_blank" aria-label="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
             </div>
         </div>
     </footer>
@@ -759,69 +801,69 @@
     <script defer>
         document.addEventListener('DOMContentLoaded', function () {
 
-        const themeToggle = document.getElementById('themeToggle');
-        const mobileThemeToggle = document.getElementById('mobileThemeToggle');
-        const html = document.documentElement;
+            const themeToggle = document.getElementById('themeToggle');
+            const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+            const html = document.documentElement;
 
 
-        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        if (savedTheme) {
-            html.setAttribute('data-theme', savedTheme);
-            updateThemeIcon(savedTheme);
-        }
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (savedTheme) {
+                html.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            }
 
-        function toggleTheme() {
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            function toggleTheme() {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        }
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            }
 
-        function updateThemeIcon(theme) {
-            const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
-            themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
-            mobileThemeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
-        }
+            function updateThemeIcon(theme) {
+                const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
+                themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+                mobileThemeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+            }
 
-        themeToggle.addEventListener('click', toggleTheme);
-        mobileThemeToggle.addEventListener('click', toggleTheme);
-
-
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const closeMenuBtn = document.getElementById('closeMenu');
-        const mobileMenu = document.getElementById('mobileMenu');
-
-        mobileMenuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            mobileMenu.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        });
-
-        closeMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.remove('active');
-            document.body.style.overflow = '';
-        });
+            themeToggle.addEventListener('click', toggleTheme);
+            mobileThemeToggle.addEventListener('click', toggleTheme);
 
 
-        document.addEventListener('click', (e) => {
-            if (mobileMenu.classList.contains('active') &&
-                !mobileMenu.contains(e.target) &&
-                e.target !== mobileMenuBtn) {
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const closeMenuBtn = document.getElementById('closeMenu');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            mobileMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                mobileMenu.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
                 mobileMenu.classList.remove('active');
                 document.body.style.overflow = '';
-            }
+            });
+
+
+            document.addEventListener('click', (e) => {
+                if (mobileMenu.classList.contains('active') &&
+                    !mobileMenu.contains(e.target) &&
+                    e.target !== mobileMenuBtn) {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
         });
-    });
-</script>
-<script>
-    (function () {
-        // -------------------------------
-        // 1. Create Loader HTML + CSS
-        // -------------------------------
-        const style = document.createElement("style");
-        style.innerHTML = `
+    </script>
+    <script>
+        (function () {
+            // -------------------------------
+            // 1. Create Loader HTML + CSS
+            // -------------------------------
+            const style = document.createElement("style");
+            style.innerHTML = `
     #global-loader {
       position: fixed;
       inset: 0;
@@ -859,68 +901,68 @@
       to { transform: rotate(360deg); }
     }
   `;
-        document.head.appendChild(style);
+            document.head.appendChild(style);
 
-        const loader = document.createElement("div");
-        loader.id = "global-loader";
-        loader.innerHTML = `
+            const loader = document.createElement("div");
+            loader.id = "global-loader";
+            loader.innerHTML = `
     <div class="spinner"></div>
     <p>Loading, please wait…</p>
   `;
-        document.body.appendChild(loader);
+            document.body.appendChild(loader);
 
-        // -------------------------------
-        // 2. Hide loader when page loaded
-        // -------------------------------
-        window.addEventListener("load", () => {
-            loader.classList.add("hidden");
-            setTimeout(() => loader.remove(), 400);
-        });
+            // -------------------------------
+            // 2. Hide loader when page loaded
+            // -------------------------------
+            window.addEventListener("load", () => {
+                loader.classList.add("hidden");
+                setTimeout(() => loader.remove(), 400);
+            });
 
-        // -------------------------------
-        // 3. Show loader on link navigation
-        // -------------------------------
-        document.addEventListener("click", (e) => {
-            const link = e.target.closest("a");
+            // -------------------------------
+            // 3. Show loader on link navigation
+            // -------------------------------
+            document.addEventListener("click", (e) => {
+                const link = e.target.closest("a");
 
-            if (!link) return;
-            if (link.target === "_blank") return;
-            if (link.href.startsWith("mailto:")) return;
-            if (link.href.startsWith("tel:")) return;
-            if (link.hasAttribute("download")) return;
+                if (!link) return;
+                if (link.target === "_blank") return;
+                if (link.href.startsWith("mailto:")) return;
+                if (link.href.startsWith("tel:")) return;
+                if (link.hasAttribute("download")) return;
 
-            loader.classList.remove("hidden");
-            loader.style.display = "flex";
-        });
+                loader.classList.remove("hidden");
+                loader.style.display = "flex";
+            });
 
-        // -------------------------------
-        // 4. Show loader on form submit
-        // -------------------------------
-        document.addEventListener("submit", () => {
-            loader.classList.remove("hidden");
-            loader.style.display = "flex";
-        });
+            // -------------------------------
+            // 4. Show loader on form submit
+            // -------------------------------
+            document.addEventListener("submit", () => {
+                loader.classList.remove("hidden");
+                loader.style.display = "flex";
+            });
 
-        // -------------------------------
-        // 5. Slow network hint (optional)
-        // -------------------------------
-        if (navigator.connection && navigator.connection.effectiveType) {
-            if (navigator.connection.effectiveType.includes("2g")) {
-                loader.querySelector("p").innerText =
-                    "Slow network detected… loading";
+            // -------------------------------
+            // 5. Slow network hint (optional)
+            // -------------------------------
+            if (navigator.connection && navigator.connection.effectiveType) {
+                if (navigator.connection.effectiveType.includes("2g")) {
+                    loader.querySelector("p").innerText =
+                        "Slow network detected… loading";
+                }
             }
-        }
 
-        // -------------------------------
-        // 6. Safety fallback (10s)
-        // -------------------------------
-        setTimeout(() => {
-            if (document.body.contains(loader)) {
-                loader.remove();
-            }
-        }, 10000);
-    })();
-</script>
+            // -------------------------------
+            // 6. Safety fallback (10s)
+            // -------------------------------
+            setTimeout(() => {
+                if (document.body.contains(loader)) {
+                    loader.remove();
+                }
+            }, 10000);
+        })();
+    </script>
 
 </body>
 

@@ -878,7 +878,125 @@
                 font-size: 0.85rem;
             }
         }
-    </style>
+    /* ===============================
+   STRICT SIMPLE FOOTER OVERRIDE
+   =============================== */
+
+.simple-footer {
+    all: unset;
+    display: block;
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--border);
+    padding: 0.6rem 5%;          /* compact height */
+    margin-top: auto;
+}
+
+/* GRID LAYOUT – DESKTOP SAFE */
+.simple-footer .footer-content {
+    all: unset;
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+}
+
+/* LEFT */
+.simple-footer .footer-left {
+    display: flex;
+    align-items: center;
+}
+
+.simple-footer .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.simple-footer .footer-logo i {
+    color: var(--secondary);
+    font-size: 1.2rem;
+}
+
+/* CENTER TEXT */
+.simple-footer .footer-center {
+    text-align: center;
+}
+
+.simple-footer .copyright {
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.simple-footer .footer-name {
+    color: var(--text-dark);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.simple-footer .footer-name:hover {
+    text-decoration: underline;
+}
+
+/* RIGHT ICONS */
+.simple-footer .footer-right {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.simple-footer .footer-socials a {
+    color: var(--text-dark);
+    font-size: 1.4rem; /* BIG icons */
+    text-decoration: none;
+}
+
+.simple-footer .footer-socials a:hover {
+    opacity: 0.7;
+}
+
+/* ===============================
+   MOBILE – SMALLER HEIGHT
+   =============================== */
+@media (max-width: 768px) {
+    .simple-footer {
+        padding: 0.5rem 5%;     /* reduced height */
+    }
+
+    .simple-footer .footer-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .simple-footer .footer-center {
+        text-align: center;
+    }
+
+    .simple-footer .footer-right {
+        justify-content: center;
+    }
+
+    .simple-footer .copyright {
+        font-size: 0.8rem;
+    }
+
+    .simple-footer .footer-socials a {
+        font-size: 1.3rem;
+    }
+}
+a,
+a:hover,
+a:focus,
+a:active,
+a:visited {
+    text-decoration: none !important;
+}
+</style>
 </head>
 
 <body>
@@ -1033,27 +1151,36 @@
         </div>
     </main>
 
-    <footer class="simple-footer">
-        <div class="footer-content">
-            <div class="footer-left">
-                <a href="/doc_home" class="footer-logo">
-                    <i class="fas fa-heartbeat"></i>
-                    <span>TeleHealth</span>
-                </a>
-                <div class="copyright">
-                    © 2026 Website by Abhijit Reddy ❤️. All rights reserved.
-                </div>
-            </div>
-
-            <div class="footer-links">
-                <a href="">Privacy Policy</a>
-                <span class="separator">|</span>
-                <a href="">Terms of Service</a>
-                <span class="separator">|</span>
-                <a href="/contact">Contact</a>
-            </div>
+<footer class="simple-footer">
+    <div class="footer-content">
+        <!-- LEFT -->
+        <div class="footer-left">
+            <a href="/user_home" class="footer-logo">
+                <i class="fas fa-heartbeat"></i>
+                <span>TeleHealth</span>
+            </a>
         </div>
-    </footer>
+<!-- CENTER -->
+<div class="footer-center">
+    <span class="copyright">
+        © 2026 Built by
+        <a href="https://abhijitreddy-portfolio.netlify.app/" target="_blank" rel="noopener" class="footer-name">
+            Abhijit Reddy
+        </a>.
+    </span>
+        </div>
+
+        <!-- RIGHT -->
+        <div class="footer-right footer-socials">
+            <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" aria-label="LinkedIn">
+                <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://github.com/abhijitreddy-06" target="_blank" aria-label="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+        </div>
+        </div>
+        </footer>
 
     <script defer>
         document.addEventListener('DOMContentLoaded', function () {
