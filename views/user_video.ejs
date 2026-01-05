@@ -1040,7 +1040,7 @@
                 };
 
                 iframe.onerror = function () {
-                    console.error('❌ Iframe download error');
+                   
                     downloadBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Try Again';
                     downloadBtn.disabled = false;
                     document.body.removeChild(iframe);
@@ -1097,7 +1097,7 @@
                 if (callAlreadyEnded) return;
                 callAlreadyEnded = true;
 
-                console.log('Showing call ended overlay, prescription ready:', prescriptionReady);
+               
 
                 // Cleanup call resources
                 cleanupCall();
@@ -1185,7 +1185,7 @@
                 });
 
                 socket.on('disconnect', (reason) => {
-                    console.log('❌ Socket disconnected:', reason);
+             
                     if (!callAlreadyEnded) {
                         updateStatus('Disconnected from server', 'disconnected');
                     }

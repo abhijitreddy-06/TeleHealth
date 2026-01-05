@@ -1091,6 +1091,32 @@
             color: var(--text-dark);
             opacity: 0.9;
         }
+        /* Disable Drag & Drop on mobile */
+@media (max-width: 768px) {
+    .drop-area {
+        display: none !important;
+    }
+}
+/* Smaller Browse Files box on mobile */
+@media (max-width: 768px) {
+    #chooseFileOption {
+        padding: 1rem 0.5rem !important;
+        min-height: 100px !important;
+    }
+
+    #chooseFileOption .upload-icon {
+        font-size: 1.5rem !important;
+    }
+
+    #chooseFileOption h4 {
+        font-size: 1.25rem !important;
+    }
+
+    #chooseFileOption p {
+        font-size: 0.70rem !important;
+    }
+}
+
 </style>
 </head>
 
@@ -1667,7 +1693,7 @@
                 localStorage.setItem('telehealth_records', JSON.stringify(data));
 
             } catch (error) {
-                console.error('Error loading records:', error);
+               
                 const recordsGrid = document.getElementById("recordsGrid");
                 recordsGrid.innerHTML = `
                     <div class="empty-state">
@@ -1712,7 +1738,7 @@
 
                         button.innerHTML = originalText;
                         button.disabled = false;
-                        console.log('✅ File downloaded successfully via API');
+                       
                         return;
                     }
                 } catch (apiError) {
@@ -1720,13 +1746,13 @@
                 }
 
                 // Method 2: Use redirect method (fallback)
-                console.log('Trying redirect method');
+             
                 const iframe = document.createElement('iframe');
                 iframe.style.display = 'none';
                 iframe.src = `/vault/file/${fileId}`;
 
                 iframe.onload = function () {
-                    console.log('Iframe loaded');
+                   
                     setTimeout(() => {
                         button.innerHTML = originalText;
                         button.disabled = false;
@@ -1735,7 +1761,7 @@
                 };
 
                 iframe.onerror = function () {
-                    console.error('Iframe loading error');
+                   
                     button.innerHTML = '<i class="fas fa-download"></i> Try Again';
                     button.disabled = false;
                     document.body.removeChild(iframe);
@@ -1745,7 +1771,7 @@
                 document.body.appendChild(iframe);
 
             } catch (error) {
-                console.error('Download error:', error);
+      
                 button.innerHTML = '<i class="fas fa-download"></i> Try Again';
                 button.disabled = false;
                 alert('Unable to download file. Please try again.');
@@ -1764,7 +1790,7 @@
                 if (fileId && fileName) {
                     downloadFile(fileId, fileName, button);
                 } else {
-                    console.error('Missing file data:', { fileId, fileName });
+             
                     alert('Unable to download: Missing file information.');
                 }
             }
@@ -1820,7 +1846,7 @@
             formData.append('recordType', recordTypeSelect.value);
 
             try {
-                console.log("🔄 Starting upload...");
+               
 
                 const response = await fetch('/vault/upload', {
                     method: 'POST',
@@ -1831,7 +1857,7 @@
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-                    console.log("✅ Upload successful:", result);
+               
 
                     // Close modal
                     closeUploadModal();
@@ -1845,12 +1871,11 @@
                     }, 1000);
 
                 } else {
-                    console.error("❌ Upload failed:", result);
+                  
                     alert(`Upload failed: ${result.error || result.details || 'Unknown error'}`);
                 }
 
             } catch (error) {
-                console.error("❌ Network error:", error);
                 alert('Network error. Please check your connection and try again.');
 
             } finally {
