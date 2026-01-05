@@ -96,7 +96,7 @@ Follow these steps to run the project locally.
 1️⃣ Clone the repository
 
 ```text
-git clone https://github.com/abhijitreddy-06/TeleHealth.git
+git clone [https://github.com/abhijitreddy-06/TeleHealth.git](https://github.com/abhijitreddy-06/TeleHealth.git)
 cd TeleHealth
 ```
 2️⃣ Install dependencies
@@ -119,11 +119,11 @@ npm run dev
 ```
 ---
 
-**📌 Notes**
-Designed as a scalable full-stack healthcare system.
-AI services are decoupled from the core backend for flexibility.
-Ensures secure handling of sensitive healthcare data.
-Suitable for learning, research, and controlled production use.
+*📌 Notes*
+* Designed as a scalable full-stack healthcare system.
+* AI services are decoupled from the core backend for flexibility.
+* Ensures secure handling of sensitive healthcare data.
+* Suitable for learning, research, and controlled production use.
 ---
 
 *👤 Author*
