@@ -1,57 +1,99 @@
 # 🏥 TeleHealth – Full Stack Healthcare Platform
 
-TeleHealth is a full-stack healthcare web platform that connects **patients and doctors** through secure video consultations, appointment booking, medical record management, and AI-powered pre-consultation advice.
+![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![TensorFlow](https://img.shields.io/badge/TensorFlow-FF6F00?style=for-the-badge&logo=tensorflow&logoColor=white)
+![Render](https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=white)
 
-The goal of this project is to simplify healthcare access by combining **real-time communication**, **AI-driven insights**, and **secure data storage**.
+**TeleHealth** is a full-stack healthcare web application that connects **patients and doctors** through secure video consultations, appointment booking, medical record management, and **AI-powered pre-consultation insights**.
+
+The platform is designed to improve healthcare accessibility by combining **real-time communication**, **intelligent clinical assistance**, and **secure data storage**.
+
+---
+
+## 🔗 Live Links
+- **🚀 Live Website:** [TeleHealth on Render](https://telehealth-production.onrender.com/)
+- **📦 GitHub Repository:** [abhijitreddy-06/TeleHealth](https://github.com/abhijitreddy-06/TeleHealth)
 
 ---
 
 ## 🚀 Features
 
 ### 👤 Patient
-- Register & login as a patient
-- Book appointments with doctors
-- Attend **real-time video consultations**
-- Store and view **past medical records**
-- Get **AI-based pre-consultation advice** before meeting a doctor
+* **Secure Access:** Register and login securely.
+* **Appointments:** Book appointments with available doctors.
+* **Video Calls:** Attend real-time video consultations.
+* **Records:** Store and access past medical records.
+* **AI Insights:** Receive AI-based pre-consultation advice based on symptoms.
 
 ### 👨‍⚕️ Doctor
-- Register & login as a doctor
-- View and manage patient appointments
-- Attend **video consultations** with patients
+* **Dashboard:** View and manage patient appointments.
+* **Consultation:** Attend video consultations with patients.
+* **Secure Login:** Role-based authentication.
 
 ---
 
-## 🤖 AI Integration
-- Fine-tuned **Clinical BERT** model
-- Built using **TensorFlow & Keras**
-- Provides **pre-advice** based on patient inputs
-- Deployed independently for scalability
+## 🧠 AI Integration
+
+The platform integrates a sophisticated AI system to assist patients before consultations by analyzing clinical text and structured symptom data.
+
+### Model Architecture & Performance
+
+| Component | Details |
+| :--- | :--- |
+| **Model** | Clinical BERT (Bio_ClinicalBERT) with binary symptom features |
+| **Architecture** | **Multi-input, Multi-task:** <br>1. Text-based clinical input<br>2. Binary symptom feature vector |
+| **Disease Prediction** | **~99%** Accuracy (Validation) |
+| **Specialist Rec.** | **~93%** Accuracy (Validation) |
+| **Inference** | GPU-accelerated (RTX 2050) |
+| **Hosting** | Hugging Face Spaces |
+
+> **⚠️ Disclaimer:** This AI model provides pre-consultation insights only and does not replace professional medical diagnosis.
 
 ---
 
 ## 🛠 Tech Stack
 
-### Backend
-- **Express.js**
-- REST APIs
-- Role-based authentication (Doctor / Patient)
+**Backend**
+* Express.js
+* RESTful APIs
+* Role-based authentication (Doctor / Patient)
 
-### Database & Storage
-- **PostgreSQL**
-- Secure file storage for medical records
+**Database & Storage**
+* PostgreSQL
+* Supabase (Secure medical record storage)
 
-### AI / ML
-- **TensorFlow**
-- **Keras**
-- Fine-tuned **Clinical BERT**
+**AI / Machine Learning**
+* TensorFlow / Keras
+* Fine-tuned Clinical BERT (Bio_ClinicalBERT)
 
-### Deployment
-- Backend & Web App: **:contentReference[oaicite:0]{index=0}**
-- AI Model: **:contentReference[oaicite:1]{index=1} (Spaces)
-- Database & Storage: **:contentReference[oaicite:2]{index=2}**
+**Deployment**
+* **Web App:** Render
+* **AI Model:** Hugging Face Spaces
 
 ---
 
 ## 📂 Project Structure
 
+```text
+TeleHealth/
+│
+├── public/
+│   └── pages/       # All HTML files
+│
+├── views/           # All EJS template files
+│
+├── server.js        # Main Express server
+├── package.json
+├── package-lock.json
+├── .gitignore
+└── README.md
+```
+⚙️ Installation & Setup
+Follow these steps to run the project locally.
+
+1️⃣ Clone the repository
+```text
+git clone [https://github.com/abhijitreddy-06/TeleHealth.git](https://github.com/abhijitreddy-06/TeleHealth.git)
+cd TeleHealth
