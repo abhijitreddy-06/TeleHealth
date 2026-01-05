@@ -94,6 +94,40 @@ TeleHealth/
 Follow these steps to run the project locally.
 
 1️⃣ Clone the repository
+
 ```text
 git clone [https://github.com/abhijitreddy-06/TeleHealth.git](https://github.com/abhijitreddy-06/TeleHealth.git)
 cd TeleHealth
+```
+2️⃣ Install dependencies
+
+```
+npm install
+```
+3️⃣ Environment variables
+Create a .env file in the root directory 
+
+4️⃣ Run the application
+Start the server:
+
+```
+npm start
+```
+For development mode (with nodemon):
+```
+npm run dev
+```
+---
+
+**📌 Notes**
+*Designed as a scalable full-stack healthcare system.
+*AI services are decoupled from the core backend for flexibility.
+*Ensures secure handling of sensitive healthcare data.
+*Suitable for learning, research, and controlled production use.
+---
+
+**👤 Author**
+***Abhijit Reddy***
+
+*Engineering Student | Full Stack Developer | AI Enthusiast*
+---
