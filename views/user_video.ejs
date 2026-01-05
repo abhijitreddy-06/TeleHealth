@@ -1415,6 +1415,113 @@
             });
         });
     </script>
+<script>
+    (function () {
+        // -------------------------------
+        // 1. Create Loader HTML + CSS
+        // -------------------------------
+        const style = document.createElement("style");
+        style.innerHTML = `
+    #global-loader {
+      position: fixed;
+      inset: 0;
+      background: #ffffff;
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    #global-loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    #global-loader .spinner {
+      width: 46px;
+      height: 46px;
+      border: 4px solid #e5e7eb;
+      border-top-color: #2563eb;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 12px;
+    }
+
+    #global-loader p {
+      font-size: 14px;
+      color: #374151;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  `;
+        document.head.appendChild(style);
+
+        const loader = document.createElement("div");
+        loader.id = "global-loader";
+        loader.innerHTML = `
+    <div class="spinner"></div>
+    <p>Loading, please wait…</p>
+  `;
+        document.body.appendChild(loader);
+
+        // -------------------------------
+        // 2. Hide loader when page loaded
+        // -------------------------------
+        window.addEventListener("load", () => {
+            loader.classList.add("hidden");
+            setTimeout(() => loader.remove(), 400);
+        });
+
+        // -------------------------------
+        // 3. Show loader on link navigation
+        // -------------------------------
+        document.addEventListener("click", (e) => {
+            const link = e.target.closest("a");
+
+            if (!link) return;
+            if (link.target === "_blank") return;
+            if (link.href.startsWith("mailto:")) return;
+            if (link.href.startsWith("tel:")) return;
+            if (link.hasAttribute("download")) return;
+
+            loader.classList.remove("hidden");
+            loader.style.display = "flex";
+        });
+
+        // -------------------------------
+        // 4. Show loader on form submit
+        // -------------------------------
+        document.addEventListener("submit", () => {
+            loader.classList.remove("hidden");
+            loader.style.display = "flex";
+        });
+
+        // -------------------------------
+        // 5. Slow network hint (optional)
+        // -------------------------------
+        if (navigator.connection && navigator.connection.effectiveType) {
+            if (navigator.connection.effectiveType.includes("2g")) {
+                loader.querySelector("p").innerText =
+                    "Slow network detected… loading";
+            }
+        }
+
+        // -------------------------------
+        // 6. Safety fallback (10s)
+        // -------------------------------
+        setTimeout(() => {
+            if (document.body.contains(loader)) {
+                loader.remove();
+            }
+        }, 10000);
+    })();
+</script>
+
 </body>
 
 </html>
