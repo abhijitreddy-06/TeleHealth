@@ -127,7 +127,7 @@ npm run dev
 ---
 
 *👤 Author*
-**Abhijit Reddy**
+**Abhijit Reddy😊**
 
 Engineering Student | Full Stack Developer | AI Enthusiast
 ---
