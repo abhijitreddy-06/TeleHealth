@@ -13,7 +13,7 @@ The platform is designed to improve healthcare accessibility by combining **real
 ---
 
 ## 🔗 Live Links
-- **🚀 Live Website:** [TeleHealth on Render](https://telehealth-production.onrender.com/)
+- **🚀 Live Website:** [TeleHealth](https://telehealth-production.onrender.com/)
 - **📦 GitHub Repository:** [abhijitreddy-06/TeleHealth](https://github.com/abhijitreddy-06/TeleHealth)
 
 ---
@@ -96,7 +96,7 @@ Follow these steps to run the project locally.
 1️⃣ Clone the repository
 
 ```text
-git clone [https://github.com/abhijitreddy-06/TeleHealth.git](https://github.com/abhijitreddy-06/TeleHealth.git)
+git clone https://github.com/abhijitreddy-06/TeleHealth.git
 cd TeleHealth
 ```
 2️⃣ Install dependencies
@@ -120,14 +120,14 @@ npm run dev
 ---
 
 **📌 Notes**
-*Designed as a scalable full-stack healthcare system.
-*AI services are decoupled from the core backend for flexibility.
-*Ensures secure handling of sensitive healthcare data.
-*Suitable for learning, research, and controlled production use.
+Designed as a scalable full-stack healthcare system.
+AI services are decoupled from the core backend for flexibility.
+Ensures secure handling of sensitive healthcare data.
+Suitable for learning, research, and controlled production use.
 ---
 
-**👤 Author**
-***Abhijit Reddy***
+*👤 Author*
+**Abhijit Reddy**
 
-*Engineering Student | Full Stack Developer | AI Enthusiast*
+Engineering Student | Full Stack Developer | AI Enthusiast
 ---
