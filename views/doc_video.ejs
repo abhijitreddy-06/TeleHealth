@@ -65,7 +65,8 @@
             transition: var(--transition);
             min-height: 100vh;
             line-height: 1.6;
-            overflow-x: hidden;
+            overflow: hidden;
+            /* Prevent body scrolling */
         }
 
         /* ===============================
@@ -253,7 +254,10 @@
            =============================== */
         .main-container {
             display: flex;
-            min-height: calc(100vh - var(--header-height));
+            height: calc(100vh - var(--header-height));
+            width: 100vw;
+            overflow: hidden;
+            /* Prevent scrolling */
             transition: var(--transition);
         }
 
@@ -265,8 +269,10 @@
             display: flex;
             flex-direction: column;
             transition: var(--transition);
-            padding: 5px;
-            /* Reduced gap */
+            padding: 4px;
+            /* Minimal gap */
+            min-width: 0;
+            /* Prevent overflow */
         }
 
         /* Video Container */
@@ -277,33 +283,34 @@
             overflow: hidden;
             position: relative;
             border: 2px solid var(--border);
-            margin-bottom: 5px;
-            /* Reduced gap */
+            margin-bottom: 4px;
+            /* Minimal gap */
+            min-height: 0;
+            /* Allow shrinking */
         }
 
-        /* Remote Video */
+        /* Remote Video - FIXED SIZE TO PREVENT SCROLLING */
         #remoteVideo {
             width: 100%;
             height: 100%;
             object-fit: contain;
             background-color: #000;
+            display: block;
         }
 
         /* Local Video (PiP) */
         .local-video-pip {
             position: absolute;
-            bottom: 10px;
-            /* Reduced gap */
-            right: 10px;
-            /* Reduced gap */
-            width: 180px;
-            height: 135px;
+            bottom: 8px;
+            right: 8px;
+            width: 160px;
+            height: 120px;
             border-radius: var(--radius);
             overflow: hidden;
             border: 2px solid var(--primary);
             background: #000;
             z-index: 5;
-            transition: var(--transition);
+            transition: transform 0.3s ease;
         }
 
         #localVideo {
@@ -319,28 +326,26 @@
             right: 0;
             background: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 0.4rem;
+            padding: 0.3rem;
             font-size: 0.8rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.3rem;
             justify-content: center;
         }
 
         /* Status Overlay */
         .call-status-overlay {
             position: absolute;
-            top: 10px;
-            /* Reduced gap */
-            left: 10px;
-            /* Reduced gap */
+            top: 8px;
+            left: 8px;
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 0.6rem 1rem;
+            padding: 0.5rem 0.8rem;
             border-radius: var(--radius);
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
             z-index: 10;
             backdrop-filter: blur(4px);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -348,12 +353,12 @@
 
         .status-indicator {
             display: flex;
-            gap: 0.25rem;
+            gap: 0.2rem;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             background-color: var(--secondary);
             border-radius: 50%;
             animation: pulse 2s infinite;
@@ -378,7 +383,7 @@
         }
 
         #callStatusText {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 500;
         }
 
@@ -399,13 +404,13 @@
         }
 
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
             border-top-color: var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
         }
 
         @keyframes spin {
@@ -424,13 +429,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 1rem;
+            padding: 0 0.5rem;
             transition: var(--transition);
+            min-height: var(--control-bar-height);
         }
 
         .controls-wrapper {
             display: flex;
-            gap: 2rem;
+            gap: 1.5rem;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
@@ -441,19 +447,19 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.3rem;
             background: transparent;
             border: none;
             color: var(--text-dark);
             cursor: pointer;
             transition: var(--transition);
-            padding: 0.8rem 1rem;
-            border-radius: 12px;
-            min-width: 70px;
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px;
+            min-width: 60px;
         }
 
         .control-btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
             background: rgba(56, 189, 248, 0.05);
         }
 
@@ -470,21 +476,20 @@
         }
 
         .control-icon {
-            font-size: 1.4rem;
-            width: 50px;
-            height: 50px;
+            font-size: 1.3rem;
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: transparent;
-            border-radius: 12px;
-            border: 2px solid var(--border);
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
             transition: var(--transition);
         }
 
         .control-btn:hover .control-icon {
             border-color: var(--primary);
-            transform: scale(1.05);
         }
 
         .control-btn.active .control-icon {
@@ -503,7 +508,7 @@
         }
 
         .control-label {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 500;
         }
 
@@ -520,44 +525,66 @@
         }
 
         .notes-panel.active {
-            width: 400px;
+            width: 380px;
             opacity: 1;
         }
 
         .notes-content {
             height: 100%;
-            padding: 1.5rem;
+            padding: 1.2rem;
             display: flex;
             flex-direction: column;
         }
 
         .notes-header {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .notes-header h3 {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.6rem;
             color: var(--text-dark);
-            font-size: 1.3rem;
+            font-size: 1.2rem;
         }
 
         .notes-header h3 i {
             color: var(--primary);
         }
 
+        /* Close button for mobile notes panel */
+        .mobile-close-notes {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-size: 1.4rem;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-close-notes:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
         #notesText {
             flex: 1;
             width: 100%;
-            min-height: 300px;
-            padding: 1rem;
+            min-height: 200px;
+            padding: 0.9rem;
             border: 1px solid var(--border);
             border-radius: var(--radius);
             background-color: var(--background);
             color: var(--text-dark);
             font-family: inherit;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             resize: none;
             transition: var(--transition);
             margin-bottom: 1rem;
@@ -566,7 +593,7 @@
         #notesText:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.1);
         }
 
         .notes-footer {
@@ -577,13 +604,13 @@
 
         .notes-actions {
             display: flex;
-            gap: 0.75rem;
+            gap: 0.6rem;
         }
 
         .notes-actions button {
-            padding: 0.6rem 1.2rem;
-            font-size: 0.875rem;
-            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
             border: none;
             cursor: pointer;
             transition: var(--transition);
@@ -607,21 +634,41 @@
 
         #saveNotes:hover {
             background-color: var(--primary-hover);
-            transform: translateY(-1px);
         }
 
         .char-count {
             color: var(--text-medium);
-            font-size: 0.875rem;
+            font-size: 0.85rem;
         }
 
         /* ===============================
-           MOBILE VIEW
+           MOBILE VIEW - INCREASED FONT SIZES
            =============================== */
         @media (max-width: 768px) {
             :root {
-                --header-height: 70px;
-                --control-bar-height: 70px;
+                --header-height: 75px;
+                --control-bar-height: 75px;
+            }
+
+            /* INCREASED MOBILE FONT SIZES */
+            body {
+                font-size: 16px;
+                /* Increased base font size */
+            }
+
+            /* Header adjustments */
+            .navbar {
+                padding: 1rem 4%;
+            }
+
+            .logo {
+                font-size: 1.6rem;
+                /* Increased */
+            }
+
+            .logo i {
+                font-size: 1.4rem;
+                /* Increased */
             }
 
             /* Hide desktop nav, show mobile */
@@ -635,6 +682,10 @@
 
             .mobile-menu-btn {
                 display: flex;
+                font-size: 1.6rem;
+                /* Increased */
+                width: 44px;
+                height: 44px;
             }
 
             .logo-text {
@@ -644,69 +695,92 @@
             /* Main container for mobile */
             .main-container {
                 flex-direction: column;
+                height: calc(100vh - var(--header-height));
             }
 
             /* Video area for mobile */
             .video-area {
                 height: calc(100vh - var(--header-height) - var(--control-bar-height));
                 padding: 3px;
-                /* Even less gap on mobile */
+                width: 100%;
+                overflow: hidden;
             }
 
             .video-container {
                 margin-bottom: 3px;
-                /* Even less gap on mobile */
+                flex: 1;
+                min-height: 0;
             }
 
-            /* Local video PiP smaller for mobile */
+            /* Remote video fix for mobile */
+            #remoteVideo {
+                object-fit: cover;
+            }
+
+            /* Local video PiP larger for mobile */
             .local-video-pip {
-                width: 100px;
-                height: 75px;
-                bottom: 5px;
-                /* Reduced gap */
-                right: 5px;
-                /* Reduced gap */
+                width: 120px;
+                height: 90px;
+                bottom: 6px;
+                right: 6px;
+                transition: transform 0.3s ease, bottom 0.3s ease;
             }
 
-            /* Status overlay smaller */
+            /* When notes panel opens, move local video up */
+            .notes-panel.active~.video-area .local-video-pip {
+                transform: translateY(-25vh);
+            }
+
+            /* Status overlay larger */
             .call-status-overlay {
-                top: 5px;
-                /* Reduced gap */
-                left: 5px;
-                /* Reduced gap */
-                padding: 0.4rem 0.8rem;
+                top: 6px;
+                left: 6px;
+                padding: 0.6rem 0.9rem;
             }
 
             #callStatusText {
-                font-size: 0.8rem;
+                font-size: 0.9rem;
+                /* Increased */
+                font-weight: 600;
             }
 
-            /* Control bar adjustments */
+            /* INCREASED CONTROL BAR SIZES */
             .controls-bar {
-                padding: 0 0.5rem;
+                padding: 0 0.8rem;
+                height: var(--control-bar-height);
+                min-height: var(--control-bar-height);
             }
 
             .controls-wrapper {
-                gap: 1rem;
+                gap: 1.2rem;
+                width: 100%;
+                justify-content: space-around;
             }
 
             .control-btn {
-                min-width: 60px;
-                padding: 0.6rem 0.5rem;
+                min-width: 70px;
+                /* Increased */
+                padding: 0.7rem 0.5rem;
             }
 
             .control-icon {
-                width: 42px;
-                height: 42px;
-                font-size: 1.1rem;
+                width: 56px;
+                /* Increased */
+                height: 56px;
+                /* Increased */
+                font-size: 1.4rem;
+                /* Increased */
+                border-width: 2px;
             }
 
             .control-label {
-                font-size: 0.7rem;
+                font-size: 0.85rem;
+                /* Increased */
+                font-weight: 600;
             }
 
             /* ===============================
-               NOTES PANEL - MOBILE (Hidden by default, slides from bottom)
+               NOTES PANEL - MOBILE (Slides from bottom)
                =============================== */
             .notes-panel {
                 position: fixed;
@@ -716,11 +790,12 @@
                 width: 100%;
                 height: 50vh;
                 border-left: none;
-                border-top: 1px solid var(--border);
-                border-radius: var(--radius) var(--radius) 0 0;
+                border-top: 2px solid var(--border);
+                border-radius: 20px 20px 0 0;
                 z-index: 100;
                 opacity: 1;
                 transition: transform 0.3s ease;
+                box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.15);
             }
 
             .notes-panel.active {
@@ -728,19 +803,9 @@
                 width: 100%;
             }
 
-            /* When notes panel opens on mobile, move local video up */
-            .notes-panel.active~.video-area .local-video-pip {
-                transform: translateY(-25vh);
-            }
-
             .notes-content {
-                padding: 1rem;
-                height: calc(50vh - 2rem);
-            }
-
-            #notesText {
-                min-height: 150px;
-                font-size: 0.9rem;
+                padding: 1.2rem;
+                height: calc(50vh - 2.4rem);
             }
 
             .notes-header {
@@ -748,7 +813,36 @@
             }
 
             .notes-header h3 {
-                font-size: 1.1rem;
+                font-size: 1.3rem;
+                /* Increased */
+            }
+
+            /* Show mobile close button */
+            .mobile-close-notes {
+                display: flex;
+                font-size: 1.5rem;
+                /* Increased */
+                width: 40px;
+                height: 40px;
+            }
+
+            #notesText {
+                min-height: 140px;
+                font-size: 1rem;
+                /* Increased */
+                padding: 1rem;
+            }
+
+            .notes-actions button {
+                padding: 0.6rem 1.2rem;
+                font-size: 0.95rem;
+                /* Increased */
+                font-weight: 600;
+            }
+
+            .char-count {
+                font-size: 0.9rem;
+                /* Increased */
             }
         }
 
@@ -770,23 +864,42 @@
 
         /* Responsive adjustments for very small screens */
         @media (max-width: 480px) {
+            :root {
+                --header-height: 70px;
+                --control-bar-height: 70px;
+            }
+
+            .navbar {
+                padding: 0.8rem 3%;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .mobile-menu-btn {
+                font-size: 1.5rem;
+                width: 42px;
+                height: 42px;
+            }
+
             .controls-wrapper {
-                gap: 0.5rem;
+                gap: 0.8rem;
             }
 
             .control-btn {
-                min-width: 55px;
-                padding: 0.5rem;
+                min-width: 65px;
+                padding: 0.6rem 0.4rem;
             }
 
             .control-icon {
-                width: 38px;
-                height: 38px;
-                font-size: 1rem;
+                width: 52px;
+                height: 52px;
+                font-size: 1.3rem;
             }
 
             .control-label {
-                font-size: 0.65rem;
+                font-size: 0.8rem;
             }
 
             .notes-panel {
@@ -799,6 +912,31 @@
 
             .notes-panel.active~.video-area .local-video-pip {
                 transform: translateY(-27.5vh);
+            }
+
+            .local-video-pip {
+                width: 110px;
+                height: 82px;
+            }
+        }
+
+        /* Small height devices */
+        @media (max-height: 700px) and (max-width: 768px) {
+            .notes-panel {
+                height: 60vh;
+            }
+
+            .notes-panel.active {
+                transform: translateY(-60vh);
+            }
+
+            .notes-panel.active~.video-area .local-video-pip {
+                transform: translateY(-30vh);
+            }
+
+            .local-video-pip {
+                width: 100px;
+                height: 75px;
             }
         }
     </style>
@@ -924,6 +1062,9 @@
                         <i class="fas fa-notes-medical"></i>
                         Consultation Notes
                     </h3>
+                    <button class="mobile-close-notes" id="mobileCloseNotes">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
                 <textarea id="notesText" placeholder="Enter consultation notes here...
 • Symptoms observed
@@ -968,6 +1109,7 @@
         const charCount = document.getElementById('charCount');
         const notesPanel = document.getElementById('notesPanel');
         const toggleNotesBtn = document.getElementById('toggleNotes');
+        const mobileCloseNotes = document.getElementById('mobileCloseNotes');
 
         // Video call state
         let localStream = null;
@@ -977,6 +1119,7 @@
         let callStartTime = null;
         let isAudioMuted = false;
         let isVideoOff = false;
+        let isMobile = window.innerWidth <= 768;
 
         // ===============================
         // THEME TOGGLE FUNCTIONALITY
@@ -1048,22 +1191,38 @@
             // ===============================
             // NOTES PANEL FUNCTIONALITY
             // ===============================
-            // Notes panel is hidden by default on mobile
-            if (window.innerWidth <= 768) {
-                notesPanel.classList.remove('active');
-            }
+            // Notes panel is hidden by default
+            notesPanel.classList.remove('active');
 
+            // Toggle notes panel
             toggleNotesBtn.addEventListener('click', () => {
-                notesPanel.classList.toggle('active');
+                const isActive = notesPanel.classList.toggle('active');
 
                 // Update button state
-                const isActive = notesPanel.classList.contains('active');
                 toggleNotesBtn.classList.toggle('active', isActive);
 
                 if (isActive) {
                     toggleNotesBtn.querySelector('.control-icon').style.borderColor = 'var(--primary)';
+                    if (isMobile) {
+                        // Prevent body scrolling when notes panel is open on mobile
+                        document.body.style.overflow = 'hidden';
+                    }
                 } else {
                     toggleNotesBtn.querySelector('.control-icon').style.borderColor = 'var(--border)';
+                    if (isMobile) {
+                        // Restore scrolling when notes panel is closed
+                        document.body.style.overflow = '';
+                    }
+                }
+            });
+
+            // Close notes panel with mobile close button
+            mobileCloseNotes.addEventListener('click', () => {
+                notesPanel.classList.remove('active');
+                toggleNotesBtn.classList.remove('active');
+                toggleNotesBtn.querySelector('.control-icon').style.borderColor = 'var(--border)';
+                if (isMobile) {
+                    document.body.style.overflow = '';
                 }
             });
 
@@ -1266,7 +1425,6 @@
                     'fas fa-microphone';
                 toggleMic.querySelector('.control-label').textContent = isAudioMuted ? 'Unmute' : 'Mute';
 
-                // Update icon border color based on active state
                 if (!isAudioMuted) {
                     toggleMic.querySelector('.control-icon').style.borderColor = 'var(--primary)';
                 } else {
@@ -1288,7 +1446,6 @@
                     'fas fa-video';
                 toggleCam.querySelector('.control-label').textContent = isVideoOff ? 'Camera On' : 'Camera Off';
 
-                // Update icon border color based on active state
                 if (!isVideoOff) {
                     toggleCam.querySelector('.control-icon').style.borderColor = 'var(--primary)';
                 } else {
@@ -1397,13 +1554,25 @@
 
         // Handle window resize to manage notes panel state
         window.addEventListener('resize', function () {
-            if (window.innerWidth <= 768) {
-                // On mobile, ensure notes panel is hidden by default
-                notesPanel.classList.remove('active');
-                toggleNotesBtn.classList.remove('active');
-                toggleNotesBtn.querySelector('.control-icon').style.borderColor = 'var(--border)';
+            isMobile = window.innerWidth <= 768;
+
+            if (isMobile) {
+                // On mobile, close notes panel when resizing
+                if (notesPanel.classList.contains('active')) {
+                    notesPanel.classList.remove('active');
+                    toggleNotesBtn.classList.remove('active');
+                    toggleNotesBtn.querySelector('.control-icon').style.borderColor = 'var(--border)';
+                    document.body.style.overflow = '';
+                }
             }
         });
+
+        // Prevent scrolling on the page
+        document.addEventListener('touchmove', function (e) {
+            if (document.body.style.overflow === 'hidden') {
+                e.preventDefault();
+            }
+        }, { passive: false });
     </script>
 
     <!-- Global Loader Script -->
