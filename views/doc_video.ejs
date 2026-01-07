@@ -36,7 +36,7 @@
                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 12px;
 
-            /* Header height variable */
+            /* Height variables */
             --header-height: 80px;
             --control-bar-height: 80px;
         }
@@ -68,7 +68,9 @@
             overflow-x: hidden;
         }
 
-        /* Header & Navigation - EXACT FROM DOC_HOME */
+        /* ===============================
+           HEADER - EXACT FROM DOC_HOME
+           =============================== */
         header {
             background-color: var(--card-bg);
             box-shadow: var(--shadow);
@@ -143,37 +145,6 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        .btn {
-            padding: 0.6rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(56, 189, 248, 0.3);
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 2px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-outline:hover {
-            background-color: var(--primary);
-            color: white;
-        }
-
         .theme-toggle {
             background: none;
             border: none;
@@ -194,7 +165,9 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* Mobile Menu - EXACT FROM DOC_HOME */
+        /* ===============================
+           MOBILE MENU - EXACT FROM DOC_HOME
+           =============================== */
         .mobile-controls {
             display: none;
             align-items: center;
@@ -275,35 +248,37 @@
             color: var(--primary);
         }
 
-        .mobile-menu .btn-outline {
-            width: 100%;
-            text-align: center;
-            justify-content: center;
-            margin-top: 1rem;
+        /* ===============================
+           MAIN LAYOUT CONTAINER
+           =============================== */
+        .main-container {
+            display: flex;
+            min-height: calc(100vh - var(--header-height));
+            transition: var(--transition);
         }
 
         /* ===============================
-           VIDEO CALL PAGE LAYOUT - DESKTOP
+           VIDEO AREA (Left side)
            =============================== */
-        .main-wrapper {
+        .video-area {
+            flex: 1;
             display: flex;
-            min-height: calc(100vh - var(--header-height) - var(--control-bar-height));
-            position: relative;
+            flex-direction: column;
             transition: var(--transition);
+            padding: 5px;
+            /* Reduced gap */
         }
 
         /* Video Container */
         .video-container {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
             background-color: #000;
-            margin: 1rem;
             border-radius: var(--radius);
             overflow: hidden;
+            position: relative;
             border: 2px solid var(--border);
-            transition: var(--transition);
+            margin-bottom: 5px;
+            /* Reduced gap */
         }
 
         /* Remote Video */
@@ -314,14 +289,54 @@
             background-color: #000;
         }
 
+        /* Local Video (PiP) */
+        .local-video-pip {
+            position: absolute;
+            bottom: 10px;
+            /* Reduced gap */
+            right: 10px;
+            /* Reduced gap */
+            width: 180px;
+            height: 135px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 2px solid var(--primary);
+            background: #000;
+            z-index: 5;
+            transition: var(--transition);
+        }
+
+        #localVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .local-video-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.4rem;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
         /* Status Overlay */
         .call-status-overlay {
             position: absolute;
-            top: 1rem;
-            left: 1rem;
+            top: 10px;
+            /* Reduced gap */
+            left: 10px;
+            /* Reduced gap */
             background-color: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 0.75rem 1.25rem;
+            padding: 0.6rem 1rem;
             border-radius: var(--radius);
             display: flex;
             align-items: center;
@@ -363,45 +378,8 @@
         }
 
         #callStatusText {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
-        }
-
-        /* Local Video (PiP) */
-        .local-video-pip {
-            position: absolute;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            width: 200px;
-            height: 150px;
-            border-radius: var(--radius);
-            overflow: hidden;
-            border: 3px solid var(--primary);
-            box-shadow: var(--shadow);
-            background: #000;
-            z-index: 5;
-            transition: var(--transition);
-        }
-
-        #localVideo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .local-video-label {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 0.5rem;
-            font-size: 0.875rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            justify-content: center;
         }
 
         /* Video Loading State */
@@ -421,8 +399,8 @@
         }
 
         .loading-spinner {
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             border: 4px solid rgba(255, 255, 255, 0.1);
             border-top-color: var(--primary);
             border-radius: 50%;
@@ -437,20 +415,17 @@
         }
 
         /* ===============================
-           CONTROL BAR (Fixed at bottom)
+           CONTROL BAR (Not fixed)
            =============================== */
         .controls-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
             height: var(--control-bar-height);
             background-color: var(--card-bg);
             border-top: 1px solid var(--border);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 99;
+            padding: 0 1rem;
+            transition: var(--transition);
         }
 
         .controls-wrapper {
@@ -461,28 +436,28 @@
             align-items: center;
         }
 
+        /* MODERN CONTROL BUTTONS */
         .control-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            background: none;
+            gap: 0.4rem;
+            background: transparent;
             border: none;
             color: var(--text-dark);
             cursor: pointer;
             transition: var(--transition);
-            padding: 1rem;
-            border-radius: var(--radius);
-            min-width: 80px;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            min-width: 70px;
         }
 
         .control-btn:hover {
-            background-color: rgba(56, 189, 248, 0.1);
             transform: translateY(-2px);
+            background: rgba(56, 189, 248, 0.05);
         }
 
         .control-btn.active {
-            background-color: rgba(56, 189, 248, 0.15);
             color: var(--primary);
         }
 
@@ -491,37 +466,44 @@
         }
 
         .control-btn.danger:hover {
-            background-color: rgba(239, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.05);
         }
 
         .control-icon {
-            font-size: 1.5rem;
-            width: 56px;
-            height: 56px;
+            font-size: 1.4rem;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: var(--background);
-            border-radius: 50%;
+            background: transparent;
+            border-radius: 12px;
+            border: 2px solid var(--border);
             transition: var(--transition);
         }
 
         .control-btn:hover .control-icon {
-            transform: scale(1.1);
+            border-color: var(--primary);
+            transform: scale(1.05);
         }
 
         .control-btn.active .control-icon {
             background-color: var(--primary);
             color: white;
+            border-color: var(--primary);
         }
 
         .control-btn.danger .control-icon {
+            border-color: var(--error);
+        }
+
+        .control-btn.danger:hover .control-icon {
             background-color: var(--error);
             color: white;
         }
 
         .control-label {
-            font-size: 0.875rem;
+            font-size: 0.8rem;
             font-weight: 500;
         }
 
@@ -529,31 +511,28 @@
            NOTES PANEL - DESKTOP (Slides from right)
            =============================== */
         .notes-panel {
-            position: fixed;
-            top: var(--header-height);
-            right: -400px;
-            width: 400px;
-            height: calc(100vh - var(--header-height));
+            width: 0;
+            overflow: hidden;
             background-color: var(--card-bg);
             border-left: 1px solid var(--border);
-            z-index: 90;
-            display: flex;
-            flex-direction: column;
             transition: var(--transition);
-            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            opacity: 0;
         }
 
         .notes-panel.active {
-            right: 0;
+            width: 400px;
+            opacity: 1;
+        }
+
+        .notes-content {
+            height: 100%;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
         }
 
         .notes-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--card-bg);
+            margin-bottom: 1.5rem;
         }
 
         .notes-header h3 {
@@ -561,39 +540,16 @@
             align-items: center;
             gap: 0.75rem;
             color: var(--text-dark);
+            font-size: 1.3rem;
         }
 
         .notes-header h3 i {
             color: var(--primary);
         }
 
-        .close-notes {
-            background: none;
-            border: none;
-            color: var(--text-medium);
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-
-        .close-notes:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
-
-        .notes-content {
-            flex: 1;
-            padding: 1.5rem;
-            overflow-y: auto;
-        }
-
         #notesText {
+            flex: 1;
             width: 100%;
-            height: 100%;
             min-height: 300px;
             padding: 1rem;
             border: 1px solid var(--border);
@@ -601,9 +557,10 @@
             background-color: var(--background);
             color: var(--text-dark);
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 0.95rem;
             resize: none;
             transition: var(--transition);
+            margin-bottom: 1rem;
         }
 
         #notesText:focus {
@@ -613,12 +570,9 @@
         }
 
         .notes-footer {
-            padding: 1.5rem;
-            border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: var(--card-bg);
         }
 
         .notes-actions {
@@ -626,9 +580,34 @@
             gap: 0.75rem;
         }
 
-        .notes-footer .btn {
-            padding: 0.5rem 1rem;
+        .notes-actions button {
+            padding: 0.6rem 1.2rem;
             font-size: 0.875rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        #clearNotes {
+            background: var(--background);
+            color: var(--text-dark);
+            border: 1px solid var(--border);
+        }
+
+        #clearNotes:hover {
+            background: var(--border);
+        }
+
+        #saveNotes {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        #saveNotes:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
         }
 
         .char-count {
@@ -662,54 +641,76 @@
                 display: none;
             }
 
-            /* Main wrapper for mobile */
-            .main-wrapper {
+            /* Main container for mobile */
+            .main-container {
                 flex-direction: column;
-                min-height: calc(100vh - var(--header-height) - var(--control-bar-height));
             }
 
-            /* Video container for mobile */
+            /* Video area for mobile */
+            .video-area {
+                height: calc(100vh - var(--header-height) - var(--control-bar-height));
+                padding: 3px;
+                /* Even less gap on mobile */
+            }
+
             .video-container {
-                margin: 0.5rem;
-                margin-bottom: calc(var(--control-bar-height) + 0.5rem);
+                margin-bottom: 3px;
+                /* Even less gap on mobile */
             }
 
             /* Local video PiP smaller for mobile */
             .local-video-pip {
-                width: 120px;
-                height: 90px;
-                bottom: 0.5rem;
-                right: 0.5rem;
+                width: 100px;
+                height: 75px;
+                bottom: 5px;
+                /* Reduced gap */
+                right: 5px;
+                /* Reduced gap */
             }
 
-            /* Control bar adjustments for mobile */
-            .controls-wrapper {
-                gap: 1rem;
-                padding: 0 0.5rem;
+            /* Status overlay smaller */
+            .call-status-overlay {
+                top: 5px;
+                /* Reduced gap */
+                left: 5px;
+                /* Reduced gap */
+                padding: 0.4rem 0.8rem;
             }
 
-            .control-btn {
-                min-width: 70px;
-                padding: 0.75rem 0.5rem;
-            }
-
-            .control-icon {
-                width: 48px;
-                height: 48px;
-                font-size: 1.25rem;
-            }
-
-            .control-label {
+            #callStatusText {
                 font-size: 0.8rem;
             }
 
+            /* Control bar adjustments */
+            .controls-bar {
+                padding: 0 0.5rem;
+            }
+
+            .controls-wrapper {
+                gap: 1rem;
+            }
+
+            .control-btn {
+                min-width: 60px;
+                padding: 0.6rem 0.5rem;
+            }
+
+            .control-icon {
+                width: 42px;
+                height: 42px;
+                font-size: 1.1rem;
+            }
+
+            .control-label {
+                font-size: 0.7rem;
+            }
+
             /* ===============================
-               NOTES PANEL - MOBILE (Slides from bottom)
+               NOTES PANEL - MOBILE (Hidden by default, slides from bottom)
                =============================== */
             .notes-panel {
                 position: fixed;
-                top: auto;
-                bottom: -50vh;
+                top: 100vh;
                 left: 0;
                 right: 0;
                 width: 100%;
@@ -718,29 +719,36 @@
                 border-top: 1px solid var(--border);
                 border-radius: var(--radius) var(--radius) 0 0;
                 z-index: 100;
+                opacity: 1;
+                transition: transform 0.3s ease;
             }
 
             .notes-panel.active {
-                bottom: var(--control-bar-height);
-                transform: translateY(0);
+                transform: translateY(-50vh);
+                width: 100%;
             }
 
-            /* When notes panel opens on mobile, local video should slide up */
-            .notes-panel.active~.video-container .local-video-pip {
+            /* When notes panel opens on mobile, move local video up */
+            .notes-panel.active~.video-area .local-video-pip {
                 transform: translateY(-25vh);
             }
 
             .notes-content {
                 padding: 1rem;
+                height: calc(50vh - 2rem);
             }
 
             #notesText {
                 min-height: 150px;
+                font-size: 0.9rem;
             }
 
-            .notes-header,
-            .notes-footer {
-                padding: 1rem;
+            .notes-header {
+                margin-bottom: 1rem;
+            }
+
+            .notes-header h3 {
+                font-size: 1.1rem;
             }
         }
 
@@ -751,11 +759,6 @@
             display: none !important;
         }
 
-        /* ===============================
-           FOOTER STYLES (Removed for video call page)
-           =============================== */
-        /* No footer on video call page */
-
         /* Remove all link underlines */
         a,
         a:hover,
@@ -765,33 +768,37 @@
             text-decoration: none !important;
         }
 
-        /* Responsive adjustments for smaller mobile screens */
+        /* Responsive adjustments for very small screens */
         @media (max-width: 480px) {
             .controls-wrapper {
                 gap: 0.5rem;
             }
 
             .control-btn {
-                min-width: 60px;
+                min-width: 55px;
                 padding: 0.5rem;
             }
 
             .control-icon {
-                width: 40px;
-                height: 40px;
+                width: 38px;
+                height: 38px;
                 font-size: 1rem;
             }
 
             .control-label {
-                font-size: 0.75rem;
+                font-size: 0.65rem;
             }
 
             .notes-panel {
-                height: 60vh;
+                height: 55vh;
             }
 
-            .notes-panel.active~.video-container .local-video-pip {
-                transform: translateY(-30vh);
+            .notes-panel.active {
+                transform: translateY(-55vh);
+            }
+
+            .notes-panel.active~.video-area .local-video-pip {
+                transform: translateY(-27.5vh);
             }
         }
     </style>
@@ -838,106 +845,106 @@
     </div>
 
     <!-- Main Content Area -->
-    <div class="main-wrapper">
-        <!-- Video Container -->
-        <div class="video-container">
-            <!-- Status Overlay -->
-            <div class="call-status-overlay" id="callStatusOverlay">
-                <div class="status-indicator">
-                    <div class="status-dot"></div>
-                    <div class="status-dot"></div>
+    <div class="main-container">
+        <!-- Video Area (Left side) -->
+        <div class="video-area">
+            <!-- Video Container -->
+            <div class="video-container">
+                <!-- Status Overlay -->
+                <div class="call-status-overlay" id="callStatusOverlay">
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <div class="status-dot"></div>
+                    </div>
+                    <span id="callStatusText">CALL STATUS: CONNECTING...</span>
                 </div>
-                <span id="callStatusText">CALL STATUS: CONNECTING...</span>
+
+                <!-- Remote Video Stream -->
+                <video id="remoteVideo" autoplay playsinline></video>
+
+                <!-- Local Video (Picture-in-Picture) -->
+                <div class="local-video-pip">
+                    <video id="localVideo" autoplay muted playsinline></video>
+                    <div class="local-video-label">
+                        <i class="fas fa-user-md"></i>
+                        <span>YOU</span>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div class="video-loading hidden" id="videoLoading">
+                    <div class="loading-spinner"></div>
+                    <p>Establishing connection...</p>
+                </div>
             </div>
 
-            <!-- Remote Video Stream -->
-            <video id="remoteVideo" autoplay playsinline></video>
+            <!-- Control Bar (Not fixed) -->
+            <div class="controls-bar">
+                <div class="controls-wrapper">
+                    <!-- Microphone Toggle -->
+                    <button class="control-btn active" id="toggleMic">
+                        <div class="control-icon">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <span class="control-label">Mute</span>
+                    </button>
 
-            <!-- Local Video (Picture-in-Picture) -->
-            <div class="local-video-pip">
-                <video id="localVideo" autoplay muted playsinline></video>
-                <div class="local-video-label">
-                    <i class="fas fa-user-md"></i>
-                    <span>YOU</span>
+                    <!-- Camera Toggle -->
+                    <button class="control-btn active" id="toggleCam">
+                        <div class="control-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <span class="control-label">Camera</span>
+                    </button>
+
+                    <!-- Notes Button -->
+                    <button class="control-btn" id="toggleNotes">
+                        <div class="control-icon">
+                            <i class="fas fa-notes-medical"></i>
+                        </div>
+                        <span class="control-label">Notes</span>
+                    </button>
+
+                    <!-- End Call -->
+                    <button class="control-btn danger" id="endCall">
+                        <div class="control-icon">
+                            <i class="fas fa-phone-slash"></i>
+                        </div>
+                        <span class="control-label">End</span>
+                    </button>
                 </div>
-            </div>
-
-            <!-- Loading State -->
-            <div class="video-loading hidden" id="videoLoading">
-                <div class="loading-spinner"></div>
-                <p>Establishing connection...</p>
             </div>
         </div>
 
-        <!-- Notes Panel -->
+        <!-- Notes Panel (Right side) -->
         <div class="notes-panel" id="notesPanel">
-            <div class="notes-header">
-                <h3>
-                    <i class="fas fa-notes-medical"></i>
-                    Consultation Notes
-                </h3>
-                <button class="close-notes" id="closeNotes">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
             <div class="notes-content">
+                <div class="notes-header">
+                    <h3>
+                        <i class="fas fa-notes-medical"></i>
+                        Consultation Notes
+                    </h3>
+                </div>
                 <textarea id="notesText" placeholder="Enter consultation notes here...
 • Symptoms observed
 • Preliminary diagnosis
 • Prescription details
 • Follow-up recommendations
 • Additional observations"></textarea>
+                <div class="notes-footer">
+                    <div class="notes-actions">
+                        <button id="clearNotes">
+                            <i class="fas fa-trash-alt"></i> Clear
+                        </button>
+                        <button id="saveNotes">
+                            <i class="fas fa-save"></i> Save Notes
+                        </button>
+                    </div>
+                    <div class="char-count">
+                        <span id="charCount">0</span> characters
+                    </div>
+                </div>
             </div>
-            <div class="notes-footer">
-                <div class="notes-actions">
-                    <button class="btn btn-outline" id="clearNotes">
-                        <i class="fas fa-trash-alt"></i> Clear
-                    </button>
-                    <button class="btn btn-primary" id="saveNotes">
-                        <i class="fas fa-save"></i> Save Notes
-                    </button>
-                </div>
-                <div class="char-count">
-                    <span id="charCount">0</span> characters
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Control Bar (Fixed at bottom) -->
-    <div class="controls-bar">
-        <div class="controls-wrapper">
-            <!-- Microphone Toggle -->
-            <button class="control-btn active" id="toggleMic">
-                <div class="control-icon">
-                    <i class="fas fa-microphone"></i>
-                </div>
-                <span class="control-label">Mute</span>
-            </button>
-
-            <!-- Camera Toggle -->
-            <button class="control-btn active" id="toggleCam">
-                <div class="control-icon">
-                    <i class="fas fa-video"></i>
-                </div>
-                <span class="control-label">Camera</span>
-            </button>
-
-            <!-- Notes Button -->
-            <button class="control-btn" id="toggleNotes">
-                <div class="control-icon">
-                    <i class="fas fa-notes-medical"></i>
-                </div>
-                <span class="control-label">Notes</span>
-            </button>
-
-            <!-- End Call -->
-            <button class="control-btn danger" id="endCall">
-                <div class="control-icon">
-                    <i class="fas fa-phone-slash"></i>
-                </div>
-                <span class="control-label">End</span>
-            </button>
         </div>
     </div>
 
@@ -961,7 +968,6 @@
         const charCount = document.getElementById('charCount');
         const notesPanel = document.getElementById('notesPanel');
         const toggleNotesBtn = document.getElementById('toggleNotes');
-        const closeNotesBtn = document.getElementById('closeNotes');
 
         // Video call state
         let localStream = null;
@@ -1042,21 +1048,23 @@
             // ===============================
             // NOTES PANEL FUNCTIONALITY
             // ===============================
+            // Notes panel is hidden by default on mobile
+            if (window.innerWidth <= 768) {
+                notesPanel.classList.remove('active');
+            }
+
             toggleNotesBtn.addEventListener('click', () => {
                 notesPanel.classList.toggle('active');
 
                 // Update button state
                 const isActive = notesPanel.classList.contains('active');
                 toggleNotesBtn.classList.toggle('active', isActive);
-                toggleNotesBtn.querySelector('.control-icon').style.backgroundColor = isActive ? 'var(--primary)' : 'var(--background)';
-                toggleNotesBtn.querySelector('.control-icon i').style.color = isActive ? 'white' : '';
-            });
 
-            closeNotesBtn.addEventListener('click', () => {
-                notesPanel.classList.remove('active');
-                toggleNotesBtn.classList.remove('active');
-                toggleNotesBtn.querySelector('.control-icon').style.backgroundColor = 'var(--background)';
-                toggleNotesBtn.querySelector('.control-icon i').style.color = '';
+                if (isActive) {
+                    toggleNotesBtn.querySelector('.control-icon').style.borderColor = 'var(--primary)';
+                } else {
+                    toggleNotesBtn.querySelector('.control-icon').style.borderColor = 'var(--border)';
+                }
             });
 
             // Character counter for notes
@@ -1257,6 +1265,13 @@
                     'fas fa-microphone-slash' :
                     'fas fa-microphone';
                 toggleMic.querySelector('.control-label').textContent = isAudioMuted ? 'Unmute' : 'Mute';
+
+                // Update icon border color based on active state
+                if (!isAudioMuted) {
+                    toggleMic.querySelector('.control-icon').style.borderColor = 'var(--primary)';
+                } else {
+                    toggleMic.querySelector('.control-icon').style.borderColor = 'var(--border)';
+                }
             }
         });
 
@@ -1272,6 +1287,13 @@
                     'fas fa-video-slash' :
                     'fas fa-video';
                 toggleCam.querySelector('.control-label').textContent = isVideoOff ? 'Camera On' : 'Camera Off';
+
+                // Update icon border color based on active state
+                if (!isVideoOff) {
+                    toggleCam.querySelector('.control-icon').style.borderColor = 'var(--primary)';
+                } else {
+                    toggleCam.querySelector('.control-icon').style.borderColor = 'var(--border)';
+                }
             }
         });
 
@@ -1370,6 +1392,16 @@
                 e.preventDefault();
                 e.returnValue = 'Are you sure you want to leave the call?';
                 return e.returnValue;
+            }
+        });
+
+        // Handle window resize to manage notes panel state
+        window.addEventListener('resize', function () {
+            if (window.innerWidth <= 768) {
+                // On mobile, ensure notes panel is hidden by default
+                notesPanel.classList.remove('active');
+                toggleNotesBtn.classList.remove('active');
+                toggleNotesBtn.querySelector('.control-icon').style.borderColor = 'var(--border)';
             }
         });
     </script>
