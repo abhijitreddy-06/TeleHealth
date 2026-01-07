@@ -1,3 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Doctor Video Call | TeleHealth</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+<style>
+    /* ===============================
+       BASE STYLES - COMPLETELY FIXED
+       =============================== */
+    :root {
+        /* Color Variables */
+        --primary: #38bdf8;
+        --primary-hover: #0ea5e9;
+        --secondary: #10b981;
+        --background: #f9fafb;
+        --dark-bg: #1e293b;
+        --card-bg: #ffffff;
+        --text-dark: #0f172a;
+        --text-light: #f1f5f9;
+        --text-medium: #475569;
+        --border: #e2e8f0;
+        --error: #ef4444;
+        --warning: #f59e0b;
+        --info: #60a5fa;
+        --disabled: #9ca3af;
+        --footer-bg: #1e293b;
+
+        /* Layout Variables - FIXED VALUES */
+        --header-height-desktop: 70px;
+        --header-height-mobile: 60px;
+        --controls-height-desktop: 70px;
+        --controls-height-mobile: 80px;
+        --notes-panel-width: 400px;
+
+        /* Animation Variables */
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --radius: 12px;
+    }
+
+    /* Dark Theme Variables */
+    [data-theme="dark"] {
+        --background: #1e293b;
+        --card-bg: #334155;
+        --text-dark: #f1f5f9;
+        --text-light: #0f172a;
+        --text-medium: #cbd5e1;
+        --border: #475569;
+        --footer-bg: #0f172a;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", "Inter", "Roboto", sans-serif;
+    }
+
+    body {
+        background-color: var(--background);
+        color: var(--text-dark);
+        transition: var(--transition);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        line-height: 1.6;
+        overflow: hidden;
+    }
+
+    /* ===============================
+       HEADER & NAVIGATION
+       =============================== */
+    header {
+        background-color: var(--card-bg);
+        box-shadow: var(--shadow);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        height: var(--header-height-desktop);
+    }
+
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.2rem 5%;
+        max-width: 1400px;
+        margin: 0 auto;
+        height: 100%;
+    }
+
+    .logo {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .logo i {
+        color: var(--secondary);
+        font-size: 1.5rem;
+    }
+
+    .logo-text {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 800;
+    }
+
+    .nav-links {
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .nav-links a {
+        color: var(--text-dark);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        padding: 0.5rem 0.8rem;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .nav-links a.active {
+        background-color: rgba(56, 189, 248, 0.1);
+        color: var(--primary);
+    }
+
+    .nav-links a:hover:not(.active) {
+        color: var(--primary);
+        background-color: rgba(56, 189, 248, 0.1);
+    }
+
+    .theme-toggle {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-dark);
+        font-size: 1.2rem;
+        padding: 0.5rem;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+    }
+
+    .theme-toggle:hover {
+        background-color: rgba(56, 189, 248, 0.1);
+    }
+
+    /* Mobile Menu */
+    .mobile-controls {
+        display: none;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .mobile-menu-btn {
+        display: none;
+        background: none;
+        border: none;
+        color: var(--text-dark);
+        font-size: 1.5rem;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobile-menu-btn:hover {
+        background-color: rgba(56, 189, 248, 0.1);
+    }
+
+    .mobile-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background-color: var(--card-bg);
+        z-index: 1000;
+        padding: 2rem;
+        transition: var(--transition);
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    .mobile-menu.active {
+        right: 0;
+    }
+
+    .close-menu {
+        align-self: flex-end;
+        background: none;
+        border: none;
+        color: var(--text-dark);
+        font-size: 1.5rem;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .close-menu:hover {
+        background-color: rgba(56, 189, 248, 0.1);
+    }
+
+    .mobile-menu a {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: var(--transition);
+    }
+
+    .mobile-menu a:hover,
+    .mobile-menu a.active {
+        background-color: rgba(56, 189, 248, 0.1);
+        color: var(--primary);
+    }
+
+    /* ===============================
+       MAIN VIDEO CALL LAYOUT - COMPLETELY FIXED
+       =============================== */
+    .video-call-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        width: 100%;
+        height: calc(100vh - var(--header-height-desktop));
+        transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+
+    /* FIXED: Notes panel now uses transform instead of margin */
+    .video-call-container.with-notes {
+        transform: translateX(calc(var(--notes-panel-width) * -1));
+        width: calc(100% + var(--notes-panel-width));
+    }
+
+    /* Status Overlay */
+    .call-status-overlay {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        z-index: 10;
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .status-indicator {
+        display: flex;
+        gap: 0.25rem;
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background-color: var(--secondary);
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    .status-dot:nth-child(2) {
+        animation-delay: 0.5s;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.5;
+            transform: scale(0.9);
+        }
+    }
+
+    #callStatusText {
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    /* Main Video Area - FIXED ZOOM ISSUE */
+    .video-main-area {
+        flex: 1;
+        position: relative;
+        overflow: hidden;
+        background: #000;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* FIXED: Remote video zoom issue */
+    #remoteVideo {
+        width: 100%;
+        height: 100%;
+        object-fit: contain !important;
+        background-color: #000;
+        display: block;
+    }
+
+    /* Local Video (PiP) - COMPLETELY FIXED POSITION */
+    .local-video-pip {
+        position: absolute;
+        bottom: 90px;
+        /* FIXED: Raised above controls */
+        right: 20px;
+        width: 220px;
+        height: 165px;
+        border-radius: var(--radius);
+        overflow: hidden;
+        border: 3px solid var(--primary);
+        box-shadow: var(--shadow);
+        background: #000;
+        z-index: 95;
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #localVideo {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .local-video-label {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0.5rem;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    /* FIXED: Local video position when notes panel opens */
+    .video-call-container.with-notes .local-video-pip {
+        transform: translateX(calc(var(--notes-panel-width) * -1)) scale(0.95);
+    }
+
+    /* Video Loading State */
+    .video-loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.9);
+        color: white;
+        z-index: 2;
+        backdrop-filter: blur(5px);
+    }
+
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* ===============================
+       DESKTOP CONTROLS - COMPLETELY FIXED POSITION
+       =============================== */
+    .desktop-controls {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: var(--controls-height-desktop);
+        background-color: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 90;
+        /* FIXED: Lower than local video */
+        padding: 0 5%;
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    [data-theme="dark"] .desktop-controls {
+        background-color: rgba(30, 41, 59, 0.95);
+    }
+
+    .controls-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        max-width: 600px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    /* CONTROL BUTTONS - FIXED */
+    .control-btn,
+    .mobile-control-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--card-bg);
+        border: 2px solid var(--border);
+        color: var(--text-medium);
+        cursor: pointer;
+        transition: var(--transition);
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    /* MODERN HOVER EFFECTS */
+    .control-btn:hover,
+    .mobile-control-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 8px 16px rgba(56, 189, 248, 0.15);
+        border-color: transparent;
+    }
+
+    .control-btn:active,
+    .mobile-control-btn:active {
+        transform: scale(0.98);
+    }
+
+    /* Active State */
+    .control-btn.active,
+    .mobile-control-btn.active {
+        color: var(--primary);
+        border-color: var(--primary);
+        background-color: rgba(56, 189, 248, 0.08);
+    }
+
+    .control-btn.active:hover,
+    .mobile-control-btn.active:hover {
+        box-shadow: 0 8px 16px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Inactive/Muted State */
+    .control-btn.inactive,
+    .mobile-control-btn.inactive {
+        color: var(--text-medium);
+        border-color: var(--border);
+        background-color: var(--card-bg);
+        opacity: 0.7;
+    }
+
+    .control-btn.inactive i::after,
+    .mobile-control-btn.inactive i::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 30px;
+        height: 2px;
+        background: var(--text-medium);
+        transform: translate(-50%, -50%) rotate(45deg);
+        border-radius: 1px;
+    }
+
+    /* Danger/End Call State */
+    .control-btn.danger,
+    .mobile-control-btn.danger {
+        color: var(--error);
+        border-color: var(--error);
+        background-color: rgba(239, 68, 68, 0.08);
+    }
+
+    .control-btn.danger:hover,
+    .mobile-control-btn.danger:hover {
+        box-shadow: 0 8px 16px rgba(239, 68, 68, 0.25);
+    }
+
+    /* Icon Styles */
+    .control-btn i,
+    .mobile-control-btn i {
+        font-size: 1.5rem;
+        transition: var(--transition);
+    }
+
+    .control-btn:hover i,
+    .mobile-control-btn:hover i {
+        transform: scale(1.1);
+    }
+
+    /* ===============================
+       DESKTOP NOTES PANEL (RIGHT SIDEBAR) - FIXED
+       =============================== */
+    .notes-panel {
+        position: fixed;
+        top: var(--header-height-desktop);
+        right: calc(var(--notes-panel-width) * -1);
+        bottom: 0;
+        width: var(--notes-panel-width);
+        background-color: var(--card-bg);
+        border-left: 1px solid var(--border);
+        z-index: 80;
+        transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .notes-panel.active {
+        right: 0;
+        box-shadow: -2px 0 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .notes-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: var(--card-bg);
+    }
+
+    .notes-header h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: var(--text-dark);
+        font-size: 1.1rem;
+    }
+
+    .notes-header h3 i {
+        color: var(--primary);
+    }
+
+    .close-notes {
+        background: none;
+        border: none;
+        color: var(--text-medium);
+        cursor: pointer;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: var(--transition);
+    }
+
+    .close-notes:hover {
+        background-color: rgba(0, 0, 0, 0.1);
+        transform: rotate(90deg);
+    }
+
+    .notes-content {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+        opacity: 1;
+        transition: opacity 0.1s;
+    }
+
+    #notesText {
+        width: 100%;
+        height: 100%;
+        min-height: 300px;
+        padding: 1rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background-color: var(--background);
+        color: var(--text-dark);
+        font-family: inherit;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        resize: none;
+    }
+
+    #notesText:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+    }
+
+    .notes-footer {
+        padding: 1.5rem;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: var(--card-bg);
+    }
+
+    .notes-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .notes-footer .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .btn-outline {
+        background: transparent;
+        border: 1px solid var(--primary);
+        color: var(--primary);
+    }
+
+    .btn-primary {
+        background-color: var(--primary);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: var(--primary-hover);
+    }
+
+    .char-count {
+        color: var(--text-medium);
+        font-size: 0.875rem;
+    }
+
+    /* ===============================
+       MOBILE VIEW - COMPLETELY FIXED
+       =============================== */
+    @media (max-width: 768px) {
+        :root {
+            --header-height-mobile: 60px;
+            --controls-height-mobile: 80px;
+        }
+
+        /* NAVBAR MOBILE */
+        header {
+            height: var(--header-height-mobile);
+        }
+
+        .navbar {
+            padding: 0.8rem 5%;
+        }
+
+        .logo-text {
+            display: none;
+        }
+
+        .nav-links {
+            display: none;
+        }
+
+        .mobile-controls {
+            display: flex;
+        }
+
+        .mobile-menu-btn {
+            display: flex;
+        }
+
+        /* FIXED: VIDEO CONTAINER MOBILE - Full height between header and controls */
+        .video-call-container {
+            position: fixed;
+            top: var(--header-height-mobile);
+            left: 0;
+            right: 0;
+            bottom: var(--controls-height-mobile);
+            height: calc(100vh - var(--header-height-mobile) - var(--controls-height-mobile));
+            padding: 0;
+            width: 100%;
+        }
+
+        .video-call-container.with-notes {
+            transform: none;
+            width: 100%;
+        }
+
+        /* FIXED: Video main area fills container */
+        .video-main-area {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* FIXED: Remote video fills container horizontally */
+        #remoteVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Changed to cover for mobile to fill screen */
+            background-color: #000;
+        }
+
+        /* HIDE DESKTOP ELEMENTS ON MOBILE */
+        .desktop-controls,
+        .notes-panel {
+            display: none !important;
+        }
+
+        /* MOBILE CONTROLS - FIXED AT BOTTOM */
+        .mobile-controls-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--controls-height-mobile);
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 0 5%;
+        }
+
+        [data-theme="dark"] .mobile-controls-bar {
+            background-color: rgba(30, 41, 59, 0.95);
+        }
+
+        .mobile-controls-wrapper {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            max-width: 500px;
+            padding: 0 1rem;
+        }
+
+        /* FIXED: LOCAL VIDEO PIP - MOBILE (Properly positioned) */
+        .local-video-pip {
+            position: fixed;
+            bottom: calc(var(--controls-height-mobile) + 20px);
+            right: 10px;
+            width: 120px;
+            height: 90px;
+            border-width: 2px;
+            z-index: 110;
+        }
+
+        /* STATUS OVERLAY MOBILE */
+        .call-status-overlay {
+            top: 0.5rem;
+            left: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            max-width: 200px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+        }
+
+        /* VIDEO LOADING MOBILE */
+        .video-loading {
+            font-size: 0.9rem;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+        }
+    }
+
+    /* ===============================
+       MOBILE NOTES PANEL (BOTTOM SLIDE-UP) - FIXED
+       =============================== */
+    .mobile-notes-panel {
+        position: fixed;
+        bottom: calc(var(--controls-height-mobile) * -1);
+        left: 0;
+        right: 0;
+        height: 50vh;
+        background-color: var(--card-bg);
+        border-top: 1px solid var(--border);
+        z-index: 120;
+        transition: bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mobile-notes-panel.active {
+        bottom: var(--controls-height-mobile);
+    }
+
+    .mobile-notes-panel .notes-content {
+        flex: 1;
+        padding: 1rem;
+        overflow-y: auto;
+    }
+
+    #mobileNotesText {
+        width: 100%;
+        height: 100%;
+        min-height: 200px;
+        padding: 1rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background-color: var(--background);
+        color: var(--text-dark);
+        font-family: inherit;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        resize: none;
+    }
+
+    /* FIXED: Local video moves up when notes panel opens on mobile */
+    body.mobile-notes-open .local-video-pip {
+        bottom: calc(50vh + var(--controls-height-mobile) + 20px);
+        transition: bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Hide desktop notes panel on mobile */
+    @media (min-width: 769px) {
+
+        .mobile-notes-panel,
+        .mobile-controls-bar {
+            display: none !important;
+        }
+    }
+
+    /* Hide mobile elements on desktop */
+    @media (max-width: 768px) {
+
+        .desktop-controls,
+        .notes-panel {
+            display: none !important;
+        }
+    }
+
+    /* ===============================
+       NEW UI COMPONENTS FOR FIXES
+       =============================== */
+    /* Connection Quality Indicator */
+    .connection-quality {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius);
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        z-index: 10;
+        backdrop-filter: blur(4px);
+    }
+
+    .connection-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10b981;
+    }
+
+    .connection-dot.poor {
+        background: #ef4444;
+    }
+
+    .connection-dot.fair {
+        background: #f59e0b;
+    }
+
+    .connection-dot.good {
+        background: #10b981;
+    }
+
+    /* Echo Warning */
+    .echo-warning {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+        padding: 1.5rem;
+        border-radius: var(--radius);
+        z-index: 1000;
+        display: none;
+        text-align: center;
+        max-width: 300px;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .echo-warning button {
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        background: white;
+        color: #ef4444;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .echo-warning button:hover {
+        background: #f8f8f8;
+        transform: scale(1.05);
+    }
+
+    /* Audio Activity Indicator */
+    .audio-indicator {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(16, 185, 129, 0.3);
+        height: 3px;
+        transform-origin: bottom;
+        display: none;
+        z-index: 96;
+    }
+
+    .audio-active {
+        display: block;
+        animation: audioPulse 0.5s infinite alternate;
+    }
+
+    @keyframes audioPulse {
+        from {
+            height: 3px;
+        }
+
+        to {
+            height: 10px;
+        }
+    }
+
+    /* Refresh Button Animation */
+    .refreshing {
+        animation: rotate 1s linear infinite;
+    }
+
+    @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Toast Notifications */
+    .toast-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 12px 20px;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 1000;
+        box-shadow: var(--shadow);
+        animation: slideIn 0.3s ease;
+        max-width: 300px;
+    }
+
+    .toast-notification.toast-error {
+        background: #ef4444;
+    }
+
+    .toast-notification.toast-warning {
+        background: #f59e0b;
+    }
+
+    .toast-notification.toast-info {
+        background: #3b82f6;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+
+    /* Video Fit Controls */
+    .video-fit-controls {
+        position: absolute;
+        bottom: 100px;
+        left: 20px;
+        display: flex;
+        gap: 0.5rem;
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 0.5rem;
+        border-radius: var(--radius);
+        backdrop-filter: blur(4px);
+    }
+
+    .fit-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+
+    .fit-btn.active {
+        background: var(--primary);
+    }
+
+    .fit-btn:hover:not(.active) {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* ===============================
+       UTILITY CLASSES
+       =============================== */
+    .hidden {
+        display: none !important;
+    }
+
+    /* Remove all footer styles */
+    .simple-footer,
+    footer {
+        display: none !important;
+    }
+
+    a,
+    a:hover,
+    a:focus,
+    a:active,
+    a:visited {
+        text-decoration: none !important;
+    }
+</style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="/doc_home" class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span class="logo-text">TeleHealth</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="/doc_home"><i class="fas fa-home"></i> Home</a>
+                <a href="/doc_video_dashboard" class="active"><i class="fas fa-video"></i>Video</a>
+                <a href="/doc_profile"><i class="fas fa-user-circle"></i> Profile</a>
+                <button class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+
+            <div class="mobile-controls">
+                <button class="theme-toggle" id="mobileThemeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="close-menu" id="closeMenu">
+            <i class="fas fa-times"></i>
+        </button>
+        <a href="/doc_home"><i class="fas fa-home"></i> Home</a>
+        <a href="/doc_video_dashboard" class="active"><i class="fas fa-video"></i>Video</a>
+        <a href="/doc_profile"><i class="fas fa-user-circle"></i> Profile</a>
+    </div>
+
+    <div class="notes-panel" id="notesPanel" aria-hidden="true">
+        <div class="notes-header">
+            <h3>
+                <i class="fas fa-notes-medical"></i>
+                Consultation Notes
+            </h3>
+            <button class="close-notes" id="closeNotes">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notes-content">
+            <textarea id="notesText" placeholder="Enter consultation notes here...
+• Symptoms observed
+• Preliminary diagnosis
+• Prescription details
+• Follow-up recommendations
+• Additional observations"></textarea>
+        </div>
+        <div class="notes-footer">
+            <div class="notes-actions">
+                <button class="btn btn-outline" id="clearNotes">
+                    <i class="fas fa-trash-alt"></i> Clear
+                </button>
+                <button class="btn btn-primary" id="saveNotes">
+                    <i class="fas fa-save"></i> Save Notes
+                </button>
+            </div>
+            <div class="char-count">
+                <span id="charCount">0</span> characters
+            </div>
+        </div>
+    </div>
+
+    <main class="video-call-container" id="videoCallContainer">
+        <div class="call-status-overlay" id="callStatusOverlay">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <div class="status-dot"></div>
+            </div>
+            <span id="callStatusText">CALL STATUS: CONNECTING...</span>
+        </div>
+
+        <!-- Video Fit Controls -->
+        <div class="video-fit-controls">
+            <button class="fit-btn active" id="fitContain">Fit</button>
+            <button class="fit-btn" id="fitCover">Fill</button>
+        </div>
+
+        <div class="video-main-area">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <div class="audio-indicator" id="audioIndicator"></div>
+
+            <div class="local-video-pip" id="localPip">
+                <video id="localVideo" autoplay muted playsinline></video>
+                <div class="local-video-label">
+                    <i class="fas fa-user-md"></i>
+                    <span>YOU</span>
+                </div>
+            </div>
+
+            <div class="video-loading hidden" id="videoLoading">
+                <div class="loading-spinner"></div>
+                <p>Establishing connection...</p>
+            </div>
+        </div>
+
+        <div class="desktop-controls">
+            <div class="controls-wrapper">
+                <button class="control-btn active" id="toggleMic" title="Mute/Unmute">
+                    <i class="fas fa-microphone"></i>
+                </button>
+
+                <button class="control-btn active" id="toggleCam" title="Camera On/Off">
+                    <i class="fas fa-video"></i>
+                </button>
+
+                <button class="control-btn" id="toggleAudioDevice" title="Switch Audio">
+                    <i class="fas fa-headset"></i>
+                </button>
+
+                <button class="control-btn" id="toggleNotes" title="Show Notes">
+                    <i class="fas fa-notes-medical"></i>
+                </button>
+
+                <button class="control-btn" id="refreshCall" title="Refresh Connection">
+                    <i class="fas fa-redo"></i>
+                </button>
+
+                <button class="control-btn danger" id="endCall" title="End Call">
+                    <i class="fas fa-phone-slash"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="mobile-controls-bar">
+            <div class="mobile-controls-wrapper">
+                <button class="mobile-control-btn active" id="mobileToggleMic" title="Mute/Unmute">
+                    <i class="fas fa-microphone"></i>
+                </button>
+
+                <button class="mobile-control-btn active" id="mobileToggleCam" title="Camera On/Off">
+                    <i class="fas fa-video"></i>
+                </button>
+
+                <button class="mobile-control-btn" id="mobileToggleNotes" title="Show Notes">
+                    <i class="fas fa-notes-medical"></i>
+                </button>
+
+                <button class="mobile-control-btn" id="mobileRefreshCall" title="Refresh">
+                    <i class="fas fa-redo"></i>
+                </button>
+
+                <button class="mobile-control-btn danger" id="mobileEndCall" title="End Call">
+                    <i class="fas fa-phone-slash"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div class="mobile-notes-panel" id="mobileNotesPanel">
+        <div class="notes-header">
+            <h3>
+                <i class="fas fa-notes-medical"></i>
+                Consultation Notes
+            </h3>
+            <button class="close-notes" id="mobileCloseNotes">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="notes-content">
+            <textarea id="mobileNotesText" placeholder="Enter consultation notes here...
+• Symptoms observed
+• Preliminary diagnosis
+• Prescription details
+• Follow-up recommendations
+• Additional observations"></textarea>
+        </div>
+        <div class="notes-footer">
+            <div class="notes-actions">
+                <button class="btn btn-outline" id="mobileClearNotes">
+                    <i class="fas fa-trash-alt"></i> Clear
+                </button>
+                <button class="btn btn-primary" id="mobileSaveNotes">
+                    <i class="fas fa-save"></i> Save
+                </button>
+            </div>
+            <div class="char-count">
+                <span id="mobileCharCount">0</span> characters
+            </div>
+        </div>
+    </div>
+
+    <!-- Echo Warning Modal -->
+    <div class="echo-warning" id="echoWarning">
+        <i class="fas fa-volume-up" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+        <p><strong>Echo Detected!</strong><br>Please use headphones or reduce speaker volume for better audio quality.
+        </p>
+        <button onclick="document.getElementById('echoWarning').style.display='none'">Got it</button>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
 <script>
     // ===============================
     // COMPLETE VIDEO CALL SOLUTION - ALL ISSUES FIXED
@@ -1586,3 +2898,6 @@
         }, 10000);
     })();
 </script>
+</body>
+
+</html>
