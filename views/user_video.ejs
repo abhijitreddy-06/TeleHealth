@@ -31,6 +31,10 @@
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 12px;
+
+            /* Height variables - SAME AS DOCTOR PAGE */
+            --header-height: 80px;
+            --control-bar-height: 80px;
         }
 
         /* Light Theme Variables */
@@ -56,20 +60,21 @@
             color: var(--text-dark);
             transition: var(--transition);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
             line-height: 1.6;
             overflow: hidden;
+            /* Prevent body scrolling */
         }
 
-        /* Header */
+        /* ===============================
+           HEADER - MODIFIED FOR NEW LAYOUT
+           =============================== */
         header {
             background-color: var(--card-bg);
             box-shadow: var(--shadow);
             position: sticky;
             top: 0;
             z-index: 100;
-            height: 70px;
+            height: var(--header-height);
             border-bottom: 1px solid var(--border);
         }
 
@@ -84,13 +89,17 @@
         }
 
         .logo {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            /* Increased from 1.5rem */
             font-weight: 700;
             color: var(--primary);
             display: flex;
             align-items: center;
             gap: 0.5rem;
             text-decoration: none;
+            font-family: "Poppins", sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .logo i {
@@ -164,44 +173,68 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* Main Video Container */
-        .video-container {
-            position: relative;
-            height: calc(100vh - 70px);
-            background: #020617;
+        /* ===============================
+           MAIN LAYOUT CONTAINER - SAME AS DOCTOR PAGE
+           =============================== */
+        .main-container {
             display: flex;
+            height: calc(100vh - var(--header-height));
+            width: 100vw;
             overflow: hidden;
+            transition: var(--transition);
+        }
+
+        /* ===============================
+           VIDEO AREA (Left side) - SAME AS DOCTOR PAGE
+           =============================== */
+        .video-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            padding: 4px;
+            min-width: 0;
+        }
+
+        /* Video Container */
+        .video-container {
+            flex: 1;
+            background-color: #020617;
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--border);
+            margin-bottom: 4px;
+            min-height: 0;
         }
 
         [data-theme="light"] .video-container {
             background: #1e293b;
         }
 
-        /* Remote Video (Doctor) */
+        /* Remote Video */
         #remoteVideo {
-            flex: 1;
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
             background: #020617;
+            display: block;
         }
 
         [data-theme="light"] #remoteVideo {
             background: #1e293b;
         }
 
-        /* Local Video (User) - Desktop (Made smaller) */
+        /* Local Video (PiP) - NEW POSITIONING */
         #localVideo {
             position: absolute;
-            bottom: 120px;
-            right: 20px;
-            width: 220px;
-            /* Reduced from 280px */
-            height: 165px;
-            /* Reduced from 210px */
+            bottom: 8px;
+            right: 8px;
+            width: 160px;
+            height: 120px;
             border: 3px solid var(--primary);
             border-radius: var(--radius);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            box-shadow: var(--shadow);
             background: #000;
             z-index: 10;
             transition: var(--transition);
@@ -215,16 +248,16 @@
 
         .local-video-label {
             position: absolute;
-            bottom: 100px;
-            right: 20px;
+            bottom: 0;
+            right: 8px;
             background: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
+            padding: 0.3rem;
+            font-size: 0.8rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.3rem;
+            justify-content: center;
             z-index: 11;
             backdrop-filter: blur(10px);
         }
@@ -233,92 +266,19 @@
             color: var(--primary);
         }
 
-        /* Controls Bar - Desktop (Made smaller) */
-        .controls-bar {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 90px;
-            /* Reduced from 100px */
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0));
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1.5rem;
-            /* Reduced from 2rem */
-            z-index: 50;
-        }
-
-        [data-theme="light"] .controls-bar {
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0));
-        }
-
-        .control-btn {
-            width: 52px;
-            /* Reduced from 60px */
-            height: 52px;
-            /* Reduced from 60px */
-            border-radius: 50%;
-            background: rgba(30, 41, 59, 0.9);
-            color: white;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            /* Reduced from 1.4rem */
-            transition: var(--transition);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .control-btn:hover {
-            transform: translateY(-2px);
-            background: rgba(30, 41, 59, 1);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-        }
-
-        .control-btn.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .control-label {
-            position: absolute;
-            bottom: -22px;
-            color: white;
-            font-size: 0.8rem;
-            opacity: 0.9;
-            white-space: nowrap;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-        }
-
-        [data-theme="light"] .control-label {
-            color: white;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
-        }
-
-        .control-group {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
         /* Connection Status */
         .connection-status {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 8px;
+            left: 8px;
             background: rgba(15, 23, 42, 0.9);
-            padding: 0.75rem 1.25rem;
+            padding: 0.5rem 0.8rem;
             border-radius: var(--radius);
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
             color: var(--text-dark);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             backdrop-filter: blur(10px);
             border: 1px solid var(--border);
             z-index: 20;
@@ -330,40 +290,40 @@
         }
 
         .status-indicator {
-            width: 10px;
-            height: 10px;
+            width: 6px;
+            height: 6px;
+            background-color: var(--secondary);
             border-radius: 50%;
-            background: var(--secondary);
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-            0% {
+
+            0%,
+            100% {
                 opacity: 1;
+                transform: scale(1);
             }
 
             50% {
                 opacity: 0.5;
-            }
-
-            100% {
-                opacity: 1;
+                transform: scale(0.9);
             }
         }
 
         /* Doctor Info Overlay */
         .doctor-info-overlay {
             position: absolute;
-            top: 20px;
-            right: 20px;
+            top: 8px;
+            right: 8px;
             background: rgba(15, 23, 42, 0.9);
-            padding: 0.75rem 1.25rem;
+            padding: 0.5rem 0.8rem;
             border-radius: var(--radius);
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.5rem;
             color: var(--text-dark);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             backdrop-filter: blur(10px);
             border: 1px solid var(--border);
             z-index: 20;
@@ -375,8 +335,8 @@
         }
 
         .doctor-avatar {
-            width: 36px;
-            height: 36px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             display: flex;
@@ -384,6 +344,7 @@
             justify-content: center;
             color: white;
             font-weight: 600;
+            font-size: 0.9rem;
         }
 
         /* Loading Overlay */
@@ -403,20 +364,14 @@
             background: rgba(15, 23, 42, 0.95);
         }
 
-        .loading-content {
-            text-align: center;
-            max-width: 500px;
-            padding: 2rem;
-        }
-
         .loading-spinner {
-            width: 80px;
-            height: 80px;
-            border: 5px solid rgba(56, 189, 248, 0.3);
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
             border-top-color: var(--primary);
             border-radius: 50%;
-            animation: spin 1.5s linear infinite;
-            margin: 0 auto 2rem;
+            animation: spin 1s linear infinite;
+            margin-bottom: 0.8rem;
         }
 
         @keyframes spin {
@@ -425,85 +380,97 @@
             }
         }
 
-        .loading-overlay h2 {
-            font-size: 2rem;
-            color: var(--text-dark);
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .loading-overlay p {
-            color: var(--text-medium);
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .loading-details {
-            background: rgba(56, 189, 248, 0.1);
-            border-radius: var(--radius);
-            padding: 1rem;
-            margin-top: 1.5rem;
-            border: 1px solid var(--border);
-        }
-
-        .loading-details h4 {
-            color: var(--text-dark);
-            margin-bottom: 0.5rem;
+        /* ===============================
+           CONTROL BAR - SAME MODERN STYLE AS DOCTOR PAGE
+           =============================== */
+        .controls-bar {
+            height: var(--control-bar-height);
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            padding: 0 0.5rem;
+            transition: var(--transition);
+            min-height: var(--control-bar-height);
         }
 
-        .loading-details ul {
-            list-style: none;
-            padding-left: 1.5rem;
+        .controls-wrapper {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
         }
 
-        .loading-details li {
-            color: var(--text-medium);
-            margin-bottom: 0.5rem;
-            position: relative;
+        /* MODERN CONTROL BUTTONS - SAME AS DOCTOR PAGE */
+        .control-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+            background: transparent;
+            border: none;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 0.6rem 0.8rem;
+            border-radius: 10px;
+            min-width: 60px;
         }
 
-        .loading-details li:before {
-            content: "•";
+        .control-btn:hover {
+            transform: translateY(-1px);
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        .control-btn.active {
             color: var(--primary);
-            font-weight: bold;
-            position: absolute;
-            left: -1rem;
         }
 
-        /* Permission Prompt */
-        .permission-prompt {
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            padding: 2rem;
-            margin-top: 2rem;
-            border: 1px solid var(--border);
-            text-align: left;
+        .control-btn.danger {
+            color: var(--error);
         }
 
-        .permission-prompt h3 {
-            color: var(--text-dark);
-            margin-bottom: 1rem;
+        .control-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .control-icon {
+            font-size: 1.3rem;
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            justify-content: center;
+            background: transparent;
+            border-radius: 10px;
+            border: 1.5px solid var(--border);
+            transition: var(--transition);
         }
 
-        .permission-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.75rem;
-            color: var(--text-medium);
+        .control-btn:hover .control-icon {
+            border-color: var(--primary);
         }
 
-        .permission-item i {
-            color: var(--secondary);
+        .control-btn.active .control-icon {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .control-btn.danger .control-icon {
+            border-color: var(--error);
+        }
+
+        .control-btn.danger:hover .control-icon {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .control-label {
+            font-size: 0.75rem;
+            font-weight: 500;
         }
 
         /* Call Ended Overlay */
@@ -521,7 +488,7 @@
         .call-ended-content {
             text-align: center;
             background: var(--card-bg);
-            padding: 3rem;
+            padding: 2rem;
             border-radius: var(--radius);
             border: 2px solid var(--border);
             max-width: 500px;
@@ -529,7 +496,7 @@
         }
 
         .call-ended-icon {
-            font-size: 4rem;
+            font-size: 3rem;
             color: var(--secondary);
             margin-bottom: 1.5rem;
         }
@@ -537,22 +504,22 @@
         .call-ended-content h2 {
             color: var(--text-dark);
             margin-bottom: 1rem;
-            font-size: 2rem;
+            font-size: 1.8rem;
         }
 
         .call-ended-content p {
             color: var(--text-medium);
             margin-bottom: 2rem;
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
 
         .prescription-download-btn {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             border: none;
-            padding: 1rem 2rem;
+            padding: 0.8rem 1.5rem;
             border-radius: 8px;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
             display: flex;
@@ -576,82 +543,35 @@
             display: flex;
         }
 
-        .text-center {
-            text-align: center;
-        }
-
-        .text-dark {
-            color: var(--text-dark) !important;
-        }
-
-        .text-medium {
-            color: var(--text-medium) !important;
-        }
-
-        /* Light Mode Text Fixes */
-        [data-theme="light"] .doctor-info,
-        [data-theme="light"] .connection-status span,
-        [data-theme="light"] .doctor-info-overlay div,
-        [data-theme="light"] .loading-overlay p,
-        [data-theme="light"] .loading-details h4,
-        [data-theme="light"] .permission-prompt h3 {
-            color: var(--text-dark);
-        }
-
-        [data-theme="light"] .loading-details li,
-        [data-theme="light"] .permission-item {
-            color: var(--text-medium);
-        }
-
-        /* ============= MOBILE VIEW ============= */
+        /* ===============================
+           MOBILE VIEW - INCREASED FONT SIZES
+           =============================== */
         @media (max-width: 768px) {
-            .video-container {
-                flex-direction: column;
+            :root {
+                --header-height: 75px;
+                --control-bar-height: 75px;
             }
 
-            /* Local Video - Mobile (Fixed to avoid controls overlap) */
-            #localVideo {
-                position: absolute;
-                bottom: 100px;
-                /* Positioned above controls */
-                right: 10px;
-                width: 150px;
-                height: 113px;
-                border-width: 2px;
+            /* INCREASED MOBILE FONT SIZES */
+            body {
+                font-size: 16px;
             }
 
-            .local-video-label {
-                right: 10px;
-                bottom: 80px;
-                font-size: 0.8rem;
-                padding: 0.4rem 0.8rem;
+            /* Header adjustments */
+            .navbar {
+                padding: 1rem;
             }
 
-            /* Controls Bar - Mobile (Fixed position) */
-            .controls-bar {
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0));
-                padding: 12px;
-                gap: 16px;
-                border-radius: 0;
-                margin-top: 0;
-                z-index: 100;
-                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-                height: 80px;
+            .logo {
+                font-size: 1.6rem;
             }
 
-            .control-btn {
-                width: 50px;
-                height: 50px;
-                font-size: 18px;
+            .logo i {
+                font-size: 1.4rem;
             }
 
-            .control-label {
-                font-size: 10px;
-                bottom: -20px;
+            .logo-text {
+                display: none;
             }
 
             .call-info {
@@ -660,315 +580,219 @@
                 align-items: flex-start;
             }
 
+            .doctor-info {
+                font-size: 0.9rem;
+            }
+
             .timer-container {
                 font-size: 0.9rem;
                 padding: 0.4rem 1rem;
             }
 
-            .loading-content {
-                padding: 1.5rem;
+            /* Main container for mobile */
+            .main-container {
+                flex-direction: column;
+                height: calc(100vh - var(--header-height));
             }
 
-            .loading-overlay h2 {
-                font-size: 1.5rem;
+            /* Video area for mobile */
+            .video-area {
+                height: calc(100vh - var(--header-height) - var(--control-bar-height));
+                padding: 3px;
+                width: 100%;
+                overflow: hidden;
             }
 
-            .doctor-info-overlay {
-                right: 10px;
-                top: 10px;
-            }
-        }
-
-        /* Extra Small Mobile */
-        @media (max-width: 480px) {
-            .navbar {
-                padding: 0 1rem;
+            .video-container {
+                margin-bottom: 3px;
+                flex: 1;
+                min-height: 0;
             }
 
-            .logo {
-                font-size: 1.2rem;
+            /* Remote video fix for mobile */
+            #remoteVideo {
+                object-fit: cover;
             }
 
-            .logo i {
-                font-size: 1.2rem;
+            /* Local video PiP larger for mobile */
+            #localVideo {
+                width: 120px;
+                height: 90px;
+                bottom: 6px;
+                right: 6px;
+            }
+
+            .local-video-label {
+                right: 6px;
+                bottom: 0;
+                font-size: 0.75rem;
+                padding: 0.2rem 0.5rem;
+            }
+
+            /* Status overlay larger */
+            .connection-status {
+                top: 6px;
+                left: 6px;
+                padding: 0.4rem 0.8rem;
+            }
+
+            .status-indicator {
+                width: 6px;
+                height: 6px;
             }
 
             .doctor-info-overlay {
                 display: none;
             }
 
-            #localVideo {
-                width: 130px;
-                height: 98px;
-                bottom: 90px;
-                right: 8px;
-            }
-
-            .local-video-label {
-                right: 8px;
-                bottom: 70px;
-                font-size: 0.75rem;
-                padding: 0.3rem 0.6rem;
-            }
-
+            /* INCREASED CONTROL BAR SIZES */
             .controls-bar {
-                gap: 12px;
+                padding: 0 0.8rem;
+                height: var(--control-bar-height);
+                min-height: var(--control-bar-height);
+            }
+
+            .controls-wrapper {
+                gap: 1.2rem;
+                width: 100%;
+                justify-content: center;
             }
 
             .control-btn {
-                width: 46px;
-                height: 46px;
-                font-size: 16px;
+                min-width: 70px;
+                padding: 0.7rem 0.5rem;
+            }
+
+            .control-icon {
+                width: 56px;
+                height: 56px;
+                font-size: 1.4rem;
+                border-width: 2px;
             }
 
             .control-label {
-                font-size: 9px;
-                bottom: -18px;
+                font-size: 0.85rem;
+                font-weight: 600;
             }
 
-            .loading-overlay {
-                padding: 1rem;
+            /* Call ended overlay adjustments */
+            .call-ended-content {
+                padding: 1.5rem;
+                margin: 1rem;
             }
 
-            .loading-overlay h2 {
+            .call-ended-icon {
+                font-size: 2.5rem;
+            }
+
+            .call-ended-content h2 {
+                font-size: 1.5rem;
+            }
+
+            .call-ended-content p {
+                font-size: 0.95rem;
+            }
+        }
+
+        /* ===============================
+           UTILITY CLASSES
+           =============================== */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Remove all link underlines */
+        a,
+        a:hover,
+        a:focus,
+        a:active,
+        a:visited {
+            text-decoration: none !important;
+        }
+
+        /* Responsive adjustments for very small screens */
+        @media (max-width: 480px) {
+            :root {
+                --header-height: 70px;
+                --control-bar-height: 70px;
+            }
+
+            .navbar {
+                padding: 0.8rem;
+            }
+
+            .logo {
+                font-size: 1.5rem;
+            }
+
+            .logo i {
                 font-size: 1.3rem;
             }
 
-            .loading-spinner {
-                width: 60px;
-                height: 60px;
-            }
-        }
-
-        /* Small Landscape Mobile */
-        @media (max-width: 768px) and (orientation: landscape) {
-            #localVideo {
-                width: 120px;
-                height: 90px;
-                bottom: 20px;
-                right: 20px;
+            .call-info {
+                gap: 0.3rem;
             }
 
-            .local-video-label {
-                right: 20px;
-                bottom: 0px;
+            .doctor-info {
+                font-size: 0.85rem;
             }
 
-            .controls-bar {
-                height: 70px;
+            .timer-container {
+                font-size: 0.85rem;
+                padding: 0.3rem 0.8rem;
             }
-        }
 
-        /* Desktop Optimizations */
-        @media (min-width: 1200px) {
-            .controls-bar {
-                gap: 24px;
+            .controls-wrapper {
+                gap: 0.8rem;
             }
 
             .control-btn {
-                width: 56px;
-                height: 56px;
+                min-width: 65px;
+                padding: 0.6rem 0.4rem;
+            }
+
+            .control-icon {
+                width: 52px;
+                height: 52px;
                 font-size: 1.3rem;
             }
 
+            .control-label {
+                font-size: 0.8rem;
+            }
+
             #localVideo {
-                width: 240px;
-                height: 180px;
-                bottom: 20px;
-                right: 20px;
+                width: 110px;
+                height: 82px;
+                bottom: 5px;
+                right: 5px;
+            }
+
+            .local-video-label {
+                right: 5px;
+                font-size: 0.7rem;
+                padding: 0.2rem 0.4rem;
             }
         }
-        /* =========================================================
-   ✅ MOBILE PiP FIX — SAME BEHAVIOR AS FIRST CODE
-   ========================================================= */
-@media (max-width: 768px) {
 
-    /* Local video always above controls */
-    #localVideo {
-        position: fixed;          /* 🔑 KEY FIX */
-        right: 10px;
-        bottom: 96px;             /* controls height + gap */
-        width: 150px;
-        height: 113px;
-        border-width: 2px;
-        z-index: 150;
-        pointer-events: auto;
-        object-fit: cover;
-    }
+        /* Small height devices */
+        @media (max-height: 700px) and (max-width: 768px) {
+            #localVideo {
+                width: 100px;
+                height: 75px;
+            }
 
-    /* Local video label follows PiP */
-    .local-video-label {
-        position: fixed;
-        right: 10px;
-        bottom: 76px;
-        z-index: 151;
-        font-size: 0.8rem;
-        padding: 0.4rem 0.8rem;
-        pointer-events: none;
-    }
+            .local-video-label {
+                font-size: 0.7rem;
+            }
 
-    /* Controls stay below PiP */
-    .controls-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        height: 80px;
-        z-index: 100;
-        touch-action: manipulation;
-    }
-}
-
-/* Extra small devices */
-@media (max-width: 480px) {
-    #localVideo {
-        width: 130px;
-        height: 98px;
-        bottom: 92px;
-        right: 8px;
-    }
-
-    .local-video-label {
-        bottom: 72px;
-        right: 8px;
-        font-size: 0.75rem;
-    }
-}
-
-/* Landscape mobile */
-@media (max-width: 768px) and (orientation: landscape) {
-    #localVideo {
-        width: 120px;
-        height: 90px;
-        bottom: 80px;
-        right: 12px;
-    }
-
-    .local-video-label {
-        bottom: 60px;
-        right: 12px;
-    }
-}
-
-    /* ===============================
-   STRICT SIMPLE FOOTER OVERRIDE
-   =============================== */
-
-.simple-footer {
-    all: unset;
-    display: block;
-    background-color: var(--card-bg);
-    border-top: 1px solid var(--border);
-    padding: 0.6rem 5%;          /* compact height */
-    margin-top: auto;
-}
-
-/* GRID LAYOUT – DESKTOP SAFE */
-.simple-footer .footer-content {
-    all: unset;
-    max-width: 1400px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-}
-
-/* LEFT */
-.simple-footer .footer-left {
-    display: flex;
-    align-items: center;
-}
-
-.simple-footer .footer-logo {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--primary);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.simple-footer .footer-logo i {
-    color: var(--secondary);
-    font-size: 1.2rem;
-}
-
-/* CENTER TEXT */
-.simple-footer .footer-center {
-    text-align: center;
-}
-
-.simple-footer .copyright {
-    color: var(--text-dark);
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-.simple-footer .footer-name {
-    color: var(--text-dark);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.simple-footer .footer-name:hover {
-    text-decoration: underline;
-}
-
-/* RIGHT ICONS */
-.simple-footer .footer-right {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-}
-
-.simple-footer .footer-socials a {
-    color: var(--text-dark);
-    font-size: 1.4rem; /* BIG icons */
-    text-decoration: none;
-}
-
-.simple-footer .footer-socials a:hover {
-    opacity: 0.7;
-}
-
-/* ===============================
-   MOBILE – SMALLER HEIGHT
-   =============================== */
-@media (max-width: 768px) {
-    .simple-footer {
-        padding: 0.5rem 5%;     /* reduced height */
-    }
-
-    .simple-footer .footer-content {
-        display: flex;
-        flex-direction: column;
-        gap: 0.3rem;
-    }
-
-    .simple-footer .footer-center {
-        text-align: center;
-    }
-
-    .simple-footer .footer-right {
-        justify-content: center;
-    }
-
-    .simple-footer .copyright {
-        font-size: 0.8rem;
-    }
-
-    .simple-footer .footer-socials a {
-        font-size: 1.3rem;
-    }
-}
-a,
-a:hover,
-a:focus,
-a:active,
-a:visited {
-    text-decoration: none !important;
-}
-</style>
+            .control-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -999,61 +823,85 @@ a:visited {
         </nav>
     </header>
 
-    <!-- Main Video Container -->
-    <main class="video-container">
-        <!-- Connection Status -->
-        <div class="connection-status" id="connectionStatus">
-            <div class="status-indicator" id="statusIndicator"></div>
-            <span class="text-dark" id="statusText">Connecting to doctor...</span>
-        </div>
-
-        <!-- Remote Video (Doctor) -->
-        <div class="video-wrapper">
-            <video id="remoteVideo" autoplay playsinline></video>
-        </div>
-
-        <!-- Local Video (User) -->
-        <video id="localVideo" autoplay muted playsinline></video>
-        <div class="local-video-label">
-            <i class="fas fa-user"></i>
-            <span>You</span>
-        </div>
-
-        <!-- Controls Bar -->
-        <div class="controls-bar">
-            <div class="control-group">
-                <button class="control-btn active" id="toggleMic">
-                    <i class="fas fa-microphone"></i>
-                </button>
-                <span class="control-label">Mic On</span>
-            </div>
-
-            <div class="control-group">
-                <button class="control-btn active" id="toggleCam">
-                    <i class="fas fa-video"></i>
-                </button>
-                <span class="control-label">Camera On</span>
-            </div>
-        </div>
-
-        <!-- Call Ended Overlay -->
-        <div class="call-ended-overlay" id="callEndedOverlay" style="display: none;">
-            <div class="call-ended-content">
-                <div class="call-ended-icon">
-                    <i class="fas fa-check-circle"></i>
+    <!-- Main Content Area - SAME LAYOUT AS DOCTOR PAGE -->
+    <div class="main-container">
+        <!-- Video Area (Left side) -->
+        <div class="video-area">
+            <!-- Video Container -->
+            <div class="video-container">
+                <!-- Connection Status -->
+                <div class="connection-status" id="connectionStatus">
+                    <div class="status-indicator" id="statusIndicator"></div>
+                    <span class="text-dark" id="statusText">Connecting to doctor...</span>
                 </div>
-                <h2>Consultation Completed</h2>
-                <p class="text-medium">Your video consultation has ended.</p>
-                <button class="prescription-download-btn" id="manualDownloadBtn">
-                    <i class="fas fa-download"></i>
-                    Download Prescription
-                </button>
-                <p class="text-medium" style="margin-top: 1.5rem; font-size: 0.9rem;">
-                    You will be redirected to your dashboard shortly...
-                </p>
+
+                <!-- Doctor Info Overlay -->
+                <div class="doctor-info-overlay">
+                    <div class="doctor-avatar">DR</div>
+                    <div>Dr. Smith</div>
+                </div>
+
+                <!-- Remote Video (Doctor) -->
+                <video id="remoteVideo" autoplay playsinline></video>
+
+                <!-- Local Video (User) -->
+                <video id="localVideo" autoplay muted playsinline></video>
+                <div class="local-video-label">
+                    <i class="fas fa-user"></i>
+                    <span>You</span>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading-overlay hidden" id="videoLoading">
+                    <div class="loading-spinner"></div>
+                    <p>Establishing connection...</p>
+                </div>
+            </div>
+
+            <!-- Control Bar (Not fixed) -->
+            <div class="controls-bar">
+                <div class="controls-wrapper">
+                    <!-- Microphone Toggle -->
+                    <div class="control-group">
+                        <button class="control-btn active" id="toggleMic">
+                            <div class="control-icon">
+                                <i class="fas fa-microphone"></i>
+                            </div>
+                            <span class="control-label">Mic On</span>
+                        </button>
+                    </div>
+
+                    <!-- Camera Toggle -->
+                    <div class="control-group">
+                        <button class="control-btn active" id="toggleCam">
+                            <div class="control-icon">
+                                <i class="fas fa-video"></i>
+                            </div>
+                            <span class="control-label">Camera On</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-    </main>
+    </div>
+
+    <!-- Call Ended Overlay -->
+    <div class="call-ended-overlay" id="callEndedOverlay">
+        <div class="call-ended-content">
+            <div class="call-ended-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h2>Consultation Completed</h2>
+            <p class="text-medium">Your video consultation has ended.</p>
+            <button class="prescription-download-btn" id="manualDownloadBtn">
+                <i class="fas fa-download"></i>
+                Download Prescription
+            </button>
+            <p class="text-medium" style="margin-top: 1.5rem; font-size: 0.9rem;">
+                You will be redirected to your dashboard shortly...
+            </p>
+        </div>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -1158,7 +1006,7 @@ a:visited {
                 };
 
                 iframe.onerror = function () {
-                   
+
                     downloadBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Try Again';
                     downloadBtn.disabled = false;
                     document.body.removeChild(iframe);
@@ -1215,7 +1063,7 @@ a:visited {
                 if (callAlreadyEnded) return;
                 callAlreadyEnded = true;
 
-               
+
 
                 // Cleanup call resources
                 cleanupCall();
@@ -1249,6 +1097,45 @@ a:visited {
                 setTimeout(() => {
                     window.location.href = "/user_video_dashboard";
                 }, redirectDelay);
+            }
+
+            // Update status display
+            function updateStatus(message, type) {
+                if (callAlreadyEnded) return;
+
+                statusText.textContent = message;
+
+                // Update status indicator color
+                if (type === 'connected') {
+                    statusIndicator.style.background = 'var(--secondary)';
+                } else if (type === 'disconnected') {
+                    statusIndicator.style.background = 'var(--error)';
+                } else if (type === 'warning') {
+                    statusIndicator.style.background = 'var(--warning)';
+                }
+            }
+
+            // Get user media
+            async function getLocalStream() {
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            frameRate: { ideal: 24 }
+                        },
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }
+                    });
+
+                    localVideo.srcObject = localStream;
+                } catch (error) {
+                    updateStatus('Camera/mic permission required', 'disconnected');
+                    alert('Unable to access camera and microphone. Please check permissions and try again.');
+                }
             }
 
             // Initialize Socket.io
@@ -1303,7 +1190,7 @@ a:visited {
                 });
 
                 socket.on('disconnect', (reason) => {
-             
+
                     if (!callAlreadyEnded) {
                         updateStatus('Disconnected from server', 'disconnected');
                     }
@@ -1316,45 +1203,6 @@ a:visited {
                 socket.on('error', (error) => {
                     console.error('Socket error:', error);
                 });
-            }
-
-            // Update status display
-            function updateStatus(message, type) {
-                if (callAlreadyEnded) return;
-
-                statusText.textContent = message;
-
-                // Update status indicator color
-                if (type === 'connected') {
-                    statusIndicator.style.background = 'var(--secondary)';
-                } else if (type === 'disconnected') {
-                    statusIndicator.style.background = 'var(--error)';
-                } else if (type === 'warning') {
-                    statusIndicator.style.background = 'var(--warning)';
-                }
-            }
-
-            // Get user media
-            async function getLocalStream() {
-                try {
-                    localStream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            width: { ideal: 640 },
-                            height: { ideal: 480 },
-                            frameRate: { ideal: 24 }
-                        },
-                        audio: {
-                            echoCancellation: true,
-                            noiseSuppression: true,
-                            autoGainControl: true
-                        }
-                    });
-
-                    localVideo.srcObject = localStream;
-                } catch (error) {
-                    updateStatus('Camera/mic permission required', 'disconnected');
-                    alert('Unable to access camera and microphone. Please check permissions and try again.');
-                }
             }
 
             // Create peer connection
@@ -1456,7 +1304,7 @@ a:visited {
                 }
             }
 
-            // Toggle microphone
+            // Toggle microphone - UPDATED FOR NEW BUTTON STYLE
             toggleMic.addEventListener('click', () => {
                 if (localStream) {
                     const audioTracks = localStream.getAudioTracks();
@@ -1467,17 +1315,24 @@ a:visited {
 
                         isAudioMuted = !audioTracks[0].enabled;
                         toggleMic.classList.toggle('active', !isAudioMuted);
-                        toggleMic.innerHTML = isAudioMuted ?
-                            '<i class="fas fa-microphone-slash"></i>' :
-                            '<i class="fas fa-microphone"></i>';
+                        toggleMic.querySelector('.control-icon i').className = isAudioMuted ?
+                            'fas fa-microphone-slash' :
+                            'fas fa-microphone';
 
-                        document.querySelector('.control-group:nth-child(1) .control-label').textContent =
+                        // Update icon border color based on active state
+                        if (!isAudioMuted) {
+                            toggleMic.querySelector('.control-icon').style.borderColor = 'var(--primary)';
+                        } else {
+                            toggleMic.querySelector('.control-icon').style.borderColor = 'var(--border)';
+                        }
+
+                        toggleMic.querySelector('.control-label').textContent =
                             isAudioMuted ? 'Mic Off' : 'Mic On';
                     }
                 }
             });
 
-            // Toggle camera
+            // Toggle camera - UPDATED FOR NEW BUTTON STYLE
             toggleCam.addEventListener('click', () => {
                 if (localStream) {
                     const videoTracks = localStream.getVideoTracks();
@@ -1488,11 +1343,18 @@ a:visited {
 
                         isVideoOff = !videoTracks[0].enabled;
                         toggleCam.classList.toggle('active', !isVideoOff);
-                        toggleCam.innerHTML = isVideoOff ?
-                            '<i class="fas fa-video-slash"></i>' :
-                            '<i class="fas fa-video"></i>';
+                        toggleCam.querySelector('.control-icon i').className = isVideoOff ?
+                            'fas fa-video-slash' :
+                            'fas fa-video';
 
-                        document.querySelector('.control-group:nth-child(2) .control-label').textContent =
+                        // Update icon border color based on active state
+                        if (!isVideoOff) {
+                            toggleCam.querySelector('.control-icon').style.borderColor = 'var(--primary)';
+                        } else {
+                            toggleCam.querySelector('.control-icon').style.borderColor = 'var(--border)';
+                        }
+
+                        toggleCam.querySelector('.control-label').textContent =
                             isVideoOff ? 'Camera Off' : 'Camera On';
                     }
                 }
@@ -1533,13 +1395,13 @@ a:visited {
             });
         });
     </script>
-<script>
-    (function () {
-        // -------------------------------
-        // 1. Create Loader HTML + CSS
-        // -------------------------------
-        const style = document.createElement("style");
-        style.innerHTML = `
+    <script>
+        (function () {
+            // -------------------------------
+            // 1. Create Loader HTML + CSS
+            // -------------------------------
+            const style = document.createElement("style");
+            style.innerHTML = `
     #global-loader {
       position: fixed;
       inset: 0;
@@ -1577,68 +1439,68 @@ a:visited {
       to { transform: rotate(360deg); }
     }
   `;
-        document.head.appendChild(style);
+            document.head.appendChild(style);
 
-        const loader = document.createElement("div");
-        loader.id = "global-loader";
-        loader.innerHTML = `
+            const loader = document.createElement("div");
+            loader.id = "global-loader";
+            loader.innerHTML = `
     <div class="spinner"></div>
     <p>Loading, please wait…</p>
   `;
-        document.body.appendChild(loader);
+            document.body.appendChild(loader);
 
-        // -------------------------------
-        // 2. Hide loader when page loaded
-        // -------------------------------
-        window.addEventListener("load", () => {
-            loader.classList.add("hidden");
-            setTimeout(() => loader.remove(), 400);
-        });
+            // -------------------------------
+            // 2. Hide loader when page loaded
+            // -------------------------------
+            window.addEventListener("load", () => {
+                loader.classList.add("hidden");
+                setTimeout(() => loader.remove(), 400);
+            });
 
-        // -------------------------------
-        // 3. Show loader on link navigation
-        // -------------------------------
-        document.addEventListener("click", (e) => {
-            const link = e.target.closest("a");
+            // -------------------------------
+            // 3. Show loader on link navigation
+            // -------------------------------
+            document.addEventListener("click", (e) => {
+                const link = e.target.closest("a");
 
-            if (!link) return;
-            if (link.target === "_blank") return;
-            if (link.href.startsWith("mailto:")) return;
-            if (link.href.startsWith("tel:")) return;
-            if (link.hasAttribute("download")) return;
+                if (!link) return;
+                if (link.target === "_blank") return;
+                if (link.href.startsWith("mailto:")) return;
+                if (link.href.startsWith("tel:")) return;
+                if (link.hasAttribute("download")) return;
 
-            loader.classList.remove("hidden");
-            loader.style.display = "flex";
-        });
+                loader.classList.remove("hidden");
+                loader.style.display = "flex";
+            });
 
-        // -------------------------------
-        // 4. Show loader on form submit
-        // -------------------------------
-        document.addEventListener("submit", () => {
-            loader.classList.remove("hidden");
-            loader.style.display = "flex";
-        });
+            // -------------------------------
+            // 4. Show loader on form submit
+            // -------------------------------
+            document.addEventListener("submit", () => {
+                loader.classList.remove("hidden");
+                loader.style.display = "flex";
+            });
 
-        // -------------------------------
-        // 5. Slow network hint (optional)
-        // -------------------------------
-        if (navigator.connection && navigator.connection.effectiveType) {
-            if (navigator.connection.effectiveType.includes("2g")) {
-                loader.querySelector("p").innerText =
-                    "Slow network detected… loading";
+            // -------------------------------
+            // 5. Slow network hint (optional)
+            // -------------------------------
+            if (navigator.connection && navigator.connection.effectiveType) {
+                if (navigator.connection.effectiveType.includes("2g")) {
+                    loader.querySelector("p").innerText =
+                        "Slow network detected… loading";
+                }
             }
-        }
 
-        // -------------------------------
-        // 6. Safety fallback (10s)
-        // -------------------------------
-        setTimeout(() => {
-            if (document.body.contains(loader)) {
-                loader.remove();
-            }
-        }, 10000);
-    })();
-</script>
+            // -------------------------------
+            // 6. Safety fallback (10s)
+            // -------------------------------
+            setTimeout(() => {
+                if (document.body.contains(loader)) {
+                    loader.remove();
+                }
+            }, 10000);
+        })();
+    </script>
 
 </body>
 
