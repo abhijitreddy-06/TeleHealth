@@ -30,15 +30,18 @@
             --disabled: #9ca3af;
             --footer-bg: #1e293b;
 
+            /* Layout Variables */
+            --header-height-desktop: 70px;
+            --header-height-mobile: 60px;
+            --controls-height-desktop: 70px;
+            /* Same as navbar */
+            --controls-height-mobile: 80px;
+
             /* Other Variables */
             --transition: all 0.3s ease;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 12px;
-
-            /* Header heights */
-            --header-height-desktop: 70px;
-            --header-height-mobile: 60px;
         }
 
         /* Dark Theme Variables */
@@ -71,7 +74,7 @@
         }
 
         /* ===============================
-           HEADER & NAVIGATION (From doc_home)
+           HEADER & NAVIGATION (From doc_home - EXACT COPY)
            =============================== */
         header {
             background-color: var(--card-bg);
@@ -167,7 +170,7 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* Mobile Menu (From doc_home) */
+        /* Mobile Menu (From doc_home - EXACT COPY) */
         .mobile-controls {
             display: none;
             align-items: center;
@@ -249,10 +252,8 @@
         }
 
         /* ===============================
-           VIDEO CALL PAGE LAYOUT
+           DESKTOP LAYOUT - FLEX COLUMN
            =============================== */
-
-        /* Main Container */
         .video-call-container {
             flex: 1;
             display: flex;
@@ -260,7 +261,12 @@
             position: relative;
             width: 100%;
             height: calc(100vh - var(--header-height-desktop));
-            background: #000;
+            transition: margin-left 0.3s ease;
+        }
+
+        .video-call-container.with-notes {
+            margin-left: 400px;
+            width: calc(100% - 400px);
         }
 
         /* Status Overlay */
@@ -288,7 +294,7 @@
         .status-dot {
             width: 8px;
             height: 8px;
-            background-color: var(--success);
+            background-color: var(--secondary);
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
@@ -330,10 +336,11 @@
             object-fit: cover;
         }
 
-        /* Local Video (PiP) */
+        /* Local Video (PiP) - Desktop */
         .local-video-pip {
             position: absolute;
-            bottom: 20px;
+            bottom: 90px;
+            /* Above controls */
             right: 20px;
             width: 220px;
             height: 165px;
@@ -343,6 +350,11 @@
             box-shadow: var(--shadow);
             background: #000;
             z-index: 5;
+            transition: all 0.3s ease;
+        }
+
+        .video-call-container.with-notes .local-video-pip {
+            right: calc(20px + 400px);
         }
 
         #localVideo {
@@ -399,12 +411,10 @@
         }
 
         /* ===============================
-           DESKTOP CONTROLS (15% height)
+           DESKTOP CONTROLS (SAME HEIGHT AS NAVBAR)
            =============================== */
         .desktop-controls {
-            height: 15vh;
-            min-height: 80px;
-            max-height: 120px;
+            height: var(--controls-height-desktop);
             background-color: var(--card-bg);
             border-top: 1px solid var(--border);
             display: flex;
@@ -412,12 +422,14 @@
             align-items: center;
             padding: 0 5%;
             width: 100%;
+            position: relative;
+            z-index: 10;
         }
 
         .controls-wrapper {
             display: flex;
             justify-content: center;
-            gap: 2rem;
+            gap: 3rem;
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
@@ -433,7 +445,7 @@
             color: var(--text-dark);
             cursor: pointer;
             transition: var(--transition);
-            padding: 1rem;
+            padding: 0.5rem 1rem;
             border-radius: var(--radius);
             min-width: 80px;
         }
@@ -443,13 +455,35 @@
             transform: translateY(-2px);
         }
 
+        /* ACTIVE STATES WITH COLORS */
         .control-btn.active {
             background-color: rgba(56, 189, 248, 0.15);
             color: var(--primary);
         }
 
+        .control-btn.active .control-icon {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* INACTIVE STATES */
+        .control-btn.inactive {
+            color: var(--text-medium);
+        }
+
+        .control-btn.inactive .control-icon {
+            background-color: var(--background);
+            color: var(--text-medium);
+        }
+
+        /* DANGER STATE */
         .control-btn.danger {
             color: var(--error);
+        }
+
+        .control-btn.danger .control-icon {
+            background-color: var(--error);
+            color: white;
         }
 
         .control-btn.danger:hover {
@@ -457,9 +491,9 @@
         }
 
         .control-icon {
-            font-size: 1.5rem;
-            width: 56px;
-            height: 56px;
+            font-size: 1.3rem;
+            width: 50px;
+            height: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -468,23 +502,140 @@
             transition: var(--transition);
         }
 
-        .control-btn:hover .control-icon {
-            transform: scale(1.1);
+        .control-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-top: 0.25rem;
         }
 
-        .control-btn.active .control-icon {
+        /* ===============================
+           DESKTOP NOTES PANEL (LEFT SIDEBAR)
+           =============================== */
+        .desktop-notes-panel {
+            position: fixed;
+            top: var(--header-height-desktop);
+            left: -400px;
+            bottom: 0;
+            width: 400px;
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border);
+            z-index: 100;
+            transition: left 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .desktop-notes-panel.active {
+            left: 0;
+        }
+
+        .desktop-notes-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--card-bg);
+        }
+
+        .desktop-notes-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-dark);
+            font-size: 1.1rem;
+        }
+
+        .desktop-notes-header h3 i {
+            color: var(--primary);
+        }
+
+        .desktop-close-notes {
+            background: none;
+            border: none;
+            color: var(--text-medium);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .desktop-close-notes:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .desktop-notes-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        #desktopNotesText {
+            width: 100%;
+            height: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background-color: var(--background);
+            color: var(--text-dark);
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            resize: none;
+        }
+
+        #desktopNotesText:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+        }
+
+        .desktop-notes-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--card-bg);
+        }
+
+        .desktop-notes-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .desktop-notes-footer .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-primary {
             background-color: var(--primary);
             color: white;
         }
 
-        .control-btn.danger .control-icon {
-            background-color: var(--error);
-            color: white;
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
         }
 
-        .control-label {
+        .desktop-char-count {
+            color: var(--text-medium);
             font-size: 0.875rem;
-            font-weight: 500;
         }
 
         /* ===============================
@@ -493,8 +644,10 @@
         @media (max-width: 768px) {
             :root {
                 --header-height-mobile: 60px;
+                --controls-height-mobile: 80px;
             }
 
+            /* NAVBAR MOBILE (EXACTLY FROM DOC_HOME) */
             header {
                 height: var(--header-height-mobile);
             }
@@ -519,24 +672,31 @@
                 display: flex;
             }
 
-            /* Video container for mobile */
+            /* VIDEO CONTAINER MOBILE */
             .video-call-container {
                 height: calc(100vh - var(--header-height-mobile));
-                padding-bottom: 80px;
-                /* Space for fixed controls */
+                padding-bottom: var(--controls-height-mobile);
             }
 
-            /* Mobile Controls - Fixed at bottom */
-            .desktop-controls {
-                display: none;
+            .video-call-container.with-notes {
+                margin-left: 0;
+                width: 100%;
             }
 
+            /* HIDE DESKTOP ELEMENTS ON MOBILE */
+            .desktop-controls,
+            .desktop-notes-panel,
+            .desktop-notes-panel.active {
+                display: none !important;
+            }
+
+            /* MOBILE CONTROLS - FIXED AT BOTTOM */
             .mobile-controls-bar {
                 position: fixed;
                 bottom: 0;
                 left: 0;
                 right: 0;
-                height: 80px;
+                height: var(--controls-height-mobile);
                 background-color: var(--card-bg);
                 border-top: 1px solid var(--border);
                 display: flex;
@@ -564,6 +724,39 @@
                 cursor: pointer;
                 padding: 0.5rem;
                 min-width: 60px;
+                transition: var(--transition);
+            }
+
+            /* MOBILE CONTROL BUTTON COLORS */
+            .mobile-control-btn.active {
+                color: var(--primary);
+            }
+
+            .mobile-control-btn.active .mobile-control-icon {
+                background-color: var(--primary);
+                color: white;
+            }
+
+            .mobile-control-btn.inactive {
+                color: var(--text-medium);
+            }
+
+            .mobile-control-btn.inactive .mobile-control-icon {
+                background-color: var(--background);
+                color: var(--text-medium);
+            }
+
+            .mobile-control-btn.danger {
+                color: var(--error);
+            }
+
+            .mobile-control-btn.danger .mobile-control-icon {
+                background-color: var(--error);
+                color: white;
+            }
+
+            .mobile-control-btn.danger:hover {
+                background-color: rgba(239, 68, 68, 0.1);
             }
 
             .mobile-control-icon {
@@ -575,25 +768,32 @@
                 justify-content: center;
                 background-color: var(--background);
                 border-radius: 50%;
+                transition: var(--transition);
             }
 
             .mobile-control-label {
                 font-size: 0.75rem;
                 font-weight: 500;
+                margin-top: 0.25rem;
             }
 
-            /* Local Video PiP - Mobile (above controls) */
+            /* LOCAL VIDEO PIP - MOBILE */
             .local-video-pip {
                 position: fixed;
-                bottom: 90px;
+                bottom: calc(var(--controls-height-mobile) + 10px);
                 right: 10px;
                 width: 140px;
                 height: 105px;
                 border-width: 2px;
                 z-index: 50;
+                transition: bottom 0.3s ease;
             }
 
-            /* Status overlay mobile adjustments */
+            .with-mobile-notes .local-video-pip {
+                bottom: calc(50vh + var(--controls-height-mobile) + 10px);
+            }
+
+            /* STATUS OVERLAY MOBILE */
             .call-status-overlay {
                 top: 0.5rem;
                 left: 0.5rem;
@@ -608,28 +808,27 @@
         }
 
         /* ===============================
-           NOTES PANEL (Mobile Only)
+           MOBILE NOTES PANEL (SLIDES UP FROM BOTTOM)
            =============================== */
         .mobile-notes-panel {
             position: fixed;
-            bottom: -50%;
+            bottom: -50vh;
             left: 0;
             right: 0;
-            height: 50%;
+            height: 50vh;
             background-color: var(--card-bg);
             border-top: 1px solid var(--border);
-            z-index: 1000;
+            z-index: 80;
             transition: bottom 0.3s ease-out;
             display: flex;
             flex-direction: column;
         }
 
         .mobile-notes-panel.active {
-            bottom: 80px;
-            /* Position above controls */
+            bottom: var(--controls-height-mobile);
         }
 
-        .notes-header {
+        .mobile-notes-header {
             padding: 1rem;
             border-bottom: 1px solid var(--border);
             display: flex;
@@ -637,7 +836,7 @@
             align-items: center;
         }
 
-        .notes-header h3 {
+        .mobile-notes-header h3 {
             display: flex;
             align-items: center;
             gap: 0.75rem;
@@ -645,11 +844,11 @@
             font-size: 1rem;
         }
 
-        .notes-header h3 i {
+        .mobile-notes-header h3 i {
             color: var(--primary);
         }
 
-        .close-notes {
+        .mobile-close-notes {
             background: none;
             border: none;
             color: var(--text-medium);
@@ -663,11 +862,11 @@
             transition: var(--transition);
         }
 
-        .close-notes:hover {
+        .mobile-close-notes:hover {
             background-color: rgba(0, 0, 0, 0.1);
         }
 
-        .notes-content {
+        .mobile-notes-content {
             flex: 1;
             padding: 1rem;
             overflow-y: auto;
@@ -683,7 +882,8 @@
             background-color: var(--background);
             color: var(--text-dark);
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
             resize: none;
         }
 
@@ -692,7 +892,7 @@
             border-color: var(--primary);
         }
 
-        .notes-footer {
+        .mobile-notes-footer {
             padding: 1rem;
             border-top: 1px solid var(--border);
             display: flex;
@@ -700,12 +900,12 @@
             align-items: center;
         }
 
-        .notes-actions {
+        .mobile-notes-actions {
             display: flex;
             gap: 0.5rem;
         }
 
-        .notes-footer .btn {
+        .mobile-notes-footer .btn {
             padding: 0.4rem 0.8rem;
             font-size: 0.875rem;
             border-radius: 8px;
@@ -714,73 +914,25 @@
             transition: var(--transition);
         }
 
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
-        }
-
-        .char-count {
+        .mobile-char-count {
             color: var(--text-medium);
             font-size: 0.75rem;
         }
 
-        /* Desktop Notes Modal (for desktop only) */
-        .desktop-notes-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .desktop-notes-modal.active {
-            display: flex;
-        }
-
-        .desktop-notes-panel {
-            background-color: var(--card-bg);
-            border-radius: var(--radius);
-            width: 100%;
-            max-width: 600px;
-            max-height: 70vh;
-            display: flex;
-            flex-direction: column;
-            box-shadow: var(--shadow);
-        }
-
         /* Hide mobile notes panel on desktop */
         @media (min-width: 769px) {
-            .mobile-notes-panel {
-                display: none;
-            }
 
+            .mobile-notes-panel,
             .mobile-controls-bar {
-                display: none;
+                display: none !important;
             }
         }
 
-        /* Hide desktop controls on mobile */
+        /* Hide desktop elements on mobile */
         @media (max-width: 768px) {
-            .desktop-controls {
-                display: none;
-            }
 
-            .desktop-notes-modal {
+            .desktop-controls,
+            .desktop-notes-panel {
                 display: none !important;
             }
         }
@@ -810,6 +962,7 @@
 
 <body>
 
+    <!-- HEADER (EXACT COPY FROM DOC_HOME) -->
     <header>
         <nav class="navbar">
             <a href="/doc_home" class="logo">
@@ -837,7 +990,7 @@
         </nav>
     </header>
 
-    <!-- Mobile Menu (From doc_home) -->
+    <!-- MOBILE MENU (EXACT COPY FROM DOC_HOME) -->
     <div class="mobile-menu" id="mobileMenu">
         <button class="close-menu" id="closeMenu">
             <i class="fas fa-times"></i>
@@ -847,8 +1000,42 @@
         <a href="/doc_profile"><i class="fas fa-user-circle"></i> Profile</a>
     </div>
 
-    <!-- Main Video Call Container -->
-    <main class="video-call-container">
+    <!-- DESKTOP NOTES PANEL (LEFT SIDEBAR) -->
+    <div class="desktop-notes-panel" id="desktopNotesPanel">
+        <div class="desktop-notes-header">
+            <h3>
+                <i class="fas fa-notes-medical"></i>
+                Consultation Notes
+            </h3>
+            <button class="desktop-close-notes" id="desktopCloseNotes">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="desktop-notes-content">
+            <textarea id="desktopNotesText" placeholder="Enter consultation notes here...
+• Symptoms observed
+• Preliminary diagnosis
+• Prescription details
+• Follow-up recommendations
+• Additional observations"></textarea>
+        </div>
+        <div class="desktop-notes-footer">
+            <div class="desktop-notes-actions">
+                <button class="btn btn-outline" id="desktopClearNotes">
+                    <i class="fas fa-trash-alt"></i> Clear
+                </button>
+                <button class="btn btn-primary" id="desktopSaveNotes">
+                    <i class="fas fa-save"></i> Save Notes
+                </button>
+            </div>
+            <div class="desktop-char-count">
+                <span id="desktopCharCount">0</span> characters
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN VIDEO CALL CONTAINER -->
+    <main class="video-call-container" id="videoCallContainer">
         <!-- Status Overlay -->
         <div class="call-status-overlay" id="callStatusOverlay">
             <div class="status-indicator">
@@ -879,7 +1066,7 @@
             </div>
         </div>
 
-        <!-- Desktop Controls (15% height) -->
+        <!-- DESKTOP CONTROLS (SAME HEIGHT AS NAVBAR) -->
         <div class="desktop-controls">
             <div class="controls-wrapper">
                 <!-- Microphone Toggle -->
@@ -916,7 +1103,7 @@
             </div>
         </div>
 
-        <!-- Mobile Controls (Fixed at bottom) -->
+        <!-- MOBILE CONTROLS (FIXED AT BOTTOM) -->
         <div class="mobile-controls-bar">
             <div class="mobile-controls-wrapper">
                 <!-- Microphone Toggle -->
@@ -954,54 +1141,18 @@
         </div>
     </main>
 
-    <!-- Desktop Notes Modal -->
-    <div class="desktop-notes-modal" id="desktopNotesModal">
-        <div class="desktop-notes-panel">
-            <div class="notes-header">
-                <h3>
-                    <i class="fas fa-notes-medical"></i>
-                    Consultation Notes
-                </h3>
-                <button class="close-notes" id="desktopCloseNotes">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="notes-content">
-                <textarea id="notesText" placeholder="Enter consultation notes here...
-• Symptoms observed
-• Preliminary diagnosis
-• Prescription details
-• Follow-up recommendations
-• Additional observations"></textarea>
-            </div>
-            <div class="notes-footer">
-                <div class="notes-actions">
-                    <button class="btn btn-outline" id="desktopClearNotes">
-                        <i class="fas fa-trash-alt"></i> Clear
-                    </button>
-                    <button class="btn btn-primary" id="desktopSaveNotes">
-                        <i class="fas fa-save"></i> Save Notes
-                    </button>
-                </div>
-                <div class="char-count">
-                    <span id="desktopCharCount">0</span> characters
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mobile Notes Panel (Slides up from bottom) -->
+    <!-- MOBILE NOTES PANEL (SLIDES UP FROM BOTTOM) -->
     <div class="mobile-notes-panel" id="mobileNotesPanel">
-        <div class="notes-header">
+        <div class="mobile-notes-header">
             <h3>
                 <i class="fas fa-notes-medical"></i>
                 Consultation Notes
             </h3>
-            <button class="close-notes" id="mobileCloseNotes">
+            <button class="mobile-close-notes" id="mobileCloseNotes">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div class="notes-content">
+        <div class="mobile-notes-content">
             <textarea id="mobileNotesText" placeholder="Enter consultation notes here...
 • Symptoms observed
 • Preliminary diagnosis
@@ -1009,8 +1160,8 @@
 • Follow-up recommendations
 • Additional observations"></textarea>
         </div>
-        <div class="notes-footer">
-            <div class="notes-actions">
+        <div class="mobile-notes-footer">
+            <div class="mobile-notes-actions">
                 <button class="btn btn-outline" id="mobileClearNotes">
                     <i class="fas fa-trash-alt"></i> Clear
                 </button>
@@ -1018,7 +1169,7 @@
                     <i class="fas fa-save"></i> Save
                 </button>
             </div>
-            <div class="char-count">
+            <div class="mobile-char-count">
                 <span id="mobileCharCount">0</span> characters
             </div>
         </div>
@@ -1028,7 +1179,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // ===============================
-        // EXISTING LOGIC FROM DOC_VIDEO.EJS
+        // EXISTING LOGIC FROM DOC_VIDEO.EJS (PRESERVED)
         // ===============================
 
         // Variables
@@ -1050,11 +1201,11 @@
         let isVideoOff = false;
 
         // ===============================
-        // UI-SPECIFIC FUNCTIONS (NEW)
+        // NEW UI FUNCTIONALITY (NO LOGIC CHANGES)
         // ===============================
 
-        // Theme toggle functionality
         document.addEventListener('DOMContentLoaded', function () {
+            // Theme toggle functionality
             const themeToggle = document.getElementById('themeToggle');
             const mobileThemeToggle = document.getElementById('mobileThemeToggle');
             const html = document.documentElement;
@@ -1068,7 +1219,6 @@
             function toggleTheme() {
                 const currentTheme = html.getAttribute('data-theme');
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
                 html.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
                 updateThemeIcon(newTheme);
@@ -1087,7 +1237,7 @@
                 mobileThemeToggle.addEventListener('click', toggleTheme);
             }
 
-            // Mobile menu functionality (from doc_home)
+            // Mobile menu functionality (EXACT COPY FROM DOC_HOME)
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const closeMenuBtn = document.getElementById('closeMenu');
             const mobileMenu = document.getElementById('mobileMenu');
@@ -1116,23 +1266,27 @@
                 }
             });
 
-            // Notes functionality
-            setupNotesFunctionality();
+            // NOTES PANEL FUNCTIONALITY
+            setupNotesPanels();
 
-            // Setup control button sync between desktop and mobile
+            // CONTROL BUTTONS SYNC
             setupControlButtons();
+
+            // Initialize video call (existing logic)
+            initVideoCall();
         });
 
-        // Setup notes functionality for both desktop and mobile
-        function setupNotesFunctionality() {
+        // Setup notes panels for desktop and mobile
+        function setupNotesPanels() {
             // Desktop notes
             const toggleNotes = document.getElementById('toggleNotes');
-            const desktopNotesModal = document.getElementById('desktopNotesModal');
+            const desktopNotesPanel = document.getElementById('desktopNotesPanel');
             const desktopCloseNotes = document.getElementById('desktopCloseNotes');
-            const notesText = document.getElementById('notesText');
+            const desktopNotesText = document.getElementById('desktopNotesText');
             const desktopCharCount = document.getElementById('desktopCharCount');
             const desktopClearNotes = document.getElementById('desktopClearNotes');
             const desktopSaveNotes = document.getElementById('desktopSaveNotes');
+            const videoCallContainer = document.getElementById('videoCallContainer');
 
             // Mobile notes
             const mobileToggleNotes = document.getElementById('mobileToggleNotes');
@@ -1144,7 +1298,7 @@
             const mobileSaveNotes = document.getElementById('mobileSaveNotes');
 
             // Character counters
-            notesText.addEventListener('input', function () {
+            desktopNotesText.addEventListener('input', function () {
                 desktopCharCount.textContent = this.value.length;
                 mobileNotesText.value = this.value; // Sync with mobile
                 mobileCharCount.textContent = this.value.length;
@@ -1152,36 +1306,65 @@
 
             mobileNotesText.addEventListener('input', function () {
                 mobileCharCount.textContent = this.value.length;
-                notesText.value = this.value; // Sync with desktop
+                desktopNotesText.value = this.value; // Sync with desktop
                 desktopCharCount.textContent = this.value.length;
             });
 
-            // Desktop notes toggle
+            // DESKTOP NOTES TOGGLE (Left sidebar)
+            let desktopNotesOpen = false;
             if (toggleNotes) {
                 toggleNotes.addEventListener('click', () => {
-                    desktopNotesModal.classList.add('active');
-                    document.body.style.overflow = 'hidden';
+                    desktopNotesOpen = !desktopNotesOpen;
+
+                    if (desktopNotesOpen) {
+                        desktopNotesPanel.classList.add('active');
+                        videoCallContainer.classList.add('with-notes');
+                    } else {
+                        desktopNotesPanel.classList.remove('active');
+                        videoCallContainer.classList.remove('with-notes');
+                    }
+
+                    // Update button state
+                    toggleNotes.classList.toggle('active', desktopNotesOpen);
                 });
             }
 
             if (desktopCloseNotes) {
                 desktopCloseNotes.addEventListener('click', () => {
-                    desktopNotesModal.classList.remove('active');
-                    document.body.style.overflow = '';
+                    desktopNotesOpen = false;
+                    desktopNotesPanel.classList.remove('active');
+                    videoCallContainer.classList.remove('with-notes');
+                    toggleNotes.classList.remove('active');
                 });
             }
 
-            // Mobile notes toggle
+            // MOBILE NOTES TOGGLE (Bottom slide-up)
+            let mobileNotesOpen = false;
             if (mobileToggleNotes) {
                 mobileToggleNotes.addEventListener('click', () => {
-                    mobileNotesPanel.classList.add('active');
-                    document.body.style.overflow = 'hidden';
+                    mobileNotesOpen = !mobileNotesOpen;
+
+                    if (mobileNotesOpen) {
+                        mobileNotesPanel.classList.add('active');
+                        videoCallContainer.classList.add('with-mobile-notes');
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        mobileNotesPanel.classList.remove('active');
+                        videoCallContainer.classList.remove('with-mobile-notes');
+                        document.body.style.overflow = '';
+                    }
+
+                    // Update button state
+                    mobileToggleNotes.classList.toggle('active', mobileNotesOpen);
                 });
             }
 
             if (mobileCloseNotes) {
                 mobileCloseNotes.addEventListener('click', () => {
+                    mobileNotesOpen = false;
                     mobileNotesPanel.classList.remove('active');
+                    videoCallContainer.classList.remove('with-mobile-notes');
+                    mobileToggleNotes.classList.remove('active');
                     document.body.style.overflow = '';
                 });
             }
@@ -1190,7 +1373,7 @@
             if (desktopClearNotes) {
                 desktopClearNotes.addEventListener('click', function () {
                     if (confirm('Are you sure you want to clear all notes?')) {
-                        notesText.value = '';
+                        desktopNotesText.value = '';
                         mobileNotesText.value = '';
                         desktopCharCount.textContent = '0';
                         mobileCharCount.textContent = '0';
@@ -1201,7 +1384,7 @@
             if (mobileClearNotes) {
                 mobileClearNotes.addEventListener('click', function () {
                     if (confirm('Are you sure you want to clear all notes?')) {
-                        notesText.value = '';
+                        desktopNotesText.value = '';
                         mobileNotesText.value = '';
                         desktopCharCount.textContent = '0';
                         mobileCharCount.textContent = '0';
@@ -1231,30 +1414,12 @@
 
             // Mic toggle sync
             if (toggleMic && mobileToggleMic) {
-                toggleMic.addEventListener('click', () => {
-                    setTimeout(() => {
-                        syncButtonState(toggleMic, mobileToggleMic);
-                    }, 0);
-                });
-                mobileToggleMic.addEventListener('click', () => {
-                    setTimeout(() => {
-                        syncButtonState(mobileToggleMic, toggleMic);
-                    }, 0);
-                });
+                setupButtonSync(toggleMic, mobileToggleMic, 'fa-microphone', 'fa-microphone-slash', 'Mute', 'Unmute');
             }
 
             // Camera toggle sync
             if (toggleCam && mobileToggleCam) {
-                toggleCam.addEventListener('click', () => {
-                    setTimeout(() => {
-                        syncButtonState(toggleCam, mobileToggleCam);
-                    }, 0);
-                });
-                mobileToggleCam.addEventListener('click', () => {
-                    setTimeout(() => {
-                        syncButtonState(mobileToggleCam, toggleCam);
-                    }, 0);
-                });
+                setupButtonSync(toggleCam, mobileToggleCam, 'fa-video', 'fa-video-slash', 'Camera', 'Camera On');
             }
 
             // End call button sync
@@ -1264,24 +1429,34 @@
             }
         }
 
-        // Sync button state between desktop and mobile buttons
-        function syncButtonState(sourceButton, targetButton) {
-            const isActive = sourceButton.classList.contains('active');
-            const icon = sourceButton.querySelector('i');
-            const label = sourceButton.querySelector('.control-label, .mobile-control-label');
+        // Helper function to sync button states
+        function setupButtonSync(button1, button2, activeIcon, inactiveIcon, activeLabel, inactiveLabel) {
+            let isActive = true;
 
-            // Update target button
-            targetButton.classList.toggle('active', isActive);
-            if (icon) {
-                targetButton.querySelector('i').className = icon.className;
-            }
-            if (label) {
-                targetButton.querySelector('.control-label, .mobile-control-label').textContent = label.textContent;
-            }
+            const updateButtons = () => {
+                isActive = !isActive;
+
+                // Update button 1
+                button1.classList.toggle('active', isActive);
+                button1.classList.toggle('inactive', !isActive);
+                button1.querySelector('i').className = `fas ${isActive ? activeIcon : inactiveIcon}`;
+                button1.querySelector('.control-label, .mobile-control-label').textContent =
+                    isActive ? activeLabel : inactiveLabel;
+
+                // Update button 2
+                button2.classList.toggle('active', isActive);
+                button2.classList.toggle('inactive', !isActive);
+                button2.querySelector('i').className = `fas ${isActive ? activeIcon : inactiveIcon}`;
+                button2.querySelector('.control-label, .mobile-control-label').textContent =
+                    isActive ? activeLabel : inactiveLabel;
+            };
+
+            button1.addEventListener('click', updateButtons);
+            button2.addEventListener('click', updateButtons);
         }
 
         // ===============================
-        // EXISTING VIDEO CALL LOGIC
+        // EXISTING VIDEO CALL LOGIC (PRESERVED)
         // ===============================
 
         // Update status display
@@ -1443,58 +1618,10 @@
             }
         }
 
-        // Toggle microphone
-        function setupMicToggle(button) {
-            if (button && localStream) {
-                button.addEventListener('click', () => {
-                    localStream.getAudioTracks().forEach(track => {
-                        track.enabled = !track.enabled;
-                    });
-
-                    isAudioMuted = !localStream.getAudioTracks()[0].enabled;
-                    button.classList.toggle('active', !isAudioMuted);
-
-                    const icon = button.querySelector('i');
-                    if (icon) {
-                        icon.className = isAudioMuted ? 'fas fa-microphone-slash' : 'fas fa-microphone';
-                    }
-
-                    const label = button.querySelector('.control-label, .mobile-control-label');
-                    if (label) {
-                        label.textContent = isAudioMuted ? 'Unmute' : 'Mute';
-                    }
-                });
-            }
-        }
-
-        // Toggle camera
-        function setupCamToggle(button) {
-            if (button && localStream) {
-                button.addEventListener('click', () => {
-                    localStream.getVideoTracks().forEach(track => {
-                        track.enabled = !track.enabled;
-                    });
-
-                    isVideoOff = !localStream.getVideoTracks()[0].enabled;
-                    button.classList.toggle('active', !isVideoOff);
-
-                    const icon = button.querySelector('i');
-                    if (icon) {
-                        icon.className = isVideoOff ? 'fas fa-video-slash' : 'fas fa-video';
-                    }
-
-                    const label = button.querySelector('.control-label, .mobile-control-label');
-                    if (label) {
-                        label.textContent = isVideoOff ? 'Camera On' : 'Camera Off';
-                    }
-                });
-            }
-        }
-
         // Save notes function
         async function saveNotes() {
-            const notesText = document.getElementById('notesText');
-            const notes = notesText ? notesText.value.trim() : '';
+            const desktopNotesText = document.getElementById('desktopNotesText');
+            const notes = desktopNotesText ? desktopNotesText.value.trim() : '';
 
             if (notes) {
                 try {
@@ -1508,17 +1635,12 @@
                     });
                     alert('Notes saved successfully!');
 
-                    // Close notes panel on mobile
+                    // Close mobile notes panel
                     const mobileNotesPanel = document.getElementById('mobileNotesPanel');
                     if (mobileNotesPanel && mobileNotesPanel.classList.contains('active')) {
                         mobileNotesPanel.classList.remove('active');
-                        document.body.style.overflow = '';
-                    }
-
-                    // Close notes modal on desktop
-                    const desktopNotesModal = document.getElementById('desktopNotesModal');
-                    if (desktopNotesModal && desktopNotesModal.classList.contains('active')) {
-                        desktopNotesModal.classList.remove('active');
+                        document.getElementById('videoCallContainer').classList.remove('with-mobile-notes');
+                        document.getElementById('mobileToggleNotes').classList.remove('active');
                         document.body.style.overflow = '';
                     }
                 } catch (error) {
@@ -1532,8 +1654,8 @@
 
         // End call handler
         async function endCallHandler() {
-            const notesText = document.getElementById('notesText');
-            const notes = notesText ? notesText.value.trim() : '';
+            const desktopNotesText = document.getElementById('desktopNotesText');
+            const notes = desktopNotesText ? desktopNotesText.value.trim() : '';
 
             // Save notes locally first
             if (notes) {
@@ -1590,36 +1712,12 @@
             window.location.href = "/doc_video_dashboard";
         }
 
-        // Setup control button event listeners
-        function setupControlEventListeners() {
-            // Setup mic toggles
-            const toggleMic = document.getElementById('toggleMic');
-            const mobileToggleMic = document.getElementById('mobileToggleMic');
-            setupMicToggle(toggleMic);
-            setupMicToggle(mobileToggleMic);
-
-            // Setup camera toggles
-            const toggleCam = document.getElementById('toggleCam');
-            const mobileToggleCam = document.getElementById('mobileToggleCam');
-            setupCamToggle(toggleCam);
-            setupCamToggle(mobileToggleCam);
-
-            // Setup end call buttons
-            const endCall = document.getElementById('endCall');
-            const mobileEndCall = document.getElementById('mobileEndCall');
-            if (endCall) endCall.addEventListener('click', endCallHandler);
-            if (mobileEndCall) mobileEndCall.addEventListener('click', endCallHandler);
-        }
-
-        // Initialize
-        async function init() {
+        // Initialize video call
+        async function initVideoCall() {
             updateStatus('INITIALIZING...', 'warning');
             await getLocalStream();
             initSocket();
-            setupControlEventListeners();
         }
-
-        init();
 
         // Handle page unload
         window.addEventListener('beforeunload', (e) => {
