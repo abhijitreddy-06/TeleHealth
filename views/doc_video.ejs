@@ -552,20 +552,20 @@
         /* ===============================
            DESKTOP NOTES PANEL (RIGHT SIDEBAR)
            =============================== */
-.notes-panel {
-    position: fixed;
-    top: var(--header-height-desktop);
-    right: -400px;
-    bottom: 0;
-    width: 400px;
-    background-color: var(--card-bg);
-    border-left: 1px solid var(--border);
-    z-index: 100;
-    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
-    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
-}
+        .notes-panel {
+            position: fixed;
+            top: var(--header-height-desktop);
+            right: -400px;
+            bottom: 0;
+            width: 400px;
+            background-color: var(--card-bg);
+            border-left: 1px solid var(--border);
+            z-index: 100;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+        }
 
         .notes-panel.active {
             right: 0;
@@ -881,23 +881,23 @@
         /* ===============================
            MOBILE NOTES PANEL (BOTTOM SLIDE-UP)
            =============================== */
-.mobile-notes-panel {
-    position: fixed;
-    bottom: -50vh;
-    left: 0;
-    right: 0;
-    height: 50vh;
-    background-color: var(--card-bg);
-    border-top: 1px solid var(--border);
-    z-index: 100; /* Above control bar (which is z-index: 80) */
-    transition: bottom 0.3s ease-out;
-    display: flex;
-    flex-direction: column;
-}
+        .mobile-notes-panel {
+            position: fixed;
+            bottom: -50vh;
+            left: 0;
+            right: 0;
+            height: 50vh;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border);
+            z-index: 100;
+            transition: bottom 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+        }
 
-.mobile-notes-panel.active {
-    bottom: var(--controls-height-mobile);
-}
+        .mobile-notes-panel.active {
+            bottom: var(--controls-height-mobile);
+        }
 
         /* FIX: Mobile notes text area size */
         .mobile-notes-panel .notes-content {
@@ -964,9 +964,46 @@
         a:visited {
             text-decoration: none !important;
         }
-        .video-call-container.with-notes .local-video-pip {
+        /* In the desktop notes panel section (around line 315-320), remove overlapping: */
+.notes-panel {
+    position: fixed;
+    top: var(--header-height-desktop);
+    right: -400px;
+    bottom: 0;
+    width: 400px;
+    background-color: var(--card-bg);
+    border-left: 1px solid var(--border);
+    z-index: 100;
+    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Add this new rule to prevent double layering in desktop: */
+.video-call-container.with-notes .local-video-pip {
     right: 420px; /* Moves local video left when notes panel is open */
 }
+/* MOBILE NOTES PANEL (BOTTOM SLIDE-UP) */
+.mobile-notes-panel {
+    position: fixed;
+    bottom: -50vh;
+    left: 0;
+    right: 0;
+    height: 50vh;
+    background-color: var(--card-bg);
+    border-top: 1px solid var(--border);
+    z-index: 100; /* Above control bar (which is z-index: 80) */
+    transition: bottom 0.3s ease-out;
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-notes-panel.active {
+    bottom: var(--controls-height-mobile);
+}
+
+/* This rule makes local video move up with notes panel */
 .mobile-notes-panel.active ~ .video-call-container .local-video-pip {
     bottom: calc(50vh + var(--controls-height-mobile) + 20px);
     transition: bottom 0.3s ease-out;
@@ -1307,7 +1344,7 @@
             // DESKTOP NOTES TOGGLE (Right sidebar)
             if (toggleNotes) {
                 toggleNotes.addEventListener('click', () => {
-                    // Close mobile notes if it's open to prevent double layering
+                    // Close mobile notes if open
                     if (mobileNotesOpen) {
                         mobileNotesPanel.classList.remove('active');
                         mobileToggleNotes.classList.remove('active');
@@ -1325,11 +1362,13 @@
 
                     if (desktopNotesOpen) {
                         notesPanel.classList.add('active');
+                        // Add a small delay for the video container animation
                         setTimeout(() => {
                             videoCallContainer.classList.add('with-notes');
                         }, 50);
                     } else {
                         videoCallContainer.classList.remove('with-notes');
+                        // Wait for video container animation before hiding notes panel
                         setTimeout(() => {
                             notesPanel.classList.remove('active');
                         }, 350);
@@ -1358,9 +1397,9 @@
             }
 
             // MOBILE NOTES TOGGLE (Bottom slide-up)
-      if (mobileToggleNotes) {
+            if (mobileToggleNotes) {
                 mobileToggleNotes.addEventListener('click', () => {
-                    // Close desktop notes if it's open to prevent double layering
+                    // Close desktop notes if open
                     if (desktopNotesOpen) {
                         videoCallContainer.classList.remove('with-notes');
                         setTimeout(() => {
@@ -1919,7 +1958,75 @@
             }, 10000);
         })();
     </script>
+<script>
+    // In the setupNotesPanels function, replace the DESKTOP NOTES TOGGLE section:
 
-</body>
+        // DESKTOP NOTES TOGGLE (Right sidebar)
+        let desktopNotesOpen = false;
+        if (toggleNotes) {
+            toggleNotes.addEventListener('click', () => {
+                // Close mobile notes if it's open to prevent double layering
+                if (mobileNotesOpen) {
+                    mobileNotesPanel.classList.remove('active');
+                    mobileToggleNotes.classList.remove('active');
+                    mobileNotesOpen = false;
+                    document.body.style.overflow = '';
+                }
+
+                desktopNotesOpen = !desktopNotesOpen;
+
+                // Add button click animation
+                toggleNotes.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    toggleNotes.style.transform = '';
+                }, 150);
+
+                if (desktopNotesOpen) {
+                    notesPanel.classList.add('active');
+                    setTimeout(() => {
+                        videoCallContainer.classList.add('with-notes');
+                    }, 50);
+                } else {
+                    videoCallContainer.classList.remove('with-notes');
+                    setTimeout(() => {
+                        notesPanel.classList.remove('active');
+                    }, 350);
+                }
+
+                // Update button state
+                toggleNotes.classList.toggle('active', desktopNotesOpen);
+            });
+        }
+
+        // In the MOBILE NOTES TOGGLE section:
+        // MOBILE NOTES TOGGLE (Bottom slide-up)
+        let mobileNotesOpen = false;
+        if (mobileToggleNotes) {
+            mobileToggleNotes.addEventListener('click', () => {
+                // Close desktop notes if it's open to prevent double layering
+                if (desktopNotesOpen) {
+                    videoCallContainer.classList.remove('with-notes');
+                    setTimeout(() => {
+                        notesPanel.classList.remove('active');
+                    }, 350);
+                    toggleNotes.classList.remove('active');
+                    desktopNotesOpen = false;
+                }
+
+                mobileNotesOpen = !mobileNotesOpen;
+
+                if (mobileNotesOpen) {
+                    mobileNotesPanel.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    mobileNotesPanel.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+
+                // Update button state
+                mobileToggleNotes.classList.toggle('active', mobileNotesOpen);
+            });
+        }
+</script></body>
 
 </html>
