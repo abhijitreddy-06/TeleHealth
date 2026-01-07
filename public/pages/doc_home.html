@@ -3,963 +3,803 @@
 
 <head>
     <meta charset="UTF-8">
+    <title>Doctor Video Call | TeleHealth</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeleHealth - Virtual Healthcare Solutions</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
-        <style>
+    <style>
+        /* ===============================
+           BASE STYLES FROM DOC_HOME
+           =============================== */
+        :root {
+            /* Color Variables */
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --secondary: #10b981;
+            --background: #f9fafb;
+            --dark-bg: #1e293b;
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-light: #f1f5f9;
+            --text-medium: #475569;
+            --border: #e2e8f0;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --info: #60a5fa;
+            --disabled: #9ca3af;
+            --footer-bg: #1e293b;
+
+            /* Other Variables */
+            --transition: all 0.3s ease;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+
+            /* Header height variable */
+            --header-height: 80px;
+            --control-bar-height: 80px;
+        }
+
+        /* Dark Theme Variables */
+        [data-theme="dark"] {
+            --background: #1e293b;
+            --card-bg: #334155;
+            --text-dark: #f1f5f9;
+            --text-light: #0f172a;
+            --text-medium: #cbd5e1;
+            --border: #475569;
+            --footer-bg: #0f172a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", "Inter", "Roboto", sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-dark);
+            transition: var(--transition);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header & Navigation - EXACT FROM DOC_HOME */
+        header {
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: var(--header-height);
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+            height: 100%;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-family: "Poppins", sans-serif;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo i {
+            color: var(--secondary);
+            font-size: 1.5rem;
+        }
+
+        .logo-text {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links a.active {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-links a:hover:not(.active) {
+            color: var(--primary);
+            background-color: rgba(56, 189, 248, 0.1);
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(56, 189, 248, 0.1);
+        }
+
+        /* Mobile Menu - EXACT FROM DOC_HOME */
+        .mobile-controls {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-menu-btn:hover {
+            background-color: rgba(56, 189, 248, 0.1);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 280px;
+            height: 100vh;
+            background-color: var(--card-bg);
+            z-index: 1000;
+            padding: 2rem;
+            transition: var(--transition);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .close-menu {
+            align-self: flex-end;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-menu:hover {
+            background-color: rgba(56, 189, 248, 0.1);
+        }
+
+        .mobile-menu a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .mobile-menu a:hover,
+        .mobile-menu a.active {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+        }
+
+        .mobile-menu .btn-outline {
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        /* ===============================
+           VIDEO CALL PAGE LAYOUT - DESKTOP
+           =============================== */
+        .main-wrapper {
+            display: flex;
+            min-height: calc(100vh - var(--header-height) - var(--control-bar-height));
+            position: relative;
+            transition: var(--transition);
+        }
+
+        /* Video Container */
+        .video-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: #000;
+            margin: 1rem;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 2px solid var(--border);
+            transition: var(--transition);
+        }
+
+        /* Remote Video */
+        #remoteVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: #000;
+        }
+
+        /* Status Overlay */
+        .call-status-overlay {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-indicator {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot:nth-child(2) {
+            animation-delay: 0.5s;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.5;
+                transform: scale(0.9);
+            }
+        }
+
+        #callStatusText {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        /* Local Video (PiP) */
+        .local-video-pip {
+            position: absolute;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            width: 200px;
+            height: 150px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 3px solid var(--primary);
+            box-shadow: var(--shadow);
+            background: #000;
+            z-index: 5;
+            transition: var(--transition);
+        }
+
+        #localVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .local-video-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        /* Video Loading State */
+        .video-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            z-index: 2;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===============================
+           CONTROL BAR (Fixed at bottom)
+           =============================== */
+        .controls-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--control-bar-height);
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99;
+        }
+
+        .controls-wrapper {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .control-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: var(--transition);
+            padding: 1rem;
+            border-radius: var(--radius);
+            min-width: 80px;
+        }
+
+        .control-btn:hover {
+            background-color: rgba(56, 189, 248, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .control-btn.active {
+            background-color: rgba(56, 189, 248, 0.15);
+            color: var(--primary);
+        }
+
+        .control-btn.danger {
+            color: var(--error);
+        }
+
+        .control-btn.danger:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        .control-icon {
+            font-size: 1.5rem;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--background);
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+
+        .control-btn:hover .control-icon {
+            transform: scale(1.1);
+        }
+
+        .control-btn.active .control-icon {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .control-btn.danger .control-icon {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .control-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        /* ===============================
+           NOTES PANEL - DESKTOP (Slides from right)
+           =============================== */
+        .notes-panel {
+            position: fixed;
+            top: var(--header-height);
+            right: -400px;
+            width: 400px;
+            height: calc(100vh - var(--header-height));
+            background-color: var(--card-bg);
+            border-left: 1px solid var(--border);
+            z-index: 90;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .notes-panel.active {
+            right: 0;
+        }
+
+        .notes-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--card-bg);
+        }
+
+        .notes-header h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: var(--text-dark);
+        }
+
+        .notes-header h3 i {
+            color: var(--primary);
+        }
+
+        .close-notes {
+            background: none;
+            border: none;
+            color: var(--text-medium);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .close-notes:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .notes-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        #notesText {
+            width: 100%;
+            height: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background-color: var(--background);
+            color: var(--text-dark);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: none;
+            transition: var(--transition);
+        }
+
+        #notesText:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+        }
+
+        .notes-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--card-bg);
+        }
+
+        .notes-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .notes-footer .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .char-count {
+            color: var(--text-medium);
+            font-size: 0.875rem;
+        }
+
+        /* ===============================
+           MOBILE VIEW
+           =============================== */
+        @media (max-width: 768px) {
             :root {
-                /* Color Variables */
-                --primary: #38bdf8;
-                --primary-hover: #0ea5e9;
-                --secondary: #10b981;
-                --background: #f9fafb;
-                --dark-bg: #1e293b;
-                --card-bg: #ffffff;
-                --text-dark: #0f172a;
-                --text-light: #f1f5f9;
-                --text-medium: #475569;
-                --border: #e2e8f0;
-                --error: #ef4444;
-                --warning: #f59e0b;
-                --info: #60a5fa;
-                --disabled: #9ca3af;
-                --footer-bg: #1e293b;
-        
-                /* Other Variables */
-                --transition: all 0.3s ease;
-                --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-                    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-                --radius: 12px;
+                --header-height: 70px;
+                --control-bar-height: 70px;
             }
-        
-            /* Dark Theme Variables */
-            [data-theme="dark"] {
-                --background: #1e293b;
-                --card-bg: #334155;
-                --text-dark: #f1f5f9;
-                --text-light: #0f172a;
-                --text-medium: #cbd5e1;
-                --border: #475569;
-                --footer-bg: #0f172a;
+
+            /* Hide desktop nav, show mobile */
+            .nav-links {
+                display: none;
             }
-        
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-                font-family: "Poppins", "Inter", "Roboto", sans-serif;
-            }
-        
-            body {
-                background-color: var(--background);
-                color: var(--text-dark);
-                transition: var(--transition);
-                min-height: 100vh;
+
+            .mobile-controls {
                 display: flex;
-                flex-direction: column;
-                line-height: 1.6;
             }
-        
-            /* Header & Navigation */
-            header {
-                background-color: var(--card-bg);
-                box-shadow: var(--shadow);
-                position: sticky;
-                top: 0;
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .logo-text {
+                display: none;
+            }
+
+            /* Main wrapper for mobile */
+            .main-wrapper {
+                flex-direction: column;
+                min-height: calc(100vh - var(--header-height) - var(--control-bar-height));
+            }
+
+            /* Video container for mobile */
+            .video-container {
+                margin: 0.5rem;
+                margin-bottom: calc(var(--control-bar-height) + 0.5rem);
+            }
+
+            /* Local video PiP smaller for mobile */
+            .local-video-pip {
+                width: 120px;
+                height: 90px;
+                bottom: 0.5rem;
+                right: 0.5rem;
+            }
+
+            /* Control bar adjustments for mobile */
+            .controls-wrapper {
+                gap: 1rem;
+                padding: 0 0.5rem;
+            }
+
+            .control-btn {
+                min-width: 70px;
+                padding: 0.75rem 0.5rem;
+            }
+
+            .control-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 1.25rem;
+            }
+
+            .control-label {
+                font-size: 0.8rem;
+            }
+
+            /* ===============================
+               NOTES PANEL - MOBILE (Slides from bottom)
+               =============================== */
+            .notes-panel {
+                position: fixed;
+                top: auto;
+                bottom: -50vh;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 50vh;
+                border-left: none;
+                border-top: 1px solid var(--border);
+                border-radius: var(--radius) var(--radius) 0 0;
                 z-index: 100;
             }
-        
-            .navbar {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 1.2rem 5%;
-                max-width: 1400px;
-                margin: 0 auto;
-            }
-        
-            .logo {
-                font-size: 1.8rem;
-                font-weight: 700;
-                color: var(--primary);
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                text-decoration: none;
-                font-family: "Poppins", sans-serif;
-                font-weight: 700;
-                letter-spacing: -0.5px;
-            }
-        
-            .logo i {
-                color: var(--secondary);
-                font-size: 1.5rem;
-            }
-        
-            .logo-text {
-                background: linear-gradient(135deg, var(--primary), var(--secondary));
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-                -webkit-text-fill-color: transparent;
-                font-weight: 800;
-            }
-        
-            .nav-links {
-                display: flex;
-                gap: 2rem;
-                align-items: center;
-            }
-        
-            .nav-links a {
-                color: var(--text-dark);
-                text-decoration: none;
-                font-weight: 500;
-                transition: var(--transition);
-                padding: 0.5rem 0.8rem;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-        
-            .nav-links a.active {
-                background-color: rgba(56, 189, 248, 0.1);
-                color: var(--primary);
-            }
-        
-            .nav-links a:hover:not(.active) {
-                color: var(--primary);
-                background-color: rgba(56, 189, 248, 0.1);
-            }
-        
-            .btn {
-                padding: 0.6rem 1.5rem;
-                border-radius: 8px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: var(--transition);
-                border: none;
-            }
-        
-            .btn-primary {
-                background-color: var(--primary);
-                color: white;
-            }
-        
-            .btn-primary:hover {
-                background-color: var(--primary-hover);
-                transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba(56, 189, 248, 0.3);
-            }
-        
-            .btn-outline {
-                background: transparent;
-                border: 2px solid var(--primary);
-                color: var(--primary);
-            }
-        
-            .btn-outline:hover {
-                background-color: var(--primary);
-                color: white;
-            }
-        
-            .theme-toggle {
-                background: none;
-                border: none;
-                cursor: pointer;
-                color: var(--text-dark);
-                font-size: 1.2rem;
-                padding: 0.5rem;
-                border-radius: 50%;
-                width: 40px;
-                height: 40px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: var(--transition);
-            }
-        
-            .theme-toggle:hover {
-                background-color: rgba(56, 189, 248, 0.1);
-            }
-        
-            /* Mobile Menu */
-            .mobile-controls {
-                display: none;
-                align-items: center;
-                gap: 0.5rem;
-            }
-        
-            .mobile-menu-btn {
-                display: none;
-                background: none;
-                border: none;
-                color: var(--text-dark);
-                font-size: 1.5rem;
-                cursor: pointer;
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                align-items: center;
-                justify-content: center;
-            }
-        
-            .mobile-menu-btn:hover {
-                background-color: rgba(56, 189, 248, 0.1);
-            }
-        
-            .mobile-menu {
-                position: fixed;
-                top: 0;
-                right: -100%;
-                width: 280px;
-                height: 100vh;
-                background-color: var(--card-bg);
-                z-index: 1000;
-                padding: 2rem;
-                transition: var(--transition);
-                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-                display: flex;
-                flex-direction: column;
-                gap: 1.5rem;
-            }
-        
-            .mobile-menu.active {
-                right: 0;
-            }
-        
-            .close-menu {
-                align-self: flex-end;
-                background: none;
-                border: none;
-                color: var(--text-dark);
-                font-size: 1.5rem;
-                cursor: pointer;
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-        
-            .close-menu:hover {
-                background-color: rgba(56, 189, 248, 0.1);
-            }
-        
-            .mobile-menu a {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-                padding: 0.8rem 1rem;
-                border-radius: 8px;
-                color: var(--text-dark);
-                text-decoration: none;
-                transition: var(--transition);
-            }
-        
-            .mobile-menu a:hover,
-            .mobile-menu a.active {
-                background-color: rgba(56, 189, 248, 0.1);
-                color: var(--primary);
-            }
-        
-            .mobile-menu .btn-outline {
-                width: 100%;
-                text-align: center;
-                justify-content: center;
-                margin-top: 1rem;
-            }
-        
-            /* Hero Section */
-            .hero {
-                padding: 4rem 5%;
-                max-width: 1400px;
-                margin: 0 auto;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 2rem;
-                align-items: center;
-                justify-content: space-between;
-            }
-        
-            .hero-content {
-                flex: 1;
-                min-width: 300px;
-            }
-        
-            .hero-image {
-                flex: 1;
-                min-width: 300px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-        
-            .hero-image img {
-                max-width: 100%;
-                height: auto;
-                border-radius: var(--radius);
-                box-shadow: var(--shadow);
-            }
-        
-            .hero h1 {
-                font-size: 3rem;
-                line-height: 1.2;
-                margin-bottom: 1.5rem;
-                color: var(--text-dark);
-            }
-        
-            .hero h1 span {
-                background: linear-gradient(135deg, var(--primary), var(--secondary));
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                background-clip: text;
-            }
-        
-            .hero p {
-                font-size: 1.2rem;
-                margin-bottom: 2rem;
-                color: var(--text-medium);
-                max-width: 600px;
-            }
-        
-            .hero-buttons {
-                display: flex;
-                gap: 1rem;
-                flex-wrap: wrap;
-            }
-        
-            /* Features Section */
-            .features {
-                padding: 5rem 5%;
-                background-color: var(--card-bg);
-                margin-top: 3rem;
-            }
-        
-            .section-header {
-                text-align: center;
-                margin-bottom: 3rem;
-            }
-        
-            .section-header h2 {
-                font-size: 2.5rem;
-                margin-bottom: 1rem;
-                color: var(--text-dark);
-            }
-        
-            .section-header p {
-                color: var(--text-medium);
-                max-width: 700px;
-                margin: 0 auto;
-            }
-        
-            .features-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-                gap: 2rem;
-                max-width: 1400px;
-                margin: 0 auto;
-            }
-        
-            .feature-card {
-                background-color: var(--card-bg);
-                padding: 2rem;
-                border-radius: var(--radius);
-                box-shadow: var(--shadow);
-                transition: var(--transition);
-                display: flex;
-                flex-direction: column;
-                gap: 1rem;
-            }
-        
-            .feature-card:hover {
-                transform: translateY(-10px);
-            }
-        
-            .feature-icon {
-                width: 70px;
-                height: 70px;
-                background: linear-gradient(135deg, var(--primary), var(--secondary));
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-size: 1.8rem;
-                margin-bottom: 1rem;
-            }
-        
-            .feature-card h3 {
-                font-size: 1.5rem;
-                margin-bottom: 0.5rem;
-                color: var(--text-dark);
-            }
-        
-            .feature-card p {
-                color: var(--text-medium);
-            }
-        
-            /* Appointment Section */
-            .appointment {
-                padding: 5rem 5%;
-                background-color: var(--background);
-            }
-        
-            .appointment-container {
-                max-width: 1400px;
-                margin: 0 auto;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 3rem;
-                align-items: center;
-            }
-        
-            .appointment-image {
-                flex: 1;
-                min-width: 300px;
-            }
-        
-            .appointment-image img {
-                width: 100%;
-                border-radius: var(--radius);
-                box-shadow: var(--shadow);
-            }
-        
-            .appointment-content {
-                flex: 1;
-                min-width: 300px;
-            }
-        
-            .appointment-content h2 {
-                font-size: 2.5rem;
-                margin-bottom: 1.5rem;
-                color: var(--text-dark);
-            }
-        
-            .appointment-content p {
-                color: var(--text-medium);
-                margin-bottom: 2rem;
-                font-size: 1.1rem;
-            }
-        
-            .steps {
-                display: flex;
-                flex-direction: column;
-                gap: 1.5rem;
-                margin-bottom: 2rem;
-            }
-        
-            .step {
-                display: flex;
-                gap: 1rem;
-                align-items: flex-start;
-            }
-        
-            .step-number {
-                min-width: 40px;
-                height: 40px;
-                background: linear-gradient(135deg, var(--primary), var(--secondary));
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-weight: 600;
-            }
-        
-            .step-content h3 {
-                margin-bottom: 0.5rem;
-                color: var(--text-dark);
-            }
-        
-            .step-content p {
-                margin-bottom: 0;
-                color: var(--text-medium);
-            }
-        
-            /* Stats Section */
-            .stats {
-                padding: 4rem 5%;
-                background-color: var(--card-bg);
-            }
-        
-            .stats-grid {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 2rem;
-                max-width: 1400px;
-                margin: 0 auto;
-                text-align: center;
-            }
-        
-            .stat-item {
-                padding: 2rem;
-            }
-        
-            .stat-number {
-                font-size: 3rem;
-                font-weight: 700;
-                color: var(--primary);
-                margin-bottom: 0.5rem;
-            }
-        
-            .stat-text {
-                color: var(--text-medium);
-                font-size: 1.1rem;
-            }
-        
-            /* Footer */
-            footer {
-                background-color: var(--footer-bg);
-                color: var(--text-light);
-                padding: 3rem 5% 1.5rem;
-                margin-top: auto;
-            }
-        
-            .footer-content {
-                max-width: 1400px;
-                margin: 0 auto;
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 2.5rem;
-            }
-        
-            .footer-logo {
-                font-size: 1.8rem;
-                font-weight: 700;
-                color: var(--primary);
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                margin-bottom: 1rem;
-            }
-        
-            .footer-about p {
-                margin: 1rem 0;
-                line-height: 1.6;
-                color: var(--text-light);
-                opacity: 0.9;
-            }
-        
-            .footer-links h3 {
-                font-size: 1.2rem;
-                margin-bottom: 1.5rem;
-                position: relative;
-                display: inline-block;
-                color: var(--text-light);
-            }
-        
-            .footer-links h3::after {
-                content: "";
-                position: absolute;
-                bottom: -8px;
-                left: 0;
-                width: 40px;
-                height: 3px;
-                background: var(--primary);
-                border-radius: 2px;
-            }
-        
-            .footer-links ul {
-                list-style: none;
-            }
-        
-            .footer-links li {
-                margin-bottom: 0.8rem;
-            }
-        
-            .footer-links a {
-                color: var(--text-light);
-                text-decoration: none;
-                transition: var(--transition);
-                opacity: 0.9;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-            }
-        
-            .footer-links a:hover {
-                color: var(--primary);
-                opacity: 1;
-                padding-left: 5px;
-            }
-        
-            .footer-bottom {
-                max-width: 1400px;
-                margin: 2.5rem auto 0;
-                padding-top: 1.5rem;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                gap: 1rem;
-            }
-        
-            .copyright {
-                opacity: 0.8;
-                color: var(--text-light);
-            }
-        
-            .footer-bottom-links {
-                display: flex;
-                gap: 1.5rem;
-            }
-        
-            .footer-bottom-links a {
-                color: var(--text-light);
-                text-decoration: none;
-                opacity: 0.8;
-                transition: var(--transition);
-            }
-        
-            .footer-bottom-links a:hover {
-                opacity: 1;
-                color: var(--primary);
-            }
-        
-            /* Chatbot */
-            .chatbot-container {
-                position: fixed;
-                bottom: 30px;
-                right: 30px;
-                z-index: 99;
-                display: flex;
-                flex-direction: column;
-                align-items: flex-end;
-                gap: 15px;
-            }
-        
-            .chat-bubble {
-                background: linear-gradient(to right, var(--primary), var(--secondary));
-                color: white;
-                padding: 15px 20px;
-                border-radius: 20px 20px 0 20px;
-                max-width: 250px;
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-                animation: float 4s ease-in-out infinite;
-                position: relative;
-                opacity: 0;
-                transform: translateY(20px);
-                transition: all 0.3s ease;
-            }
-        
-            .chat-bubble.active {
-                opacity: 1;
+
+            .notes-panel.active {
+                bottom: var(--control-bar-height);
                 transform: translateY(0);
             }
-        
-            .chat-bubble:after {
-                content: "";
-                position: absolute;
-                bottom: -10px;
-                right: 0;
-                border-width: 10px 0 0 15px;
-                border-style: solid;
-                border-color: transparent transparent transparent var(--primary);
+
+            /* When notes panel opens on mobile, local video should slide up */
+            .notes-panel.active~.video-container .local-video-pip {
+                transform: translateY(-25vh);
             }
-        
-            .chatbot {
-                width: 60px;
-                height: 60px;
-                background: linear-gradient(to right, var(--primary), var(--secondary));
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-size: 1.5rem;
-                cursor: pointer;
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-                transition: transform 0.3s;
+
+            .notes-content {
+                padding: 1rem;
             }
-        
-            .chatbot:hover {
-                transform: scale(1.1);
+
+            #notesText {
+                min-height: 150px;
             }
-        
-            /* Responsive Design */
-            @media (max-width: 992px) {
-                .hero h1 {
-                    font-size: 2.5rem;
-                }
+
+            .notes-header,
+            .notes-footer {
+                padding: 1rem;
             }
-        
-            @media (max-width: 768px) {
-                .nav-links {
-                    display: none;
-                }
-        
-                .mobile-controls {
-                    display: flex;
-                }
-        
-                .mobile-menu-btn {
-                    display: flex;
-                }
-        
-                .mobile-menu {
-                    display: flex;
-                }
-        
-                .footer-content {
-                    grid-template-columns: 1fr;
-                }
-        
-                .chat-bubble {
-                    max-width: 200px;
-                }
-            }
-        
-            @media (max-width: 576px) {
-                .hero h1 {
-                    font-size: 2rem;
-                }
-        
-                .section-header h2 {
-                    font-size: 2rem;
-                }
-        
-                .appointment-content h2 {
-                    font-size: 2rem;
-                }
-        
-                .btn {
-                    padding: 0.6rem 1.2rem;
-                }
-        
-                .navbar {
-                    padding: 1rem 5%;
-                }
-            }
-        
-            [data-theme="dark"] footer {
-                color: var(--text-dark);
-            }
-        
-            [data-theme="dark"] .footer-links a,
-            [data-theme="dark"] .footer-bottom-links a {
-                color: var(--text-dark);
-                opacity: 0.9;
-            }
-        
-            /* Simple Footer */
-            .simple-footer {
-                background-color: var(--card-bg);
-                border-top: 1px solid var(--border);
-                padding: 1.5rem 5%;
-                text-align: center;
-                margin-top: auto;
-            }
-        
-            .footer-content {
-                max-width: 1400px;
-                margin: 0 auto;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                gap: 1rem;
-            }
-        
-            .footer-left {
-                display: flex;
-                align-items: center;
-                gap: 0.8rem;
-            }
-        
-            .footer-logo {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                color: var(--primary);
-                font-weight: 600;
-                text-decoration: none;
-            }
-        
-            .footer-logo i {
-                color: var(--secondary);
-                font-size: 1.2rem;
-            }
-        
-            .copyright {
-                color: var(--text-medium);
-                font-size: 0.9rem;
-            }
-        
-            .footer-links {
-                display: flex;
-                gap: 1.5rem;
-                align-items: center;
-            }
-        
-            .footer-links a {
-                color: var(--text-medium);
-                text-decoration: none;
-                font-size: 0.9rem;
-                transition: var(--transition);
-            }
-        
-            .footer-links a:hover {
-                color: var(--primary);
-            }
-        
-            .footer-links .separator {
-                color: var(--border);
-            }
-        
-            /* Responsive adjustments */
-            @media (max-width: 768px) {
-                .simple-footer {
-                    padding: 1rem 5%;
-                }
-        
-                .footer-content {
-                    flex-direction: column;
-                    gap: 0.8rem;
-                    text-align: center;
-                }
-        
-                .footer-links {
-                    flex-wrap: wrap;
-                    justify-content: center;
-                    gap: 1rem;
-                }
-        
-                .separator {
-                    display: none;
-                }
-        
-                .footer-links a {
-                    font-size: 0.85rem;
-                }
-            }
+        }
+
         /* ===============================
-   STRICT SIMPLE FOOTER OVERRIDE
-   =============================== */
+           UTILITY CLASSES
+           =============================== */
+        .hidden {
+            display: none !important;
+        }
 
-.simple-footer {
-    all: unset;
-    display: block;
-    background-color: var(--card-bg);
-    border-top: 1px solid var(--border);
-    padding: 0.6rem 5%;          /* compact height */
-    margin-top: auto;
-}
+        /* ===============================
+           FOOTER STYLES (Removed for video call page)
+           =============================== */
+        /* No footer on video call page */
 
-/* GRID LAYOUT – DESKTOP SAFE */
-.simple-footer .footer-content {
-    all: unset;
-    max-width: 1400px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-}
+        /* Remove all link underlines */
+        a,
+        a:hover,
+        a:focus,
+        a:active,
+        a:visited {
+            text-decoration: none !important;
+        }
 
-/* LEFT */
-.simple-footer .footer-left {
-    display: flex;
-    align-items: center;
-}
+        /* Responsive adjustments for smaller mobile screens */
+        @media (max-width: 480px) {
+            .controls-wrapper {
+                gap: 0.5rem;
+            }
 
-.simple-footer .footer-logo {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--primary);
-    font-weight: 600;
-    text-decoration: none;
-}
+            .control-btn {
+                min-width: 60px;
+                padding: 0.5rem;
+            }
 
-.simple-footer .footer-logo i {
-    color: var(--secondary);
-    font-size: 1.2rem;
-}
+            .control-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
 
-/* CENTER TEXT */
-.simple-footer .footer-center {
-    text-align: center;
-}
+            .control-label {
+                font-size: 0.75rem;
+            }
 
-.simple-footer .copyright {
-    color: var(--text-dark);
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
+            .notes-panel {
+                height: 60vh;
+            }
 
-.simple-footer .footer-name {
-    color: var(--text-dark);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.simple-footer .footer-name:hover {
-    text-decoration: underline;
-}
-
-/* RIGHT ICONS */
-.simple-footer .footer-right {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-}
-
-.simple-footer .footer-socials a {
-    color: var(--text-dark);
-    font-size: 1.4rem; /* BIG icons */
-    text-decoration: none;
-}
-
-.simple-footer .footer-socials a:hover {
-    opacity: 0.7;
-}
-
-/* ===============================
-   MOBILE – SMALLER HEIGHT
-   =============================== */
-@media (max-width: 768px) {
-    .simple-footer {
-        padding: 0.5rem 5%;     /* reduced height */
-    }
-
-    .simple-footer .footer-content {
-        display: flex;
-        flex-direction: column;
-        gap: 0.3rem;
-    }
-
-    .simple-footer .footer-center {
-        text-align: center;
-    }
-
-    .simple-footer .footer-right {
-        justify-content: center;
-    }
-
-    .simple-footer .copyright {
-        font-size: 0.8rem;
-    }
-
-    .simple-footer .footer-socials a {
-        font-size: 1.3rem;
-    }
-}
-a,
-a:hover,
-a:focus,
-a:active,
-a:visited {
-    text-decoration: none !important;
-}
-</style>
-
+            .notes-panel.active~.video-container .local-video-pip {
+                transform: translateY(-30vh);
+            }
+        }
+    </style>
 </head>
 
 <body>
-    
+
+    <!-- Header - EXACT FROM DOC_HOME -->
     <header>
         <nav class="navbar">
             <a href="/doc_home" class="logo">
@@ -968,8 +808,8 @@ a:visited {
             </a>
 
             <div class="nav-links">
-                <a href="/doc_home" class="active"><i class="fas fa-home"></i> Home</a>
-                <a href="/doc_video_dashboard"><i class="fas fa-video"></i>Video</a>
+                <a href="/doc_home"><i class="fas fa-home"></i> Home</a>
+                <a href="/doc_video_dashboard" class="active"><i class="fas fa-video"></i>Video</a>
                 <a href="/doc_profile"><i class="fas fa-user-circle"></i> Profile</a>
                 <button class="theme-toggle" id="themeToggle">
                     <i class="fas fa-moon"></i>
@@ -987,341 +827,641 @@ a:visited {
         </nav>
     </header>
 
-
+    <!-- Mobile Menu - EXACT FROM DOC_HOME -->
     <div class="mobile-menu" id="mobileMenu">
         <button class="close-menu" id="closeMenu">
             <i class="fas fa-times"></i>
         </button>
-        <a href="/doc_home" class="active"><i class="fas fa-home"></i> Home</a>
-        <a href="/doc_video_dashboard"><i class="fas fa-video"></i>Video</a>
+        <a href="/doc_home"><i class="fas fa-home"></i> Home</a>
+        <a href="/doc_video_dashboard" class="active"><i class="fas fa-video"></i>Video</a>
         <a href="/doc_profile"><i class="fas fa-user-circle"></i> Profile</a>
-
     </div>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Your <span>Virtual Healthcare</span> Solution</h1>
-            <p>Access top healthcare professionals from the comfort of your home. Anytime, anywhere. TeleHealth makes
-                healthcare accessible, affordable, and convenient.</p>
-            <div class="hero-buttons">
-                <a href="/doc_video_dashboard" class="btn btn-outline"><i class="fas fa-video"></i> Video Consultation</a>
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+        <!-- Video Container -->
+        <div class="video-container">
+            <!-- Status Overlay -->
+            <div class="call-status-overlay" id="callStatusOverlay">
+                <div class="status-indicator">
+                    <div class="status-dot"></div>
+                    <div class="status-dot"></div>
+                </div>
+                <span id="callStatusText">CALL STATUS: CONNECTING...</span>
+            </div>
+
+            <!-- Remote Video Stream -->
+            <video id="remoteVideo" autoplay playsinline></video>
+
+            <!-- Local Video (Picture-in-Picture) -->
+            <div class="local-video-pip">
+                <video id="localVideo" autoplay muted playsinline></video>
+                <div class="local-video-label">
+                    <i class="fas fa-user-md"></i>
+                    <span>YOU</span>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div class="video-loading hidden" id="videoLoading">
+                <div class="loading-spinner"></div>
+                <p>Establishing connection...</p>
             </div>
         </div>
-        <div class="hero-image">
-            <img src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=600&h=400"
-                alt="TeleHealth Virtual Consultation">
-        </div>
-    </section>
 
-    <!-- Features Section -->
-    <section class="features">
-        <div class="section-header">
-            <h2>Our Healthcare Services</h2>
-            <p>Comprehensive virtual healthcare solutions tailored to your needs</p>
+        <!-- Notes Panel -->
+        <div class="notes-panel" id="notesPanel">
+            <div class="notes-header">
+                <h3>
+                    <i class="fas fa-notes-medical"></i>
+                    Consultation Notes
+                </h3>
+                <button class="close-notes" id="closeNotes">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="notes-content">
+                <textarea id="notesText" placeholder="Enter consultation notes here...
+• Symptoms observed
+• Preliminary diagnosis
+• Prescription details
+• Follow-up recommendations
+• Additional observations"></textarea>
+            </div>
+            <div class="notes-footer">
+                <div class="notes-actions">
+                    <button class="btn btn-outline" id="clearNotes">
+                        <i class="fas fa-trash-alt"></i> Clear
+                    </button>
+                    <button class="btn btn-primary" id="saveNotes">
+                        <i class="fas fa-save"></i> Save Notes
+                    </button>
+                </div>
+                <div class="char-count">
+                    <span id="charCount">0</span> characters
+                </div>
+            </div>
         </div>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">
+    </div>
+
+    <!-- Control Bar (Fixed at bottom) -->
+    <div class="controls-bar">
+        <div class="controls-wrapper">
+            <!-- Microphone Toggle -->
+            <button class="control-btn active" id="toggleMic">
+                <div class="control-icon">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <span class="control-label">Mute</span>
+            </button>
+
+            <!-- Camera Toggle -->
+            <button class="control-btn active" id="toggleCam">
+                <div class="control-icon">
                     <i class="fas fa-video"></i>
                 </div>
-                <h3>Virtual Consultations</h3>
-                <p>Connect with doctors through secure video calls from anywhere. No travel required, just quality
-                    healthcare.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-file-medical"></i>
+                <span class="control-label">Camera</span>
+            </button>
+
+            <!-- Notes Button -->
+            <button class="control-btn" id="toggleNotes">
+                <div class="control-icon">
+                    <i class="fas fa-notes-medical"></i>
                 </div>
-                <h3>Health Vault</h3>
-                <p>Securely store and access your medical records, prescriptions, and test results in one place.</p>
-            </div>
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-calendar-alt"></i>
+                <span class="control-label">Notes</span>
+            </button>
+
+            <!-- End Call -->
+            <button class="control-btn danger" id="endCall">
+                <div class="control-icon">
+                    <i class="fas fa-phone-slash"></i>
                 </div>
-                <h3>Appointment Dashboard</h3>
-                <p>Manage all your appointments in one place. Schedule, reschedule, or cancel with ease.</p>
-            </div>
+                <span class="control-label">End</span>
+            </button>
         </div>
-    </section>
+    </div>
 
-    <!-- Appointment Section -->
-    <section class="appointment">
-        <div class="appointment-container">
-            <div class="appointment-content">
-                <h2>Book an Appointment in 3 Simple Steps</h2>
-                <p>Getting the care you need has never been easier. Follow these simple steps to schedule your virtual
-                    consultation.</p>
+    <!-- Scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // ===============================
+        // VARIABLES
+        // ===============================
+        const ROOM_ID = "<%= roomId %>";
+        const APPOINTMENT_ID = "<%= appointment.id %>";
 
-                <div class="steps">
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            <h3>Choose Your Specialist</h3>
-                            <p>Select from our network of board-certified doctors and specialists.</p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            <h3>Select Date & Time</h3>
-                            <p>Pick a convenient time slot that works best for you.</p>
-                        </div>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <div class="step-content">
-                            <h3>Connect Virtually</h3>
-                            <p>Join the video consultation at your scheduled time.</p>
-                        </div>
-                    </div>
-                </div>
+        // DOM Elements
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const toggleMic = document.getElementById('toggleMic');
+        const toggleCam = document.getElementById('toggleCam');
+        const endCall = document.getElementById('endCall');
+        const callStatusText = document.getElementById('callStatusText');
+        const notesText = document.getElementById('notesText');
+        const charCount = document.getElementById('charCount');
+        const notesPanel = document.getElementById('notesPanel');
+        const toggleNotesBtn = document.getElementById('toggleNotes');
+        const closeNotesBtn = document.getElementById('closeNotes');
 
-                <a href="/doc_video_dashboard" class="btn btn-primary"><i class="fas fa-calendar-plus"></i> Schedule Now</a>
-            </div>
-            <div class="appointment-image">
-                <img src="https://images.unsplash.com/photo-1584432810601-6c7f27d2362b?auto=format&fit=crop&w=600&h=400"
-                    alt="Appointment Booking">
-            </div>
-        </div>
-    </section>
+        // Video call state
+        let localStream = null;
+        let remoteStream = null;
+        let peerConnection = null;
+        let socket = null;
+        let callStartTime = null;
+        let isAudioMuted = false;
+        let isVideoOff = false;
 
-    <!-- Stats Section -->
-    <section class="stats">
-        <div class="stats-grid">
-            <div class="stat-item">
-                <div class="stat-number">25k+</div>
-                <div class="stat-text">Patients Served</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">500+</div>
-                <div class="stat-text">Healthcare Providers</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">98%</div>
-                <div class="stat-text">Patient Satisfaction</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">24/7</div>
-                <div class="stat-text">Availability</div>
-            </div>
-        </div>
-    </section>
-
-
-
-
-<footer class="simple-footer">
-    <div class="footer-content">
-        <!-- LEFT -->
-        <div class="footer-left">
-            <a href="/user_home" class="footer-logo">
-                <i class="fas fa-heartbeat"></i>
-                <span>TeleHealth</span>
-            </a>
-        </div>
-<!-- CENTER -->
-<div class="footer-center">
-    <span class="copyright">
-        © 2026 Built by
-        <a href="https://abhijitreddy-portfolio.netlify.app/" target="_blank" rel="noopener" class="footer-name">
-            Abhijit Reddy😊
-        </a>.
-    </span>
-        </div>
-
-        <!-- RIGHT -->
-        <div class="footer-right footer-socials">
-            <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" aria-label="LinkedIn">
-                <i class="fab fa-linkedin"></i>
-            </a>
-            <a href="https://github.com/abhijitreddy-06" target="_blank" aria-label="GitHub">
-                <i class="fab fa-github"></i>
-            </a>
-        </div>
-        </div>
-        </footer>
-
-<script defer>
+        // ===============================
+        // THEME TOGGLE FUNCTIONALITY
+        // ===============================
         document.addEventListener('DOMContentLoaded', function () {
-    
-        const themeToggle = document.getElementById('themeToggle');
-        const mobileThemeToggle = document.getElementById('mobileThemeToggle');
-        const html = document.documentElement;
+            const themeToggle = document.getElementById('themeToggle');
+            const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+            const html = document.documentElement;
 
-
-        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        if (savedTheme) {
-            html.setAttribute('data-theme', savedTheme);
-            updateThemeIcon(savedTheme);
-        }
-
-        function toggleTheme() {
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
-        }
-
-        function updateThemeIcon(theme) {
-            const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
-            themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
-            mobileThemeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
-        }
-
-        themeToggle.addEventListener('click', toggleTheme);
-        mobileThemeToggle.addEventListener('click', toggleTheme);
-
-
-        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-        const closeMenuBtn = document.getElementById('closeMenu');
-        const mobileMenu = document.getElementById('mobileMenu');
-
-        mobileMenuBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            mobileMenu.classList.add('active');
-            document.body.style.overflow = 'hidden';
-        });
-
-        closeMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.remove('active');
-            document.body.style.overflow = '';
-        });
-
-
-        document.addEventListener('click', (e) => {
-            if (mobileMenu.classList.contains('active') &&
-                !mobileMenu.contains(e.target) &&
-                e.target !== mobileMenuBtn) {
-                mobileMenu.classList.remove('active');
-                document.body.style.overflow = '';
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (savedTheme) {
+                html.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
             }
+
+            function toggleTheme() {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            }
+
+            function updateThemeIcon(theme) {
+                const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
+                themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+                if (mobileThemeToggle) {
+                    mobileThemeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+                }
+            }
+
+            themeToggle.addEventListener('click', toggleTheme);
+            if (mobileThemeToggle) {
+                mobileThemeToggle.addEventListener('click', toggleTheme);
+            }
+
+            // ===============================
+            // MOBILE MENU FUNCTIONALITY
+            // ===============================
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const closeMenuBtn = document.getElementById('closeMenu');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    mobileMenu.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            if (closeMenuBtn) {
+                closeMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            document.addEventListener('click', (e) => {
+                if (mobileMenu.classList.contains('active') &&
+                    !mobileMenu.contains(e.target) &&
+                    e.target !== mobileMenuBtn) {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // ===============================
+            // NOTES PANEL FUNCTIONALITY
+            // ===============================
+            toggleNotesBtn.addEventListener('click', () => {
+                notesPanel.classList.toggle('active');
+
+                // Update button state
+                const isActive = notesPanel.classList.contains('active');
+                toggleNotesBtn.classList.toggle('active', isActive);
+                toggleNotesBtn.querySelector('.control-icon').style.backgroundColor = isActive ? 'var(--primary)' : 'var(--background)';
+                toggleNotesBtn.querySelector('.control-icon i').style.color = isActive ? 'white' : '';
+            });
+
+            closeNotesBtn.addEventListener('click', () => {
+                notesPanel.classList.remove('active');
+                toggleNotesBtn.classList.remove('active');
+                toggleNotesBtn.querySelector('.control-icon').style.backgroundColor = 'var(--background)';
+                toggleNotesBtn.querySelector('.control-icon i').style.color = '';
+            });
+
+            // Character counter for notes
+            notesText.addEventListener('input', function () {
+                charCount.textContent = this.value.length;
+            });
+
+            // Clear notes button
+            document.getElementById('clearNotes').addEventListener('click', function () {
+                if (confirm('Are you sure you want to clear all notes?')) {
+                    notesText.value = '';
+                    charCount.textContent = '0';
+                }
+            });
+
+            // Save notes button
+            document.getElementById('saveNotes').addEventListener('click', async function () {
+                if (notesText.value.trim()) {
+                    try {
+                        await fetch("/api/notes/save", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                roomId: ROOM_ID,
+                                notes: notesText.value
+                            })
+                        });
+                        alert('Notes saved successfully!');
+                    } catch (error) {
+                        console.error('Error saving notes:', error);
+                        alert('Error saving notes');
+                    }
+                } else {
+                    alert('No notes to save.');
+                }
+            });
         });
 
-        // Chatbot functionality
-        const chatBubble = document.getElementById('chat-bubble');
-        const chatbot = document.getElementById('chatbot');
+        // ===============================
+        // VIDEO CALL FUNCTIONS
+        // ===============================
+        function updateStatus(message, type) {
+            callStatusText.textContent = `CALL STATUS: ${message}`;
 
-        // Show chat bubble after 3 seconds
-        setTimeout(() => {
-            chatBubble.classList.add('active');
-        }, 3000);
+            const statusDots = document.querySelectorAll('.status-dot');
+            const statusColor = type === 'connected' ? '#10b981' :
+                type === 'warning' ? '#f59e0b' :
+                    type === 'disconnected' ? '#ef4444' : '#60a5fa';
 
-        chatbot.addEventListener('click', () => {
-            alert('Chatbot feature would open here. This is a frontend demonstration.');
-        });
+            statusDots.forEach(dot => {
+                dot.style.backgroundColor = statusColor;
+            });
+        }
 
-    });
-</script>
-<script>
-    (function () {
-        // -------------------------------
-        // 1. Create Loader HTML + CSS
-        // -------------------------------
-        const style = document.createElement("style");
-        style.innerHTML = `
-    #global-loader {
-      position: fixed;
-      inset: 0;
-      background: #ffffff;
-      z-index: 99999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    }
+        async function getLocalStream() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        frameRate: { ideal: 30 }
+                    },
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        autoGainControl: true
+                    }
+                });
 
-    #global-loader.hidden {
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    #global-loader .spinner {
-      width: 46px;
-      height: 46px;
-      border: 4px solid #e5e7eb;
-      border-top-color: #2563eb;
-      border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-      margin-bottom: 12px;
-    }
-
-    #global-loader p {
-      font-size: 14px;
-      color: #374151;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  `;
-        document.head.appendChild(style);
-
-        const loader = document.createElement("div");
-        loader.id = "global-loader";
-        loader.innerHTML = `
-    <div class="spinner"></div>
-    <p>Loading, please wait…</p>
-  `;
-        document.body.appendChild(loader);
-
-        // -------------------------------
-        // 2. Hide loader when page loaded
-        // -------------------------------
-        window.addEventListener("load", () => {
-            loader.classList.add("hidden");
-            setTimeout(() => loader.remove(), 400);
-        });
-
-        // -------------------------------
-        // 3. Show loader on link navigation
-        // -------------------------------
-        document.addEventListener("click", (e) => {
-            const link = e.target.closest("a");
-
-            if (!link) return;
-            if (link.target === "_blank") return;
-            if (link.href.startsWith("mailto:")) return;
-            if (link.href.startsWith("tel:")) return;
-            if (link.hasAttribute("download")) return;
-
-            loader.classList.remove("hidden");
-            loader.style.display = "flex";
-        });
-
-        // -------------------------------
-        // 4. Show loader on form submit
-        // -------------------------------
-        document.addEventListener("submit", () => {
-            loader.classList.remove("hidden");
-            loader.style.display = "flex";
-        });
-
-        // -------------------------------
-        // 5. Slow network hint (optional)
-        // -------------------------------
-        if (navigator.connection && navigator.connection.effectiveType) {
-            if (navigator.connection.effectiveType.includes("2g")) {
-                loader.querySelector("p").innerText =
-                    "Slow network detected… loading";
+                localVideo.srcObject = localStream;
+                document.getElementById('videoLoading').classList.add('hidden');
+            } catch (error) {
+                console.error('Error accessing media devices:', error);
+                updateStatus('MEDIA ERROR', 'disconnected');
+                alert('Unable to access camera and microphone. Please check permissions.');
             }
         }
 
-        // -------------------------------
-        // 6. Safety fallback (10s)
-        // -------------------------------
-        setTimeout(() => {
-            if (document.body.contains(loader)) {
-                loader.remove();
+        async function createPeerConnection() {
+            const configuration = {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' }
+                ]
+            };
+
+            peerConnection = new RTCPeerConnection(configuration);
+
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+
+            peerConnection.ontrack = (event) => {
+                if (!remoteVideo.srcObject) {
+                    remoteVideo.srcObject = event.streams[0];
+                    remoteStream = event.streams[0];
+                }
+            };
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    socket.emit('signal', {
+                        roomId: ROOM_ID,
+                        candidate: event.candidate
+                    });
+                }
+            };
+
+            peerConnection.oniceconnectionstatechange = () => {
+                if (peerConnection.iceConnectionState === 'disconnected' ||
+                    peerConnection.iceConnectionState === 'failed') {
+                    updateStatus('CONNECTION LOST', 'disconnected');
+                } else if (peerConnection.iceConnectionState === 'connected') {
+                    updateStatus('CONNECTED', 'connected');
+                    startTimer();
+                }
+            };
+        }
+
+        async function createOffer() {
+            try {
+                const offer = await peerConnection.createOffer({
+                    offerToReceiveAudio: true,
+                    offerToReceiveVideo: true
+                });
+
+                await peerConnection.setLocalDescription(offer);
+
+                socket.emit('signal', {
+                    roomId: ROOM_ID,
+                    offer: offer
+                });
+            } catch (error) {
+                console.error('Error creating offer:', error);
             }
-        }, 10000);
-    })();
-</script>
+        }
+
+        function initSocket() {
+            socket = io();
+
+            socket.on('connect', () => {
+                updateStatus('CONNECTING...', 'warning');
+                socket.emit('join-room', { roomId: ROOM_ID, role: 'doctor' });
+            });
+
+            socket.on('user-ready', async () => {
+                updateStatus('PATIENT CONNECTED', 'warning');
+                await createPeerConnection();
+                await createOffer();
+            });
+
+            socket.on('signal', async (data) => {
+                if (!peerConnection) {
+                    await createPeerConnection();
+                }
+
+                if (data.answer) {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                    updateStatus('CONNECTED', 'connected');
+                    startTimer();
+                } else if (data.candidate) {
+                    try {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    } catch (e) {
+                        console.error('Error adding ICE candidate:', e);
+                    }
+                }
+            });
+
+            socket.on('call-ended', () => {
+                endCallHandler();
+            });
+
+            socket.on('disconnect', () => {
+                updateStatus('DISCONNECTED', 'disconnected');
+            });
+        }
+
+        function startTimer() {
+            if (!callStartTime) {
+                callStartTime = Date.now();
+            }
+        }
+
+        // ===============================
+        // CONTROL BUTTON EVENT LISTENERS
+        // ===============================
+        toggleMic.addEventListener('click', () => {
+            if (localStream) {
+                localStream.getAudioTracks().forEach(track => {
+                    track.enabled = !track.enabled;
+                });
+
+                isAudioMuted = !localStream.getAudioTracks()[0].enabled;
+                toggleMic.classList.toggle('active', !isAudioMuted);
+                toggleMic.querySelector('.control-icon i').className = isAudioMuted ?
+                    'fas fa-microphone-slash' :
+                    'fas fa-microphone';
+                toggleMic.querySelector('.control-label').textContent = isAudioMuted ? 'Unmute' : 'Mute';
+            }
+        });
+
+        toggleCam.addEventListener('click', () => {
+            if (localStream) {
+                localStream.getVideoTracks().forEach(track => {
+                    track.enabled = !track.enabled;
+                });
+
+                isVideoOff = !localStream.getVideoTracks()[0].enabled;
+                toggleCam.classList.toggle('active', !isVideoOff);
+                toggleCam.querySelector('.control-icon i').className = isVideoOff ?
+                    'fas fa-video-slash' :
+                    'fas fa-video';
+                toggleCam.querySelector('.control-label').textContent = isVideoOff ? 'Camera On' : 'Camera Off';
+            }
+        });
+
+        async function endCallHandler() {
+            const notes = notesText.value.trim();
+
+            // Save notes
+            if (notes) {
+                try {
+                    await fetch("/api/notes/save", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            roomId: ROOM_ID,
+                            notes: notes
+                        })
+                    });
+                } catch (error) {
+                    console.error('Error saving notes:', error);
+                }
+            }
+
+            // Notify server
+            if (socket) {
+                socket.emit('doctor-end-call', {
+                    roomId: ROOM_ID,
+                    appointmentId: APPOINTMENT_ID,
+                    notes: notes
+                });
+            }
+
+            // Close connection
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+
+            // Stop stream
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+
+            // Complete appointment
+            try {
+                await fetch(`/appointments/${APPOINTMENT_ID}/complete`, {
+                    method: "POST"
+                });
+            } catch (error) {
+                console.error('Error completing appointment:', error);
+            }
+
+            // Disconnect
+            if (socket) {
+                socket.disconnect();
+            }
+
+            // Redirect
+            window.location.href = "/doc_video_dashboard";
+        }
+
+        endCall.addEventListener('click', endCallHandler);
+
+        // Auto-save notes every 30 seconds
+        setInterval(async () => {
+            if (notesText.value.trim()) {
+                try {
+                    await fetch("/api/notes/save", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            roomId: ROOM_ID,
+                            notes: notesText.value
+                        })
+                    });
+                } catch (error) {
+                    console.error('Error auto-saving notes:', error);
+                }
+            }
+        }, 30000);
+
+        // ===============================
+        // INITIALIZATION
+        // ===============================
+        async function init() {
+            updateStatus('INITIALIZING...', 'warning');
+            await getLocalStream();
+            initSocket();
+        }
+
+        init();
+
+        // Handle page unload
+        window.addEventListener('beforeunload', (e) => {
+            if (peerConnection || socket?.connected) {
+                e.preventDefault();
+                e.returnValue = 'Are you sure you want to leave the call?';
+                return e.returnValue;
+            }
+        });
+    </script>
+
+    <!-- Global Loader Script -->
+    <script>
+        (function () {
+            const style = document.createElement("style");
+            style.innerHTML = `
+                #global-loader {
+                    position: fixed;
+                    inset: 0;
+                    background: #ffffff;
+                    z-index: 99999;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+                }
+
+                #global-loader.hidden {
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 0.3s ease;
+                }
+
+                #global-loader .spinner {
+                    width: 46px;
+                    height: 46px;
+                    border: 4px solid #e5e7eb;
+                    border-top-color: #2563eb;
+                    border-radius: 50%;
+                    animation: spin 0.9s linear infinite;
+                    margin-bottom: 12px;
+                }
+
+                #global-loader p {
+                    font-size: 14px;
+                    color: #374151;
+                }
+
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+            `;
+            document.head.appendChild(style);
+
+            const loader = document.createElement("div");
+            loader.id = "global-loader";
+            loader.innerHTML = `
+                <div class="spinner"></div>
+                <p>Loading, please wait…</p>
+            `;
+            document.body.appendChild(loader);
+
+            window.addEventListener("load", () => {
+                loader.classList.add("hidden");
+                setTimeout(() => loader.remove(), 400);
+            });
+
+            document.addEventListener("click", (e) => {
+                const link = e.target.closest("a");
+                if (!link) return;
+                if (link.target === "_blank") return;
+                if (link.href.startsWith("mailto:")) return;
+                if (link.href.startsWith("tel:")) return;
+                if (link.hasAttribute("download")) return;
+
+                loader.classList.remove("hidden");
+                loader.style.display = "flex";
+            });
+
+            document.addEventListener("submit", () => {
+                loader.classList.remove("hidden");
+                loader.style.display = "flex";
+            });
+
+            if (navigator.connection && navigator.connection.effectiveType) {
+                if (navigator.connection.effectiveType.includes("2g")) {
+                    loader.querySelector("p").innerText =
+                        "Slow network detected… loading";
+                }
+            }
+
+            setTimeout(() => {
+                if (document.body.contains(loader)) {
+                    loader.remove();
+                }
+            }, 10000);
+        })();
+    </script>
 
 </body>
 
