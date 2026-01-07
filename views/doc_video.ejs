@@ -258,9 +258,10 @@
             position: relative;
             width: 100%;
             height: calc(100vh - var(--header-height-desktop));
-            transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: margin-right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* FIX: Combined width and margin transition to prevent double layer effect */
         .video-call-container.with-notes {
             margin-right: 400px;
             width: calc(100% - 400px);
@@ -330,7 +331,6 @@
             position: relative;
             overflow: hidden;
             background: #000;
-            /* NOTE: intentionally removed transform animation to prevent double 'layer' visual shift */
             transition: none;
         }
 
@@ -353,8 +353,8 @@
             box-shadow: var(--shadow);
             background: #000;
             z-index: 95;
-            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #localVideo {
@@ -378,11 +378,10 @@
             justify-content: center;
         }
 
-        /* When desktop notes open, nudge PiP left (controlled, not fully pushed offscreen) */
+        /* FIX: Adjusted position to prevent excessive push */
         .video-call-container.with-notes .local-video-pip {
-            right: 260px;
-            /* tuned so PiP still visible and doesn't get pushed excessively */
-            transform: scale(0.98);
+            right: 420px;
+            transform: scale(0.95);
         }
 
         /* Video Loading State */
@@ -531,7 +530,7 @@
         }
 
         /* ===============================
-           DESKTOP NOTES PANEL (RIGHT SIDEBAR)
+           DESKTOP NOTES PANEL (RIGHT SIDEBAR) - FIXED
            =============================== */
         .notes-panel {
             position: fixed;
@@ -542,15 +541,25 @@
             background-color: var(--card-bg);
             border-left: 1px solid var(--border);
             z-index: 200;
-            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+            opacity: 1;
+            /* FIX: Ensure panel content is visible from the start */
         }
 
         .notes-panel.active {
             right: 0;
             box-shadow: -2px 0 15px rgba(0, 0, 0, 0.08);
+        }
+
+        /* FIX: Remove the old visible class approach - content is always visible */
+        .notes-content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+            opacity: 1 !important;
         }
 
         .notes-header {
@@ -591,19 +600,6 @@
         .close-notes:hover {
             background-color: rgba(0, 0, 0, 0.1);
             transform: rotate(90deg);
-        }
-
-        .notes-content {
-            flex: 1;
-            padding: 1.5rem;
-            overflow-y: auto;
-            /* content visible only when 'visible' modifier present to avoid flicker */
-            opacity: 0;
-            transition: opacity 0.25s ease-in-out;
-        }
-
-        .notes-panel.visible .notes-content {
-            opacity: 1;
         }
 
         #notesText {
@@ -671,7 +667,7 @@
         }
 
         /* ===============================
-           MOBILE VIEW
+           MOBILE VIEW - UPDATED CONTROL BUTTONS
            =============================== */
         @media (max-width: 768px) {
             :root {
@@ -747,6 +743,73 @@
                 padding: 0 1rem;
             }
 
+            /* MOBILE CONTROL BUTTONS - UPDATED ICONS */
+            .mobile-control-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: var(--card-bg);
+                border: 2px solid var(--border);
+                color: var(--text-medium);
+                cursor: pointer;
+                transition: var(--transition);
+                width: 55px;
+                height: 55px;
+                border-radius: 50%;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .mobile-control-btn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 8px 16px rgba(56, 189, 248, 0.15);
+                border-color: transparent;
+            }
+
+            .mobile-control-btn:active {
+                transform: scale(0.98);
+            }
+
+            .mobile-control-btn.active {
+                color: var(--primary);
+                border-color: var(--primary);
+                background-color: rgba(56, 189, 248, 0.08);
+            }
+
+            .mobile-control-btn.inactive {
+                color: var(--text-medium);
+                border-color: var(--border);
+                background-color: var(--card-bg);
+                opacity: 0.7;
+            }
+
+            .mobile-control-btn.inactive i {
+                position: relative;
+            }
+
+            .mobile-control-btn.inactive i::after {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 26px;
+                height: 2px;
+                background: var(--text-medium);
+                transform: translate(-50%, -50%) rotate(45deg);
+                border-radius: 1px;
+            }
+
+            .mobile-control-btn.danger {
+                color: var(--error);
+                border-color: var(--error);
+                background-color: rgba(239, 68, 68, 0.08);
+            }
+
+            .mobile-control-btn i {
+                font-size: 1.3rem;
+                transition: var(--transition);
+            }
+
             /* LOCAL VIDEO PIP - MOBILE (fixed) */
             .local-video-pip {
                 position: fixed;
@@ -756,7 +819,7 @@
                 height: 105px;
                 border-width: 2px;
                 z-index: 110;
-                transition: bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+                transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
             /* STATUS OVERLAY MOBILE */
@@ -785,7 +848,7 @@
             background-color: var(--card-bg);
             border-top: 1px solid var(--border);
             z-index: 120;
-            transition: bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
         }
@@ -825,7 +888,8 @@
         @media (min-width: 769px) {
 
             .mobile-notes-panel,
-            .mobile-controls-bar {
+            .mobile-controls-bar,
+            .mobile-control-btn {
                 display: none !important;
             }
         }
@@ -834,7 +898,8 @@
         @media (max-width: 768px) {
 
             .desktop-controls,
-            .notes-panel {
+            .notes-panel,
+            .control-btn {
                 display: none !important;
             }
         }
@@ -992,7 +1057,7 @@
             </div>
         </div>
 
-        <!-- MOBILE CONTROLS (FIXED AT BOTTOM) -->
+        <!-- MOBILE CONTROLS (FIXED AT BOTTOM) - UPDATED -->
         <div class="mobile-controls-bar">
             <div class="mobile-controls-wrapper">
                 <!-- Microphone Toggle -->
@@ -1078,7 +1143,7 @@
         let isVideoOff = false;
 
         // ===============================
-        // NEW UI FUNCTIONALITY
+        // NEW UI FUNCTIONALITY - FIXED
         // ===============================
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -1174,7 +1239,7 @@
             const mobileClearNotes = document.getElementById('mobileClearNotes');
             const mobileSaveNotes = document.getElementById('mobileSaveNotes');
 
-            // FIX: Prevent double-layering of notes panels
+            // FIX: Variables to track state
             let desktopNotesOpen = false;
             let mobileNotesOpen = false;
 
@@ -1193,7 +1258,7 @@
                 });
             }
 
-            // DESKTOP NOTES TOGGLE (Right sidebar)
+            // DESKTOP NOTES TOGGLE (Right sidebar) - FIXED
             if (toggleNotes) {
                 toggleNotes.addEventListener('click', () => {
                     // Close mobile notes if open
@@ -1214,82 +1279,50 @@
                     }, 150);
 
                     if (desktopNotesOpen) {
-                        // OPEN FLOW:
+                        // OPEN FLOW - SIMPLIFIED:
                         // 1) Add 'active' to slide panel in
+                        // 2) Add 'with-notes' to container simultaneously
                         notesPanel.classList.add('active');
                         notesPanel.setAttribute('aria-hidden', 'false');
+                        videoCallContainer.classList.add('with-notes');
 
-                        // 2) Ensure content is hidden until panel finished sliding to avoid flicker
-                        notesPanel.classList.remove('visible');
-
-                        // 3) Once the panel finishes sliding in (transitionend on 'right'), reveal content and then add with-notes
-                        const onPanelShown = function (e) {
-                            if (e.propertyName === 'right') {
-                                // reveal content smoothly
-                                notesPanel.classList.add('visible');
-                                // add class to nudge content after sidebar is fully visible
-                                videoCallContainer.classList.add('with-notes');
-                            }
-                        };
-                        notesPanel.addEventListener('transitionend', onPanelShown, { once: true });
+                        // Update button state
+                        toggleNotes.classList.add('active');
                     } else {
-                        // CLOSE FLOW:
-                        // 1) remove the page shift immediately (content returns)
+                        // CLOSE FLOW - SIMPLIFIED:
+                        // 1) Remove 'with-notes' first (shifts content back)
+                        // 2) Remove 'active' after delay
                         videoCallContainer.classList.remove('with-notes');
 
-                        // 2) hide content immediately to avoid content appearing as the panel slides out
-                        notesPanel.classList.remove('visible');
+                        // Update button state
+                        toggleNotes.classList.remove('active');
 
-                        // 3) wait for transitionend and then remove 'active'
-                        const onPanelHidden = function (e) {
-                            if (e.propertyName === 'right') {
-                                notesPanel.classList.remove('active');
-                                notesPanel.setAttribute('aria-hidden', 'true');
-                            }
-                        };
-                        notesPanel.addEventListener('transitionend', onPanelHidden, { once: true });
-
-                        // Safety fallback: if transitionend not fired, remove after timeout
+                        // Remove panel after content has shifted back
                         setTimeout(() => {
-                            if (!videoCallContainer.classList.contains('with-notes')) {
-                                notesPanel.classList.remove('active');
-                                notesPanel.setAttribute('aria-hidden', 'true');
-                            }
-                        }, 500);
+                            notesPanel.classList.remove('active');
+                            notesPanel.setAttribute('aria-hidden', 'true');
+                        }, 400); // Match the transition duration
                     }
-
-                    // Update button state
-                    toggleNotes.classList.toggle('active', desktopNotesOpen);
                 });
             }
 
             if (closeNotes) {
                 closeNotes.addEventListener('click', () => {
                     desktopNotesOpen = false;
-                    // Remove visible content immediately so it doesn't 'pop' while sliding
-                    notesPanel.classList.remove('visible');
 
-                    // Remove shift
+                    // Remove shift immediately
                     videoCallContainer.classList.remove('with-notes');
 
-                    // Hide panel after it slides out
-                    const onPanelHidden = function (e) {
-                        if (e.propertyName === 'right') {
-                            notesPanel.classList.remove('active');
-                            notesPanel.setAttribute('aria-hidden', 'true');
-                        }
-                    };
-                    notesPanel.addEventListener('transitionend', onPanelHidden, { once: true });
+                    // Update button state
+                    toggleNotes.classList.remove('active');
 
-                    // fallback
+                    // Remove panel after content has shifted back
                     setTimeout(() => {
                         notesPanel.classList.remove('active');
                         notesPanel.setAttribute('aria-hidden', 'true');
-                    }, 500);
+                    }, 400);
 
-                    toggleNotes.classList.remove('active');
-
-                    // Add subtle animation to close button
+                    // Button animation
                     closeNotes.style.transform = 'rotate(90deg)';
                     setTimeout(() => {
                         closeNotes.style.transform = '';
@@ -1305,9 +1338,8 @@
                         videoCallContainer.classList.remove('with-notes');
                         setTimeout(() => {
                             notesPanel.classList.remove('active');
-                            notesPanel.classList.remove('visible');
                             notesPanel.setAttribute('aria-hidden', 'true');
-                        }, 350);
+                        }, 400);
                         toggleNotes.classList.remove('active');
                         desktopNotesOpen = false;
                     }
@@ -1318,7 +1350,6 @@
                         mobileNotesPanel.classList.add('active');
                         mobileNotesPanel.setAttribute('aria-hidden', 'false');
                         document.body.style.overflow = 'hidden';
-                        // add body class so PiP moves up smoothly in CSS
                         document.body.classList.add('mobile-notes-open');
                     } else {
                         mobileNotesPanel.classList.remove('active');
