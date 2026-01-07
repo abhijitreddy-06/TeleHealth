@@ -754,7 +754,7 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                z-index: 100;
+                z-index: 80;
                 padding: 0 5%;
                 overflow: hidden;
             }
@@ -860,7 +860,7 @@
                 width: 140px;
                 height: 105px;
                 border-width: 2px;
-                z-index: 50;
+                z-index: 90;
                 transition: bottom 0.3s ease;
             }
 
@@ -889,7 +889,7 @@
             height: 50vh;
             background-color: var(--card-bg);
             border-top: 1px solid var(--border);
-            z-index: 80;
+            z-index: 100;
             transition: bottom 0.3s ease-out;
             display: flex;
             flex-direction: column;
@@ -897,6 +897,33 @@
 
         .mobile-notes-panel.active {
             bottom: var(--controls-height-mobile);
+        }
+
+        /* FIX: Mobile notes text area size */
+        .mobile-notes-panel .notes-content {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        #mobileNotesText {
+            width: 100%;
+            height: 100%;
+            min-height: 200px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            background-color: var(--background);
+            color: var(--text-dark);
+            font-family: inherit;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            resize: none;
+        }
+
+        /* FIX: Move local video up when mobile notes panel is active */
+        .mobile-notes-panel.active~.video-call-container .local-video-pip {
+            bottom: calc(50vh + var(--controls-height-mobile) + 20px);
         }
 
         /* Hide desktop notes panel on mobile */
@@ -1222,17 +1249,17 @@
                 }
             });
 
-            // NOTES PANEL FUNCTIONALITY
+            // NOTES PANEL FUNCTIONALITY - FIXED
             setupNotesPanels();
 
-            // MIC AND CAMERA TOGGLE FUNCTIONALITY
+            // MIC AND CAMERA TOGGLE FUNCTIONALITY - FIXED
             setupMediaToggles();
 
             // Initialize video call (existing logic)
             initVideoCall();
         });
 
-        // Setup notes panels for desktop and mobile
+        // Setup notes panels for desktop and mobile - FIXED
         function setupNotesPanels() {
             // Desktop notes
             const toggleNotes = document.getElementById('toggleNotes');
@@ -1253,6 +1280,10 @@
             const mobileClearNotes = document.getElementById('mobileClearNotes');
             const mobileSaveNotes = document.getElementById('mobileSaveNotes');
 
+            // FIX: Prevent double-layering of notes panels
+            let desktopNotesOpen = false;
+            let mobileNotesOpen = false;
+
             // Character counters
             notesText.addEventListener('input', function () {
                 charCount.textContent = this.value.length;
@@ -1267,9 +1298,16 @@
             });
 
             // DESKTOP NOTES TOGGLE (Right sidebar)
-            let desktopNotesOpen = false;
             if (toggleNotes) {
                 toggleNotes.addEventListener('click', () => {
+                    // Close mobile notes if open
+                    if (mobileNotesOpen) {
+                        mobileNotesPanel.classList.remove('active');
+                        mobileToggleNotes.classList.remove('active');
+                        mobileNotesOpen = false;
+                        document.body.style.overflow = '';
+                    }
+
                     desktopNotesOpen = !desktopNotesOpen;
 
                     // Add button click animation
@@ -1315,9 +1353,18 @@
             }
 
             // MOBILE NOTES TOGGLE (Bottom slide-up)
-            let mobileNotesOpen = false;
             if (mobileToggleNotes) {
                 mobileToggleNotes.addEventListener('click', () => {
+                    // Close desktop notes if open
+                    if (desktopNotesOpen) {
+                        videoCallContainer.classList.remove('with-notes');
+                        setTimeout(() => {
+                            notesPanel.classList.remove('active');
+                        }, 350);
+                        toggleNotes.classList.remove('active');
+                        desktopNotesOpen = false;
+                    }
+
                     mobileNotesOpen = !mobileNotesOpen;
 
                     if (mobileNotesOpen) {
@@ -1375,7 +1422,7 @@
             }
         }
 
-        // Setup mic and camera toggle functionality
+        // Setup mic and camera toggle functionality - FIXED
         function setupMediaToggles() {
             // Get all control buttons
             const toggleMic = document.getElementById('toggleMic');
@@ -1385,20 +1432,26 @@
             const mobileToggleCam = document.getElementById('mobileToggleCam');
             const mobileEndCall = document.getElementById('mobileEndCall');
 
-            // MIC TOGGLE FUNCTIONALITY
+            // MIC TOGGLE FUNCTIONALITY - FIXED
             if (toggleMic && mobileToggleMic) {
                 const toggleMicHandler = () => {
-                    if (!localStream) return;
+                    if (!localStream) {
+                        console.error('Local stream not available');
+                        return;
+                    }
 
                     const audioTracks = localStream.getAudioTracks();
                     if (audioTracks.length > 0) {
-                        isAudioMuted = !audioTracks[0].enabled;
+                        isAudioMuted = !isAudioMuted;
                         audioTracks.forEach(track => {
                             track.enabled = !isAudioMuted;
                         });
 
                         // Update UI state for both desktop and mobile
                         updateButtonState(toggleMic, mobileToggleMic, !isAudioMuted, 'fa-microphone', 'fa-microphone-slash');
+
+                        // Show visual feedback
+                        showMediaToggleFeedback(isAudioMuted ? 'Microphone muted' : 'Microphone on');
                     }
                 };
 
@@ -1406,20 +1459,26 @@
                 mobileToggleMic.addEventListener('click', toggleMicHandler);
             }
 
-            // CAMERA TOGGLE FUNCTIONALITY
+            // CAMERA TOGGLE FUNCTIONALITY - FIXED
             if (toggleCam && mobileToggleCam) {
                 const toggleCamHandler = () => {
-                    if (!localStream) return;
+                    if (!localStream) {
+                        console.error('Local stream not available');
+                        return;
+                    }
 
                     const videoTracks = localStream.getVideoTracks();
                     if (videoTracks.length > 0) {
-                        isVideoOff = !videoTracks[0].enabled;
+                        isVideoOff = !isVideoOff;
                         videoTracks.forEach(track => {
                             track.enabled = !isVideoOff;
                         });
 
                         // Update UI state for both desktop and mobile
                         updateButtonState(toggleCam, mobileToggleCam, !isVideoOff, 'fa-video', 'fa-video-slash');
+
+                        // Show visual feedback
+                        showMediaToggleFeedback(isVideoOff ? 'Camera off' : 'Camera on');
                     }
                 };
 
@@ -1446,10 +1505,54 @@
 
             // Update button classes and icons
             [button1, button2].forEach(button => {
-                button.classList.toggle('active', isActive);
-                button.classList.toggle('inactive', !isActive);
-                button.querySelector('i').className = `fas ${isActive ? activeIcon : inactiveIcon}`;
+                if (button) {
+                    button.classList.toggle('active', isActive);
+                    button.classList.toggle('inactive', !isActive);
+                    const iconElement = button.querySelector('i');
+                    if (iconElement) {
+                        iconElement.className = `fas ${isActive ? activeIcon : inactiveIcon}`;
+                    }
+                }
             });
+        }
+
+        // Helper function to show media toggle feedback
+        function showMediaToggleFeedback(message) {
+            // Create feedback element
+            let feedback = document.getElementById('mediaToggleFeedback');
+            if (!feedback) {
+                feedback = document.createElement('div');
+                feedback.id = 'mediaToggleFeedback';
+                feedback.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    z-index: 1000;
+                    font-size: 14px;
+                    pointer-events: none;
+                    opacity: 0;
+                    transition: opacity 0.3s;
+                `;
+                document.body.appendChild(feedback);
+            }
+
+            feedback.textContent = message;
+            feedback.style.opacity = '1';
+
+            // Hide after 1.5 seconds
+            setTimeout(() => {
+                feedback.style.opacity = '0';
+                setTimeout(() => {
+                    if (feedback.parentNode) {
+                        feedback.parentNode.removeChild(feedback);
+                    }
+                }, 300);
+            }, 1500);
         }
 
         // ===============================
