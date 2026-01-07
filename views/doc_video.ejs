@@ -257,7 +257,7 @@
             flex-direction: column;
             position: relative;
             width: 100%;
-            height: calc(100vh - var(--header-height-desktop));
+            height: calc(100vh - var(--header-height-desktop) - var(--controls-height-desktop));
             transition: margin-right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -334,11 +334,12 @@
             transition: none;
         }
 
-        #remoteVideo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+#remoteVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;  
+    background: black;
+}
 
         /* Local Video (PiP) - Desktop */
         .local-video-pip {
@@ -431,7 +432,7 @@
             align-items: center;
             padding: 0 5%;
             width: 100%;
-            position: relative;
+            position: fixed;
             z-index: 10;
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             overflow: hidden;
@@ -1486,7 +1487,8 @@
                     audio: {
                         echoCancellation: true,
                         noiseSuppression: true,
-                        autoGainControl: true
+                        autoGainControl: true,
+                        channelCount: 1
                     }
                 });
 
@@ -1513,9 +1515,14 @@
             peerConnection = new RTCPeerConnection(configuration);
 
             // Add local stream tracks
-            localStream.getTracks().forEach(track => {
+            localStream.getAudioTracks().forEach(track => {
                 peerConnection.addTrack(track, localStream);
             });
+
+            localStream.getVideoTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+
 
             // Handle remote stream
             peerConnection.ontrack = (event) => {
@@ -1524,7 +1531,8 @@
                     remoteStream = event.streams[0];
                 }
             };
-
+            remoteVideo.setAttribute("playsinline", true);
+            remoteVideo.volume = 1.0;
             // Handle ICE candidates
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
@@ -1550,10 +1558,8 @@
         // Create offer
         async function createOffer() {
             try {
-                const offer = await peerConnection.createOffer({
-                    offerToReceiveAudio: true,
-                    offerToReceiveVideo: true
-                });
+                const offer = await peerConnection.createOffer();
+
 
                 await peerConnection.setLocalDescription(offer);
 
@@ -1705,6 +1711,7 @@
             if (socket) {
                 socket.disconnect();
             }
+            cleanupCall();
 
             // Redirect to dashboard
             window.location.href = "/doc_video_dashboard";
@@ -1716,14 +1723,35 @@
             await getLocalStream();
             initSocket();
         }
+    // ===============================
+    // CLEANUP FUNCTION (VERY IMPORTANT)
+    // ===============================
+    function cleanupCall() {
+        if (peerConnection) {
+            peerConnection.ontrack = null;
+            peerConnection.onicecandidate = null;
+            peerConnection.close();
+            peerConnection = null;
+        }
+
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
+
+        if (remoteVideo) {
+            remoteVideo.srcObject = null;
+        }
+
+        if (socket && socket.connected) {
+            socket.disconnect();
+            socket = null;
+        }
+    }
 
         // Handle page unload
         window.addEventListener('beforeunload', (e) => {
-            if (peerConnection || socket?.connected) {
-                e.preventDefault();
-                e.returnValue = 'Are you sure you want to leave the call?';
-                return e.returnValue;
-            }
+            cleanupCall();   
         });
     </script>
 
