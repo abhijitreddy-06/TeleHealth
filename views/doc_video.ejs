@@ -261,11 +261,12 @@
             position: relative;
             width: 100%;
             height: calc(100vh - var(--header-height-desktop));
-            transition: margin-left 0.3s ease;
+            transition: margin-right 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .video-call-container.with-notes {
-            margin-left: 400px;
+            margin-right: 400px;
             width: calc(100% - 400px);
         }
 
@@ -284,6 +285,11 @@
             z-index: 10;
             backdrop-filter: blur(4px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .video-call-container.with-notes .call-status-overlay {
+            transform: translateX(-200px);
         }
 
         .status-indicator {
@@ -328,6 +334,11 @@
             position: relative;
             overflow: hidden;
             background: #000;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .video-call-container.with-notes .video-main-area {
+            transform: translateX(-200px) scale(0.98);
         }
 
         #remoteVideo {
@@ -350,11 +361,7 @@
             box-shadow: var(--shadow);
             background: #000;
             z-index: 5;
-            transition: all 0.3s ease;
-        }
-
-        .video-call-container.with-notes .local-video-pip {
-            right: calc(20px + 400px);
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #localVideo {
@@ -424,6 +431,11 @@
             width: 100%;
             position: relative;
             z-index: 10;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .video-call-container.with-notes .desktop-controls {
+            transform: translateX(-200px) scale(0.98);
         }
 
         .controls-wrapper {
@@ -435,14 +447,17 @@
             width: 100%;
         }
 
+        /* ===============================
+           DESKTOP CONTROL BUTTONS - NEUTRAL BACKGROUND
+           =============================== */
         .control-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 0.5rem;
-            background: none;
+            background: transparent;
             border: none;
-            color: var(--text-dark);
+            color: var(--text-medium);
             cursor: pointer;
             transition: var(--transition);
             padding: 0.5rem 1rem;
@@ -451,19 +466,18 @@
         }
 
         .control-btn:hover {
-            background-color: rgba(56, 189, 248, 0.1);
-            transform: translateY(-2px);
+            background-color: rgba(56, 189, 248, 0.08);
         }
 
-        /* ACTIVE STATES WITH COLORS */
+        /* ACTIVE STATES WITH NEUTRAL BACKGROUND */
         .control-btn.active {
-            background-color: rgba(56, 189, 248, 0.15);
             color: var(--primary);
         }
 
         .control-btn.active .control-icon {
-            background-color: var(--primary);
-            color: white;
+            background-color: var(--card-bg);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         /* INACTIVE STATES */
@@ -472,22 +486,36 @@
         }
 
         .control-btn.inactive .control-icon {
-            background-color: var(--background);
+            background-color: var(--card-bg);
+            border-color: var(--border);
             color: var(--text-medium);
         }
 
-        /* DANGER STATE */
+        /* DANGER STATE - END CALL */
         .control-btn.danger {
             color: var(--error);
         }
 
         .control-btn.danger .control-icon {
-            background-color: var(--error);
-            color: white;
+            background-color: var(--card-bg);
+            border-color: var(--error);
+            color: var(--error);
         }
 
         .control-btn.danger:hover {
-            background-color: rgba(239, 68, 68, 0.1);
+            background-color: rgba(239, 68, 68, 0.08);
+        }
+
+        .control-btn.danger:hover .control-icon {
+            background-color: var(--card-bg);
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .control-btn.danger.active .control-icon {
+            background-color: var(--error);
+            border-color: var(--error);
+            color: white;
         }
 
         .control-icon {
@@ -497,7 +525,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: var(--background);
+            background-color: var(--card-bg);
+            border: 2px solid var(--border);
             border-radius: 50%;
             transition: var(--transition);
         }
@@ -508,25 +537,39 @@
             margin-top: 0.25rem;
         }
 
+        /* Hover effects for control icons */
+        .control-btn:hover .control-icon {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .control-btn.danger:hover .control-icon {
+            border-color: var(--error);
+            color: var(--error);
+        }
+
         /* ===============================
-           DESKTOP NOTES PANEL (LEFT SIDEBAR)
+           DESKTOP NOTES PANEL (RIGHT SIDEBAR)
            =============================== */
         .desktop-notes-panel {
             position: fixed;
             top: var(--header-height-desktop);
-            left: -400px;
+            right: -400px;
             bottom: 0;
             width: 400px;
             background-color: var(--card-bg);
-            border-right: 1px solid var(--border);
+            border-left: 1px solid var(--border);
             z-index: 100;
-            transition: left 0.3s ease;
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
         }
 
         .desktop-notes-panel.active {
-            left: 0;
+            right: 0;
+            box-shadow: -2px 0 15px rgba(0, 0, 0, 0.08);
         }
 
         .desktop-notes-header {
@@ -566,12 +609,22 @@
 
         .desktop-close-notes:hover {
             background-color: rgba(0, 0, 0, 0.1);
+            transform: rotate(90deg);
         }
 
         .desktop-notes-content {
             flex: 1;
             padding: 1.5rem;
             overflow-y: auto;
+            transition: opacity 0.3s ease-in-out 0.1s;
+        }
+
+        .desktop-notes-panel:not(.active) .desktop-notes-content {
+            opacity: 0;
+        }
+
+        .desktop-notes-panel.active .desktop-notes-content {
+            opacity: 1;
         }
 
         #desktopNotesText {
@@ -638,6 +691,26 @@
             font-size: 0.875rem;
         }
 
+        /* Gentle scale animation */
+        @keyframes gentleScale {
+            0% {
+                transform: translateX(-200px) scale(1);
+            }
+
+            50% {
+                transform: translateX(-200px) scale(0.995);
+            }
+
+            100% {
+                transform: translateX(-200px) scale(0.98);
+            }
+        }
+
+        .video-call-container.with-notes .video-main-area,
+        .video-call-container.with-notes .desktop-controls {
+            animation: gentleScale 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         /* ===============================
            MOBILE VIEW
            =============================== */
@@ -679,7 +752,7 @@
             }
 
             .video-call-container.with-notes {
-                margin-left: 0;
+                margin-right: 0;
                 width: 100%;
             }
 
@@ -733,8 +806,9 @@
             }
 
             .mobile-control-btn.active .mobile-control-icon {
-                background-color: var(--primary);
-                color: white;
+                background-color: var(--card-bg);
+                border-color: var(--primary);
+                color: var(--primary);
             }
 
             .mobile-control-btn.inactive {
@@ -742,7 +816,8 @@
             }
 
             .mobile-control-btn.inactive .mobile-control-icon {
-                background-color: var(--background);
+                background-color: var(--card-bg);
+                border-color: var(--border);
                 color: var(--text-medium);
             }
 
@@ -751,12 +826,19 @@
             }
 
             .mobile-control-btn.danger .mobile-control-icon {
-                background-color: var(--error);
-                color: white;
+                background-color: var(--card-bg);
+                border-color: var(--error);
+                color: var(--error);
             }
 
             .mobile-control-btn.danger:hover {
                 background-color: rgba(239, 68, 68, 0.1);
+            }
+
+            .mobile-control-btn.danger.active .mobile-control-icon {
+                background-color: var(--error);
+                border-color: var(--error);
+                color: white;
             }
 
             .mobile-control-icon {
@@ -766,7 +848,8 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background-color: var(--background);
+                background-color: var(--card-bg);
+                border: 2px solid var(--border);
                 border-radius: 50%;
                 transition: var(--transition);
             }
@@ -870,6 +953,15 @@
             flex: 1;
             padding: 1rem;
             overflow-y: auto;
+            transition: opacity 0.3s ease-in-out 0.1s;
+        }
+
+        .mobile-notes-panel:not(.active) .mobile-notes-content {
+            opacity: 0;
+        }
+
+        .mobile-notes-panel.active .mobile-notes-content {
+            opacity: 1;
         }
 
         #mobileNotesText {
@@ -1000,7 +1092,7 @@
         <a href="/doc_profile"><i class="fas fa-user-circle"></i> Profile</a>
     </div>
 
-    <!-- DESKTOP NOTES PANEL (LEFT SIDEBAR) -->
+    <!-- DESKTOP NOTES PANEL (RIGHT SIDEBAR) -->
     <div class="desktop-notes-panel" id="desktopNotesPanel">
         <div class="desktop-notes-header">
             <h3>
@@ -1310,18 +1402,30 @@
                 desktopCharCount.textContent = this.value.length;
             });
 
-            // DESKTOP NOTES TOGGLE (Left sidebar)
+            // DESKTOP NOTES TOGGLE (Right sidebar)
             let desktopNotesOpen = false;
             if (toggleNotes) {
                 toggleNotes.addEventListener('click', () => {
                     desktopNotesOpen = !desktopNotesOpen;
 
+                    // Add button click animation
+                    toggleNotes.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        toggleNotes.style.transform = '';
+                    }, 150);
+
                     if (desktopNotesOpen) {
                         desktopNotesPanel.classList.add('active');
-                        videoCallContainer.classList.add('with-notes');
+                        // Add a small delay for the video container animation
+                        setTimeout(() => {
+                            videoCallContainer.classList.add('with-notes');
+                        }, 50);
                     } else {
-                        desktopNotesPanel.classList.remove('active');
                         videoCallContainer.classList.remove('with-notes');
+                        // Wait for video container animation before hiding notes panel
+                        setTimeout(() => {
+                            desktopNotesPanel.classList.remove('active');
+                        }, 350);
                     }
 
                     // Update button state
@@ -1332,9 +1436,17 @@
             if (desktopCloseNotes) {
                 desktopCloseNotes.addEventListener('click', () => {
                     desktopNotesOpen = false;
-                    desktopNotesPanel.classList.remove('active');
                     videoCallContainer.classList.remove('with-notes');
+                    setTimeout(() => {
+                        desktopNotesPanel.classList.remove('active');
+                    }, 350);
                     toggleNotes.classList.remove('active');
+
+                    // Add subtle animation to close button
+                    desktopCloseNotes.style.transform = 'rotate(90deg)';
+                    setTimeout(() => {
+                        desktopCloseNotes.style.transform = '';
+                    }, 200);
                 });
             }
 
@@ -1435,6 +1547,14 @@
 
             const updateButtons = () => {
                 isActive = !isActive;
+
+                // Add button click animation
+                button1.style.transform = 'scale(0.9)';
+                button2.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    button1.style.transform = '';
+                    button2.style.transform = '';
+                }, 150);
 
                 // Update button 1
                 button1.classList.toggle('active', isActive);
