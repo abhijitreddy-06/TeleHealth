@@ -10,7 +10,7 @@
         rel="stylesheet">
     <style>
         /* ===============================
-           BASE STYLES FROM DOC_HOME
+           BASE STYLES
            =============================== */
         :root {
             /* Color Variables */
@@ -36,8 +36,8 @@
             --controls-height-desktop: 70px;
             --controls-height-mobile: 80px;
 
-            /* Other Variables */
-            --transition: all 0.3s ease;
+            /* Animation Variables */
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 12px;
@@ -73,7 +73,7 @@
         }
 
         /* ===============================
-           HEADER & NAVIGATION (From doc_home - EXACT COPY)
+           HEADER & NAVIGATION
            =============================== */
         header {
             background-color: var(--card-bg);
@@ -102,7 +102,6 @@
             align-items: center;
             gap: 0.5rem;
             text-decoration: none;
-            font-family: "Poppins", sans-serif;
             font-weight: 700;
             letter-spacing: -0.5px;
         }
@@ -117,7 +116,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            -webkit-text-fill-color: transparent;
             font-weight: 800;
         }
 
@@ -169,7 +167,7 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* Mobile Menu (From doc_home - EXACT COPY) */
+        /* Mobile Menu */
         .mobile-controls {
             display: none;
             align-items: center;
@@ -251,7 +249,7 @@
         }
 
         /* ===============================
-           DESKTOP LAYOUT - FLEX COLUMN
+           MAIN VIDEO CALL LAYOUT
            =============================== */
         .video-call-container {
             flex: 1;
@@ -260,10 +258,11 @@
             position: relative;
             width: 100%;
             height: calc(100vh - var(--header-height-desktop));
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: margin-right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .video-call-container.with-notes {
+            margin-right: 400px;
             width: calc(100% - 400px);
         }
 
@@ -283,6 +282,10 @@
             backdrop-filter: blur(4px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .video-call-container.with-notes .call-status-overlay {
+            transform: translateX(-200px);
         }
 
         .status-indicator {
@@ -327,6 +330,11 @@
             position: relative;
             overflow: hidden;
             background: #000;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .video-call-container.with-notes .video-main-area {
+            transform: translateX(-200px) scale(0.98);
         }
 
         #remoteVideo {
@@ -338,7 +346,7 @@
         /* Local Video (PiP) - Desktop */
         .local-video-pip {
             position: absolute;
-            bottom: 90px;
+            bottom: 100px;
             right: 20px;
             width: 220px;
             height: 165px;
@@ -405,7 +413,7 @@
         }
 
         /* ===============================
-           DESKTOP CONTROLS - FIXED ISSUES
+           DESKTOP CONTROLS - FIXED HEIGHT, NO OVERFLOW
            =============================== */
         .desktop-controls {
             height: var(--controls-height-desktop);
@@ -414,126 +422,137 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            padding: 0 5%;
             width: 100%;
             position: relative;
             z-index: 10;
-            flex-shrink: 0;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .video-call-container.with-notes .desktop-controls {
+            transform: translateX(-200px) scale(0.98);
         }
 
         .controls-wrapper {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 2.5rem;
-            max-width: 800px;
+            gap: 2rem;
+            max-width: 500px;
             width: 100%;
+            margin: 0 auto;
+            padding: 0 1rem;
         }
 
-        /* ===============================
-           MODERN CONTROL BUTTONS
-           =============================== */
+        /* Control Buttons - Icon Only, No Text Labels */
         .control-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            background: none;
-            border: none;
-            color: var(--text-medium);
-            cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 0.75rem 1rem;
-            border-radius: var(--radius);
-            min-width: 90px;
-            position: relative;
-            outline: none;
-        }
-
-        /* Remove old hover effects */
-        .control-btn:hover {
-            background-color: rgba(56, 189, 248, 0.08);
-            transform: translateY(-2px);
-        }
-
-        /* Modern hover effects */
-        .control-btn:hover .control-icon {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
-        }
-
-        /* Active state - clean */
-        .control-btn.active {
-            color: var(--primary);
-        }
-
-        .control-btn.active .control-icon {
-            background-color: var(--primary);
-            color: white;
-            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
-        }
-
-        /* Inactive state */
-        .control-btn.inactive {
-            color: var(--text-medium);
-        }
-
-        .control-btn.inactive .control-icon {
-            background-color: var(--card-bg);
-            color: var(--text-medium);
-            border-color: var(--border);
-        }
-
-        /* Danger button - End Call */
-        .control-btn.danger {
-            color: var(--error);
-        }
-
-        .control-btn.danger .control-icon {
-            background-color: var(--card-bg);
-            border: 2px solid var(--border);
-            color: var(--error);
-        }
-
-        .control-btn.danger:hover .control-icon {
-            background-color: var(--error);
-            color: white;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-            border-color: var(--error);
-            transform: scale(1.1);
-        }
-
-        .control-btn.danger.active .control-icon {
-            background-color: var(--error);
-            color: white;
-            border-color: var(--error);
-        }
-
-        /* Modern icon styling */
-        .control-icon {
-            font-size: 1.3rem;
-            width: 56px;
-            height: 56px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: var(--card-bg);
+            background: var(--card-bg);
             border: 2px solid var(--border);
+            color: var(--text-medium);
+            cursor: pointer;
+            transition: var(--transition);
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            color: var(--text-dark);
+            position: relative;
+            overflow: hidden;
         }
 
-        .control-label {
-            font-size: 0.85rem;
-            font-weight: 500;
-            margin-top: 0.25rem;
-            white-space: nowrap;
+        /* MODERN HOVER EFFECTS */
+        .control-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 16px rgba(56, 189, 248, 0.15);
+            border-color: transparent;
+        }
+
+        .control-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Active State */
+        .control-btn.active {
+            color: var(--primary);
+            border-color: var(--primary);
+            background-color: rgba(56, 189, 248, 0.08);
+        }
+
+        .control-btn.active:hover {
+            box-shadow: 0 8px 16px rgba(56, 189, 248, 0.25);
+        }
+
+        /* Inactive/Muted State */
+        .control-btn.inactive {
+            color: var(--text-medium);
+            border-color: var(--border);
+            background-color: var(--card-bg);
+            opacity: 0.7;
+        }
+
+        .control-btn.inactive i {
+            position: relative;
+        }
+
+        .control-btn.inactive i::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 30px;
+            height: 2px;
+            background: var(--text-medium);
+            transform: translate(-50%, -50%) rotate(45deg);
+            border-radius: 1px;
+        }
+
+        /* Danger/End Call State */
+        .control-btn.danger {
+            color: var(--error);
+            border-color: var(--error);
+            background-color: rgba(239, 68, 68, 0.08);
+        }
+
+        .control-btn.danger:hover {
+            box-shadow: 0 8px 16px rgba(239, 68, 68, 0.25);
+        }
+
+        /* Icon Styles */
+        .control-btn i {
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .control-btn:hover i {
+            transform: scale(1.1);
+        }
+
+        /* Gentle scale animation */
+        @keyframes gentleScale {
+            0% {
+                transform: translateX(-200px) scale(1);
+            }
+
+            50% {
+                transform: translateX(-200px) scale(0.995);
+            }
+
+            100% {
+                transform: translateX(-200px) scale(0.98);
+            }
+        }
+
+        .video-call-container.with-notes .video-main-area,
+        .video-call-container.with-notes .desktop-controls {
+            animation: gentleScale 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* ===============================
-           DESKTOP NOTES PANEL (CLEAN RIGHT DRAWER)
+           DESKTOP NOTES PANEL (RIGHT SIDEBAR)
            =============================== */
-        .desktop-notes-panel {
+        .notes-panel {
             position: fixed;
             top: var(--header-height-desktop);
             right: -400px;
@@ -541,18 +560,19 @@
             width: 400px;
             background-color: var(--card-bg);
             border-left: 1px solid var(--border);
-            z-index: 90;
+            z-index: 100;
             transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
-            box-shadow: -2px 0 20px rgba(0, 0, 0, 0.08);
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
         }
 
-        .desktop-notes-panel.active {
+        .notes-panel.active {
             right: 0;
+            box-shadow: -2px 0 15px rgba(0, 0, 0, 0.08);
         }
 
-        .desktop-notes-header {
+        .notes-header {
             padding: 1.5rem;
             border-bottom: 1px solid var(--border);
             display: flex;
@@ -561,7 +581,7 @@
             background-color: var(--card-bg);
         }
 
-        .desktop-notes-header h3 {
+        .notes-header h3 {
             display: flex;
             align-items: center;
             gap: 0.75rem;
@@ -569,11 +589,11 @@
             font-size: 1.1rem;
         }
 
-        .desktop-notes-header h3 i {
+        .notes-header h3 i {
             color: var(--primary);
         }
 
-        .desktop-close-notes {
+        .close-notes {
             background: none;
             border: none;
             color: var(--text-medium);
@@ -587,23 +607,31 @@
             transition: var(--transition);
         }
 
-        .desktop-close-notes:hover {
-            background-color: rgba(56, 189, 248, 0.1);
+        .close-notes:hover {
+            background-color: rgba(0, 0, 0, 0.1);
             transform: rotate(90deg);
-            color: var(--primary);
         }
 
-        .desktop-notes-content {
+        .notes-content {
             flex: 1;
             padding: 1.5rem;
             overflow-y: auto;
+            transition: opacity 0.3s ease-in-out 0.1s;
         }
 
-        #desktopNotesText {
+        .notes-panel:not(.active) .notes-content {
+            opacity: 0;
+        }
+
+        .notes-panel.active .notes-content {
+            opacity: 1;
+        }
+
+        #notesText {
             width: 100%;
             height: 100%;
             min-height: 300px;
-            padding: 1.2rem;
+            padding: 1rem;
             border: 1px solid var(--border);
             border-radius: var(--radius);
             background-color: var(--background);
@@ -612,16 +640,15 @@
             font-size: 0.95rem;
             line-height: 1.6;
             resize: none;
-            transition: var(--transition);
         }
 
-        #desktopNotesText:focus {
+        #notesText:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
         }
 
-        .desktop-notes-footer {
+        .notes-footer {
             padding: 1.5rem;
             border-top: 1px solid var(--border);
             display: flex;
@@ -630,29 +657,24 @@
             background-color: var(--card-bg);
         }
 
-        .desktop-notes-actions {
+        .notes-actions {
             display: flex;
             gap: 0.75rem;
         }
 
-        .desktop-notes-footer .btn {
-            padding: 0.6rem 1.2rem;
+        .notes-footer .btn {
+            padding: 0.5rem 1rem;
             font-size: 0.875rem;
             border-radius: 8px;
             border: none;
             cursor: pointer;
             transition: var(--transition);
-            font-weight: 500;
         }
 
         .btn-outline {
             background: transparent;
             border: 1px solid var(--primary);
             color: var(--primary);
-        }
-
-        .btn-outline:hover {
-            background-color: rgba(56, 189, 248, 0.1);
         }
 
         .btn-primary {
@@ -662,11 +684,9 @@
 
         .btn-primary:hover {
             background-color: var(--primary-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
         }
 
-        .desktop-char-count {
+        .char-count {
             color: var(--text-medium);
             font-size: 0.875rem;
         }
@@ -712,12 +732,13 @@
             }
 
             .video-call-container.with-notes {
+                margin-right: 0;
                 width: 100%;
             }
 
             /* HIDE DESKTOP ELEMENTS ON MOBILE */
             .desktop-controls,
-            .desktop-notes-panel {
+            .notes-panel {
                 display: none !important;
             }
 
@@ -735,6 +756,7 @@
                 align-items: center;
                 z-index: 100;
                 padding: 0 5%;
+                overflow: hidden;
             }
 
             .mobile-controls-wrapper {
@@ -743,95 +765,98 @@
                 align-items: center;
                 width: 100%;
                 max-width: 500px;
+                padding: 0 1rem;
             }
 
+            /* MOBILE CONTROL BUTTONS */
             .mobile-control-btn {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 0.5rem;
-                background: none;
-                border: none;
-                color: var(--text-dark);
-                cursor: pointer;
-                padding: 0.5rem;
-                min-width: 70px;
-                transition: transform 0.2s ease;
-                outline: none;
-                -webkit-tap-highlight-color: transparent;
-            }
-
-            /* MOBILE CONTROL BUTTON STATES */
-            .mobile-control-btn.active {
-                color: var(--primary);
-            }
-
-            .mobile-control-btn.active .mobile-control-icon {
-                background-color: var(--primary);
-                color: white;
-                box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
-            }
-
-            .mobile-control-btn.inactive {
-                color: var(--text-medium);
-            }
-
-            .mobile-control-btn.inactive .mobile-control-icon {
-                background-color: var(--card-bg);
-                color: var(--text-medium);
-                border-color: var(--border);
-            }
-
-            .mobile-control-btn.danger {
-                color: var(--error);
-            }
-
-            .mobile-control-btn.danger .mobile-control-icon {
-                background-color: var(--card-bg);
-                border: 2px solid var(--border);
-                color: var(--error);
-            }
-
-            .mobile-control-btn.danger.active .mobile-control-icon {
-                background-color: var(--error);
-                color: white;
-                border-color: var(--error);
-            }
-
-            /* Touch feedback */
-            .mobile-control-btn:active {
-                transform: scale(0.95);
-            }
-
-            .mobile-control-btn:active .mobile-control-icon {
-                transform: scale(0.95);
-            }
-
-            .mobile-control-icon {
-                font-size: 1.25rem;
-                width: 52px;
-                height: 52px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                background-color: var(--card-bg);
+                background: var(--card-bg);
                 border: 2px solid var(--border);
+                color: var(--text-medium);
+                cursor: pointer;
+                transition: var(--transition);
+                width: 56px;
+                height: 56px;
                 border-radius: 50%;
-                transition: all 0.2s ease;
+                position: relative;
+                overflow: hidden;
             }
 
-            .mobile-control-label {
-                font-size: 0.75rem;
-                font-weight: 500;
-                margin-top: 0.25rem;
-                white-space: nowrap;
+            /* MOBILE HOVER EFFECTS */
+            .mobile-control-btn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 8px 16px rgba(56, 189, 248, 0.15);
+                border-color: transparent;
+            }
+
+            .mobile-control-btn:active {
+                transform: scale(0.98);
+            }
+
+            /* MOBILE ACTIVE STATE */
+            .mobile-control-btn.active {
+                color: var(--primary);
+                border-color: var(--primary);
+                background-color: rgba(56, 189, 248, 0.08);
+            }
+
+            .mobile-control-btn.active:hover {
+                box-shadow: 0 8px 16px rgba(56, 189, 248, 0.25);
+            }
+
+            /* MOBILE INACTIVE/MUTED STATE */
+            .mobile-control-btn.inactive {
+                color: var(--text-medium);
+                border-color: var(--border);
+                background-color: var(--card-bg);
+                opacity: 0.7;
+            }
+
+            .mobile-control-btn.inactive i {
+                position: relative;
+            }
+
+            .mobile-control-btn.inactive i::after {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 26px;
+                height: 2px;
+                background: var(--text-medium);
+                transform: translate(-50%, -50%) rotate(45deg);
+                border-radius: 1px;
+            }
+
+            /* MOBILE DANGER STATE */
+            .mobile-control-btn.danger {
+                color: var(--error);
+                border-color: var(--error);
+                background-color: rgba(239, 68, 68, 0.08);
+            }
+
+            .mobile-control-btn.danger:hover {
+                box-shadow: 0 8px 16px rgba(239, 68, 68, 0.25);
+            }
+
+            /* MOBILE ICONS */
+            .mobile-control-btn i {
+                font-size: 1.4rem;
+                transition: var(--transition);
+            }
+
+            .mobile-control-btn:hover i {
+                transform: scale(1.1);
             }
 
             /* LOCAL VIDEO PIP - MOBILE */
             .local-video-pip {
                 position: fixed;
                 bottom: calc(var(--controls-height-mobile) + 20px);
-                right: 15px;
+                right: 10px;
                 width: 140px;
                 height: 105px;
                 border-width: 2px;
@@ -839,15 +864,11 @@
                 transition: bottom 0.3s ease;
             }
 
-            .with-mobile-notes .local-video-pip {
-                bottom: calc(50vh + var(--controls-height-mobile) + 20px);
-            }
-
             /* STATUS OVERLAY MOBILE */
             .call-status-overlay {
-                top: 0.75rem;
-                left: 0.75rem;
-                padding: 0.6rem 1rem;
+                top: 0.5rem;
+                left: 0.5rem;
+                padding: 0.5rem 1rem;
                 font-size: 0.85rem;
             }
 
@@ -858,7 +879,7 @@
         }
 
         /* ===============================
-           MOBILE NOTES PANEL (BOTTOM SHEET)
+           MOBILE NOTES PANEL (BOTTOM SLIDE-UP)
            =============================== */
         .mobile-notes-panel {
             position: fixed;
@@ -869,115 +890,16 @@
             background-color: var(--card-bg);
             border-top: 1px solid var(--border);
             z-index: 80;
-            transition: bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: bottom 0.3s ease-out;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .mobile-notes-panel.active {
             bottom: var(--controls-height-mobile);
         }
 
-        .mobile-notes-header {
-            padding: 1.2rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--card-bg);
-        }
-
-        .mobile-notes-header h3 {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            color: var(--text-dark);
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .mobile-notes-header h3 i {
-            color: var(--primary);
-        }
-
-        .mobile-close-notes {
-            background: none;
-            border: none;
-            color: var(--text-medium);
-            cursor: pointer;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: var(--transition);
-        }
-
-        .mobile-close-notes:hover {
-            background-color: rgba(56, 189, 248, 0.1);
-            color: var(--primary);
-        }
-
-        .mobile-notes-content {
-            flex: 1;
-            padding: 1.2rem;
-            overflow-y: auto;
-        }
-
-        #mobileNotesText {
-            width: 100%;
-            height: 100%;
-            min-height: 150px;
-            padding: 1rem;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            background-color: var(--background);
-            color: var(--text-dark);
-            font-family: inherit;
-            font-size: 0.95rem;
-            line-height: 1.6;
-            resize: none;
-            transition: var(--transition);
-        }
-
-        #mobileNotesText:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
-        }
-
-        .mobile-notes-footer {
-            padding: 1.2rem;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: var(--card-bg);
-        }
-
-        .mobile-notes-actions {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .mobile-notes-footer .btn {
-            padding: 0.6rem 1rem;
-            font-size: 0.875rem;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            font-weight: 500;
-        }
-
-        .mobile-char-count {
-            color: var(--text-medium);
-            font-size: 0.75rem;
-        }
-
-        /* Hide mobile notes panel on desktop */
+        /* Hide desktop notes panel on mobile */
         @media (min-width: 769px) {
 
             .mobile-notes-panel,
@@ -986,11 +908,11 @@
             }
         }
 
-        /* Hide desktop elements on mobile */
+        /* Hide mobile elements on desktop */
         @media (max-width: 768px) {
 
             .desktop-controls,
-            .desktop-notes-panel {
+            .notes-panel {
                 display: none !important;
             }
         }
@@ -1058,36 +980,36 @@
         <a href="/doc_profile"><i class="fas fa-user-circle"></i> Profile</a>
     </div>
 
-    <!-- DESKTOP NOTES PANEL (RIGHT DRAWER) -->
-    <div class="desktop-notes-panel" id="desktopNotesPanel">
-        <div class="desktop-notes-header">
+    <!-- DESKTOP NOTES PANEL (RIGHT SIDEBAR) -->
+    <div class="notes-panel" id="notesPanel">
+        <div class="notes-header">
             <h3>
                 <i class="fas fa-notes-medical"></i>
                 Consultation Notes
             </h3>
-            <button class="desktop-close-notes" id="desktopCloseNotes">
+            <button class="close-notes" id="closeNotes">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div class="desktop-notes-content">
-            <textarea id="desktopNotesText" placeholder="Enter consultation notes here...
+        <div class="notes-content">
+            <textarea id="notesText" placeholder="Enter consultation notes here...
 • Symptoms observed
 • Preliminary diagnosis
 • Prescription details
 • Follow-up recommendations
 • Additional observations"></textarea>
         </div>
-        <div class="desktop-notes-footer">
-            <div class="desktop-notes-actions">
-                <button class="btn btn-outline" id="desktopClearNotes">
+        <div class="notes-footer">
+            <div class="notes-actions">
+                <button class="btn btn-outline" id="clearNotes">
                     <i class="fas fa-trash-alt"></i> Clear
                 </button>
-                <button class="btn btn-primary" id="desktopSaveNotes">
+                <button class="btn btn-primary" id="saveNotes">
                     <i class="fas fa-save"></i> Save Notes
                 </button>
             </div>
-            <div class="desktop-char-count">
-                <span id="desktopCharCount">0</span> characters
+            <div class="char-count">
+                <span id="charCount">0</span> characters
             </div>
         </div>
     </div>
@@ -1128,89 +1050,65 @@
         <div class="desktop-controls">
             <div class="controls-wrapper">
                 <!-- Microphone Toggle -->
-                <button class="control-btn active" id="toggleMic">
-                    <div class="control-icon">
-                        <i class="fas fa-microphone"></i>
-                    </div>
-                    <span class="control-label">Mute</span>
+                <button class="control-btn active" id="toggleMic" title="Mute/Unmute">
+                    <i class="fas fa-microphone"></i>
                 </button>
 
                 <!-- Camera Toggle -->
-                <button class="control-btn active" id="toggleCam">
-                    <div class="control-icon">
-                        <i class="fas fa-video"></i>
-                    </div>
-                    <span class="control-label">Camera</span>
+                <button class="control-btn active" id="toggleCam" title="Camera On/Off">
+                    <i class="fas fa-video"></i>
                 </button>
 
                 <!-- Notes Button -->
-                <button class="control-btn" id="toggleNotes">
-                    <div class="control-icon">
-                        <i class="fas fa-notes-medical"></i>
-                    </div>
-                    <span class="control-label">Notes</span>
+                <button class="control-btn" id="toggleNotes" title="Show Notes">
+                    <i class="fas fa-notes-medical"></i>
                 </button>
 
                 <!-- End Call -->
-                <button class="control-btn danger" id="endCall">
-                    <div class="control-icon">
-                        <i class="fas fa-phone-slash"></i>
-                    </div>
-                    <span class="control-label">End</span>
+                <button class="control-btn danger" id="endCall" title="End Call">
+                    <i class="fas fa-phone-slash"></i>
                 </button>
             </div>
         </div>
 
-        <!-- MOBILE CONTROLS -->
+        <!-- MOBILE CONTROLS (FIXED AT BOTTOM) -->
         <div class="mobile-controls-bar">
             <div class="mobile-controls-wrapper">
                 <!-- Microphone Toggle -->
-                <button class="mobile-control-btn active" id="mobileToggleMic">
-                    <div class="mobile-control-icon">
-                        <i class="fas fa-microphone"></i>
-                    </div>
-                    <span class="mobile-control-label">Mute</span>
+                <button class="mobile-control-btn active" id="mobileToggleMic" title="Mute/Unmute">
+                    <i class="fas fa-microphone"></i>
                 </button>
 
                 <!-- Camera Toggle -->
-                <button class="mobile-control-btn active" id="mobileToggleCam">
-                    <div class="mobile-control-icon">
-                        <i class="fas fa-video"></i>
-                    </div>
-                    <span class="mobile-control-label">Camera</span>
+                <button class="mobile-control-btn active" id="mobileToggleCam" title="Camera On/Off">
+                    <i class="fas fa-video"></i>
                 </button>
 
                 <!-- Notes Button -->
-                <button class="mobile-control-btn" id="mobileToggleNotes">
-                    <div class="mobile-control-icon">
-                        <i class="fas fa-notes-medical"></i>
-                    </div>
-                    <span class="mobile-control-label">Notes</span>
+                <button class="mobile-control-btn" id="mobileToggleNotes" title="Show Notes">
+                    <i class="fas fa-notes-medical"></i>
                 </button>
 
                 <!-- End Call -->
-                <button class="mobile-control-btn danger" id="mobileEndCall">
-                    <div class="mobile-control-icon">
-                        <i class="fas fa-phone-slash"></i>
-                    </div>
-                    <span class="mobile-control-label">End</span>
+                <button class="mobile-control-btn danger" id="mobileEndCall" title="End Call">
+                    <i class="fas fa-phone-slash"></i>
                 </button>
             </div>
         </div>
     </main>
 
-    <!-- MOBILE NOTES PANEL (BOTTOM SHEET) -->
+    <!-- MOBILE NOTES PANEL (BOTTOM SLIDE-UP) -->
     <div class="mobile-notes-panel" id="mobileNotesPanel">
-        <div class="mobile-notes-header">
+        <div class="notes-header">
             <h3>
                 <i class="fas fa-notes-medical"></i>
                 Consultation Notes
             </h3>
-            <button class="mobile-close-notes" id="mobileCloseNotes">
+            <button class="close-notes" id="mobileCloseNotes">
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div class="mobile-notes-content">
+        <div class="notes-content">
             <textarea id="mobileNotesText" placeholder="Enter consultation notes here...
 • Symptoms observed
 • Preliminary diagnosis
@@ -1218,8 +1116,8 @@
 • Follow-up recommendations
 • Additional observations"></textarea>
         </div>
-        <div class="mobile-notes-footer">
-            <div class="mobile-notes-actions">
+        <div class="notes-footer">
+            <div class="notes-actions">
                 <button class="btn btn-outline" id="mobileClearNotes">
                     <i class="fas fa-trash-alt"></i> Clear
                 </button>
@@ -1227,12 +1125,13 @@
                     <i class="fas fa-save"></i> Save
                 </button>
             </div>
-            <div class="mobile-char-count">
+            <div class="char-count">
                 <span id="mobileCharCount">0</span> characters
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
         // ===============================
@@ -1258,7 +1157,7 @@
         let isVideoOff = false;
 
         // ===============================
-        // NEW UI FUNCTIONALITY (NO LOGIC CHANGES)
+        // NEW UI FUNCTIONALITY
         // ===============================
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -1326,8 +1225,8 @@
             // NOTES PANEL FUNCTIONALITY
             setupNotesPanels();
 
-            // CONTROL BUTTONS SYNC
-            setupControlButtons();
+            // MIC AND CAMERA TOGGLE FUNCTIONALITY
+            setupMediaToggles();
 
             // Initialize video call (existing logic)
             initVideoCall();
@@ -1337,12 +1236,12 @@
         function setupNotesPanels() {
             // Desktop notes
             const toggleNotes = document.getElementById('toggleNotes');
-            const desktopNotesPanel = document.getElementById('desktopNotesPanel');
-            const desktopCloseNotes = document.getElementById('desktopCloseNotes');
-            const desktopNotesText = document.getElementById('desktopNotesText');
-            const desktopCharCount = document.getElementById('desktopCharCount');
-            const desktopClearNotes = document.getElementById('desktopClearNotes');
-            const desktopSaveNotes = document.getElementById('desktopSaveNotes');
+            const notesPanel = document.getElementById('notesPanel');
+            const closeNotes = document.getElementById('closeNotes');
+            const notesText = document.getElementById('notesText');
+            const charCount = document.getElementById('charCount');
+            const clearNotes = document.getElementById('clearNotes');
+            const saveNotes = document.getElementById('saveNotes');
             const videoCallContainer = document.getElementById('videoCallContainer');
 
             // Mobile notes
@@ -1355,19 +1254,19 @@
             const mobileSaveNotes = document.getElementById('mobileSaveNotes');
 
             // Character counters
-            desktopNotesText.addEventListener('input', function () {
-                desktopCharCount.textContent = this.value.length;
+            notesText.addEventListener('input', function () {
+                charCount.textContent = this.value.length;
                 mobileNotesText.value = this.value; // Sync with mobile
                 mobileCharCount.textContent = this.value.length;
             });
 
             mobileNotesText.addEventListener('input', function () {
                 mobileCharCount.textContent = this.value.length;
-                desktopNotesText.value = this.value; // Sync with desktop
-                desktopCharCount.textContent = this.value.length;
+                notesText.value = this.value; // Sync with desktop
+                charCount.textContent = this.value.length;
             });
 
-            // DESKTOP NOTES TOGGLE (Right drawer)
+            // DESKTOP NOTES TOGGLE (Right sidebar)
             let desktopNotesOpen = false;
             if (toggleNotes) {
                 toggleNotes.addEventListener('click', () => {
@@ -1380,33 +1279,42 @@
                     }, 150);
 
                     if (desktopNotesOpen) {
-                        desktopNotesPanel.classList.add('active');
-                        videoCallContainer.classList.add('with-notes');
-                        toggleNotes.classList.add('active');
+                        notesPanel.classList.add('active');
+                        // Add a small delay for the video container animation
+                        setTimeout(() => {
+                            videoCallContainer.classList.add('with-notes');
+                        }, 50);
                     } else {
-                        desktopNotesPanel.classList.remove('active');
                         videoCallContainer.classList.remove('with-notes');
-                        toggleNotes.classList.remove('active');
+                        // Wait for video container animation before hiding notes panel
+                        setTimeout(() => {
+                            notesPanel.classList.remove('active');
+                        }, 350);
                     }
+
+                    // Update button state
+                    toggleNotes.classList.toggle('active', desktopNotesOpen);
                 });
             }
 
-            if (desktopCloseNotes) {
-                desktopCloseNotes.addEventListener('click', () => {
+            if (closeNotes) {
+                closeNotes.addEventListener('click', () => {
                     desktopNotesOpen = false;
-                    desktopNotesPanel.classList.remove('active');
                     videoCallContainer.classList.remove('with-notes');
+                    setTimeout(() => {
+                        notesPanel.classList.remove('active');
+                    }, 350);
                     toggleNotes.classList.remove('active');
 
                     // Add subtle animation to close button
-                    desktopCloseNotes.style.transform = 'rotate(90deg)';
+                    closeNotes.style.transform = 'rotate(90deg)';
                     setTimeout(() => {
-                        desktopCloseNotes.style.transform = '';
+                        closeNotes.style.transform = '';
                     }, 200);
                 });
             }
 
-            // MOBILE NOTES TOGGLE (Bottom sheet)
+            // MOBILE NOTES TOGGLE (Bottom slide-up)
             let mobileNotesOpen = false;
             if (mobileToggleNotes) {
                 mobileToggleNotes.addEventListener('click', () => {
@@ -1414,15 +1322,14 @@
 
                     if (mobileNotesOpen) {
                         mobileNotesPanel.classList.add('active');
-                        videoCallContainer.classList.add('with-mobile-notes');
                         document.body.style.overflow = 'hidden';
-                        mobileToggleNotes.classList.add('active');
                     } else {
                         mobileNotesPanel.classList.remove('active');
-                        videoCallContainer.classList.remove('with-mobile-notes');
                         document.body.style.overflow = '';
-                        mobileToggleNotes.classList.remove('active');
                     }
+
+                    // Update button state
+                    mobileToggleNotes.classList.toggle('active', mobileNotesOpen);
                 });
             }
 
@@ -1430,19 +1337,18 @@
                 mobileCloseNotes.addEventListener('click', () => {
                     mobileNotesOpen = false;
                     mobileNotesPanel.classList.remove('active');
-                    videoCallContainer.classList.remove('with-mobile-notes');
                     mobileToggleNotes.classList.remove('active');
                     document.body.style.overflow = '';
                 });
             }
 
             // Clear notes buttons
-            if (desktopClearNotes) {
-                desktopClearNotes.addEventListener('click', function () {
+            if (clearNotes) {
+                clearNotes.addEventListener('click', function () {
                     if (confirm('Are you sure you want to clear all notes?')) {
-                        desktopNotesText.value = '';
+                        notesText.value = '';
                         mobileNotesText.value = '';
-                        desktopCharCount.textContent = '0';
+                        charCount.textContent = '0';
                         mobileCharCount.textContent = '0';
                     }
                 });
@@ -1451,26 +1357,26 @@
             if (mobileClearNotes) {
                 mobileClearNotes.addEventListener('click', function () {
                     if (confirm('Are you sure you want to clear all notes?')) {
-                        desktopNotesText.value = '';
+                        notesText.value = '';
                         mobileNotesText.value = '';
-                        desktopCharCount.textContent = '0';
+                        charCount.textContent = '0';
                         mobileCharCount.textContent = '0';
                     }
                 });
             }
 
             // Save notes buttons
-            if (desktopSaveNotes) {
-                desktopSaveNotes.addEventListener('click', saveNotes);
+            if (saveNotes) {
+                saveNotes.addEventListener('click', saveNotesHandler);
             }
 
             if (mobileSaveNotes) {
-                mobileSaveNotes.addEventListener('click', saveNotes);
+                mobileSaveNotes.addEventListener('click', saveNotesHandler);
             }
         }
 
-        // Sync control buttons between desktop and mobile
-        function setupControlButtons() {
+        // Setup mic and camera toggle functionality
+        function setupMediaToggles() {
             // Get all control buttons
             const toggleMic = document.getElementById('toggleMic');
             const toggleCam = document.getElementById('toggleCam');
@@ -1479,55 +1385,71 @@
             const mobileToggleCam = document.getElementById('mobileToggleCam');
             const mobileEndCall = document.getElementById('mobileEndCall');
 
-            // Mic toggle sync
+            // MIC TOGGLE FUNCTIONALITY
             if (toggleMic && mobileToggleMic) {
-                setupButtonSync(toggleMic, mobileToggleMic, 'fa-microphone', 'fa-microphone-slash', 'Mute', 'Unmute');
+                const toggleMicHandler = () => {
+                    if (!localStream) return;
+
+                    const audioTracks = localStream.getAudioTracks();
+                    if (audioTracks.length > 0) {
+                        isAudioMuted = !audioTracks[0].enabled;
+                        audioTracks.forEach(track => {
+                            track.enabled = !isAudioMuted;
+                        });
+
+                        // Update UI state for both desktop and mobile
+                        updateButtonState(toggleMic, mobileToggleMic, !isAudioMuted, 'fa-microphone', 'fa-microphone-slash');
+                    }
+                };
+
+                toggleMic.addEventListener('click', toggleMicHandler);
+                mobileToggleMic.addEventListener('click', toggleMicHandler);
             }
 
-            // Camera toggle sync
+            // CAMERA TOGGLE FUNCTIONALITY
             if (toggleCam && mobileToggleCam) {
-                setupButtonSync(toggleCam, mobileToggleCam, 'fa-video', 'fa-video-slash', 'Camera', 'Camera On');
+                const toggleCamHandler = () => {
+                    if (!localStream) return;
+
+                    const videoTracks = localStream.getVideoTracks();
+                    if (videoTracks.length > 0) {
+                        isVideoOff = !videoTracks[0].enabled;
+                        videoTracks.forEach(track => {
+                            track.enabled = !isVideoOff;
+                        });
+
+                        // Update UI state for both desktop and mobile
+                        updateButtonState(toggleCam, mobileToggleCam, !isVideoOff, 'fa-video', 'fa-video-slash');
+                    }
+                };
+
+                toggleCam.addEventListener('click', toggleCamHandler);
+                mobileToggleCam.addEventListener('click', toggleCamHandler);
             }
 
-            // End call button sync
+            // END CALL BUTTON SYNC
             if (endCall && mobileEndCall) {
                 endCall.addEventListener('click', endCallHandler);
                 mobileEndCall.addEventListener('click', endCallHandler);
             }
         }
 
-        // Helper function to sync button states
-        function setupButtonSync(button1, button2, activeIcon, inactiveIcon, activeLabel, inactiveLabel) {
-            let isActive = true;
+        // Helper function to update button state
+        function updateButtonState(button1, button2, isActive, activeIcon, inactiveIcon) {
+            // Add click animation
+            button1.style.transform = 'scale(0.9)';
+            button2.style.transform = 'scale(0.9)';
+            setTimeout(() => {
+                button1.style.transform = '';
+                button2.style.transform = '';
+            }, 150);
 
-            const updateButtons = () => {
-                isActive = !isActive;
-
-                // Add button click animation
-                button1.style.transform = 'scale(0.95)';
-                button2.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    button1.style.transform = '';
-                    button2.style.transform = '';
-                }, 150);
-
-                // Update button 1
-                button1.classList.toggle('active', isActive);
-                button1.classList.toggle('inactive', !isActive);
-                button1.querySelector('i').className = `fas ${isActive ? activeIcon : inactiveIcon}`;
-                button1.querySelector('.control-label, .mobile-control-label').textContent =
-                    isActive ? activeLabel : inactiveLabel;
-
-                // Update button 2
-                button2.classList.toggle('active', isActive);
-                button2.classList.toggle('inactive', !isActive);
-                button2.querySelector('i').className = `fas ${isActive ? activeIcon : inactiveIcon}`;
-                button2.querySelector('.control-label, .mobile-control-label').textContent =
-                    isActive ? activeLabel : inactiveLabel;
-            };
-
-            button1.addEventListener('click', updateButtons);
-            button2.addEventListener('click', updateButtons);
+            // Update button classes and icons
+            [button1, button2].forEach(button => {
+                button.classList.toggle('active', isActive);
+                button.classList.toggle('inactive', !isActive);
+                button.querySelector('i').className = `fas ${isActive ? activeIcon : inactiveIcon}`;
+            });
         }
 
         // ===============================
@@ -1689,14 +1611,13 @@
         function startTimer() {
             if (!callStartTime) {
                 callStartTime = Date.now();
-                // Timer display would go here if needed
             }
         }
 
         // Save notes function
-        async function saveNotes() {
-            const desktopNotesText = document.getElementById('desktopNotesText');
-            const notes = desktopNotesText ? desktopNotesText.value.trim() : '';
+        async function saveNotesHandler() {
+            const notesText = document.getElementById('notesText');
+            const notes = notesText ? notesText.value.trim() : '';
 
             if (notes) {
                 try {
@@ -1710,11 +1631,10 @@
                     });
                     alert('Notes saved successfully!');
 
-                    // Close mobile notes panel
+                    // Close mobile notes panel if open
                     const mobileNotesPanel = document.getElementById('mobileNotesPanel');
                     if (mobileNotesPanel && mobileNotesPanel.classList.contains('active')) {
                         mobileNotesPanel.classList.remove('active');
-                        document.getElementById('videoCallContainer').classList.remove('with-mobile-notes');
                         document.getElementById('mobileToggleNotes').classList.remove('active');
                         document.body.style.overflow = '';
                     }
@@ -1729,8 +1649,8 @@
 
         // End call handler
         async function endCallHandler() {
-            const desktopNotesText = document.getElementById('desktopNotesText');
-            const notes = desktopNotesText ? desktopNotesText.value.trim() : '';
+            const notesText = document.getElementById('notesText');
+            const notes = notesText ? notesText.value.trim() : '';
 
             // Save notes locally first
             if (notes) {
