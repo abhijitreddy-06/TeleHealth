@@ -333,8 +333,9 @@
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* removed transform effect that caused double layering */
         .video-call-container.with-notes .video-main-area {
-            transform: translateX(-200px) scale(0.98);
+            transform: none;
         }
 
         #remoteVideo {
@@ -355,8 +356,8 @@
             border: 3px solid var(--primary);
             box-shadow: var(--shadow);
             background: #000;
-            z-index: 5;
-            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 95;
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         #localVideo {
@@ -430,8 +431,9 @@
             overflow: hidden;
         }
 
+        /* removed transform effect on desktop controls to prevent double layering */
         .video-call-container.with-notes .desktop-controls {
-            transform: translateX(-200px) scale(0.98);
+            transform: none;
         }
 
         .controls-wrapper {
@@ -529,26 +531,6 @@
             transform: scale(1.1);
         }
 
-        /* Gentle scale animation */
-        @keyframes gentleScale {
-            0% {
-                transform: translateX(-200px) scale(1);
-            }
-
-            50% {
-                transform: translateX(-200px) scale(0.995);
-            }
-
-            100% {
-                transform: translateX(-200px) scale(0.98);
-            }
-        }
-
-        .video-call-container.with-notes .video-main-area,
-        .video-call-container.with-notes .desktop-controls {
-            animation: gentleScale 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
         /* ===============================
            DESKTOP NOTES PANEL (RIGHT SIDEBAR)
            =============================== */
@@ -560,8 +542,9 @@
             width: 400px;
             background-color: var(--card-bg);
             border-left: 1px solid var(--border);
-            z-index: 100;
-            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 200;
+            /* ensure visible above video */
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
             box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
@@ -860,8 +843,8 @@
                 width: 140px;
                 height: 105px;
                 border-width: 2px;
-                z-index: 90;
-                transition: bottom 0.3s ease;
+                z-index: 110;
+                transition: bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
             /* STATUS OVERLAY MOBILE */
@@ -889,8 +872,8 @@
             height: 50vh;
             background-color: var(--card-bg);
             border-top: 1px solid var(--border);
-            z-index: 100;
-            transition: bottom 0.3s ease-out;
+            z-index: 120;
+            transition: bottom 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             flex-direction: column;
         }
@@ -921,10 +904,7 @@
             resize: none;
         }
 
-        /* FIX: Move local video up when mobile notes panel is active */
-        .mobile-notes-panel.active~.video-call-container .local-video-pip {
-            bottom: calc(50vh + var(--controls-height-mobile) + 20px);
-        }
+        /* Remove incorrect sibling selector usage (we control via body class) */
 
         /* Hide desktop notes panel on mobile */
         @media (min-width: 769px) {
@@ -964,82 +944,43 @@
         a:visited {
             text-decoration: none !important;
         }
-        /* In the desktop notes panel section (around line 315-320), remove overlapping: */
-.notes-panel {
-    position: fixed;
-    top: var(--header-height-desktop);
-    right: -400px;
-    bottom: 0;
-    width: 400px;
-    background-color: var(--card-bg);
-    border-left: 1px solid var(--border);
-    z-index: 100;
-    transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
-    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
-}
 
-/* Add this new rule to prevent double layering in desktop: */
-.video-call-container.with-notes .local-video-pip {
-    right: 420px; /* Moves local video left when notes panel is open */
-}
-/* MOBILE NOTES PANEL (BOTTOM SLIDE-UP) */
-.mobile-notes-panel {
-    position: fixed;
-    bottom: -50vh;
-    left: 0;
-    right: 0;
-    height: 50vh;
-    background-color: var(--card-bg);
-    border-top: 1px solid var(--border);
-    z-index: 100; /* Above control bar (which is z-index: 80) */
-    transition: bottom 0.3s ease-out;
-    display: flex;
-    flex-direction: column;
-}
+        /* =====================================================
+           FIX #1: DESKTOP NOTES + LOCAL VIDEO BEHAVIOR
+           - ensure notes-panel is visible (higher z-index)
+           - only nudge PiP slightly when notes open (not huge)
+           - keep animations smooth
+           ===================================================== */
+        .video-call-container.with-notes .local-video-pip {
+            /* nudge PiP left a bit so it doesn't fully overlap the sidebar
+               but do not push it off-screen or over-move it */
+            right: 260px;
+            /* 400px panel width - 140px overlap margin ~ 260px */
+            transform: scale(0.98);
+            z-index: 95;
+        }
 
-.mobile-notes-panel.active {
-    bottom: var(--controls-height-mobile);
-}
+        /* ensure PiP stays above main video but below the notes panel so the panel is always visible */
+        .local-video-pip {
+            z-index: 95;
+        }
 
-/* This rule makes local video move up with notes panel */
-.mobile-notes-panel.active ~ .video-call-container .local-video-pip {
-    bottom: calc(50vh + var(--controls-height-mobile) + 20px);
-    transition: bottom 0.3s ease-out;
-}
-/* =====================================================
-   FIX #1: DESKTOP DOUBLE NOTES PANEL (REMOVE LAYERING)
-   ===================================================== */
+        .notes-panel {
+            z-index: 200;
+        }
 
-/* Prevent video + controls from shifting visually */
-.video-call-container.with-notes .video-main-area,
-.video-call-container.with-notes .desktop-controls {
-    transform: none !important;
-    animation: none !important;
-}
-
-/* Keep layout clean: only sidebar slides */
-.video-call-container.with-notes {
-    margin-right: 400px;
-    width: calc(100% - 400px);
-}
-
-/* =====================================================
-   FIX #2: MOBILE NOTES PANEL + LOCAL VIDEO SYNC
-   ===================================================== */
-
-@media (max-width: 768px) {
-    .local-video-pip {
-        transition: bottom 0.3s ease-out;
-    }
-
-    /* When mobile notes open, push local video up */
-    body.mobile-notes-open .local-video-pip {
-        bottom: calc(50vh + var(--controls-height-mobile) + 20px);
-    }
-}
-
+        /* =====================================================
+           FIX #2: MOBILE NOTES PANEL + LOCAL VIDEO SYNC (BODY CLASS)
+           - when body has .mobile-notes-open -> PiP moves up
+           - when removed -> PiP returns to original place
+           ===================================================== */
+        @media (max-width: 768px) {
+            body.mobile-notes-open .local-video-pip {
+                bottom: calc(50vh + var(--controls-height-mobile) + 12px);
+                /* scale slightly so it feels like it's moving with the panel */
+                transform: translateY(-6px) scale(1);
+            }
+        }
     </style>
 </head>
 
@@ -1134,7 +1075,7 @@
             <video id="remoteVideo" autoplay playsinline></video>
 
             <!-- Local Video (Picture-in-Picture) -->
-            <div class="local-video-pip">
+            <div class="local-video-pip" id="localPip">
                 <video id="localVideo" autoplay muted playsinline></video>
                 <div class="local-video-label">
                     <i class="fas fa-user-md"></i>
@@ -1325,7 +1266,7 @@
                 }
             });
 
-            // NOTES PANEL FUNCTIONALITY - FIXED
+            // NOTES PANEL FUNCTIONALITY - UPDATED UI CLASS HANDLING
             setupNotesPanels();
 
             // MIC AND CAMERA TOGGLE FUNCTIONALITY - FIXED
@@ -1335,7 +1276,7 @@
             initVideoCall();
         });
 
-        // Setup notes panels for desktop and mobile - FIXED
+        // Setup notes panels for desktop and mobile - FIXED (UI only)
         function setupNotesPanels() {
             // Desktop notes
             const toggleNotes = document.getElementById('toggleNotes');
@@ -1360,28 +1301,31 @@
             let desktopNotesOpen = false;
             let mobileNotesOpen = false;
 
-            // Character counters
-            notesText.addEventListener('input', function () {
-                charCount.textContent = this.value.length;
-                mobileNotesText.value = this.value; // Sync with mobile
-                mobileCharCount.textContent = this.value.length;
-            });
+            // Character counters (sync)
+            if (notesText && mobileNotesText) {
+                notesText.addEventListener('input', function () {
+                    charCount.textContent = this.value.length;
+                    mobileNotesText.value = this.value; // Sync with mobile
+                    mobileCharCount.textContent = this.value.length;
+                });
 
-            mobileNotesText.addEventListener('input', function () {
-                mobileCharCount.textContent = this.value.length;
-                notesText.value = this.value; // Sync with desktop
-                charCount.textContent = this.value.length;
-            });
+                mobileNotesText.addEventListener('input', function () {
+                    mobileCharCount.textContent = this.value.length;
+                    notesText.value = this.value; // Sync with desktop
+                    charCount.textContent = this.value.length;
+                });
+            }
 
             // DESKTOP NOTES TOGGLE (Right sidebar)
             if (toggleNotes) {
                 toggleNotes.addEventListener('click', () => {
-                    // Close mobile notes if open
+                    // Close mobile notes if open (UI only)
                     if (mobileNotesOpen) {
                         mobileNotesPanel.classList.remove('active');
                         mobileToggleNotes.classList.remove('active');
                         mobileNotesOpen = false;
                         document.body.style.overflow = '';
+                        document.body.classList.remove('mobile-notes-open');
                     }
 
                     desktopNotesOpen = !desktopNotesOpen;
@@ -1400,7 +1344,7 @@
                         }, 50);
                     } else {
                         videoCallContainer.classList.remove('with-notes');
-                        // Wait for video container animation before hiding notes panel
+                        // Wait a bit before hiding notes panel so animation feels smooth
                         setTimeout(() => {
                             notesPanel.classList.remove('active');
                         }, 350);
@@ -1431,7 +1375,7 @@
             // MOBILE NOTES TOGGLE (Bottom slide-up)
             if (mobileToggleNotes) {
                 mobileToggleNotes.addEventListener('click', () => {
-                    // Close desktop notes if open
+                    // Close desktop notes if open (UI only)
                     if (desktopNotesOpen) {
                         videoCallContainer.classList.remove('with-notes');
                         setTimeout(() => {
@@ -1446,9 +1390,13 @@
                     if (mobileNotesOpen) {
                         mobileNotesPanel.classList.add('active');
                         document.body.style.overflow = 'hidden';
+                        // add UI class so PiP moves up with the panel
+                        document.body.classList.add('mobile-notes-open');
                     } else {
                         mobileNotesPanel.classList.remove('active');
                         document.body.style.overflow = '';
+                        // remove class so PiP returns to original position
+                        document.body.classList.remove('mobile-notes-open');
                     }
 
                     // Update button state
@@ -1462,6 +1410,7 @@
                     mobileNotesPanel.classList.remove('active');
                     mobileToggleNotes.classList.remove('active');
                     document.body.style.overflow = '';
+                    document.body.classList.remove('mobile-notes-open');
                 });
             }
 
@@ -1469,10 +1418,10 @@
             if (clearNotes) {
                 clearNotes.addEventListener('click', function () {
                     if (confirm('Are you sure you want to clear all notes?')) {
-                        notesText.value = '';
-                        mobileNotesText.value = '';
-                        charCount.textContent = '0';
-                        mobileCharCount.textContent = '0';
+                        if (notesText) notesText.value = '';
+                        if (mobileNotesText) mobileNotesText.value = '';
+                        if (charCount) charCount.textContent = '0';
+                        if (mobileCharCount) mobileCharCount.textContent = '0';
                     }
                 });
             }
@@ -1480,10 +1429,10 @@
             if (mobileClearNotes) {
                 mobileClearNotes.addEventListener('click', function () {
                     if (confirm('Are you sure you want to clear all notes?')) {
-                        notesText.value = '';
-                        mobileNotesText.value = '';
-                        charCount.textContent = '0';
-                        mobileCharCount.textContent = '0';
+                        if (notesText) notesText.value = '';
+                        if (mobileNotesText) mobileNotesText.value = '';
+                        if (charCount) charCount.textContent = '0';
+                        if (mobileCharCount) mobileCharCount.textContent = '0';
                     }
                 });
             }
@@ -1810,12 +1759,14 @@
                     });
                     alert('Notes saved successfully!');
 
-                    // Close mobile notes panel if open
+                    // Close mobile notes panel if open (UI only)
                     const mobileNotesPanel = document.getElementById('mobileNotesPanel');
                     if (mobileNotesPanel && mobileNotesPanel.classList.contains('active')) {
                         mobileNotesPanel.classList.remove('active');
-                        document.getElementById('mobileToggleNotes').classList.remove('active');
+                        const mt = document.getElementById('mobileToggleNotes');
+                        if (mt) mt.classList.remove('active');
                         document.body.style.overflow = '';
+                        document.body.classList.remove('mobile-notes-open');
                     }
                 } catch (error) {
                     console.error('Error saving notes:', error);
@@ -1990,33 +1941,6 @@
             }, 10000);
         })();
     </script>
-<script>
-    /* =====================================================
-       MOBILE NOTES + LOCAL VIDEO SYNC (NO LOGIC CHANGE)
-       ===================================================== */
-
-    (function () {
-        const mobileToggleNotes = document.getElementById('mobileToggleNotes');
-        const mobileCloseNotes = document.getElementById('mobileCloseNotes');
-        const mobileNotesPanel = document.getElementById('mobileNotesPanel');
-
-        if (!mobileToggleNotes || !mobileNotesPanel) return;
-
-        mobileToggleNotes.addEventListener('click', () => {
-            if (mobileNotesPanel.classList.contains('active')) {
-                document.body.classList.add('mobile-notes-open');
-            } else {
-                document.body.classList.remove('mobile-notes-open');
-            }
-        });
-
-        if (mobileCloseNotes) {
-            mobileCloseNotes.addEventListener('click', () => {
-                document.body.classList.remove('mobile-notes-open');
-            });
-        }
-    })();
-</script>
 
 </body>
 
