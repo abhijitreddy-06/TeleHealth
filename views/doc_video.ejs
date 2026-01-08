@@ -942,6 +942,87 @@
                 height: 75px;
             }
         }
+        /* =====================================================
+   FINAL MOBILE VIEWPORT + CONTROL BAR FIX (DROP-IN)
+   ===================================================== */
+
+/* Prevent mobile viewport height bugs */
+html, body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+/* ---------- MAIN LAYOUT FIX ---------- */
+@media (max-width: 768px) {
+
+  /* Let flex manage height instead of vh math */
+  .main-container {
+    height: calc(100dvh - var(--header-height));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Video area becomes flexible container */
+  .video-area {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* Video container takes remaining space only */
+  .video-container {
+    flex: 1;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  /* Remote video sizing – no zoom, no overflow */
+  #remoteVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---------- CONTROL BAR FIX ---------- */
+  .controls-bar {
+    flex-shrink: 0;
+    height: var(--control-bar-height);
+    min-height: var(--control-bar-height);
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    background-color: var(--card-bg);
+  }
+
+  /* Ensure controls never wrap outside */
+  .controls-wrapper {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ---------- EXTRA SAFETY FOR SMALL HEIGHT DEVICES ---------- */
+@media (max-height: 700px) and (max-width: 768px) {
+  .controls-bar {
+    height: 70px;
+    min-height: 70px;
+  }
+}
+
+/* ---------- iOS / Android SAFE AREA SUPPORT ---------- */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .controls-bar {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
     </style>
 </head>
 
