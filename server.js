@@ -1007,9 +1007,9 @@ function protectedRoutes(app, PROJECT_ROOT) {
         res.render("doc_video_dashboard");
     });
 
-    app.get("/user_video/:roomId", authenticate, authorize("user"), (req, res) => {
-        res.render("user_video", { roomId: req.params.roomId });
-    });
+    // app.get("/user_video/:roomId", authenticate, authorize("user"), (req, res) => {
+    //     res.render("user_video", { roomId: req.params.roomId });
+    // });
 
     // Doctor Pages
     app.get("/doc_home", authenticate, authorize("doctor"), (req, res) => {
