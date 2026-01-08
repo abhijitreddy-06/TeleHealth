@@ -3,28 +3,32 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>User Consultation | TeleHealth</title>
+    <title>User Video Call | TeleHealth</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <style>
+        /* ===============================
+           BASE STYLES FROM DOC_HOME (works)
+           =============================== */
         :root {
             /* Color Variables */
             --primary: #38bdf8;
             --primary-hover: #0ea5e9;
             --secondary: #10b981;
-            --background: #0f172a;
+            --background: #f9fafb;
             --dark-bg: #1e293b;
-            --card-bg: #1e293b;
-            --text-dark: #f1f5f9;
-            --text-light: #0f172a;
-            --text-medium: #cbd5e1;
-            --border: #475569;
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-light: #f1f5f9;
+            --text-medium: #475569;
+            --border: #e2e8f0;
             --error: #ef4444;
             --warning: #f59e0b;
             --info: #60a5fa;
             --disabled: #9ca3af;
-            --footer-bg: #0f172a;
+            --footer-bg: #1e293b;
 
             /* Other Variables */
             --transition: all 0.3s ease;
@@ -32,20 +36,20 @@
                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 12px;
 
-            /* Height variables - SAME AS DOCTOR PAGE */
+            /* Height variables */
             --header-height: 80px;
             --control-bar-height: 80px;
         }
 
-        /* Light Theme Variables */
-        [data-theme="light"] {
-            --background: #f9fafb;
-            --card-bg: #ffffff;
-            --text-dark: #0f172a;
-            --text-light: #f1f5f9;
-            --text-medium: #475569;
-            --border: #e2e8f0;
-            --footer-bg: #1e293b;
+        /* Dark Theme Variables */
+        [data-theme="dark"] {
+            --background: #1e293b;
+            --card-bg: #334155;
+            --text-dark: #f1f5f9;
+            --text-light: #0f172a;
+            --text-medium: #cbd5e1;
+            --border: #475569;
+            --footer-bg: #0f172a;
         }
 
         * {
@@ -66,7 +70,7 @@
         }
 
         /* ===============================
-           HEADER - MODIFIED FOR NEW LAYOUT
+           HEADER - EXACT FROM DOC_HOME
            =============================== */
         header {
             background-color: var(--card-bg);
@@ -75,22 +79,20 @@
             top: 0;
             z-index: 100;
             height: var(--header-height);
-            border-bottom: 1px solid var(--border);
         }
 
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 2rem;
-            height: 100%;
+            padding: 1.2rem 5%;
             max-width: 1400px;
             margin: 0 auto;
+            height: 100%;
         }
 
         .logo {
             font-size: 1.8rem;
-            /* Increased from 1.5rem */
             font-weight: 700;
             color: var(--primary);
             display: flex;
@@ -116,41 +118,32 @@
             font-weight: 800;
         }
 
-        .call-info {
+        .nav-links {
             display: flex;
-            align-items: center;
             gap: 2rem;
+            align-items: center;
         }
 
-        .doctor-info {
+        .nav-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--text-medium);
         }
 
-        .doctor-info i {
+        .nav-links a.active {
+            background-color: rgba(56, 189, 248, 0.1);
             color: var(--primary);
         }
 
-        .timer-container {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            padding: 0.5rem 1.25rem;
-            border-radius: 20px;
-            color: white;
-            font-weight: 600;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
-        }
-
-        .timer-container i {
-            margin-right: 0.5rem;
-        }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+        .nav-links a:hover:not(.active) {
+            color: var(--primary);
+            background-color: rgba(56, 189, 248, 0.1);
         }
 
         .theme-toggle {
@@ -174,18 +167,102 @@
         }
 
         /* ===============================
-           MAIN LAYOUT CONTAINER - SAME AS DOCTOR PAGE
+           MOBILE MENU - EXACT FROM DOC_HOME
+           =============================== */
+        .mobile-controls {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-menu-btn:hover {
+            background-color: rgba(56, 189, 248, 0.1);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 280px;
+            height: 100vh;
+            background-color: var(--card-bg);
+            z-index: 1000;
+            padding: 2rem;
+            transition: var(--transition);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .close-menu {
+            align-self: flex-end;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-menu:hover {
+            background-color: rgba(56, 189, 248, 0.1);
+        }
+
+        .mobile-menu a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .mobile-menu a:hover,
+        .mobile-menu a.active {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+        }
+
+        /* ===============================
+           MAIN LAYOUT CONTAINER
            =============================== */
         .main-container {
             display: flex;
             height: calc(100vh - var(--header-height));
             width: 100vw;
             overflow: hidden;
+            /* Prevent scrolling */
             transition: var(--transition);
         }
 
         /* ===============================
-           VIDEO AREA (Left side) - SAME AS DOCTOR PAGE
+           VIDEO AREA (Left side)
            =============================== */
         .video-area {
             flex: 1;
@@ -193,63 +270,60 @@
             flex-direction: column;
             transition: var(--transition);
             padding: 4px;
+            /* Minimal gap */
             min-width: 0;
+            /* Prevent overflow */
         }
 
         /* Video Container */
         .video-container {
             flex: 1;
-            background-color: #020617;
+            background-color: #000;
             border-radius: var(--radius);
             overflow: hidden;
             position: relative;
             border: 2px solid var(--border);
             margin-bottom: 4px;
+            /* Minimal gap */
             min-height: 0;
+            /* Allow shrinking */
         }
 
-        [data-theme="light"] .video-container {
-            background: #1e293b;
-        }
-
-        /* Remote Video */
+        /* Remote Video - FIXED SIZE TO PREVENT SCROLLING */
         #remoteVideo {
             width: 100%;
             height: 100%;
             object-fit: contain;
-            background: #020617;
+            background-color: #000;
             display: block;
         }
 
-        [data-theme="light"] #remoteVideo {
-            background: #1e293b;
-        }
-
-        /* Local Video (PiP) - NEW POSITIONING */
-        #localVideo {
+        /* Local Video (PiP) */
+        .local-video-pip {
             position: absolute;
             bottom: 8px;
             right: 8px;
             width: 160px;
             height: 120px;
-            border: 3px solid var(--primary);
             border-radius: var(--radius);
-            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 2px solid var(--primary);
             background: #000;
-            z-index: 10;
-            transition: var(--transition);
-            object-fit: cover;
+            z-index: 5;
+            transition: transform 0.3s ease;
         }
 
-        #localVideo:hover {
-            transform: scale(1.02);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+        #localVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .local-video-label {
             position: absolute;
             bottom: 0;
-            right: 8px;
+            left: 0;
+            right: 0;
             background: rgba(0, 0, 0, 0.7);
             color: white;
             padding: 0.3rem;
@@ -258,43 +332,40 @@
             align-items: center;
             gap: 0.3rem;
             justify-content: center;
-            z-index: 11;
-            backdrop-filter: blur(10px);
         }
 
-        .local-video-label i {
-            color: var(--primary);
-        }
-
-        /* Connection Status */
-        .connection-status {
+        /* Status Overlay */
+        .call-status-overlay {
             position: absolute;
             top: 8px;
             left: 8px;
-            background: rgba(15, 23, 42, 0.9);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
             padding: 0.5rem 0.8rem;
             border-radius: var(--radius);
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            color: var(--text-dark);
-            font-size: 0.85rem;
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            z-index: 20;
-        }
-
-        [data-theme="light"] .connection-status {
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--text-dark);
+            z-index: 10;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .status-indicator {
+            display: flex;
+            gap: 0.2rem;
+        }
+
+        .status-dot {
             width: 6px;
             height: 6px;
             background-color: var(--secondary);
             border-radius: 50%;
             animation: pulse 2s infinite;
+        }
+
+        .status-dot:nth-child(2) {
+            animation-delay: 0.5s;
         }
 
         @keyframes pulse {
@@ -311,57 +382,25 @@
             }
         }
 
-        /* Doctor Info Overlay */
-        .doctor-info-overlay {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(15, 23, 42, 0.9);
-            padding: 0.5rem 0.8rem;
-            border-radius: var(--radius);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-dark);
+        #callStatusText {
             font-size: 0.85rem;
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border);
-            z-index: 20;
+            font-weight: 500;
         }
 
-        [data-theme="light"] .doctor-info-overlay {
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--text-dark);
-        }
-
-        .doctor-avatar {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        /* Loading Overlay */
-        .loading-overlay {
+        /* Video Loading State */
+        .video-loading {
             position: absolute;
-            inset: 0;
-            background: rgba(2, 6, 23, 0.95);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 100;
-            transition: var(--transition);
-        }
-
-        [data-theme="light"] .loading-overlay {
-            background: rgba(15, 23, 42, 0.95);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            z-index: 2;
         }
 
         .loading-spinner {
@@ -381,7 +420,7 @@
         }
 
         /* ===============================
-           CONTROL BAR - SAME MODERN STYLE AS DOCTOR PAGE
+           CONTROL BAR (Not fixed)
            =============================== */
         .controls-bar {
             height: var(--control-bar-height);
@@ -403,7 +442,7 @@
             align-items: center;
         }
 
-        /* MODERN CONTROL BUTTONS - SAME AS DOCTOR PAGE */
+        /* MODERN CONTROL BUTTONS */
         .control-btn {
             display: flex;
             flex-direction: column;
@@ -473,76 +512,6 @@
             font-weight: 500;
         }
 
-        /* Call Ended Overlay */
-        .call-ended-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(2, 6, 23, 0.95);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-        }
-
-        .call-ended-content {
-            text-align: center;
-            background: var(--card-bg);
-            padding: 2rem;
-            border-radius: var(--radius);
-            border: 2px solid var(--border);
-            max-width: 500px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .call-ended-icon {
-            font-size: 3rem;
-            color: var(--secondary);
-            margin-bottom: 1.5rem;
-        }
-
-        .call-ended-content h2 {
-            color: var(--text-dark);
-            margin-bottom: 1rem;
-            font-size: 1.8rem;
-        }
-
-        .call-ended-content p {
-            color: var(--text-medium);
-            margin-bottom: 2rem;
-            font-size: 1rem;
-        }
-
-        .prescription-download-btn {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            margin: 0 auto;
-            transition: var(--transition);
-        }
-
-        .prescription-download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
-        }
-
-        /* Utility Classes */
-        .hidden {
-            display: none !important;
-        }
-
-        .visible {
-            display: flex;
-        }
-
         /* ===============================
            MOBILE VIEW - INCREASED FONT SIZES
            =============================== */
@@ -555,38 +524,43 @@
             /* INCREASED MOBILE FONT SIZES */
             body {
                 font-size: 16px;
+                /* Increased base font size */
             }
 
             /* Header adjustments */
             .navbar {
-                padding: 1rem;
+                padding: 1rem 4%;
             }
 
             .logo {
                 font-size: 1.6rem;
+                /* Increased */
             }
 
             .logo i {
                 font-size: 1.4rem;
+                /* Increased */
+            }
+
+            /* Hide desktop nav, show mobile */
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-controls {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+                font-size: 1.6rem;
+                /* Increased */
+                width: 44px;
+                height: 44px;
             }
 
             .logo-text {
                 display: none;
-            }
-
-            .call-info {
-                flex-direction: column;
-                gap: 0.5rem;
-                align-items: flex-start;
-            }
-
-            .doctor-info {
-                font-size: 0.9rem;
-            }
-
-            .timer-container {
-                font-size: 0.9rem;
-                padding: 0.4rem 1rem;
             }
 
             /* Main container for mobile */
@@ -607,42 +581,36 @@
                 margin-bottom: 3px;
                 flex: 1;
                 min-height: 0;
+                height: calc(100vh - 160px);
             }
 
             /* Remote video fix for mobile */
             #remoteVideo {
+                height: 100%;
                 object-fit: cover;
+
             }
 
             /* Local video PiP larger for mobile */
-            #localVideo {
+            .local-video-pip {
                 width: 120px;
                 height: 90px;
                 bottom: 6px;
                 right: 6px;
-            }
-
-            .local-video-label {
-                right: 6px;
-                bottom: 0;
-                font-size: 0.75rem;
-                padding: 0.2rem 0.5rem;
+                transition: transform 0.3s ease, bottom 0.3s ease;
             }
 
             /* Status overlay larger */
-            .connection-status {
+            .call-status-overlay {
                 top: 6px;
                 left: 6px;
-                padding: 0.4rem 0.8rem;
+                padding: 0.6rem 0.9rem;
             }
 
-            .status-indicator {
-                width: 6px;
-                height: 6px;
-            }
-
-            .doctor-info-overlay {
-                display: none;
+            #callStatusText {
+                font-size: 0.9rem;
+                /* Increased */
+                font-weight: 600;
             }
 
             /* INCREASED CONTROL BAR SIZES */
@@ -655,42 +623,29 @@
             .controls-wrapper {
                 gap: 1.2rem;
                 width: 100%;
-                justify-content: center;
+                justify-content: space-around;
             }
 
             .control-btn {
                 min-width: 70px;
+                /* Increased */
                 padding: 0.7rem 0.5rem;
             }
 
             .control-icon {
                 width: 56px;
+                /* Increased */
                 height: 56px;
+                /* Increased */
                 font-size: 1.4rem;
+                /* Increased */
                 border-width: 2px;
             }
 
             .control-label {
                 font-size: 0.85rem;
+                /* Increased */
                 font-weight: 600;
-            }
-
-            /* Call ended overlay adjustments */
-            .call-ended-content {
-                padding: 1.5rem;
-                margin: 1rem;
-            }
-
-            .call-ended-icon {
-                font-size: 2.5rem;
-            }
-
-            .call-ended-content h2 {
-                font-size: 1.5rem;
-            }
-
-            .call-ended-content p {
-                font-size: 0.95rem;
             }
         }
 
@@ -718,28 +673,17 @@
             }
 
             .navbar {
-                padding: 0.8rem;
+                padding: 0.8rem 3%;
             }
 
             .logo {
                 font-size: 1.5rem;
             }
 
-            .logo i {
-                font-size: 1.3rem;
-            }
-
-            .call-info {
-                gap: 0.3rem;
-            }
-
-            .doctor-info {
-                font-size: 0.85rem;
-            }
-
-            .timer-container {
-                font-size: 0.85rem;
-                padding: 0.3rem 0.8rem;
+            .mobile-menu-btn {
+                font-size: 1.5rem;
+                width: 42px;
+                height: 42px;
             }
 
             .controls-wrapper {
@@ -761,42 +705,185 @@
                 font-size: 0.8rem;
             }
 
-            #localVideo {
+            .local-video-pip {
                 width: 110px;
                 height: 82px;
-                bottom: 5px;
-                right: 5px;
-            }
-
-            .local-video-label {
-                right: 5px;
-                font-size: 0.7rem;
-                padding: 0.2rem 0.4rem;
             }
         }
 
         /* Small height devices */
         @media (max-height: 700px) and (max-width: 768px) {
-            #localVideo {
+            .local-video-pip {
                 width: 100px;
                 height: 75px;
             }
+        }
 
-            .local-video-label {
-                font-size: 0.7rem;
+        /* =====================================================
+   FINAL MOBILE VIEWPORT + CONTROL BAR FIX (DROP-IN)
+   ===================================================== */
+
+        /* Prevent mobile viewport height bugs */
+        html,
+        body {
+            height: 100%;
+            overscroll-behavior: none;
+        }
+
+        /* ---------- MAIN LAYOUT FIX ---------- */
+        @media (max-width: 768px) {
+
+            /* Let flex manage height instead of vh math */
+            .main-container {
+                height: calc(100dvh - var(--header-height));
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
             }
 
-            .control-icon {
-                width: 48px;
-                height: 48px;
-                font-size: 1.2rem;
+            /* Video area becomes flexible container */
+            .video-area {
+                flex: 1;
+                min-height: 0;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
             }
+
+            /* Video container takes remaining space only */
+            .video-container {
+                flex: 1;
+                min-height: 0;
+                max-height: 100%;
+                overflow: hidden;
+            }
+
+            /* Remote video sizing – no zoom, no overflow */
+            #remoteVideo {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            /* ---------- CONTROL BAR FIX ---------- */
+            .controls-bar {
+                flex-shrink: 0;
+                height: var(--control-bar-height);
+                min-height: var(--control-bar-height);
+                position: sticky;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 30;
+                background-color: var(--card-bg);
+            }
+
+            /* Ensure controls never wrap outside */
+            .controls-wrapper {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+        }
+
+        /* ---------- EXTRA SAFETY FOR SMALL HEIGHT DEVICES ---------- */
+        @media (max-height: 700px) and (max-width: 768px) {
+            .controls-bar {
+                height: 70px;
+                min-height: 70px;
+            }
+        }
+
+        /* ---------- iOS / Android SAFE AREA SUPPORT ---------- */
+        @supports (padding: env(safe-area-inset-bottom)) {
+            .controls-bar {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+
+        /* ===============================
+   CALL ENDED OVERLAY
+   =============================== */
+        .call-ended-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(2, 6, 23, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            padding: 1rem;
+        }
+
+        .call-ended-content {
+            text-align: center;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--radius);
+            border: 2px solid var(--border);
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .call-ended-icon {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .call-ended-content h2 {
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+
+        .call-ended-content p {
+            color: var(--text-medium);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .prescription-download-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: var(--transition);
+            margin: 0 auto;
+        }
+
+        .prescription-download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(56, 189, 248, 0.3);
+        }
+
+        [data-theme="dark"] .call-ended-overlay {
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        [data-theme="dark"] .call-ended-content {
+            background: var(--card-bg);
+            color: var(--text-dark);
         }
     </style>
 </head>
 
 <body>
-    <!-- Header -->
+
+    <!-- Header - EXACT FROM DOC_HOME -->
     <header>
         <nav class="navbar">
             <a href="/user_video_dashboard" class="logo">
@@ -804,55 +891,64 @@
                 <span class="logo-text">TeleHealth</span>
             </a>
 
-            <div class="call-info">
-                <div class="doctor-info">
-                    <i class="fas fa-user-md"></i>
-                    <span class="text-dark">Doctor Consultation</span>
-                </div>
-                <div class="timer-container" id="callTimer">
-                    <i class="fas fa-clock"></i>
-                    <span>00:00:00</span>
-                </div>
-            </div>
-
-            <div class="header-controls">
+            <div class="nav-links">
+                <a href="/user_home"><i class="fas fa-home"></i> Home</a>
+                <a href="/user_video_dashboard" class="active"><i class="fas fa-video"></i>Video</a>
+                <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
                 <button class="theme-toggle" id="themeToggle">
                     <i class="fas fa-moon"></i>
+                </button>
+            </div>
+
+            <div class="mobile-controls">
+                <button class="theme-toggle" id="mobileThemeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
                 </button>
             </div>
         </nav>
     </header>
 
-    <!-- Main Content Area - SAME LAYOUT AS DOCTOR PAGE -->
+    <!-- Mobile Menu - EXACT FROM DOC_HOME -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="close-menu" id="closeMenu">
+            <i class="fas fa-times"></i>
+        </button>
+        <a href="/user_home"><i class="fas fa-home"></i> Home</a>
+        <a href="/user_video_dashboard" class="active"><i class="fas fa-video"></i>Video</a>
+        <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
+    </div>
+
+    <!-- Main Content Area -->
     <div class="main-container">
         <!-- Video Area (Left side) -->
         <div class="video-area">
             <!-- Video Container -->
             <div class="video-container">
-                <!-- Connection Status -->
-                <div class="connection-status" id="connectionStatus">
-                    <div class="status-indicator" id="statusIndicator"></div>
-                    <span class="text-dark" id="statusText">Connecting to doctor...</span>
+                <!-- Status Overlay -->
+                <div class="call-status-overlay" id="connectionStatus">
+                    <div class="status-indicator">
+                        <div class="status-dot" id="statusIndicator"></div>
+                    </div>
+                    <span id="statusText">Connecting to doctor...</span>
                 </div>
 
-                <!-- Doctor Info Overlay -->
-                <div class="doctor-info-overlay">
-                    <div class="doctor-avatar">DR</div>
-                    <div>Dr. Smith</div>
-                </div>
-
-                <!-- Remote Video (Doctor) -->
+                <!-- Remote Video Stream -->
                 <video id="remoteVideo" autoplay playsinline></video>
 
-                <!-- Local Video (User) -->
-                <video id="localVideo" autoplay muted playsinline></video>
-                <div class="local-video-label">
-                    <i class="fas fa-user"></i>
-                    <span>You</span>
+                <!-- Local Video (Picture-in-Picture) -->
+                <div class="local-video-pip">
+                    <video id="localVideo" autoplay muted playsinline></video>
+                    <div class="local-video-label">
+                        <i class="fas fa-user"></i>
+                        <span>YOU</span>
+                    </div>
                 </div>
 
                 <!-- Loading State -->
-                <div class="loading-overlay hidden" id="videoLoading">
+                <div class="video-loading hidden" id="videoLoading">
                     <div class="loading-spinner"></div>
                     <p>Establishing connection...</p>
                 </div>
@@ -862,24 +958,20 @@
             <div class="controls-bar">
                 <div class="controls-wrapper">
                     <!-- Microphone Toggle -->
-                    <div class="control-group">
-                        <button class="control-btn active" id="toggleMic">
-                            <div class="control-icon">
-                                <i class="fas fa-microphone"></i>
-                            </div>
-                            <span class="control-label">Mic On</span>
-                        </button>
-                    </div>
+                    <button class="control-btn active" id="toggleMic">
+                        <div class="control-icon">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <span class="control-label">Mute</span>
+                    </button>
 
                     <!-- Camera Toggle -->
-                    <div class="control-group">
-                        <button class="control-btn active" id="toggleCam">
-                            <div class="control-icon">
-                                <i class="fas fa-video"></i>
-                            </div>
-                            <span class="control-label">Camera On</span>
-                        </button>
-                    </div>
+                    <button class="control-btn active" id="toggleCam">
+                        <div class="control-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <span class="control-label">Camera</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -903,6 +995,7 @@
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="/socket.io/socket.io.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -924,7 +1017,6 @@
             const remoteVideo = document.getElementById('remoteVideo');
             const toggleMic = document.getElementById('toggleMic');
             const toggleCam = document.getElementById('toggleCam');
-            const callTimer = document.getElementById('callTimer');
             const statusText = document.getElementById('statusText');
             const statusIndicator = document.getElementById('statusIndicator');
             const callEndedOverlay = document.getElementById('callEndedOverlay');
@@ -934,6 +1026,7 @@
 
             // Theme Toggle
             const themeToggle = document.getElementById('themeToggle');
+            const mobileThemeToggle = document.getElementById('mobileThemeToggle');
             const html = document.documentElement;
 
             const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -951,9 +1044,50 @@
             function updateThemeIcon(theme) {
                 const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
                 themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+                if (mobileThemeToggle) {
+                    mobileThemeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+                }
             }
 
             themeToggle.addEventListener('click', toggleTheme);
+            if (mobileThemeToggle) {
+                mobileThemeToggle.addEventListener('click', toggleTheme);
+            }
+
+            // ===============================
+            // MOBILE MENU FUNCTIONALITY
+            // ===============================
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const closeMenuBtn = document.getElementById('closeMenu');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    mobileMenu.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            if (closeMenuBtn) {
+                closeMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            document.addEventListener('click', (e) => {
+                if (mobileMenu.classList.contains('active') &&
+                    !mobileMenu.contains(e.target) &&
+                    e.target !== mobileMenuBtn) {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // ===============================
+            // VIDEO CALL LOGIC
+            // ===============================
 
             // Function to download prescription
             function downloadPrescription(roomId) {
@@ -1006,7 +1140,6 @@
                 };
 
                 iframe.onerror = function () {
-
                     downloadBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Try Again';
                     downloadBtn.disabled = false;
                     document.body.removeChild(iframe);
@@ -1062,8 +1195,6 @@
             function showCallEndedOverlay(prescriptionReady = false) {
                 if (callAlreadyEnded) return;
                 callAlreadyEnded = true;
-
-
 
                 // Cleanup call resources
                 cleanupCall();
@@ -1132,6 +1263,7 @@
                     });
 
                     localVideo.srcObject = localStream;
+                    document.getElementById('videoLoading').classList.add('hidden');
                 } catch (error) {
                     updateStatus('Camera/mic permission required', 'disconnected');
                     alert('Unable to access camera and microphone. Please check permissions and try again.');
@@ -1190,7 +1322,6 @@
                 });
 
                 socket.on('disconnect', (reason) => {
-
                     if (!callAlreadyEnded) {
                         updateStatus('Disconnected from server', 'disconnected');
                     }
@@ -1294,68 +1425,59 @@
 
                         const timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-                        // Update timer display
-                        const timerSpan = callTimer.querySelector('span');
-                        if (timerSpan) {
-                            timerSpan.textContent = timeString;
+                        // Update timer display (if exists)
+                        const timerElement = document.getElementById('callTimer');
+                        if (timerElement) {
+                            const timerSpan = timerElement.querySelector('span');
+                            if (timerSpan) {
+                                timerSpan.textContent = timeString;
+                            }
                         }
 
                     }, 1000);
                 }
             }
 
-            // Toggle microphone - UPDATED FOR NEW BUTTON STYLE
+            // Toggle microphone
             toggleMic.addEventListener('click', () => {
                 if (localStream) {
-                    const audioTracks = localStream.getAudioTracks();
-                    if (audioTracks.length > 0) {
-                        audioTracks.forEach(track => {
-                            track.enabled = !track.enabled;
-                        });
+                    localStream.getAudioTracks().forEach(track => {
+                        track.enabled = !track.enabled;
+                    });
 
-                        isAudioMuted = !audioTracks[0].enabled;
-                        toggleMic.classList.toggle('active', !isAudioMuted);
-                        toggleMic.querySelector('.control-icon i').className = isAudioMuted ?
-                            'fas fa-microphone-slash' :
-                            'fas fa-microphone';
+                    isAudioMuted = !localStream.getAudioTracks()[0].enabled;
+                    toggleMic.classList.toggle('active', !isAudioMuted);
+                    toggleMic.querySelector('.control-icon i').className = isAudioMuted ?
+                        'fas fa-microphone-slash' :
+                        'fas fa-microphone';
+                    toggleMic.querySelector('.control-label').textContent = isAudioMuted ? 'Unmute' : 'Mute';
 
-                        // Update icon border color based on active state
-                        if (!isAudioMuted) {
-                            toggleMic.querySelector('.control-icon').style.borderColor = 'var(--primary)';
-                        } else {
-                            toggleMic.querySelector('.control-icon').style.borderColor = 'var(--border)';
-                        }
-
-                        toggleMic.querySelector('.control-label').textContent =
-                            isAudioMuted ? 'Mic Off' : 'Mic On';
+                    if (!isAudioMuted) {
+                        toggleMic.querySelector('.control-icon').style.borderColor = 'var(--primary)';
+                    } else {
+                        toggleMic.querySelector('.control-icon').style.borderColor = 'var(--border)';
                     }
                 }
             });
 
-            // Toggle camera - UPDATED FOR NEW BUTTON STYLE
+            // Toggle camera
             toggleCam.addEventListener('click', () => {
                 if (localStream) {
-                    const videoTracks = localStream.getVideoTracks();
-                    if (videoTracks.length > 0) {
-                        videoTracks.forEach(track => {
-                            track.enabled = !track.enabled;
-                        });
+                    localStream.getVideoTracks().forEach(track => {
+                        track.enabled = !track.enabled;
+                    });
 
-                        isVideoOff = !videoTracks[0].enabled;
-                        toggleCam.classList.toggle('active', !isVideoOff);
-                        toggleCam.querySelector('.control-icon i').className = isVideoOff ?
-                            'fas fa-video-slash' :
-                            'fas fa-video';
+                    isVideoOff = !localStream.getVideoTracks()[0].enabled;
+                    toggleCam.classList.toggle('active', !isVideoOff);
+                    toggleCam.querySelector('.control-icon i').className = isVideoOff ?
+                        'fas fa-video-slash' :
+                        'fas fa-video';
+                    toggleCam.querySelector('.control-label').textContent = isVideoOff ? 'Camera On' : 'Camera Off';
 
-                        // Update icon border color based on active state
-                        if (!isVideoOff) {
-                            toggleCam.querySelector('.control-icon').style.borderColor = 'var(--primary)';
-                        } else {
-                            toggleCam.querySelector('.control-icon').style.borderColor = 'var(--border)';
-                        }
-
-                        toggleCam.querySelector('.control-label').textContent =
-                            isVideoOff ? 'Camera Off' : 'Camera On';
+                    if (!isVideoOff) {
+                        toggleCam.querySelector('.control-icon').style.borderColor = 'var(--primary)';
+                    } else {
+                        toggleCam.querySelector('.control-icon').style.borderColor = 'var(--border)';
                     }
                 }
             });
@@ -1395,74 +1517,66 @@
             });
         });
     </script>
+
+    <!-- Global Loader Script -->
     <script>
         (function () {
-            // -------------------------------
-            // 1. Create Loader HTML + CSS
-            // -------------------------------
             const style = document.createElement("style");
             style.innerHTML = `
-    #global-loader {
-      position: fixed;
-      inset: 0;
-      background: #ffffff;
-      z-index: 99999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    }
+                #global-loader {
+                    position: fixed;
+                    inset: 0;
+                    background: #ffffff;
+                    z-index: 99999;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+                }
 
-    #global-loader.hidden {
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
+                #global-loader.hidden {
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 0.3s ease;
+                }
 
-    #global-loader .spinner {
-      width: 46px;
-      height: 46px;
-      border: 4px solid #e5e7eb;
-      border-top-color: #2563eb;
-      border-radius: 50%;
-      animation: spin 0.9s linear infinite;
-      margin-bottom: 12px;
-    }
+                #global-loader .spinner {
+                    width: 46px;
+                    height: 46px;
+                    border: 4px solid #e5e7eb;
+                    border-top-color: #2563eb;
+                    border-radius: 50%;
+                    animation: spin 0.9s linear infinite;
+                    margin-bottom: 12px;
+                }
 
-    #global-loader p {
-      font-size: 14px;
-      color: #374151;
-    }
+                #global-loader p {
+                    font-size: 14px;
+                    color: #374151;
+                }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-  `;
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+            `;
             document.head.appendChild(style);
 
             const loader = document.createElement("div");
             loader.id = "global-loader";
             loader.innerHTML = `
-    <div class="spinner"></div>
-    <p>Loading, please wait…</p>
-  `;
+                <div class="spinner"></div>
+                <p>Loading, please wait…</p>
+            `;
             document.body.appendChild(loader);
 
-            // -------------------------------
-            // 2. Hide loader when page loaded
-            // -------------------------------
             window.addEventListener("load", () => {
                 loader.classList.add("hidden");
                 setTimeout(() => loader.remove(), 400);
             });
 
-            // -------------------------------
-            // 3. Show loader on link navigation
-            // -------------------------------
             document.addEventListener("click", (e) => {
                 const link = e.target.closest("a");
-
                 if (!link) return;
                 if (link.target === "_blank") return;
                 if (link.href.startsWith("mailto:")) return;
@@ -1473,17 +1587,11 @@
                 loader.style.display = "flex";
             });
 
-            // -------------------------------
-            // 4. Show loader on form submit
-            // -------------------------------
             document.addEventListener("submit", () => {
                 loader.classList.remove("hidden");
                 loader.style.display = "flex";
             });
 
-            // -------------------------------
-            // 5. Slow network hint (optional)
-            // -------------------------------
             if (navigator.connection && navigator.connection.effectiveType) {
                 if (navigator.connection.effectiveType.includes("2g")) {
                     loader.querySelector("p").innerText =
@@ -1491,9 +1599,6 @@
                 }
             }
 
-            // -------------------------------
-            // 6. Safety fallback (10s)
-            // -------------------------------
             setTimeout(() => {
                 if (document.body.contains(loader)) {
                     loader.remove();
