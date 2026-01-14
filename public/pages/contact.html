@@ -1509,47 +1509,46 @@ a:visited {
 
         });
         </script>
-    <script>
-        document.getElementById('contactForm').addEventListener('submit', function (e) {
-            e.preventDefault();
+<script>
+    document.getElementById("contactForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
 
-            // Get form values
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const subject = document.getElementById('subject').value.trim();
-            const message = document.getElementById('message').value.trim();
+        const data = {
+            name: name.value.trim(),
+            email: email.value.trim(),
+            phone: phone.value.trim(),
+            subject: subject.value.trim(),
+            message: message.value.trim(),
+        };
 
-            // Basic validation
-            if (!name || !email || !subject || !message) {
-                alert("Please fill in all fields.");
-                return;
-            }
+        if (!data.name || !data.email || !data.subject || !data.message) {
+            alert("Please fill all required fields.");
+            return;
+        }
 
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(email)) {
-                alert("Please enter a valid email address.");
-                return;
-            }
+        const btn = this.querySelector("button[type='submit']");
+        btn.disabled = true;
+        btn.innerText = "Sending...";
 
-            // Construct Gmail compose URL
-            const gmailURL =
-                `https://mail.google.com/mail/?view=cm&fs=1` +
-                `&to=abhijitreddy828@gmail.com` +
-                `&su=${encodeURIComponent(subject)}` +
-                `&body=${encodeURIComponent(
-                    `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
-                )}`;
+        try {
+            const res = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data),
+            });
 
-            // Open Gmail compose in new tab
-            window.open(gmailURL, "_blank");
+            if (!res.ok) throw new Error();
 
-            // Reset form after opening Gmail
+            alert("✅ Message sent successfully!");
             this.reset();
-
-            alert(`Thank you, ${name}! Your message has been prepared in Gmail.`);
-        });
-        </script>
-
+        } catch {
+            alert("❌ Failed to send message. Please try again.");
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+        }
+    });
+</script>
     <script>
         (function () {
             // -------------------------------
@@ -1656,6 +1655,12 @@ a:visited {
                     }, 10000);
                 })();
             </script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+    (function () {
+        emailjs.init("l6wT5Yx3hCWWgFmau"); // PUBLIC KEY
+    })();
+</script>
 
 </body>
 

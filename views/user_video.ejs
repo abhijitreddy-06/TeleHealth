@@ -1607,6 +1607,317 @@
                 }
             }, 10000);
         })();
+        // ===============================
+            // AUTO-RELOAD WHEN NOT CONNECTED
+            // ===============================
+
+            // Function to check connection status
+            function checkConnection() {
+                // Don't check if call has already ended
+                if (callAlreadyEnded) {
+                    return true; // Don't reload if call ended normally
+                }
+
+                // Check if we have a socket connection
+                if (!socket || !socket.connected) {
+                    console.log('Socket not connected, connection check failed...');
+                    return false;
+                }
+
+                // Check if we have a peer connection
+                if (!peerConnection) {
+                    console.log('No peer connection, connection check failed...');
+                    return false;
+                }
+
+                // Check peer connection state
+                if (peerConnection.iceConnectionState === 'disconnected' ||
+                    peerConnection.iceConnectionState === 'failed' ||
+                    peerConnection.iceConnectionState === 'closed') {
+                    console.log('Peer connection state:', peerConnection.iceConnectionState, '- connection check failed...');
+                    return false;
+                }
+
+                // Check if we have a remote video stream
+                if (!remoteVideo.srcObject && !callAlreadyEnded) {
+                    console.log('No remote video stream, connection check failed...');
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Function to reload the page
+            function reloadPage() {
+                console.log('Reloading page due to connection issues...');
+
+                // Don't reload if call has already ended
+                if (callAlreadyEnded) {
+                    console.log('Call already ended, skipping reload...');
+                    return;
+                }
+
+                // Show loading state
+                updateStatus('Reconnecting...', 'warning');
+
+                // Cleanup before reload
+                cleanupCall();
+
+                // Disconnect socket if exists
+                if (socket && socket.connected) {
+                    socket.disconnect();
+                }
+
+                // Reload after a short delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }
+
+            // Periodic connection checker
+            let connectionCheckInterval;
+            let consecutiveFailures = 0;
+            const MAX_CONSECUTIVE_FAILURES = 3; // Require 3 consecutive failures before reloading
+            const CHECK_INTERVAL = 5000; // Check every 5 seconds
+
+            function startConnectionMonitor() {
+                // Clear any existing interval
+                if (connectionCheckInterval) {
+                    clearInterval(connectionCheckInterval);
+                }
+
+                connectionCheckInterval = setInterval(() => {
+                    // Don't monitor if call has ended
+                    if (callAlreadyEnded) {
+                        clearInterval(connectionCheckInterval);
+                        return;
+                    }
+
+                    const isConnected = checkConnection();
+
+                    if (isConnected) {
+                        consecutiveFailures = 0; // Reset failures on successful check
+                    } else {
+                        consecutiveFailures++;
+                        console.log(`Connection check failed (${consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES})`);
+
+                        // Update status to show reconnecting
+                        if (consecutiveFailures === 1) {
+                            updateStatus('Checking connection...', 'warning');
+                        } else if (consecutiveFailures === 2) {
+                            updateStatus('Connection unstable...', 'warning');
+                        }
+
+                        // Only reload after multiple consecutive failures
+                        if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                            clearInterval(connectionCheckInterval);
+                            reloadPage();
+                        }
+                    }
+                }, CHECK_INTERVAL);
+            }
+
+            // Socket connection monitoring
+            function monitorSocketEvents() {
+                if (socket) {
+                    // Listen for socket disconnect
+                    socket.on('disconnect', (reason) => {
+                        console.log('Socket disconnected:', reason);
+
+                        // Don't reload if call has ended
+                        if (callAlreadyEnded) return;
+
+                        // If disconnect wasn't initiated by user, start checking for reconnection
+                        if (reason !== 'io client disconnect' && reason !== 'transport close') {
+                            consecutiveFailures = MAX_CONSECUTIVE_FAILURES - 1; // Fast-track to reload
+                            updateStatus('Connection lost, reconnecting...', 'disconnected');
+                        }
+                    });
+
+                    // Listen for socket reconnect attempts
+                    socket.on('reconnect_attempt', (attemptNumber) => {
+                        console.log('Socket reconnect attempt:', attemptNumber);
+                        if (!callAlreadyEnded) {
+                            updateStatus(`Reconnecting (attempt ${attemptNumber})...`, 'warning');
+                        }
+                    });
+
+                    // Listen for successful reconnect
+                    socket.on('reconnect', () => {
+                        console.log('Socket reconnected');
+                        if (!callAlreadyEnded) {
+                            consecutiveFailures = 0;
+                            updateStatus('Reconnected, establishing call...', 'warning');
+                        }
+                    });
+
+                    // Listen for socket reconnect failure
+                    socket.on('reconnect_failed', () => {
+                        console.log('Socket reconnect failed');
+                        if (!callAlreadyEnded) {
+                            reloadPage();
+                        }
+                    });
+
+                    // Listen for connection errors
+                    socket.on('connect_error', (error) => {
+                        console.log('Socket connection error:', error);
+                        if (!callAlreadyEnded) {
+                            consecutiveFailures++;
+                            if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                                reloadPage();
+                            }
+                        }
+                    });
+                }
+            }
+
+            // Initialize connection monitoring with delay to allow initial connection
+            setTimeout(() => {
+                startConnectionMonitor();
+                monitorSocketEvents();
+                console.log('Connection monitoring started');
+            }, 10000); // Start monitoring after 10 seconds to allow initial connection
+
+            // Also check when visibility changes (user comes back to tab)
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && !callAlreadyEnded) {
+                    // When user returns to tab, check connection immediately
+                    setTimeout(() => {
+                        if (!checkConnection()) {
+                            consecutiveFailures++;
+                            console.log(`Visibility change check failed (${consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES})`);
+                            if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                                reloadPage();
+                            }
+                        }
+                    }, 1000);
+                }
+            });
+
+            // Add a manual refresh button/indicator for user control (optional visual feedback)
+            const addConnectionIndicator = () => {
+                const indicator = document.createElement('div');
+                indicator.id = 'connectionIndicator';
+                indicator.style.cssText = `
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: #10b981;
+        z-index: 1000;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    `;
+
+                // Add tooltip
+                indicator.title = 'Connection status (green=good, red=poor) - Click to manually check connection';
+
+                // Add click handler for manual check
+                indicator.addEventListener('click', () => {
+                    if (!callAlreadyEnded) {
+                        if (!checkConnection()) {
+                            updateStatus('Manual connection check: Failed', 'disconnected');
+                            indicator.style.backgroundColor = '#ef4444';
+                            indicator.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.3)';
+
+                            // Auto-reload after showing status for 2 seconds
+                            setTimeout(() => {
+                                if (!checkConnection() && !callAlreadyEnded) {
+                                    reloadPage();
+                                }
+                            }, 2000);
+                        } else {
+                            updateStatus('Manual connection check: OK', 'connected');
+                            indicator.style.backgroundColor = '#10b981';
+                            indicator.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.3)';
+
+                            // Reset status after 2 seconds
+                            setTimeout(() => {
+                                if (!callAlreadyEnded && checkConnection()) {
+                                    updateStatus('Call connected', 'connected');
+                                }
+                            }, 2000);
+                        }
+                    }
+                });
+
+                document.body.appendChild(indicator);
+
+                // Update indicator color based on connection status
+                const updateIndicator = () => {
+                    if (callAlreadyEnded) {
+                        indicator.style.display = 'none';
+                        return;
+                    }
+
+                    const isConnected = checkConnection();
+                    indicator.style.backgroundColor = isConnected ? '#10b981' : '#ef4444';
+                    indicator.style.boxShadow = isConnected
+                        ? '0 0 0 3px rgba(16, 185, 129, 0.3)'
+                        : '0 0 0 3px rgba(239, 68, 68, 0.3)';
+                };
+
+                // Update indicator periodically
+                const indicatorInterval = setInterval(() => {
+                    if (callAlreadyEnded) {
+                        clearInterval(indicatorInterval);
+                        indicator.style.display = 'none';
+                    } else {
+                        updateIndicator();
+                    }
+                }, 2000);
+
+                updateIndicator();
+            };
+
+            // Add connection indicator after page loads
+            setTimeout(addConnectionIndicator, 3000);
+
+            // Network connection monitoring
+            if (navigator.connection) {
+                navigator.connection.addEventListener('change', () => {
+                    if (!callAlreadyEnded) {
+                        console.log('Network connection changed:', navigator.connection.effectiveType);
+
+                        // If network goes offline or becomes very slow, increase failure count
+                        if (navigator.connection.effectiveType.includes('2g') ||
+                            navigator.connection.downlink < 0.5) {
+                            consecutiveFailures = Math.max(consecutiveFailures, MAX_CONSECUTIVE_FAILURES - 1);
+                            updateStatus('Network slow, checking connection...', 'warning');
+                        }
+                    }
+                });
+            }
+
+            // Prevent multiple reloads
+            let isReloading = false;
+
+            // Override reloadPage function to prevent multiple reloads
+            const originalReloadPage = reloadPage;
+            reloadPage = function () {
+                if (isReloading || callAlreadyEnded) return;
+
+                isReloading = true;
+                console.log('Initiating page reload...');
+
+                // Show a message to user
+                const statusOverlay = document.getElementById('connectionStatus');
+                if (statusOverlay) {
+                    statusOverlay.innerHTML = `
+            <div class="status-indicator">
+                <div class="status-dot" style="background-color: var(--warning);"></div>
+            </div>
+            <span id="statusText">Reconnecting, please wait...</span>
+        `;
+                }
+
+                // Call original function
+                originalReloadPage();
+            };
     </script>
 
 </body>
