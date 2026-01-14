@@ -153,11 +153,19 @@ app.use(express.static(path.join(PROJECT_ROOT, "public")));
 app.set("view engine", "ejs");
 app.set("views", path.join(PROJECT_ROOT, "views"));
 
-// Cookie configuration
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days
+
 const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production', 
-    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax', 
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
+    path: '/',
+    maxAge: COOKIE_MAX_AGE
+};
+const clearCookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax',
     path: '/'
 };
 
@@ -211,7 +219,8 @@ function authenticate(req, res, next) {
         next();
     } catch (err) {
 
-        res.clearCookie("token", cookieOptions);
+        res.clearCookie("token", clearCookieOptions);
+
         return res.redirect("/role");
     }
 }
@@ -724,7 +733,8 @@ function authRoutes(app) {
     // Logout
     app.get("/logout", (req, res) => {
      
-        res.clearCookie("token", cookieOptions);
+        res.clearCookie("token", clearCookieOptions);
+
         res.redirect("/role");
     });
 }
