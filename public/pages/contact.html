@@ -1266,6 +1266,53 @@ a:active,
 a:visited {
     text-decoration: none !important;
 }
+/* ===============================
+   CONTACT STATUS MODAL
+   =============================== */
+.contact-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.contact-modal.show {
+    display: flex;
+}
+
+.contact-modal-content {
+    background: var(--card-bg);
+    color: var(--text-dark);
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+    max-width: 360px;
+    width: 90%;
+    animation: scaleIn 0.25s ease;
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-icon {
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+}
+
+.modal-icon.success {
+    color: var(--secondary);
+}
+
+.modal-icon.error {
+    color: var(--error);
+}
+
 </style>
 
 </head>
@@ -1422,6 +1469,16 @@ a:visited {
                     <span>TeleHealth</span>
                 </a>
             </div>
+            <!-- CONTACT STATUS MODAL -->
+            <div id="contactModal" class="contact-modal">
+                <div class="contact-modal-content">
+                    <div id="contactModalIcon" class="modal-icon"></div>
+                    <h3 id="contactModalTitle"></h3>
+                    <p id="contactModalMessage"></p>
+                    <button id="contactModalBtn" class="btn btn-primary">OK</button>
+                </div>
+            </div>
+
 <!-- CENTER -->
 <div class="footer-center">
     <span class="copyright">
@@ -1509,46 +1566,87 @@ a:visited {
 
         });
         </script>
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
 <script>
-    document.getElementById("contactForm").addEventListener("submit", async function (e) {
+    emailjs.init("l6wT5Yx3hCWWgFmau");
+
+    const form = document.getElementById("contactForm");
+    const submitBtn = form.querySelector("button[type='submit']");
+
+    const modal = document.getElementById("contactModal");
+    const modalIcon = document.getElementById("contactModalIcon");
+    const modalTitle = document.getElementById("contactModalTitle");
+    const modalMessage = document.getElementById("contactModalMessage");
+    const modalBtn = document.getElementById("contactModalBtn");
+
+    function showModal(type, title, message) {
+        modalIcon.className = `modal-icon ${type}`;
+        modalIcon.innerHTML =
+            type === "success"
+                ? '<i class="fas fa-check-circle"></i>'
+                : '<i class="fas fa-times-circle"></i>';
+
+        modalTitle.innerText = title;
+        modalMessage.innerText = message;
+        modal.classList.add("show");
+    }
+
+    modalBtn.addEventListener("click", () => {
+        modal.classList.remove("show");
+    });
+
+    form.addEventListener("submit", function (e) {
         e.preventDefault();
 
         const data = {
-            name: name.value.trim(),
-            email: email.value.trim(),
-            phone: phone.value.trim(),
-            subject: subject.value.trim(),
-            message: message.value.trim(),
+            from_name: document.getElementById("name").value.trim(),
+            from_email: document.getElementById("email").value.trim(),
+            phone: document.getElementById("phone").value.trim(),
+            subject: document.getElementById("subject").value.trim(),
+            message: document.getElementById("message").value.trim(),
         };
 
-        if (!data.name || !data.email || !data.subject || !data.message) {
-            alert("Please fill all required fields.");
+        if (!data.from_name || !data.from_email || !data.subject || !data.message) {
+            showModal("error", "Missing Information", "Please fill all required fields.");
             return;
         }
 
-        const btn = this.querySelector("button[type='submit']");
-        btn.disabled = true;
-        btn.innerText = "Sending...";
+        // Button loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+        <i class="fas fa-spinner fa-spin"></i> Sending...
+    `;
 
-        try {
-            const res = await fetch("/api/contact", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
+        emailjs
+            .send("service_k6xg7or", "template_7wiuiza", data)
+            .then(() => {
+                showModal(
+                    "success",
+                    "Message Sent",
+                    "Thanks for reaching out. We’ll get back to you shortly."
+                );
+                form.reset();
+            })
+            .catch((err) => {
+                console.error(err);
+                showModal(
+                    "error",
+                    "Failed to Send",
+                    "Something went wrong. Please try again later."
+                );
+            })
+            .finally(() => {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `
+                <i class="fas fa-paper-plane"></i> Send Message
+            `;
             });
-
-            if (!res.ok) throw new Error();
-
-            alert("✅ Message sent successfully!");
-            this.reset();
-        } catch {
-            alert("❌ Failed to send message. Please try again.");
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-        }
     });
 </script>
+
+
+
     <script>
         (function () {
             // -------------------------------
@@ -1603,9 +1701,6 @@ a:visited {
   `;
             document.body.appendChild(loader);
 
-            // -------------------------------
-            // 2. Hide loader when page loaded
-            // -------------------------------
             window.addEventListener("load", () => {
                 loader.classList.add("hidden");
                 setTimeout(() => loader.remove(), 400);
@@ -1631,6 +1726,7 @@ a:visited {
             // 4. Show loader on form submit
             // -------------------------------
             document.addEventListener("submit", () => {
+                if (e.target.id === "contactForm") return;
                 loader.classList.remove("hidden");
                 loader.style.display = "flex";
             });
@@ -1655,12 +1751,6 @@ a:visited {
                     }, 10000);
                 })();
             </script>
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-<script>
-    (function () {
-        emailjs.init("l6wT5Yx3hCWWgFmau"); // PUBLIC KEY
-    })();
-</script>
 
 </body>
 

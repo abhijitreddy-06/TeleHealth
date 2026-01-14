@@ -1780,7 +1780,28 @@ html, body {
             // Function to reload the page
             function reloadPage() {
                 console.log('Reloading page due to connection issues...');
+                if (peerConnection && peerConnection.connectionState !== 'closed') {
+                    try {
+                        peerConnection.restartIce();
+                        console.log('ICE restart triggered');
 
+                        // Give ICE a few seconds to recover
+                        setTimeout(() => {
+                            if (checkConnection()) {
+                                console.log('ICE restart successful, skipping reload');
+                                updateStatus('CONNECTED', 'connected');
+                                return;
+                            } else {
+                                console.log('ICE restart failed, proceeding to reload');
+                                forceReload();
+                            }
+                        }, 4000);
+
+                        return; // ⛔ stop here, don't reload yet
+                    } catch (e) {
+                        console.error('ICE restart error:', e);
+                    }
+                }
                 // First try to save notes if any exist
                 if (notesText && notesText.value.trim()) {
                     try {
@@ -1801,11 +1822,12 @@ html, body {
                 }, 1000);
             }
 
-            // Periodic connection checker
-            let connectionCheckInterval;
-            let consecutiveFailures = 0;
-            const MAX_CONSECUTIVE_FAILURES = 3; // Require 3 consecutive failures before reloading
-            const CHECK_INTERVAL = 5000; // Check every 5 seconds
+                // Periodic connection checker
+                        // Periodic connection checker
+                        let connectionCheckInterval;
+                        let consecutiveFailures = 0;
+                        const MAX_CONSECUTIVE_FAILURES = 3; // Increased to 4 for more stability
+                        const CHECK_INTERVAL = 2000; // Check every 6 seconds
 
             function startConnectionMonitor() {
                 connectionCheckInterval = setInterval(() => {
@@ -1856,7 +1878,7 @@ html, body {
             setTimeout(() => {
                 startConnectionMonitor();
                 monitorSocketEvents();
-            }, 10000); // Start monitoring after 10 seconds to allow initial connection
+            }, 8000); // Start monitoring after 10 seconds to allow initial connection
 
             // Also check when visibility changes (user comes back to tab)
             document.addEventListener('visibilitychange', () => {
@@ -1907,6 +1929,267 @@ html, body {
 
             // Add connection indicator after page loads
             setTimeout(addConnectionIndicator, 3000);
+                // ===============================
+                // AUTO-RELOAD WHEN NOT CONNECTED (DOCTOR VERSION)
+                // ===============================
+
+                // Variable to track if we're auto-reloading
+                let isAutoReloading = false;
+
+                // Variable to track if call has ended for doctor
+                let callEnded = false;
+
+                // Function to check connection status
+                function checkConnection() {
+                    // Don't check if call has ended
+                    if (callEnded) {
+                        return true; // Don't reload if call ended normally
+                    }
+
+                    // Check if we have a socket connection
+                    if (!socket || !socket.connected) {
+                        console.log('Socket not connected, connection check failed...');
+                        return false;
+                    }
+
+                    // Check if we have a peer connection
+                    if (!peerConnection) {
+                        console.log('No peer connection, connection check failed...');
+                        return false;
+                    }
+
+                    // Check peer connection state
+                    if (peerConnection.iceConnectionState === 'disconnected' ||
+                        peerConnection.iceConnectionState === 'failed' ||
+                        peerConnection.iceConnectionState === 'closed') {
+                        console.log('Peer connection state:', peerConnection.iceConnectionState, '- connection check failed...');
+                        return false;
+                    }
+
+                    // Check if we have a remote video stream (but wait longer for initial connection)
+                    const callDuration = Date.now() - (callStartTime || Date.now());
+                    if (!remoteVideo.srcObject && callDuration > 8000 && !callEnded) { // Wait 20 seconds for initial connection
+                        console.log('No remote video stream after 20s, connection check failed...');
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                // Function to reload the page without browser warning
+                function reloadPage() {
+                    console.log('Auto-reloading page due to connection issues...');
+
+                    // Don't reload if call has ended
+                    if (callEnded) {
+                        console.log('Call already ended, skipping reload...');
+                        return;
+                    }
+
+                    // Set flag to prevent browser warning
+                    isAutoReloading = true;
+
+                    // Show loading state
+                    updateStatus('Reconnecting...', 'warning');
+
+                    // Save notes before reload if any
+                    const notes = notesText ? notesText.value.trim() : '';
+                    if (notes) {
+                        try {
+                            fetch("/api/notes/save", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    roomId: ROOM_ID,
+                                    notes: notes
+                                })
+                            }).catch(() => { }); // Ignore errors during reload
+                        } catch (e) { }
+                    }
+
+                    // Cleanup before reload
+                    if (peerConnection) {
+                        peerConnection.close();
+                        peerConnection = null;
+                    }
+
+                    if (localStream) {
+                        localStream.getTracks().forEach(track => track.stop());
+                        localStream = null;
+                    }
+
+                    // Disconnect socket if exists
+                    if (socket && socket.connected) {
+                        socket.disconnect();
+                    }
+
+                    // Add a small delay to ensure cleanup completes
+                    setTimeout(() => {
+                        console.log('Performing auto-reload now...');
+                        window.location.reload();
+                    }, 1000);
+                }
+
+
+
+                function startConnectionMonitor() {
+                    // Clear any existing interval
+                    if (connectionCheckInterval) {
+                        clearInterval(connectionCheckInterval);
+                    }
+
+                    // Don't start monitoring if call has ended
+                    if (callEnded) return;
+
+                    connectionCheckInterval = setInterval(() => {
+                        // Don't monitor if call has ended
+                        if (callEnded) {
+                            clearInterval(connectionCheckInterval);
+                            return;
+                        }
+
+                        const isConnected = checkConnection();
+
+                        if (isConnected) {
+                            consecutiveFailures = 0; // Reset failures on successful check
+                        } else {
+                            consecutiveFailures++;
+                            console.log(`Connection check failed (${consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES})`);
+
+                            // Update status to show reconnecting
+                            if (consecutiveFailures === 1) {
+                                updateStatus('Checking connection...', 'warning');
+                            } else if (consecutiveFailures === 2) {
+                                updateStatus('Connection unstable...', 'warning');
+                            } else if (consecutiveFailures === 3) {
+                                updateStatus('Attempting to reconnect...', 'warning');
+                            }
+
+                            // Only reload after multiple consecutive failures
+                            if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                                clearInterval(connectionCheckInterval);
+                                reloadPage();
+                            }
+                        }
+                    }, CHECK_INTERVAL);
+                }
+
+                // Socket connection monitoring
+                function monitorSocketEvents() {
+                    if (socket) {
+                        // Listen for socket disconnect
+                        socket.on('disconnect', (reason) => {
+                            console.log('Socket disconnected:', reason);
+
+                            // Don't reload if call has ended
+                            if (callEnded) return;
+
+                            // If disconnect wasn't initiated by user, start checking for reconnection
+                            if (reason !== 'io client disconnect' && reason !== 'transport close') {
+                                consecutiveFailures = MAX_CONSECUTIVE_FAILURES - 2; // Get closer to reload threshold
+                                updateStatus('Connection lost, reconnecting...', 'disconnected');
+                            }
+                        });
+
+                        // Listen for socket reconnect attempts
+                        socket.on('reconnect_attempt', (attemptNumber) => {
+                            console.log('Socket reconnect attempt:', attemptNumber);
+                            if (!callEnded) {
+                                updateStatus(`Reconnecting (attempt ${attemptNumber})...`, 'warning');
+                            }
+                        });
+
+                        // Listen for successful reconnect
+                        socket.on('reconnect', () => {
+                            console.log('Socket reconnected');
+                            if (!callEnded) {
+                                consecutiveFailures = 0;
+                                updateStatus('Reconnected, establishing call...', 'warning');
+                            }
+                        });
+
+                        // Listen for socket reconnect failure
+                        socket.on('reconnect_failed', () => {
+                            console.log('Socket reconnect failed');
+                            if (!callEnded) {
+                                reloadPage();
+                            }
+                        });
+
+                        // Listen for connection errors
+                        socket.on('connect_error', (error) => {
+                            console.log('Socket connection error:', error);
+                            if (!callEnded) {
+                                consecutiveFailures++;
+                                if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                                    reloadPage();
+                                }
+                            }
+                        });
+
+                        // Mark call as ended when doctor ends call
+                        socket.on('call-ended', () => {
+                            callEnded = true;
+                        });
+                    }
+                }
+
+                // Override the existing endCallHandler to set callEnded flag
+                const originalEndCallHandler = endCallHandler;
+                endCallHandler = async function () {
+                    callEnded = true;
+                    await originalEndCallHandler();
+                };
+
+                // Update endCall event listener
+                endCall.removeEventListener('click', endCallHandler);
+                endCall.addEventListener('click', endCallHandler);
+
+                // Initialize connection monitoring with delay to allow initial connection
+                setTimeout(() => {
+                    // Don't start monitoring if call has ended
+                    if (!callEnded) {
+                        startConnectionMonitor();
+                        monitorSocketEvents();
+                        console.log('Connection monitoring started');
+                    }
+                }, 5000); // Start monitoring after 15 seconds to allow initial connection
+
+                // Intercept beforeunload event
+                window.addEventListener('beforeunload', function (e) {
+                    // If we're auto-reloading, don't show the warning
+                    if (isAutoReloading) {
+                        // Clean up and allow reload without warning
+                        console.log('Auto-reload in progress, suppressing browser warning...');
+                        return undefined;
+                    }
+
+                    // If call has ended, don't show warning
+                    if (callEnded) {
+                        return undefined;
+                    }
+
+                    // Only show warning for user-initiated navigation during active call
+                    if ((peerConnection && peerConnection.connectionState !== 'closed') ||
+                        (socket && socket.connected)) {
+                        e.preventDefault();
+                        e.returnValue = 'Are you sure you want to leave the video call? Your consultation will end.';
+                        return e.returnValue;
+                    }
+                });
+
+                // Clean up media tracks on page unload
+                window.addEventListener('unload', function () {
+                    if (localStream) {
+                        localStream.getTracks().forEach(track => track.stop());
+                    }
+                    if (peerConnection) {
+                        peerConnection.close();
+                    }
+                    if (socket) {
+                        socket.disconnect();
+                    }
+                });
     </script>
 
 </body>

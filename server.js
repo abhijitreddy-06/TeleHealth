@@ -2015,44 +2015,6 @@ function prescriptionRoutes(app) {
 // CONTACT FORM (EMAILJS) – SAFE ADDITION
 // ==============================================
 
-app.post("/api/contact", async (req, res) => {
-    const { name, email, phone, subject, message } = req.body;
-
-    if (!name || !email || !subject || !message) {
-        return res.status(400).json({ error: "Missing required fields" });
-    }
-
-    try {
-        await emailjs.send(
-            process.env.EMAILJS_SERVICE_ID,
-            process.env.EMAILJS_TEMPLATE_ID,
-            {
-                from_name: name,
-                from_email: email,
-                subject,
-                message: `
-Name: ${name}
-Email: ${email}
-Phone: ${phone || "N/A"}
-
-Message:
-${message}
-                `,
-            },
-            {
-                publicKey: process.env.EMAILJS_PUBLIC_KEY,
-            }
-        );
-
-        return res.status(200).json({ success: true });
-    } catch (err) {
-        logger.error("Contact email failed:", err);
-        return res.status(500).json({
-            error: "Failed to send message"
-        });
-    }
-});
-
 // ==============================================
 // REGISTER ALL ROUTES
 // ==============================================
