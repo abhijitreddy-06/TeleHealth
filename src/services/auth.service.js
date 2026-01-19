@@ -1,0 +1,259 @@
+const { pool } = require('../config/database');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const config = require('../config/auth');
+
+class AuthService {
+    constructor() {
+        this.ACCESS_TOKEN_SECRET = config.ACCESS_TOKEN_SECRET;
+        this.REFRESH_TOKEN_SECRET = config.REFRESH_TOKEN_SECRET;
+        this.ACCESS_TOKEN_EXPIRY = config.ACCESS_TOKEN_EXPIRY;
+        this.REFRESH_TOKEN_EXPIRY = config.REFRESH_TOKEN_EXPIRY;
+    }
+
+    async registerUser(phone, password, role = 'user') {
+        const exists = await pool.query(
+            `SELECT ${role === 'user' ? 'id' : 'docid'} FROM ${role === 'user' ? 'login' : 'doc_login'} WHERE phone=$1`,
+            [phone]
+        );
+
+        if (exists.rows.length) {
+            throw new Error('Account already exists');
+        }
+
+        const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+        const table = role === 'user' ? 'login' : 'doc_login';
+        const idField = role === 'user' ? 'id' : 'docid';
+
+        const result = await pool.query(
+            `INSERT INTO ${table} (phone, password) VALUES ($1, $2) RETURNING ${idField}`,
+            [phone, hash]
+        );
+
+        return {
+            id: result.rows[0][idField],
+            phone,
+            role
+        };
+    }
+
+    async authenticateUser(phone, password, role = 'user') {
+        const table = role === 'user' ? 'login' : 'doc_login';
+        const idField = role === 'user' ? 'id' : 'docid';
+
+        const result = await pool.query(
+            `SELECT * FROM ${table} WHERE phone=$1`,
+            [phone]
+        );
+
+        if (!result.rows.length) {
+            throw new Error('Account not found');
+        }
+
+        const user = result.rows[0];
+        if (!bcrypt.compareSync(password, user.password)) {
+            throw new Error('Incorrect password');
+        }
+
+        return {
+            id: user[idField],
+            phone: user.phone,
+            role
+        };
+    }
+
+    async generateTokens(user) {
+        const accessToken = jwt.sign(
+            { id: user.id, phone: user.phone, role: user.role },
+            this.ACCESS_TOKEN_SECRET,
+            { expiresIn: this.ACCESS_TOKEN_EXPIRY }
+        );
+
+        const refreshToken = jwt.sign(
+            { id: user.id, role: user.role, type: 'refresh' },
+            this.REFRESH_TOKEN_SECRET,
+            { expiresIn: this.REFRESH_TOKEN_EXPIRY }
+        );
+
+        await pool.query(
+            `INSERT INTO refresh_tokens (user_id, role, token, expires_at)
+             VALUES ($1, $2, $3, $4)`,
+            [user.id, user.role, refreshToken, new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)]
+        );
+
+        return { accessToken, refreshToken };
+    }
+
+    async verifyAccessToken(token) {
+        try {
+            return jwt.verify(token, this.ACCESS_TOKEN_SECRET);
+        } catch (error) {
+            return null;
+        }
+    }
+
+    async verifyRefreshToken(refreshToken) {
+        try {
+            const refreshPayload = jwt.verify(refreshToken, this.REFRESH_TOKEN_SECRET);
+
+            const result = await pool.query(
+                `SELECT * FROM refresh_tokens 
+                 WHERE token = $1 AND user_id = $2 AND role = $3 
+                   AND revoked = FALSE AND expires_at > CURRENT_TIMESTAMP`,
+                [refreshToken, refreshPayload.id, refreshPayload.role]
+            );
+
+            if (result.rows.length === 0) {
+                throw new Error("Invalid or revoked refresh token");
+            }
+
+            const userQuery = await pool.query(
+                `SELECT phone FROM ${refreshPayload.role === 'user' ? 'login' : 'doc_login'} 
+                 WHERE ${refreshPayload.role === 'user' ? 'id' : 'docid'} = $1`,
+                [refreshPayload.id]
+            );
+
+            if (userQuery.rows.length === 0) {
+                throw new Error("User not found");
+            }
+
+            return {
+                id: refreshPayload.id,
+                phone: userQuery.rows[0].phone,
+                role: refreshPayload.role
+            };
+        } catch (error) {
+            throw new Error("Invalid refresh token");
+        }
+    }
+
+    async revokeRefreshToken(token) {
+        await pool.query(
+            `UPDATE refresh_tokens SET revoked = TRUE, revoked_at = CURRENT_TIMESTAMP 
+             WHERE token = $1`,
+            [token]
+        );
+    }
+
+    async revokeAllUserTokens(userId, role) {
+        await pool.query(
+            `UPDATE refresh_tokens SET revoked = TRUE, revoked_at = CURRENT_TIMESTAMP 
+             WHERE user_id = $1 AND role = $2 AND revoked = FALSE`,
+            [userId, role]
+        );
+    }
+
+    async createUserProfile(userId, profileData) {
+        const {
+            fullName,
+            gender,
+            customGender,
+            dob,
+            weight,
+            height,
+            bloodGroup,
+            allergies
+        } = profileData;
+
+        await pool.query(
+            `INSERT INTO user_profile
+             (user_id, full_name, gender, custom_gender, date_of_birth,
+              weight_kg, height_cm, blood_group, allergies)
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+             ON CONFLICT (user_id)
+             DO UPDATE SET
+                 full_name = EXCLUDED.full_name,
+                 gender = EXCLUDED.gender,
+                 custom_gender = EXCLUDED.custom_gender,
+                 date_of_birth = EXCLUDED.date_of_birth,
+                 weight_kg = EXCLUDED.weight_kg,
+                 height_cm = EXCLUDED.height_cm,
+                 blood_group = EXCLUDED.blood_group,
+                 allergies = EXCLUDED.allergies`,
+            [
+                userId,
+                fullName,
+                gender,
+                customGender || null,
+                dob,
+                weight,
+                height,
+                bloodGroup,
+                allergies || null
+            ]
+        );
+    }
+
+    async createDoctorProfile(doctorId, profileData) {
+        const {
+            fullName,
+            specialization,
+            experience,
+            qualification,
+            hospital,
+            bio
+        } = profileData;
+
+        await pool.query(
+            `INSERT INTO doc_profile
+             (doc_id, full_name, specialization, experience_years,
+              qualification, hospital_name, bio)
+             VALUES ($1,$2,$3,$4,$5,$6,$7)
+             ON CONFLICT (doc_id)
+             DO UPDATE SET
+                 full_name = EXCLUDED.full_name,
+                 specialization = EXCLUDED.specialization,
+                 experience_years = EXCLUDED.experience_years,
+                 qualification = EXCLUDED.qualification,
+                 hospital_name = EXCLUDED.hospital_name,
+                 bio = EXCLUDED.bio`,
+            [
+                doctorId,
+                fullName,
+                specialization,
+                experience,
+                qualification || null,
+                hospital || null,
+                bio || null
+            ]
+        );
+    }
+
+    async getUserProfile(userId) {
+        const result = await pool.query(
+            `SELECT full_name, gender, custom_gender, date_of_birth,
+                    weight_kg, height_cm, blood_group, allergies
+             FROM user_profile
+             WHERE user_id = $1`,
+            [userId]
+        );
+        return result.rows[0];
+    }
+
+    async getDoctorProfile(doctorId) {
+        const result = await pool.query(
+            `SELECT full_name, specialization, experience_years,
+                    qualification, hospital_name, bio
+             FROM doc_profile
+             WHERE doc_id = $1`,
+            [doctorId]
+        );
+        return result.rows[0];
+    }
+
+    validatePassword(password) {
+        if (!password || password.length < 6) {
+            throw new Error('Password must be at least 6 characters');
+        }
+        return true;
+    }
+
+    validatePasswordMatch(password, confirmPassword) {
+        if (password !== confirmPassword) {
+            throw new Error('Passwords must match');
+        }
+        return true;
+    }
+}
+
+module.exports = new AuthService();

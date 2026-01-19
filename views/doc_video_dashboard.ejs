@@ -861,7 +861,7 @@ a:visited {
                                 <i class="fas fa-video"></i> Start Call
                             </button>
                             <% } else if (appointment.status==='started' && appointment.room_id) { %>
-                                <button class="btn btn-success" onclick="joinCall('<%= appointment.room_id %>')">
+                            <button class="btn btn-success join-call-btn" data-room-id="<%= appointment.room_id %>">
                                     <i class="fas fa-sign-in-alt"></i> Join Call
                                 </button>
                                 <% } else if (appointment.status==='completed' ) { %>
@@ -869,9 +869,9 @@ a:visited {
                                         <i class="fas fa-check-circle"></i> Completed
                                     </button>
                                     <% } else { %>
-                                        <button class="btn btn-primary" disabled>
-                                            <i class="fas fa-video"></i> Start Call
-                                        </button>
+<button class="btn btn-primary start-call-btn" data-appointment-id="<%= appointment.id %>">
+    <i class="fas fa-video"></i> Start Call
+</button>
                                         <% } %>
                     </div>
                     <% } else { %>
@@ -1067,6 +1067,61 @@ a:visited {
             if (!roomId) return;
             window.location.href = `/doc_video/${roomId}`;
         }
+        console.log("Script loaded - checking button setup");
+
+            // Add click event listener to check if button exists
+            document.addEventListener('DOMContentLoaded', function () {
+                console.log("DOM loaded");
+
+                // Find all start call buttons
+                const startButtons = document.querySelectorAll('button[onclick*="startCall"]');
+                console.log("Found start call buttons:", startButtons.length);
+
+                if (startButtons.length > 0) {
+                    console.log("First button onclick attribute:", startButtons[0].getAttribute('onclick'));
+                    // In your EJS file, add this
+                    console.log("User logged in? Check cookies");
+                    console.log("Cookies:", document.cookie);
+
+                    // Check if there's an accessToken
+                    const tokenMatch = document.cookie.match(/accessToken=([^;]+)/);
+                    if (tokenMatch) {
+                        console.log("Access token found");
+                    } else {
+                        console.error("No access token found!");
+                    }
+                    // Also attach event listener to log clicks
+                    startButtons.forEach(button => {
+                        button.addEventListener('click', function (e) {
+                            console.log("Button clicked via event listener");
+                            console.log("Button text:", this.innerText);
+                            console.log("Onclick value:", this.getAttribute('onclick'));
+                        });
+                    });
+                }
+            });
+    // Event delegation for start call buttons
+    document.addEventListener('click', function (event) {
+        // Check if click is on a start-call button or its child
+        const startBtn = event.target.closest('.start-call-btn');
+        if (startBtn) {
+            event.preventDefault();
+            const appointmentId = startBtn.getAttribute('data-appointment-id');
+            console.log("Start call button clicked via event delegation, appointmentId:", appointmentId);
+            startCall(appointmentId);
+            return;
+        }
+
+        // Check if click is on a join-call button or its child
+        const joinBtn = event.target.closest('.join-call-btn');
+        if (joinBtn) {
+            event.preventDefault();
+            const roomId = joinBtn.getAttribute('data-room-id');
+            console.log("Join call button clicked via event delegation, roomId:", roomId);
+            joinCall(roomId);
+            return;
+        }
+    });
 </script>
 
 
