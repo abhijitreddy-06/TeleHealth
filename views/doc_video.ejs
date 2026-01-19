@@ -1426,11 +1426,21 @@ html, body {
                 });
             }
 
-            socket?.emit('doctor-end-call', {
-                roomId: ROOM_ID,
-                appointmentId: APPOINTMENT_ID,
-                notes
-            });
+            if (socket) {
+                socket.emit('doctor-end-call', {
+                    roomId: ROOM_ID,
+                    appointmentId: APPOINTMENT_ID,
+                    notes: notes
+                });
+
+                // Also emit directly to the room for immediate notification
+                socket.emit('end-call-to-room', {
+                    roomId: ROOM_ID,
+                    appointmentId: APPOINTMENT_ID,
+                    notes: notes
+                });
+            }
+            
 
             await fetch(`/appointments/${APPOINTMENT_ID}/complete`, { method: "POST" });
 
