@@ -18,12 +18,46 @@ module.exports = function (io) {
 
                 socket.join(roomId);
                 socket.roomId = roomId;
-
-                if (socket.user.role === 'user') {
+                if (socket.user && socket.user.role === 'user') {
                     socket.to(roomId).emit('user-ready');
                 }
+
             } catch (error) {
                 socket.emit('error', { message: 'Failed to join room' });
+            }
+        });
+        socket.on('doctor-end-call', async ({ roomId, appointmentId }) => {
+            try {
+                // Optional: verify socket is in the room
+                if (!socket.roomId || socket.roomId !== roomId) {
+                    return;
+                }
+
+                // 🔹 Check if prescription exists for this appointment
+                const prescriptionResult = await pool.query(
+                    `SELECT id FROM prescriptions WHERE appointment_id = $1 LIMIT 1`,
+                    [appointmentId]
+                );
+
+                const hasPrescription = prescriptionResult.rows.length > 0;
+
+                // 🔹 Notify USER in the room
+                if (hasPrescription) {
+                    socket.to(roomId).emit('call-ended-with-prescription', {
+                        appointmentId
+                    });
+                } else {
+                    socket.to(roomId).emit('call-ended', {
+                        appointmentId
+                    });
+                }
+
+                // 🔹 Also notify doctor (optional safety)
+                socket.emit('call-ended-confirmed');
+
+            } catch (error) {
+                console.error('Doctor end call error:', error);
+                socket.emit('error', { message: 'Failed to end call properly' });
             }
         });
 
