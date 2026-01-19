@@ -5,6 +5,9 @@
         <meta charset="UTF-8">
 <link rel="icon" href="/favicon.ico">
 <link rel="icon" type="image/png" href="/favicon.png">
+<!-- Add to your EJS head section -->
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <title>Doctor Video Call | TeleHealth</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1176,490 +1179,291 @@ html, body {
     </div>
 
     <!-- Scripts -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        // ===============================
-        // VARIABLES
-        // ===============================
-        const ROOM_ID = "<%= roomId %>";
-        const APPOINTMENT_ID = "<%= appointment.id %>";
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    /* ===============================
+       VARIABLES
+       =============================== */
+    const ROOM_ID = "<%= roomId %>";
+    const APPOINTMENT_ID = "<%= appointment.id %>";
 
-        // DOM Elements
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
-        const toggleMic = document.getElementById('toggleMic');
-        const toggleCam = document.getElementById('toggleCam');
-        const endCall = document.getElementById('endCall');
-        const callStatusText = document.getElementById('callStatusText');
-        const notesText = document.getElementById('notesText');
-        const charCount = document.getElementById('charCount');
-        const notesPanel = document.getElementById('notesPanel');
-        const toggleNotesBtn = document.getElementById('toggleNotes');
-        const mobileCloseNotes = document.getElementById('mobileCloseNotes');
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const toggleMic = document.getElementById('toggleMic');
+    const toggleCam = document.getElementById('toggleCam');
+    const endCall = document.getElementById('endCall');
+    const callStatusText = document.getElementById('callStatusText');
+    const notesText = document.getElementById('notesText');
+    const charCount = document.getElementById('charCount');
+    const notesPanel = document.getElementById('notesPanel');
+    const toggleNotesBtn = document.getElementById('toggleNotes');
+    const mobileCloseNotes = document.getElementById('mobileCloseNotes');
 
-        // Video call state
-        let localStream = null;
-        let remoteStream = null;
-        let peerConnection = null;
-        let socket = null;
-        let callStartTime = null;
-        let isAudioMuted = false;
-        let isVideoOff = false;
-        let isMobile = window.innerWidth <= 768;
+    let localStream = null;
+    let remoteStream = null;
+    let peerConnection = null;
+    let socket = null;
+    let callStartTime = null;
+    let isAudioMuted = false;
+    let isVideoOff = false;
+    let isMobile = window.innerWidth <= 768;
 
-        // ===============================
-        // THEME TOGGLE FUNCTIONALITY
-        // ===============================
-        document.addEventListener('DOMContentLoaded', function () {
-            const themeToggle = document.getElementById('themeToggle');
-            const mobileThemeToggle = document.getElementById('mobileThemeToggle');
-            const html = document.documentElement;
+    let connectionCheckInterval;
+    let consecutiveFailures = 0;
+    const MAX_CONSECUTIVE_FAILURES = 3;
+    const CHECK_INTERVAL = 2000;
 
-            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            if (savedTheme) {
-                html.setAttribute('data-theme', savedTheme);
-                updateThemeIcon(savedTheme);
-            }
+    let isAutoReloading = false;
+    let callEnded = false;
 
-            function toggleTheme() {
-                const currentTheme = html.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    /* ===============================
+       THEME / UI / NOTES
+       =============================== */
+    document.addEventListener('DOMContentLoaded', () => {
 
-                html.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                updateThemeIcon(newTheme);
-            }
+        const themeToggle = document.getElementById('themeToggle');
+        const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+        const html = document.documentElement;
 
-            function updateThemeIcon(theme) {
-                const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
-                themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
-                if (mobileThemeToggle) {
-                    mobileThemeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
-                }
-            }
+        const savedTheme = localStorage.getItem('theme') ||
+            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
-            themeToggle.addEventListener('click', toggleTheme);
+        html.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        function toggleTheme() {
+            const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
+            themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
             if (mobileThemeToggle) {
-                mobileThemeToggle.addEventListener('click', toggleTheme);
+                mobileThemeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
             }
+        }
 
-            // ===============================
-            // MOBILE MENU FUNCTIONALITY
-            // ===============================
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const closeMenuBtn = document.getElementById('closeMenu');
-            const mobileMenu = document.getElementById('mobileMenu');
+        themeToggle.addEventListener('click', toggleTheme);
+        mobileThemeToggle?.addEventListener('click', toggleTheme);
 
-            if (mobileMenuBtn) {
-                mobileMenuBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    mobileMenu.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                });
-            }
+        /* NOTES PANEL */
+        notesPanel.classList.remove('active');
 
-            if (closeMenuBtn) {
-                closeMenuBtn.addEventListener('click', () => {
-                    mobileMenu.classList.remove('active');
-                    document.body.style.overflow = '';
-                });
-            }
+        toggleNotesBtn.addEventListener('click', () => {
+            const active = notesPanel.classList.toggle('active');
+            toggleNotesBtn.classList.toggle('active', active);
+            document.body.style.overflow = active && isMobile ? 'hidden' : '';
+        });
 
-            document.addEventListener('click', (e) => {
-                if (mobileMenu.classList.contains('active') &&
-                    !mobileMenu.contains(e.target) &&
-                    e.target !== mobileMenuBtn) {
-                    mobileMenu.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
-
-            // ===============================
-            // NOTES PANEL FUNCTIONALITY
-            // ===============================
-            // Notes panel is hidden by default
+        mobileCloseNotes.addEventListener('click', () => {
             notesPanel.classList.remove('active');
-
-            // Toggle notes panel
-            toggleNotesBtn.addEventListener('click', () => {
-                const isActive = notesPanel.classList.toggle('active');
-
-                // Update button state
-                toggleNotesBtn.classList.toggle('active', isActive);
-
-                if (isActive) {
-                    toggleNotesBtn.querySelector('.control-icon').style.borderColor = 'var(--primary)';
-                    if (isMobile) {
-                        // Prevent body scrolling when notes panel is open on mobile
-                        document.body.style.overflow = 'hidden';
-                    }
-                } else {
-                    toggleNotesBtn.querySelector('.control-icon').style.borderColor = 'var(--border)';
-                    if (isMobile) {
-                        // Restore scrolling when notes panel is closed
-                        document.body.style.overflow = '';
-                    }
-                }
-            });
-
-            // Close notes panel with mobile close button
-            mobileCloseNotes.addEventListener('click', () => {
-                notesPanel.classList.remove('active');
-                toggleNotesBtn.classList.remove('active');
-                toggleNotesBtn.querySelector('.control-icon').style.borderColor = 'var(--border)';
-                if (isMobile) {
-                    document.body.style.overflow = '';
-                }
-            });
-
-            // Character counter for notes
-            notesText.addEventListener('input', function () {
-                charCount.textContent = this.value.length;
-            });
-
-            // Clear notes button
-            document.getElementById('clearNotes').addEventListener('click', function () {
-                if (confirm('Are you sure you want to clear all notes?')) {
-                    notesText.value = '';
-                    charCount.textContent = '0';
-                }
-            });
-
-            // Save notes button
-            document.getElementById('saveNotes').addEventListener('click', async function () {
-                if (notesText.value.trim()) {
-                    try {
-                        await fetch("/api/notes/save", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                roomId: ROOM_ID,
-                                notes: notesText.value
-                            })
-                        });
-                        alert('Notes saved successfully!');
-                    } catch (error) {
-                        console.error('Error saving notes:', error);
-                        alert('Error saving notes');
-                    }
-                } else {
-                    alert('No notes to save.');
-                }
-            });
+            toggleNotesBtn.classList.remove('active');
+            document.body.style.overflow = '';
         });
 
-        // ===============================
-        // VIDEO CALL FUNCTIONS
-        // ===============================
-        function updateStatus(message, type) {
-            callStatusText.textContent = `CALL STATUS: ${message}`;
+        notesText.addEventListener('input', () => {
+            charCount.textContent = notesText.value.length;
+        });
 
-            const statusDots = document.querySelectorAll('.status-dot');
-            const statusColor = type === 'connected' ? '#10b981' :
-                type === 'warning' ? '#f59e0b' :
-                    type === 'disconnected' ? '#ef4444' : '#60a5fa';
-
-            statusDots.forEach(dot => {
-                dot.style.backgroundColor = statusColor;
-            });
-        }
-
-        async function getLocalStream() {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 },
-                        frameRate: { ideal: 30 }
-                    },
-                    audio: {
-                        echoCancellation: true,
-                        noiseSuppression: true,
-                        autoGainControl: true
-                    }
-                });
-
-                localVideo.srcObject = localStream;
-                document.getElementById('videoLoading').classList.add('hidden');
-            } catch (error) {
-                console.error('Error accessing media devices:', error);
-                updateStatus('MEDIA ERROR', 'disconnected');
-                alert('Unable to access camera and microphone. Please check permissions.');
-            }
-        }
-
-        async function createPeerConnection() {
-            const configuration = {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' }
-                ]
-            };
-
-            peerConnection = new RTCPeerConnection(configuration);
-
-            localStream.getTracks().forEach(track => {
-                peerConnection.addTrack(track, localStream);
-            });
-
-            peerConnection.ontrack = (event) => {
-                if (!remoteVideo.srcObject) {
-                    remoteVideo.srcObject = event.streams[0];
-                    remoteStream = event.streams[0];
-                }
-            };
-
-            peerConnection.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.emit('signal', {
-                        roomId: ROOM_ID,
-                        candidate: event.candidate
-                    });
-                }
-            };
-
-            peerConnection.oniceconnectionstatechange = () => {
-                if (peerConnection.iceConnectionState === 'disconnected' ||
-                    peerConnection.iceConnectionState === 'failed') {
-                    updateStatus('CONNECTION LOST', 'disconnected');
-                } else if (peerConnection.iceConnectionState === 'connected') {
-                    updateStatus('CONNECTED', 'connected');
-                    startTimer();
-                }
-            };
-        }
-
-        async function createOffer() {
-            try {
-                const offer = await peerConnection.createOffer({
-                    offerToReceiveAudio: true,
-                    offerToReceiveVideo: true
-                });
-
-                await peerConnection.setLocalDescription(offer);
-
-                socket.emit('signal', {
-                    roomId: ROOM_ID,
-                    offer: offer
-                });
-            } catch (error) {
-                console.error('Error creating offer:', error);
-            }
-        }
-
-        function initSocket() {
-            socket = io();
-
-            socket.on('connect', () => {
-                updateStatus('CONNECTING...', 'warning');
-                socket.emit('join-room', { roomId: ROOM_ID, role: 'doctor' });
-            });
-
-            socket.on('user-ready', async () => {
-                updateStatus('PATIENT CONNECTED', 'warning');
-                await createPeerConnection();
-                await createOffer();
-            });
-
-            socket.on('signal', async (data) => {
-                if (!peerConnection) {
-                    await createPeerConnection();
-                }
-
-                if (data.answer) {
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-                    updateStatus('CONNECTED', 'connected');
-                    startTimer();
-                } else if (data.candidate) {
-                    try {
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                    } catch (e) {
-                        console.error('Error adding ICE candidate:', e);
-                    }
-                }
-            });
-
-            socket.on('call-ended', () => {
-                endCallHandler();
-            });
-
-            socket.on('disconnect', () => {
-                updateStatus('DISCONNECTED', 'disconnected');
-            });
-        }
-
-        function startTimer() {
-            if (!callStartTime) {
-                callStartTime = Date.now();
-            }
-        }
-
-        // ===============================
-        // CONTROL BUTTON EVENT LISTENERS
-        // ===============================
-        toggleMic.addEventListener('click', () => {
-            if (localStream) {
-                localStream.getAudioTracks().forEach(track => {
-                    track.enabled = !track.enabled;
-                });
-
-                isAudioMuted = !localStream.getAudioTracks()[0].enabled;
-                toggleMic.classList.toggle('active', !isAudioMuted);
-                toggleMic.querySelector('.control-icon i').className = isAudioMuted ?
-                    'fas fa-microphone-slash' :
-                    'fas fa-microphone';
-                toggleMic.querySelector('.control-label').textContent = isAudioMuted ? 'Unmute' : 'Mute';
-
-                if (!isAudioMuted) {
-                    toggleMic.querySelector('.control-icon').style.borderColor = 'var(--primary)';
-                } else {
-                    toggleMic.querySelector('.control-icon').style.borderColor = 'var(--border)';
-                }
+        document.getElementById('clearNotes').addEventListener('click', () => {
+            if (confirm('Clear notes?')) {
+                notesText.value = '';
+                charCount.textContent = '0';
             }
         });
 
-        toggleCam.addEventListener('click', () => {
-            if (localStream) {
-                localStream.getVideoTracks().forEach(track => {
-                    track.enabled = !track.enabled;
-                });
+        document.getElementById('saveNotes').addEventListener('click', async () => {
+            if (!notesText.value.trim()) return;
+            await fetch("/api/notes/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ roomId: ROOM_ID, notes: notesText.value })
+            });
+            alert("Notes saved");
+        });
+    });
 
-                isVideoOff = !localStream.getVideoTracks()[0].enabled;
-                toggleCam.classList.toggle('active', !isVideoOff);
-                toggleCam.querySelector('.control-icon i').className = isVideoOff ?
-                    'fas fa-video-slash' :
-                    'fas fa-video';
-                toggleCam.querySelector('.control-label').textContent = isVideoOff ? 'Camera On' : 'Camera Off';
+    /* ===============================
+       STATUS
+       =============================== */
+    function updateStatus(msg, type) {
+        callStatusText.textContent = `CALL STATUS: ${msg}`;
+    }
 
-                if (!isVideoOff) {
-                    toggleCam.querySelector('.control-icon').style.borderColor = 'var(--primary)';
-                } else {
-                    toggleCam.querySelector('.control-icon').style.borderColor = 'var(--border)';
-                }
+    /* ===============================
+       MEDIA
+       =============================== */
+    async function getLocalStream() {
+        localStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 1280, height: 720 },
+            audio: true
+        });
+        localVideo.srcObject = localStream;
+    }
+
+    /* ===============================
+       WEBRTC
+       =============================== */
+    async function createPeerConnection() {
+        peerConnection = new RTCPeerConnection({
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        });
+
+        localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
+
+        peerConnection.ontrack = e => {
+            remoteVideo.srcObject = e.streams[0];
+            remoteStream = e.streams[0];
+        };
+
+        peerConnection.onicecandidate = e => {
+            if (e.candidate) {
+                socket.emit('signal', { roomId: ROOM_ID, candidate: e.candidate });
+            }
+        };
+    }
+
+    async function createOffer() {
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        socket.emit('signal', { roomId: ROOM_ID, offer });
+    }
+
+    /* ===============================
+       SOCKET
+       =============================== */
+    function initSocket() {
+        socket = io();
+
+        socket.on('connect', () => {
+            socket.emit('join-room', { roomId: ROOM_ID, role: 'doctor' });
+        });
+
+        socket.on('user-ready', async () => {
+            await createPeerConnection();
+            await createOffer();
+        });
+
+        socket.on('signal', async data => {
+            if (!peerConnection) await createPeerConnection();
+            if (data.answer) {
+                await peerConnection.setRemoteDescription(data.answer);
+            } else if (data.candidate) {
+                await peerConnection.addIceCandidate(data.candidate);
             }
         });
 
-        async function endCallHandler() {
+        socket.on('call-ended', () => callEnded = true);
+    }
+
+    /* ===============================
+       CONNECTION MONITOR (SINGLE VERSION)
+       =============================== */
+    function checkConnection() {
+        if (callEnded) return true;
+        if (!socket || !socket.connected) return false;
+        if (!peerConnection) return false;
+
+        const state = peerConnection.iceConnectionState;
+        if (['disconnected', 'failed', 'closed'].includes(state)) return false;
+
+        const elapsed = Date.now() - (callStartTime || Date.now());
+        if (!remoteVideo.srcObject && elapsed > 8000) return false;
+
+        return true;
+    }
+
+    function reloadPage() {
+        if (callEnded) return;
+        isAutoReloading = true;
+
+        if (notesText.value.trim()) {
+            fetch("/api/notes/save", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ roomId: ROOM_ID, notes: notesText.value })
+            }).catch(() => { });
+        }
+
+        peerConnection?.close();
+        localStream?.getTracks().forEach(t => t.stop());
+        socket?.disconnect();
+
+        setTimeout(() => window.location.reload(), 1000);
+    }
+
+    function startConnectionMonitor() {
+        clearInterval(connectionCheckInterval);
+        connectionCheckInterval = setInterval(() => {
+            if (!checkConnection()) {
+                consecutiveFailures++;
+                if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                    clearInterval(connectionCheckInterval);
+                    reloadPage();
+                }
+            } else {
+                consecutiveFailures = 0;
+            }
+        }, CHECK_INTERVAL);
+    }
+
+    /* ===============================
+       END CALL (UPDATED VERSION)
+       =============================== */
+    async function endCallHandler() {
+        callEnded = true;
+        try {
             const notes = notesText.value.trim();
 
-            // Save notes
             if (notes) {
-                try {
-                    await fetch("/api/notes/save", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            roomId: ROOM_ID,
-                            notes: notes
-                        })
-                    });
-                } catch (error) {
-                    console.error('Error saving notes:', error);
-                }
-            }
-
-            // Notify server
-            if (socket) {
-                socket.emit('doctor-end-call', {
-                    roomId: ROOM_ID,
-                    appointmentId: APPOINTMENT_ID,
-                    notes: notes
+                await fetch("/api/notes/save", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ roomId: ROOM_ID, notes })
                 });
             }
 
-            // Close connection
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
+            socket?.emit('doctor-end-call', {
+                roomId: ROOM_ID,
+                appointmentId: APPOINTMENT_ID,
+                notes
+            });
 
-            // Stop stream
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
+            await fetch(`/appointments/${APPOINTMENT_ID}/complete`, { method: "POST" });
 
-            // Complete appointment
-            try {
-                await fetch(`/appointments/${APPOINTMENT_ID}/complete`, {
-                    method: "POST"
-                });
-            } catch (error) {
-                console.error('Error completing appointment:', error);
-            }
+            peerConnection?.close();
+            localStream?.getTracks().forEach(t => t.stop());
+            socket?.disconnect();
 
-            // Disconnect
-            if (socket) {
-                socket.disconnect();
-            }
-
-            // Redirect
             window.location.href = "/doc_video_dashboard";
+        } catch (e) {
+            alert("Error ending call");
         }
+    }
 
-        endCall.addEventListener('click', endCallHandler);
+    endCall.addEventListener('click', endCallHandler);
 
-        // Auto-save notes every 30 seconds
-        setInterval(async () => {
-            if (notesText.value.trim()) {
-                try {
-                    await fetch("/api/notes/save", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            roomId: ROOM_ID,
-                            notes: notesText.value
-                        })
-                    });
-                } catch (error) {
-                    console.error('Error auto-saving notes:', error);
-                }
-            }
-        }, 30000);
+    /* ===============================
+       INIT
+       =============================== */
+    (async function init() {
+        await getLocalStream();
+        initSocket();
+        startConnectionMonitor();
+    })();
 
-        // ===============================
-        // INITIALIZATION
-        // ===============================
-        async function init() {
-            updateStatus('INITIALIZING...', 'warning');
-            await getLocalStream();
-            initSocket();
+    window.addEventListener('beforeunload', e => {
+        if (isAutoReloading || callEnded) return;
+        if (socket?.connected || peerConnection) {
+            e.preventDefault();
+            e.returnValue = '';
         }
+    });
+</script>
 
-        init();
-
-        // Handle page unload
-        window.addEventListener('beforeunload', (e) => {
-            if (peerConnection || socket?.connected) {
-                e.preventDefault();
-                e.returnValue = 'Are you sure you want to leave the call?';
-                return e.returnValue;
-            }
-        });
-
-        // Handle window resize to manage notes panel state
-        window.addEventListener('resize', function () {
-            isMobile = window.innerWidth <= 768;
-
-            if (isMobile) {
-                // On mobile, close notes panel when resizing
-                if (notesPanel.classList.contains('active')) {
-                    notesPanel.classList.remove('active');
-                    toggleNotesBtn.classList.remove('active');
-                    toggleNotesBtn.querySelector('.control-icon').style.borderColor = 'var(--border)';
-                    document.body.style.overflow = '';
-                }
-            }
-        });
-
-        // Prevent scrolling on the page
-        document.addEventListener('touchmove', function (e) {
-            if (document.body.style.overflow === 'hidden') {
-                e.preventDefault();
-            }
-        }, { passive: false });
-    </script>
 
     <!-- Global Loader Script -->
     <script>
@@ -1748,448 +1552,6 @@ html, body {
                 }
             }, 10000);
         })();
-        // ===============================
-            // AUTO-RELOAD WHEN NOT CONNECTED
-            // ===============================
-
-            // Function to check connection status
-            function checkConnection() {
-                // Check if we have a socket connection
-                if (!socket || !socket.connected) {
-                    console.log('Socket not connected, attempting to reload...');
-                    return false;
-                }
-
-                // Check if we have a peer connection
-                if (!peerConnection) {
-                    console.log('No peer connection, attempting to reload...');
-                    return false;
-                }
-
-                // Check peer connection state
-                if (peerConnection.iceConnectionState === 'disconnected' ||
-                    peerConnection.iceConnectionState === 'failed' ||
-                    peerConnection.iceConnectionState === 'closed') {
-                    console.log('Peer connection state:', peerConnection.iceConnectionState, '- attempting to reload...');
-                    return false;
-                }
-
-                return true;
-            }
-
-            // Function to reload the page
-            function reloadPage() {
-                console.log('Reloading page due to connection issues...');
-                if (peerConnection && peerConnection.connectionState !== 'closed') {
-                    try {
-                        peerConnection.restartIce();
-                        console.log('ICE restart triggered');
-
-                        // Give ICE a few seconds to recover
-                        setTimeout(() => {
-                            if (checkConnection()) {
-                                console.log('ICE restart successful, skipping reload');
-                                updateStatus('CONNECTED', 'connected');
-                                return;
-                            } else {
-                                console.log('ICE restart failed, proceeding to reload');
-                                forceReload();
-                            }
-                        }, 4000);
-
-                        return; // ⛔ stop here, don't reload yet
-                    } catch (e) {
-                        console.error('ICE restart error:', e);
-                    }
-                }
-                // First try to save notes if any exist
-                if (notesText && notesText.value.trim()) {
-                    try {
-                        fetch("/api/notes/save", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                roomId: ROOM_ID,
-                                notes: notesText.value
-                            })
-                        }).catch(() => { }); // Ignore errors during reload
-                    } catch (e) { }
-                }
-
-                // Reload after a short delay
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            }
-
-                // Periodic connection checker
-                        // Periodic connection checker
-                        let connectionCheckInterval;
-                        let consecutiveFailures = 0;
-                        const MAX_CONSECUTIVE_FAILURES = 3; // Increased to 4 for more stability
-                        const CHECK_INTERVAL = 2000; // Check every 6 seconds
-
-            function startConnectionMonitor() {
-                connectionCheckInterval = setInterval(() => {
-                    const isConnected = checkConnection();
-
-                    if (isConnected) {
-                        consecutiveFailures = 0; // Reset failures on successful check
-                    } else {
-                        consecutiveFailures++;
-                        console.log(`Connection check failed (${consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES})`);
-
-                        // Only reload after multiple consecutive failures
-                        if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-                            clearInterval(connectionCheckInterval);
-                            reloadPage();
-                        }
-                    }
-                }, CHECK_INTERVAL);
-            }
-
-            // Socket connection monitoring
-            function monitorSocketEvents() {
-                if (socket) {
-                    // Listen for socket disconnect
-                    socket.on('disconnect', (reason) => {
-                        console.log('Socket disconnected:', reason);
-
-                        // If disconnect wasn't initiated by user, start checking for reconnection
-                        if (reason !== 'io client disconnect' && reason !== 'transport close') {
-                            consecutiveFailures = MAX_CONSECUTIVE_FAILURES - 1; // Fast-track to reload
-                        }
-                    });
-
-                    // Listen for socket reconnect attempts
-                    socket.on('reconnect_attempt', (attemptNumber) => {
-                        console.log('Socket reconnect attempt:', attemptNumber);
-                    });
-
-                    // Listen for socket reconnect failure
-                    socket.on('reconnect_failed', () => {
-                        console.log('Socket reconnect failed');
-                        reloadPage();
-                    });
-                }
-            }
-
-            // Initialize connection monitoring
-            setTimeout(() => {
-                startConnectionMonitor();
-                monitorSocketEvents();
-            }, 8000); // Start monitoring after 10 seconds to allow initial connection
-
-            // Also check when visibility changes (user comes back to tab)
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) {
-                    // When user returns to tab, check connection immediately
-                    setTimeout(() => {
-                        if (!checkConnection()) {
-                            consecutiveFailures++;
-                            if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-                                reloadPage();
-                            }
-                        }
-                    }, 1000);
-                }
-            });
-
-            // Add a manual refresh button/indicator for user control (optional visual feedback)
-            const addConnectionIndicator = () => {
-                const indicator = document.createElement('div');
-                indicator.id = 'connectionIndicator';
-                indicator.style.cssText = `
-        position: fixed;
-        bottom: 10px;
-        right: 10px;
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background-color: #10b981;
-        z-index: 1000;
-        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
-        transition: all 0.3s ease;
-    `;
-                document.body.appendChild(indicator);
-
-                // Update indicator color based on connection status
-                const updateIndicator = () => {
-                    const isConnected = checkConnection();
-                    indicator.style.backgroundColor = isConnected ? '#10b981' : '#ef4444';
-                    indicator.style.boxShadow = isConnected
-                        ? '0 0 0 3px rgba(16, 185, 129, 0.3)'
-                        : '0 0 0 3px rgba(239, 68, 68, 0.3)';
-                };
-
-                // Update indicator periodically
-                setInterval(updateIndicator, 2000);
-                updateIndicator();
-            };
-
-            // Add connection indicator after page loads
-            setTimeout(addConnectionIndicator, 3000);
-                // ===============================
-                // AUTO-RELOAD WHEN NOT CONNECTED (DOCTOR VERSION)
-                // ===============================
-
-                // Variable to track if we're auto-reloading
-                let isAutoReloading = false;
-
-                // Variable to track if call has ended for doctor
-                let callEnded = false;
-
-                // Function to check connection status
-                function checkConnection() {
-                    // Don't check if call has ended
-                    if (callEnded) {
-                        return true; // Don't reload if call ended normally
-                    }
-
-                    // Check if we have a socket connection
-                    if (!socket || !socket.connected) {
-                        console.log('Socket not connected, connection check failed...');
-                        return false;
-                    }
-
-                    // Check if we have a peer connection
-                    if (!peerConnection) {
-                        console.log('No peer connection, connection check failed...');
-                        return false;
-                    }
-
-                    // Check peer connection state
-                    if (peerConnection.iceConnectionState === 'disconnected' ||
-                        peerConnection.iceConnectionState === 'failed' ||
-                        peerConnection.iceConnectionState === 'closed') {
-                        console.log('Peer connection state:', peerConnection.iceConnectionState, '- connection check failed...');
-                        return false;
-                    }
-
-                    // Check if we have a remote video stream (but wait longer for initial connection)
-                    const callDuration = Date.now() - (callStartTime || Date.now());
-                    if (!remoteVideo.srcObject && callDuration > 8000 && !callEnded) { // Wait 20 seconds for initial connection
-                        console.log('No remote video stream after 20s, connection check failed...');
-                        return false;
-                    }
-
-                    return true;
-                }
-
-                // Function to reload the page without browser warning
-                function reloadPage() {
-                    console.log('Auto-reloading page due to connection issues...');
-
-                    // Don't reload if call has ended
-                    if (callEnded) {
-                        console.log('Call already ended, skipping reload...');
-                        return;
-                    }
-
-                    // Set flag to prevent browser warning
-                    isAutoReloading = true;
-
-                    // Show loading state
-                    updateStatus('Reconnecting...', 'warning');
-
-                    // Save notes before reload if any
-                    const notes = notesText ? notesText.value.trim() : '';
-                    if (notes) {
-                        try {
-                            fetch("/api/notes/save", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                    roomId: ROOM_ID,
-                                    notes: notes
-                                })
-                            }).catch(() => { }); // Ignore errors during reload
-                        } catch (e) { }
-                    }
-
-                    // Cleanup before reload
-                    if (peerConnection) {
-                        peerConnection.close();
-                        peerConnection = null;
-                    }
-
-                    if (localStream) {
-                        localStream.getTracks().forEach(track => track.stop());
-                        localStream = null;
-                    }
-
-                    // Disconnect socket if exists
-                    if (socket && socket.connected) {
-                        socket.disconnect();
-                    }
-
-                    // Add a small delay to ensure cleanup completes
-                    setTimeout(() => {
-                        console.log('Performing auto-reload now...');
-                        window.location.reload();
-                    }, 1000);
-                }
-
-
-
-                function startConnectionMonitor() {
-                    // Clear any existing interval
-                    if (connectionCheckInterval) {
-                        clearInterval(connectionCheckInterval);
-                    }
-
-                    // Don't start monitoring if call has ended
-                    if (callEnded) return;
-
-                    connectionCheckInterval = setInterval(() => {
-                        // Don't monitor if call has ended
-                        if (callEnded) {
-                            clearInterval(connectionCheckInterval);
-                            return;
-                        }
-
-                        const isConnected = checkConnection();
-
-                        if (isConnected) {
-                            consecutiveFailures = 0; // Reset failures on successful check
-                        } else {
-                            consecutiveFailures++;
-                            console.log(`Connection check failed (${consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES})`);
-
-                            // Update status to show reconnecting
-                            if (consecutiveFailures === 1) {
-                                updateStatus('Checking connection...', 'warning');
-                            } else if (consecutiveFailures === 2) {
-                                updateStatus('Connection unstable...', 'warning');
-                            } else if (consecutiveFailures === 3) {
-                                updateStatus('Attempting to reconnect...', 'warning');
-                            }
-
-                            // Only reload after multiple consecutive failures
-                            if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-                                clearInterval(connectionCheckInterval);
-                                reloadPage();
-                            }
-                        }
-                    }, CHECK_INTERVAL);
-                }
-
-                // Socket connection monitoring
-                function monitorSocketEvents() {
-                    if (socket) {
-                        // Listen for socket disconnect
-                        socket.on('disconnect', (reason) => {
-                            console.log('Socket disconnected:', reason);
-
-                            // Don't reload if call has ended
-                            if (callEnded) return;
-
-                            // If disconnect wasn't initiated by user, start checking for reconnection
-                            if (reason !== 'io client disconnect' && reason !== 'transport close') {
-                                consecutiveFailures = MAX_CONSECUTIVE_FAILURES - 2; // Get closer to reload threshold
-                                updateStatus('Connection lost, reconnecting...', 'disconnected');
-                            }
-                        });
-
-                        // Listen for socket reconnect attempts
-                        socket.on('reconnect_attempt', (attemptNumber) => {
-                            console.log('Socket reconnect attempt:', attemptNumber);
-                            if (!callEnded) {
-                                updateStatus(`Reconnecting (attempt ${attemptNumber})...`, 'warning');
-                            }
-                        });
-
-                        // Listen for successful reconnect
-                        socket.on('reconnect', () => {
-                            console.log('Socket reconnected');
-                            if (!callEnded) {
-                                consecutiveFailures = 0;
-                                updateStatus('Reconnected, establishing call...', 'warning');
-                            }
-                        });
-
-                        // Listen for socket reconnect failure
-                        socket.on('reconnect_failed', () => {
-                            console.log('Socket reconnect failed');
-                            if (!callEnded) {
-                                reloadPage();
-                            }
-                        });
-
-                        // Listen for connection errors
-                        socket.on('connect_error', (error) => {
-                            console.log('Socket connection error:', error);
-                            if (!callEnded) {
-                                consecutiveFailures++;
-                                if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-                                    reloadPage();
-                                }
-                            }
-                        });
-
-                        // Mark call as ended when doctor ends call
-                        socket.on('call-ended', () => {
-                            callEnded = true;
-                        });
-                    }
-                }
-
-                // Override the existing endCallHandler to set callEnded flag
-                const originalEndCallHandler = endCallHandler;
-                endCallHandler = async function () {
-                    callEnded = true;
-                    await originalEndCallHandler();
-                };
-
-                // Update endCall event listener
-                endCall.removeEventListener('click', endCallHandler);
-                endCall.addEventListener('click', endCallHandler);
-
-                // Initialize connection monitoring with delay to allow initial connection
-                setTimeout(() => {
-                    // Don't start monitoring if call has ended
-                    if (!callEnded) {
-                        startConnectionMonitor();
-                        monitorSocketEvents();
-                        console.log('Connection monitoring started');
-                    }
-                }, 5000); // Start monitoring after 15 seconds to allow initial connection
-
-                // Intercept beforeunload event
-                window.addEventListener('beforeunload', function (e) {
-                    // If we're auto-reloading, don't show the warning
-                    if (isAutoReloading) {
-                        // Clean up and allow reload without warning
-                        console.log('Auto-reload in progress, suppressing browser warning...');
-                        return undefined;
-                    }
-
-                    // If call has ended, don't show warning
-                    if (callEnded) {
-                        return undefined;
-                    }
-
-                    // Only show warning for user-initiated navigation during active call
-                    if ((peerConnection && peerConnection.connectionState !== 'closed') ||
-                        (socket && socket.connected)) {
-                        e.preventDefault();
-                        e.returnValue = 'Are you sure you want to leave the video call? Your consultation will end.';
-                        return e.returnValue;
-                    }
-                });
-
-                // Clean up media tracks on page unload
-                window.addEventListener('unload', function () {
-                    if (localStream) {
-                        localStream.getTracks().forEach(track => track.stop());
-                    }
-                    if (peerConnection) {
-                        peerConnection.close();
-                    }
-                    if (socket) {
-                        socket.disconnect();
-                    }
-                });
     </script>
 
 </body>

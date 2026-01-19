@@ -19,6 +19,7 @@ const PORT = process.env.PORT || 10000;
 const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 const PROJECT_ROOT = path.join(__dirname, '..');
 
+
 // ============================================
 // CORS Configuration
 // ============================================
@@ -131,6 +132,10 @@ app.use('/api/ai/', apiLimiter);
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
+app.use((req, res, next) => {
+    console.log(`📡 [${req.method}] ${req.url} - IP: ${req.ip}, X-Forwarded-For: ${req.headers['x-forwarded-for']}`);
+    next();
+});
 
 // ============================================
 // STATIC FILES (MUST COME BEFORE ROUTES!)
@@ -140,7 +145,10 @@ app.use(express.static(path.join(PROJECT_ROOT, 'public')));
 
 app.set("view engine", "ejs");
 app.set("views", path.join(PROJECT_ROOT, "views"));
-
+app.set('trust proxy', 1);
+if (process.env.NODE_ENV === 'production') {
+    app.set('trust proxy', 2); // Trust up to 2 proxies in production
+}
 
 app.use(routes);  // This includes all routes from src/routes/index.js
 
@@ -223,15 +231,9 @@ require('./sockets/videoSocket')(io);
 // ============================================
 async function startServer() {
     try {
-        console.log('🔧 Starting TeleHealth MPA Application');
-        console.log('🔧 Environment:', process.env.NODE_ENV);
-        console.log('🔧 Port:', PORT);
-        console.log('🔧 Project Root:', PROJECT_ROOT);
 
         await testConnection();
         await initializeDatabase();
-
-        // Clean up expired tokens hourly
         setInterval(cleanupExpiredTokens, 60 * 60 * 1000);
 
         server.listen(PORT, HOST, () => {

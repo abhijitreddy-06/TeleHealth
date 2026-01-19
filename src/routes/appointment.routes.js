@@ -116,5 +116,27 @@ router.post("/test-appointment-start", authenticate, authorize("doctor"), async 
         });
     }
 });
+// Add to appointment.routes.js or a new debug route file
+router.post("/test-end-call", authenticate, authorize("doctor"), async (req, res) => {
+    try {
+        console.log("Test end call called");
+        console.log("Appointment ID:", req.body.appointmentId);
+        console.log("Doctor ID:", req.user.id);
 
+        // Try to complete appointment
+        await appointmentService.completeAppointment(req.body.appointmentId, req.user.id);
+
+        res.json({
+            success: true,
+            message: "Test completed successfully"
+        });
+    } catch (err) {
+        console.error("Test end call error:", err);
+        res.status(500).json({
+            success: false,
+            error: err.message,
+            stack: err.stack
+        });
+    }
+});
 module.exports = router;
