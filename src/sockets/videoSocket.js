@@ -11,7 +11,7 @@ module.exports = function (io) {
                 socket.roomId = roomId;
                 socket.role = role;
 
-                console.log(`${role} joined room: ${roomId}`);
+                console.log(`${role} joined room: ${roomId}, socket: ${socket.id}`);
 
                 // Notify the other side
                 if (role === 'user') {
@@ -21,9 +21,7 @@ module.exports = function (io) {
                         roomId,
                         message: 'Waiting for doctor...'
                     });
-                }
-
-                if (role === 'doctor') {
+                } else if (role === 'doctor') {
                     // Doctor joined, notify user if present
                     socket.to(roomId).emit('user-ready');
                     socket.emit('doctor-joined', {
@@ -42,6 +40,25 @@ module.exports = function (io) {
             try {
                 console.log(`Doctor ending call for room: ${roomId}, appointment: ${appointmentId}`);
 
+                // Update appointment status in database
+                await pool.query(
+                    `UPDATE appointments 
+                     SET status = 'completed', completed_at = NOW() 
+                     WHERE room_id = $1 AND status = 'started'`,
+                    [roomId]
+                );
+
+                // Save notes if provided
+                if (notes && notes.trim()) {
+                    await pool.query(
+                        `INSERT INTO doctor_notes (room_id, notes, created_at) 
+                         VALUES ($1, $2, NOW()) 
+                         ON CONFLICT (room_id) 
+                         DO UPDATE SET notes = EXCLUDED.notes, updated_at = NOW()`,
+                        [roomId, notes.trim()]
+                    );
+                }
+
                 // Emit to user that call is ending and prescription is ready
                 io.to(roomId).emit('call-ended-by-doctor', {
                     roomId,
@@ -50,7 +67,7 @@ module.exports = function (io) {
                     timestamp: new Date().toISOString()
                 });
 
-                // Also emit prescription-ready event separately
+                // Also emit prescription-ready event
                 io.to(roomId).emit('prescription-ready', {
                     roomId,
                     appointmentId,
@@ -70,10 +87,12 @@ module.exports = function (io) {
             }
         });
 
+        // WebRTC signaling
         socket.on('signal', ({ roomId, ...payload }) => {
             socket.to(roomId).emit('signal', payload);
         });
 
+        // Mute state updates
         socket.on('user-mute-state', ({ roomId, isMuted }) => {
             socket.to(roomId).emit('user-mute-state', { isMuted });
         });
@@ -93,23 +112,13 @@ module.exports = function (io) {
         socket.on('disconnect', (reason) => {
             console.log(`Socket disconnected: ${socket.id}, role: ${socket.role}, room: ${socket.roomId}, reason: ${reason}`);
 
-            // Only emit disconnection events for intentional disconnects
-            // (not for page reloads)
             if (socket.roomId) {
-                // Delay the disconnection notification to allow for reconnection
-                setTimeout(() => {
-                    // Check if socket has reconnected to the same room
-                    const hasReconnected = Array.from(io.sockets.adapter.rooms.get(socket.roomId) || []).some(sid => sid !== socket.id);
-
-                    if (!hasReconnected) {
-                        // No reconnection within timeout, emit disconnection
-                        if (socket.role === 'user') {
-                            socket.to(socket.roomId).emit('user-disconnected');
-                        } else if (socket.role === 'doctor') {
-                            socket.to(socket.roomId).emit('doctor-disconnected');
-                        }
-                    }
-                }, 2000); // 2 second delay to allow for reconnection
+                // Immediate notification for disconnection
+                if (socket.role === 'user') {
+                    socket.to(socket.roomId).emit('user-disconnected');
+                } else if (socket.role === 'doctor') {
+                    socket.to(socket.roomId).emit('doctor-disconnected');
+                }
             }
         });
 

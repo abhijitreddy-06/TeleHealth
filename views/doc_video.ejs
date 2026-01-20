@@ -1182,11 +1182,12 @@ html, body {
 <script src="/socket.io/socket.io.js"></script>
 <script>
     /* ===============================
-       VARIABLES
+       VARIABLES & CONSTANTS
        =============================== */
     const ROOM_ID = "<%= roomId %>";
     const APPOINTMENT_ID = "<%= appointment.id %>";
 
+    // DOM Elements
     const localVideo = document.getElementById('localVideo');
     const remoteVideo = document.getElementById('remoteVideo');
     const toggleMic = document.getElementById('toggleMic');
@@ -1199,6 +1200,7 @@ html, body {
     const toggleNotesBtn = document.getElementById('toggleNotes');
     const mobileCloseNotes = document.getElementById('mobileCloseNotes');
 
+    // State Variables
     let localStream = null;
     let remoteStream = null;
     let peerConnection = null;
@@ -1206,23 +1208,14 @@ html, body {
     let callStartTime = null;
     let isAudioMuted = false;
     let isVideoOff = false;
+    let callEnded = false;
     let isMobile = window.innerWidth <= 768;
 
-    let connectionCheckInterval;
-    let consecutiveFailures = 0;
-    const MAX_CONSECUTIVE_FAILURES = 3;
-    const CHECK_INTERVAL = 2000;
-    let userConnectionTimer = null;
-    const USER_CONNECTION_TIMEOUT = 10000; // 10 seconds
-    let userHasConnected = false;
-    let isAutoReloading = false;
-    let callEnded = false;
-
     /* ===============================
-       THEME / UI / NOTES
+       THEME & UI MANAGEMENT
        =============================== */
     document.addEventListener('DOMContentLoaded', () => {
-
+        // Theme Management
         const themeToggle = document.getElementById('themeToggle');
         const mobileThemeToggle = document.getElementById('mobileThemeToggle');
         const html = document.documentElement;
@@ -1251,7 +1244,7 @@ html, body {
         themeToggle.addEventListener('click', toggleTheme);
         mobileThemeToggle?.addEventListener('click', toggleTheme);
 
-        /* NOTES PANEL */
+        // Notes Panel Management
         notesPanel.classList.remove('active');
 
         toggleNotesBtn.addEventListener('click', () => {
@@ -1271,37 +1264,61 @@ html, body {
         });
 
         document.getElementById('clearNotes').addEventListener('click', () => {
-            if (confirm('Clear notes?')) {
+            if (confirm('Clear consultation notes?')) {
                 notesText.value = '';
                 charCount.textContent = '0';
             }
         });
 
         document.getElementById('saveNotes').addEventListener('click', async () => {
-            if (!notesText.value.trim()) return;
-            await fetch("/api/notes/save", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ roomId: ROOM_ID, notes: notesText.value })
-            });
-            alert("Notes saved");
+            if (!notesText.value.trim()) {
+                showToast('Please enter notes before saving', 'warning');
+                return;
+            }
+
+            try {
+                await fetch("/api/notes/save", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ roomId: ROOM_ID, notes: notesText.value })
+                });
+                showToast('Notes saved successfully', 'success');
+            } catch (error) {
+                showToast('Failed to save notes', 'error');
+            }
         });
+
+        // Control Buttons
+        toggleMic.addEventListener('click', toggleMicrophone);
+        toggleCam.addEventListener('click', toggleCamera);
+        endCall.addEventListener('click', endCallHandler);
     });
 
     /* ===============================
-       STATUS
+       STATUS & NOTIFICATION FUNCTIONS
        =============================== */
-    function updateStatus(msg, type) {
-        callStatusText.textContent = `CALL STATUS: ${msg}`;
+    function updateStatus(message, type = 'info') {
+        callStatusText.textContent = `CALL STATUS: ${message.toUpperCase()}`;
+
+        // Update status styling based on type
+        if (type === 'connected') {
+            callStatusText.style.color = 'var(--secondary)';
+        } else if (type === 'warning') {
+            callStatusText.style.color = 'var(--warning)';
+        } else if (type === 'error') {
+            callStatusText.style.color = 'var(--error)';
+        } else {
+            callStatusText.style.color = 'var(--text-primary)';
+        }
     }
 
     function showToast(message, type = 'info') {
-        // Create toast element if it doesn't exist
+        // Create toast if it doesn't exist
         let toast = document.getElementById('global-toast');
         if (!toast) {
             toast = document.createElement('div');
             toast.id = 'global-toast';
-            toast.className = 'toast';
+            toast.className = 'toast hidden';
             toast.innerHTML = `
                 <i class="fas fa-info-circle"></i>
                 <span id="global-toast-message"></span>
@@ -1312,21 +1329,20 @@ html, body {
         const toastMessage = document.getElementById('global-toast-message');
         toastMessage.textContent = message;
 
-        // Remove existing classes
-        toast.className = 'toast';
-
-        // Add type class
-        if (type === 'error') {
-            toast.classList.add('error');
-            toast.querySelector('i').className = 'fas fa-exclamation-circle';
+        // Set icon based on type
+        const icon = toast.querySelector('i');
+        if (type === 'success') {
+            icon.className = 'fas fa-check-circle';
+            toast.className = 'toast success';
         } else if (type === 'warning') {
-            toast.classList.add('warning');
-            toast.querySelector('i').className = 'fas fa-exclamation-triangle';
-        } else if (type === 'success') {
-            toast.classList.add('success');
-            toast.querySelector('i').className = 'fas fa-check-circle';
+            icon.className = 'fas fa-exclamation-triangle';
+            toast.className = 'toast warning';
+        } else if (type === 'error') {
+            icon.className = 'fas fa-exclamation-circle';
+            toast.className = 'toast error';
         } else {
-            toast.querySelector('i').className = 'fas fa-info-circle';
+            icon.className = 'fas fa-info-circle';
+            toast.className = 'toast info';
         }
 
         // Show toast
@@ -1341,84 +1357,203 @@ html, body {
     }
 
     /* ===============================
-       USER CONNECTION TIMER FUNCTIONS
-       =============================== */
-    function startUserConnectionTimer() {
-        clearUserConnectionTimer();
-        console.log('Starting 10-second timer for user connection...');
-        userConnectionTimer = setTimeout(() => {
-            if (!userHasConnected && !callEnded) {
-                console.log('User not connected after 10 seconds, auto-reloading...');
-                updateStatus('User not connected - reloading...', 'warning');
-                showToast('User not connected. Reloading page...', 'warning');
-                reloadPage();
-            }
-        }, USER_CONNECTION_TIMEOUT);
-    }
-
-    function clearUserConnectionTimer() {
-        if (userConnectionTimer) {
-            clearTimeout(userConnectionTimer);
-            userConnectionTimer = null;
-        }
-    }
-
-    /* ===============================
-       MEDIA
+       MEDIA STREAM MANAGEMENT
        =============================== */
     async function getLocalStream() {
         try {
             localStream = await navigator.mediaDevices.getUserMedia({
-                video: { width: 1280, height: 720 },
-                audio: true
+                video: {
+                    width: { ideal: 1280 },
+                    height: { ideal: 720 },
+                    frameRate: { ideal: 30 }
+                },
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
             });
             localVideo.srcObject = localStream;
-            console.log('Local stream obtained successfully');
+            console.log('Local media stream obtained');
+
+            // Enable control buttons
+            toggleMic.disabled = false;
+            toggleCam.disabled = false;
+
+            return true;
         } catch (error) {
-            console.error('Error getting local stream:', error);
-            showToast('Failed to access camera/microphone', 'error');
-            updateStatus('Media access failed', 'disconnected');
+            console.error('Error accessing media devices:', error);
+            updateStatus('Media access failed', 'error');
+            showToast('Failed to access camera/microphone. Please check permissions.', 'error');
+            return false;
+        }
+    }
+
+    function toggleMicrophone() {
+        if (!localStream) return;
+
+        isAudioMuted = !isAudioMuted;
+        localStream.getAudioTracks().forEach(track => {
+            track.enabled = !isAudioMuted;
+        });
+
+        // Update button UI
+        const icon = toggleMic.querySelector('.control-icon i');
+        const label = toggleMic.querySelector('.control-label');
+
+        if (isAudioMuted) {
+            toggleMic.classList.remove('active');
+            icon.className = 'fas fa-microphone-slash';
+            label.textContent = 'Unmute';
+            showToast('Microphone muted', 'warning');
+        } else {
+            toggleMic.classList.add('active');
+            icon.className = 'fas fa-microphone';
+            label.textContent = 'Mute';
+            showToast('Microphone unmuted', 'success');
+        }
+
+        // Notify other peer
+        if (socket && socket.connected) {
+            socket.emit('doctor-mute-state', {
+                roomId: ROOM_ID,
+                isMuted: isAudioMuted
+            });
+        }
+    }
+
+    function toggleCamera() {
+        if (!localStream) return;
+
+        isVideoOff = !isVideoOff;
+        localStream.getVideoTracks().forEach(track => {
+            track.enabled = !isVideoOff;
+        });
+
+        // Update button UI
+        const icon = toggleCam.querySelector('.control-icon i');
+        const label = toggleCam.querySelector('.control-label');
+
+        if (isVideoOff) {
+            toggleCam.classList.remove('active');
+            icon.className = 'fas fa-video-slash';
+            label.textContent = 'Camera';
+            showToast('Camera turned off', 'warning');
+        } else {
+            toggleCam.classList.add('active');
+            icon.className = 'fas fa-video';
+            label.textContent = 'Camera';
+            showToast('Camera turned on', 'success');
+        }
+
+        // Notify other peer
+        if (socket && socket.connected) {
+            socket.emit('doctor-camera-state', {
+                roomId: ROOM_ID,
+                isVideoOff: isVideoOff
+            });
         }
     }
 
     /* ===============================
-       WEBRTC
+       WEBRTC PEER CONNECTION
        =============================== */
-    async function createPeerConnection() {
-        peerConnection = new RTCPeerConnection({
-            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-        });
-
-        localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
-
-        peerConnection.ontrack = e => {
-            remoteVideo.srcObject = e.streams[0];
-            remoteStream = e.streams[0];
-            console.log('Remote video stream received');
+    function createPeerConnection() {
+        const configuration = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' }
+            ],
+            iceCandidatePoolSize: 10
         };
 
-        peerConnection.onicecandidate = e => {
-            if (e.candidate) {
-                socket.emit('signal', { roomId: ROOM_ID, candidate: e.candidate });
+        peerConnection = new RTCPeerConnection(configuration);
+
+        // Add local tracks
+        localStream.getTracks().forEach(track => {
+            peerConnection.addTrack(track, localStream);
+        });
+
+        // Remote stream received
+        peerConnection.ontrack = (event) => {
+            console.log('Received remote track:', event.track.kind);
+            if (!remoteVideo.srcObject) {
+                remoteVideo.srcObject = event.streams[0];
+                remoteStream = event.streams[0];
+                updateStatus('Call connected', 'connected');
+                showToast('Video call connected successfully', 'success');
             }
+        };
+
+        // ICE candidate handling
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate && socket) {
+                socket.emit('signal', {
+                    roomId: ROOM_ID,
+                    candidate: event.candidate
+                });
+            }
+        };
+
+        // Connection state monitoring
+        peerConnection.oniceconnectionstatechange = () => {
+            const state = peerConnection.iceConnectionState;
+            console.log('ICE connection state:', state);
+
+            if (state === 'connected' || state === 'completed') {
+                updateStatus('Call connected', 'connected');
+            } else if (state === 'disconnected') {
+                updateStatus('Connection unstable', 'warning');
+                showToast('Connection unstable', 'warning');
+            } else if (state === 'failed') {
+                updateStatus('Connection failed', 'error');
+                showToast('Connection failed. Attempting to reconnect...', 'error');
+            }
+        };
+
+        peerConnection.onconnectionstatechange = () => {
+            console.log('Connection state:', peerConnection.connectionState);
         };
     }
 
     async function createOffer() {
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        socket.emit('signal', { roomId: ROOM_ID, offer });
+        try {
+            const offer = await peerConnection.createOffer({
+                offerToReceiveAudio: true,
+                offerToReceiveVideo: true
+            });
+
+            await peerConnection.setLocalDescription(offer);
+
+            // Send offer to remote peer
+            socket.emit('signal', {
+                roomId: ROOM_ID,
+                offer: offer
+            });
+
+            console.log('Offer created and sent');
+        } catch (error) {
+            console.error('Error creating offer:', error);
+            showToast('Failed to establish connection', 'error');
+        }
     }
 
     /* ===============================
-       SOCKET.IO EVENTS
+       SOCKET.IO COMMUNICATION
        =============================== */
     function initSocket() {
-        socket = io();
+        socket = io({
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000
+        });
 
         socket.on('connect', () => {
             console.log('Socket connected:', socket.id);
             updateStatus('Connecting to patient...', 'warning');
+
+            // Join the room
             socket.emit('join-room', {
                 roomId: ROOM_ID,
                 role: 'doctor'
@@ -1427,297 +1562,187 @@ html, body {
 
         socket.on('joined-room', (data) => {
             console.log('Joined room:', data);
-            updateStatus('Waiting for patient...', 'warning');
+            updateStatus('Waiting for patient to join...', 'warning');
+            showToast('Room joined successfully', 'success');
         });
 
         socket.on('user-ready', async () => {
-            console.log('User ready in room:', ROOM_ID);
-            userHasConnected = true;
-            clearUserConnectionTimer();
-            updateStatus('Patient connected, establishing call...', 'warning');
-            await createPeerConnection();
+            console.log('Patient is ready to connect');
+            updateStatus('Patient joined, establishing connection...', 'warning');
+            showToast('Patient has joined the call', 'success');
+
+            // Create peer connection and send offer
+            createPeerConnection();
             await createOffer();
-            showToast('Patient joined the call', 'success');
         });
 
-        socket.on('signal', async data => {
-            if (!peerConnection) await createPeerConnection();
-            if (data.answer) {
-                await peerConnection.setRemoteDescription(data.answer);
-            } else if (data.candidate) {
-                await peerConnection.addIceCandidate(data.candidate);
+        socket.on('signal', async (data) => {
+            try {
+                if (!peerConnection) {
+                    createPeerConnection();
+                }
+
+                if (data.answer) {
+                    console.log('Received answer from patient');
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                } else if (data.candidate) {
+                    console.log('Received ICE candidate');
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
+            } catch (error) {
+                console.error('Error handling signal:', error);
             }
         });
 
-        // When call is ended (by user or system)
-        socket.on('call-ended', (data) => {
-            console.log('Call ended:', data);
-            callEnded = true;
-            updateStatus('Call ended', 'warning');
-            showToast('Call has ended', 'warning');
+        socket.on('user-disconnected', () => {
+            console.log('Patient disconnected');
+            if (!callEnded) {
+                updateStatus('Patient disconnected', 'warning');
+                showToast('Patient disconnected from the call', 'warning');
 
-            // Clean up and redirect
-            setTimeout(() => {
-                window.location.href = "/doc_video_dashboard";
-            }, 3000);
+                // Wait 30 seconds for patient to reconnect
+                setTimeout(() => {
+                    if (!callEnded) {
+                        endCallHandler();
+                    }
+                }, 30000);
+            }
         });
 
         socket.on('call-ended-confirmed', (data) => {
             console.log('Call end confirmed:', data);
-            callEnded = true;
             showToast('Call ended successfully', 'success');
-        });
-
-        // User disconnected unexpectedly
-        socket.on('user-disconnected', (data) => {
-            console.log('User disconnected:', data);
-            if (!callEnded) {
-                userHasConnected = false;
-                updateStatus('Patient disconnected', 'warning');
-                showToast('Patient disconnected from the call', 'warning');
-
-                // Start timer again to wait for reconnection
-                startUserConnectionTimer();
-            }
-        });
-
-        // User left gracefully
-        socket.on('user-left', (data) => {
-            console.log('User left:', data);
-            if (!callEnded) {
-                userHasConnected = false;
-                updateStatus('Patient left the call', 'warning');
-                showToast('Patient left the call', 'warning');
-                endCallHandler();
-            }
-        });
-
-        // User mute state updates
-        socket.on('user-mute-state', (data) => {
-            console.log('User mute state:', data);
-            // Update UI to show user's mute status if needed
-        });
-
-        // User camera state updates
-        socket.on('user-camera-state', (data) => {
-            console.log('User camera state:', data);
-            // Update UI to show user's camera status if needed
+            setTimeout(() => {
+                window.location.href = "/doc_video_dashboard";
+            }, 2000);
         });
 
         socket.on('error', (error) => {
             console.error('Socket error:', error);
             showToast('Connection error: ' + error.message, 'error');
         });
-    }
 
-    /* ===============================
-       CONNECTION MONITOR
-       =============================== */
-    function checkConnection() {
-        if (callEnded) return true;
-
-        // Check socket connection
-        if (!socket || !socket.connected) {
-            return false;
-        }
-
-        // Check peer connection if user has connected
-        if (userHasConnected && peerConnection) {
-            const state = peerConnection.iceConnectionState;
-            if (['disconnected', 'failed', 'closed'].includes(state)) {
-                return false;
+        socket.on('disconnect', (reason) => {
+            console.log('Socket disconnected:', reason);
+            if (!callEnded) {
+                updateStatus('Connection lost', 'error');
+                showToast('Connection lost. Attempting to reconnect...', 'error');
             }
-        }
-
-        return true;
+        });
     }
 
-    // function reloadPage() {
-    //     if (callEnded) return;
-    //     isAutoReloading = true;
-
-    //     // Set a flag in localStorage to indicate this is a reload, not call end
-    //     localStorage.setItem('doctor_reloading', 'true');
-    //     localStorage.setItem('reload_room_id', ROOM_ID);
-    //     localStorage.setItem('reload_notes', notesText.value.trim());
-
-    //     // Don't end the call, just disconnect and reload
-    //     if (peerConnection) {
-    //         peerConnection.close();
-    //         peerConnection = null;
-    //     }
-
-    //     if (localStream) {
-    //         localStream.getTracks().forEach(t => t.stop());
-    //         localStream = null;
-    //     }
-
-    //     if (socket) {
-    //         socket.disconnect();
-    //     }
-
-    //     setTimeout(() => window.location.reload(), 1000);
-    // }
-
-    // function startConnectionMonitor() {
-    //     connectionCheckInterval = setInterval(() => {
-    //         // Only monitor connection if user has connected
-    //         if (userHasConnected && !checkConnection()) {
-    //             consecutiveFailures++;
-    //             if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-    //                 clearInterval(connectionCheckInterval);
-    //                 updateStatus('Connection lost', 'disconnected');
-    //                 showToast('Connection lost. Attempting to reconnect...', 'error');
-
-    //                 // Try to reconnect socket
-    //                 if (socket) {
-    //                     socket.connect();
-    //                 }
-
-    //                 // Reload page after 5 seconds if still disconnected
-    //                 setTimeout(() => {
-    //                     if (!checkConnection() && !callEnded) {
-    //                         reloadPage();
-    //                     }
-    //                 }, 5000);
-    //             }
-    //         } else {
-    //             consecutiveFailures = 0;
-    //             if (peerConnection) {
-    //                 const state = peerConnection.iceConnectionState;
-    //                 if (state === 'checking' || state === 'connected') {
-    //                     updateStatus('Call connected', 'connected');
-    //                 }
-    //             }
-    //         }
-    //     }, CHECK_INTERVAL);
-    // }
-
     /* ===============================
-       END CALL HANDLER
+       CALL MANAGEMENT
        =============================== */
     async function endCallHandler() {
         if (callEnded) return;
         callEnded = true;
 
-        // Clear any reload flags
-        localStorage.removeItem('doctor_reloading');
-        localStorage.removeItem('reload_room_id');
-        localStorage.removeItem('reload_notes');
-
-        // Clear timers
-        clearUserConnectionTimer();
-        if (connectionCheckInterval) {
-            clearInterval(connectionCheckInterval);
-        }
+        // Update UI
+        updateStatus('Ending call...', 'warning');
+        endCall.disabled = true;
 
         try {
+            // Save notes if any
             const notes = notesText.value.trim();
-
-            // Save notes first
             if (notes) {
                 await fetch("/api/notes/save", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ roomId: ROOM_ID, notes })
-                }).catch(e => console.error('Failed to save notes:', e));
+                });
             }
 
             // Complete appointment
             await fetch(`/appointments/${APPOINTMENT_ID}/complete`, {
                 method: "POST"
-            }).catch(e => console.error('Failed to complete appointment:', e));
+            });
 
-            // Emit call ended event with retry logic
+            // Notify patient that call is ending
             if (socket && socket.connected) {
-                console.log('Emitting doctor-end-call event...');
-
-                // Emit with callback for confirmation
                 socket.emit('doctor-end-call', {
                     roomId: ROOM_ID,
                     appointmentId: APPOINTMENT_ID,
                     notes: notes
-                }, (response) => {
-                    console.log('Server acknowledged call end:', response);
                 });
-
-                // Wait a moment for events to propagate
-                await new Promise(resolve => setTimeout(resolve, 1000));
             }
 
-            // Cleanup
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-
+            // Cleanup media streams
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
             }
 
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+
+            // Disconnect socket
             if (socket) {
                 socket.disconnect();
             }
 
-            // Redirect after showing confirmation
-            setTimeout(() => {
-                window.location.href = "/doc_video_dashboard";
-            }, 2000);
+            showToast('Call ended successfully', 'success');
 
-        } catch (e) {
-            console.error('Error ending call:', e);
-            // Still try to redirect
+            // Redirect after delay
             setTimeout(() => {
                 window.location.href = "/doc_video_dashboard";
-            }, 2000);
+            }, 1500);
+
+        } catch (error) {
+            console.error('Error ending call:', error);
+            showToast('Error ending call', 'error');
+            setTimeout(() => {
+                window.location.href = "/doc_video_dashboard";
+            }, 1500);
         }
     }
-
-    endCall.addEventListener('click', endCallHandler);
 
     /* ===============================
        INITIALIZATION
        =============================== */
-    (async function init() {
-        // Check if this is a reload
-    //    const wasReloading = localStorage.getItem('doctor_reloading') === 'true';
-     //   const reloadRoomId = localStorage.getItem('reload_room_id');
-        const savedNotes = localStorage.getItem('reload_notes');
-
-        // if (wasReloading && reloadRoomId === ROOM_ID && savedNotes) {
-        //     // Restore notes from before reload
-        //     notesText.value = savedNotes;
-        //     charCount.textContent = savedNotes.length;
-        // }
-
-        // Clear reload flags
-        localStorage.removeItem('doctor_reloading');
-        localStorage.removeItem('reload_room_id');
-        localStorage.removeItem('reload_notes');
-
+    async function initializeCall() {
         try {
-            await getLocalStream();
+            updateStatus('Initializing...', 'warning');
+
+            // Get local media stream
+            const mediaSuccess = await getLocalStream();
+            if (!mediaSuccess) {
+                showToast('Cannot start call without camera/microphone access', 'error');
+                return;
+            }
+
+            // Initialize socket connection
             initSocket();
-            startUserConnectionTimer(); // Start waiting for user connection
-            console.log('Initialization complete. Waiting for user connection...');
+
+            updateStatus('Ready to connect', 'connected');
+
         } catch (error) {
             console.error('Initialization error:', error);
+            updateStatus('Initialization failed', 'error');
             showToast('Failed to initialize video call', 'error');
         }
-    })();
+    }
 
-    window.addEventListener('beforeunload', e => {
-        if (isAutoReloading || callEnded) return;
-        if (socket?.connected || peerConnection) {
+    // Start the call when page loads
+    window.addEventListener('load', () => {
+        setTimeout(initializeCall, 500);
+    });
+
+    // Prevent accidental page leave during call
+    window.addEventListener('beforeunload', (e) => {
+        if (!callEnded && (socket?.connected || peerConnection)) {
             e.preventDefault();
-            e.returnValue = '';
+            e.returnValue = 'Are you sure you want to leave? The call will be ended.';
         }
     });
 
-    // Add CSS for toast
-    const toastStyle = document.createElement('style');
-    toastStyle.textContent = `
+    /* ===============================
+       TOAST STYLES
+       =============================== */
+    const toastStyles = document.createElement('style');
+    toastStyles.textContent = `
         .toast {
             position: fixed;
             bottom: 20px;
@@ -1734,6 +1759,8 @@ html, body {
             transform: translateY(20px);
             transition: opacity 0.3s, transform 0.3s;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 350px;
+            font-size: 14px;
         }
         
         .toast.show {
@@ -1757,11 +1784,16 @@ html, body {
             background: var(--error);
         }
         
+        .toast.info {
+            background: var(--primary);
+        }
+        
         .toast i {
             font-size: 18px;
+            flex-shrink: 0;
         }
     `;
-    document.head.appendChild(toastStyle);
+    document.head.appendChild(toastStyles);
 </script>
 
 
