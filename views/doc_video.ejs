@@ -1414,43 +1414,69 @@ html, body {
        END CALL (UPDATED VERSION)
        =============================== */
     async function endCallHandler() {
+        if (callEnded) return;
         callEnded = true;
+
         try {
             const notes = notesText.value.trim();
 
+            // Save notes first
             if (notes) {
                 await fetch("/api/notes/save", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ roomId: ROOM_ID, notes })
-                });
+                }).catch(e => console.error('Failed to save notes:', e));
             }
 
-            if (socket) {
+            // Complete appointment
+            await fetch(`/appointments/${APPOINTMENT_ID}/complete`, {
+                method: "POST"
+            }).catch(e => console.error('Failed to complete appointment:', e));
+
+            // Emit call ended event with retry logic
+            if (socket && socket.connected) {
+                console.log('Emitting doctor-end-call event...');
+
+                // Emit with callback for confirmation
                 socket.emit('doctor-end-call', {
                     roomId: ROOM_ID,
                     appointmentId: APPOINTMENT_ID,
                     notes: notes
+                }, (response) => {
+                    console.log('Server acknowledged call end:', response);
                 });
 
-                // Also emit directly to the room for immediate notification
-                // socket.emit('end-call-to-room', {
-                //     roomId: ROOM_ID,
-                //     appointmentId: APPOINTMENT_ID,
-                //     notes: notes
-                // });
+                // Wait a moment for events to propagate
+                await new Promise(resolve => setTimeout(resolve, 1000));
             }
-            
 
-            await fetch(`/appointments/${APPOINTMENT_ID}/complete`, { method: "POST" });
+            // Cleanup
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
 
-            peerConnection?.close();
-            localStream?.getTracks().forEach(t => t.stop());
-            socket?.disconnect();
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
 
-            window.location.href = "/doc_video_dashboard";
+            if (socket) {
+                socket.disconnect();
+            }
+
+            // Redirect after showing confirmation
+            setTimeout(() => {
+                window.location.href = "/doc_video_dashboard";
+            }, 2000);
+
         } catch (e) {
-            alert("Error ending call");
+            console.error('Error ending call:', e);
+            // Still try to redirect
+            setTimeout(() => {
+                window.location.href = "/doc_video_dashboard";
+            }, 2000);
         }
     }
 

@@ -1001,747 +1001,339 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Variables
-            const ROOM_ID = "<%= roomId %>";
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
 
-            let localStream = null;
-            let remoteStream = null;
-            let peerConnection = null;
-            let socket = null;
-            let callStartTime = null;
-            let isAudioMuted = false;
-            let isVideoOff = false;
-            let timerInterval = null;
-            let callAlreadyEnded = false;
+        /* ===============================
+           CONSTANTS & STATE
+           =============================== */
+        const ROOM_ID = "<%= roomId %>";
 
-            // AUTO-RELOAD VARIABLES (ADDED)
-            let isAutoReloading = false;
-            let connectionCheckInterval;
-            let consecutiveFailures = 0;
-            const MAX_CONSECUTIVE_FAILURES = 3;
-            const CHECK_INTERVAL = 2000;
+        let localStream = null;
+        let peerConnection = null;
+        let socket = null;
+        let callStartTime = null;
+        let timerInterval = null;
 
-            // DOM Elements
-            const localVideo = document.getElementById('localVideo');
-            const remoteVideo = document.getElementById('remoteVideo');
-            const toggleMic = document.getElementById('toggleMic');
-            const toggleCam = document.getElementById('toggleCam');
-            const statusText = document.getElementById('statusText');
-            const statusIndicator = document.getElementById('statusIndicator');
-            const callEndedOverlay = document.getElementById('callEndedOverlay');
-            const overlayTitle = document.querySelector('.call-ended-content h2');
-            const overlayMessage = document.querySelector('.call-ended-content p');
-            const downloadBtn = document.getElementById('manualDownloadBtn');
+        let isAudioMuted = false;
+        let isVideoOff = false;
+        let callAlreadyEnded = false;
+        let isAutoReloading = false;
 
-            // Theme Toggle
-            const themeToggle = document.getElementById('themeToggle');
-            const mobileThemeToggle = document.getElementById('mobileThemeToggle');
-            const html = document.documentElement;
+        let connectionCheckInterval = null;
+        let consecutiveFailures = 0;
+        let doctorEverConnected = false;
+        let reloadCheckInterval = null;
 
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            html.setAttribute('data-theme', savedTheme);
-            updateThemeIcon(savedTheme);
+        const MAX_CONSECUTIVE_FAILURES = 3;
+        const CHECK_INTERVAL = 2000;
 
-            function toggleTheme() {
-                const currentTheme = html.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                html.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                updateThemeIcon(newTheme);
-            }
+        /* ===============================
+           DOM ELEMENTS
+           =============================== */
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+        const toggleMic = document.getElementById('toggleMic');
+        const toggleCam = document.getElementById('toggleCam');
 
-            function updateThemeIcon(theme) {
-                const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
-                themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
-                if (mobileThemeToggle) {
-                    mobileThemeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
-                }
-            }
+        const statusText = document.getElementById('statusText');
+        const statusIndicator = document.getElementById('statusIndicator');
 
-            themeToggle.addEventListener('click', toggleTheme);
+        const callEndedOverlay = document.getElementById('callEndedOverlay');
+        const overlayTitle = document.querySelector('.call-ended-content h2');
+        const overlayMessage = document.querySelector('.call-ended-content p');
+        const downloadBtn = document.getElementById('manualDownloadBtn');
+
+        /* ===============================
+           THEME
+           =============================== */
+        const themeToggle = document.getElementById('themeToggle');
+        const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+        const html = document.documentElement;
+
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        html.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        function toggleTheme() {
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+            updateThemeIcon(next);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
+            themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
             if (mobileThemeToggle) {
-                mobileThemeToggle.addEventListener('click', toggleTheme);
+                mobileThemeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
             }
+        }
 
-            // ===============================
-            // MOBILE MENU FUNCTIONALITY
-            // ===============================
-            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-            const closeMenuBtn = document.getElementById('closeMenu');
-            const mobileMenu = document.getElementById('mobileMenu');
+        themeToggle.addEventListener('click', toggleTheme);
+        mobileThemeToggle?.addEventListener('click', toggleTheme);
 
-            if (mobileMenuBtn) {
-                mobileMenuBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    mobileMenu.classList.add('active');
-                    document.body.style.overflow = 'hidden';
-                });
+        /* ===============================
+           MOBILE MENU
+           =============================== */
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeMenuBtn = document.getElementById('closeMenu');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        mobileMenuBtn?.addEventListener('click', e => {
+            e.stopPropagation();
+            mobileMenu.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        closeMenuBtn?.addEventListener('click', () => {
+            mobileMenu.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+
+        document.addEventListener('click', e => {
+            if (mobileMenu.classList.contains('active') &&
+                !mobileMenu.contains(e.target) &&
+                e.target !== mobileMenuBtn) {
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
             }
+        });
 
-            if (closeMenuBtn) {
-                closeMenuBtn.addEventListener('click', () => {
-                    mobileMenu.classList.remove('active');
-                    document.body.style.overflow = '';
-                });
-            }
+        /* ===============================
+           STATUS UI
+           =============================== */
+        function updateStatus(msg, type) {
+            if (callAlreadyEnded) return;
+            statusText.textContent = msg;
 
-            document.addEventListener('click', (e) => {
-                if (mobileMenu.classList.contains('active') &&
-                    !mobileMenu.contains(e.target) &&
-                    e.target !== mobileMenuBtn) {
-                    mobileMenu.classList.remove('active');
-                    document.body.style.overflow = '';
+            if (type === 'connected') statusIndicator.style.background = 'var(--secondary)';
+            if (type === 'warning') statusIndicator.style.background = 'var(--warning)';
+            if (type === 'disconnected') statusIndicator.style.background = 'var(--error)';
+        }
+
+        /* ===============================
+           MEDIA
+           =============================== */
+        async function getLocalStream() {
+            localStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 640, height: 480, frameRate: 24 },
+                audio: { echoCancellation: true, noiseSuppression: true }
+            });
+            localVideo.srcObject = localStream;
+            document.getElementById('videoLoading').classList.add('hidden');
+        }
+
+        /* ===============================
+           WEBRTC
+           =============================== */
+        async function createPeerConnection() {
+            peerConnection = new RTCPeerConnection({
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+                iceCandidatePoolSize: 10
+            });
+
+            localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
+
+            peerConnection.ontrack = e => {
+                if (!remoteVideo.srcObject) {
+                    remoteVideo.srcObject = e.streams[0];
+                    updateStatus('Call connected', 'connected');
+                    startTimer();
+                }
+            };
+
+            peerConnection.onicecandidate = e => {
+                if (e.candidate) {
+                    socket.emit('signal', { roomId: ROOM_ID, candidate: e.candidate });
+                }
+            };
+
+            peerConnection.oniceconnectionstatechange = () => {
+                const s = peerConnection.iceConnectionState;
+                if (['failed', 'disconnected'].includes(s)) {
+                    updateStatus('Connection lost', 'disconnected');
+                }
+            };
+        }
+
+        /* ===============================
+           SOCKET
+           =============================== */
+        function initSocket() {
+            socket = io();
+
+            socket.on('connect', () => {
+                updateStatus('Connecting to doctor...', 'warning');
+                socket.emit('join-room', { roomId: ROOM_ID, role: 'user' });
+            });
+
+            socket.on('signal', async data => {
+                if (!peerConnection) await createPeerConnection();
+
+                if (data.offer) {
+                     doctorEverConnected = true;
+                    await peerConnection.setRemoteDescription(data.offer);
+                    const answer = await peerConnection.createAnswer();
+                    await peerConnection.setLocalDescription(answer);
+                    socket.emit('signal', { roomId: ROOM_ID, answer });
+                } else if (data.candidate) {
+                    await peerConnection.addIceCandidate(data.candidate);
                 }
             });
 
-            // ===============================
-            // VIDEO CALL LOGIC
-            // ===============================
+            socket.on('doctor-ready', () => {
+                doctorEverConnected = true; 
+                updateStatus('Doctor connected, establishing call...', 'warning');
+            });
 
-            // Function to download prescription
-            function downloadPrescription(roomId) {
-                const downloadUrl = `/api/prescription/download/${roomId}`;
-
-                // Show loading state
-                const downloadBtn = document.getElementById('manualDownloadBtn');
-                const originalText = downloadBtn.innerHTML;
-                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
-                downloadBtn.disabled = true;
-
-                // Create hidden iframe for download
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = downloadUrl;
-
-                iframe.onload = function () {
-                    // Re-enable button after 3 seconds
-                    setTimeout(() => {
-                        downloadBtn.innerHTML = originalText;
-                        downloadBtn.disabled = false;
-
-                        // Check if download was successful
-                        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                        const iframeText = iframeDoc.body ? iframeDoc.body.innerText : '';
-
-                        if (iframeText.includes('Error') || iframeText.includes('Not Found')) {
-                            // Show error message to user
-                            overlayMessage.textContent = 'Prescription download failed. Please try again or contact support.';
-
-                            // Also try direct fetch to see the error
-                            fetch(downloadUrl)
-                                .then(response => {
-                                    if (!response.ok) {
-                                        return response.text().then(text => {
-                                            console.error('Download error:', text);
-                                        });
-                                    }
-                                })
-                                .catch(fetchError => {
-                                    console.error('Fetch error:', fetchError);
-                                });
-                        } else {
-                            console.log('✅ Prescription download initiated successfully');
-                        }
-
-                        // Remove iframe after processing
-                        document.body.removeChild(iframe);
-                    }, 3000);
-                };
-
-                iframe.onerror = function () {
-                    downloadBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Try Again';
-                    downloadBtn.disabled = false;
-                    document.body.removeChild(iframe);
-                };
-
-                document.body.appendChild(iframe);
-
-                // Also open in new tab as backup (after delay)
-                setTimeout(() => {
-                    window.open(downloadUrl, '_blank');
-                }, 1000);
-            }
-
-            // Function to cleanup and end call
-            function cleanupCall() {
-                // Clear timer interval
-                if (timerInterval) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                }
-
-                // Close peer connection
-                if (peerConnection) {
-                    try {
-                        peerConnection.close();
-                    } catch (e) {
-                        console.warn('Error closing peer connection:', e);
-                    }
-                    peerConnection = null;
-                }
-
-                // Stop local stream
-                if (localStream) {
-                    localStream.getTracks().forEach(track => {
-                        track.stop();
-                    });
-                    localStream = null;
-                    if (localVideo.srcObject) {
-                        localVideo.srcObject = null;
-                    }
-                }
-
-                // Clear remote video
-                if (remoteVideo.srcObject) {
-                    remoteVideo.srcObject = null;
-                }
-
-                // Update status
-                updateStatus('Call ended', 'disconnected');
-            }
-
-            // Show call ended overlay
-            function showCallEndedOverlay(prescriptionReady = false) {
-                if (callAlreadyEnded) return;
+            socket.on('call-ended-by-doctor', () => {
                 callAlreadyEnded = true;
+                showCallEndedOverlay(true);
+            });
 
-                // Cleanup call resources
-                cleanupCall();
+            socket.on('prescription-ready', () => {
+                setTimeout(() => downloadPrescription(), 1000);
+            });
 
-                // Disconnect socket
-                if (socket && socket.connected) {
-                    socket.disconnect();
-                }
+            socket.on('disconnect', reason => {
+                if (!callAlreadyEnded) updateStatus('Disconnected', 'disconnected');
+            });
+        }
 
-                // Update overlay message based on prescription status
-                if (prescriptionReady) {
-                    overlayTitle.textContent = 'Consultation Completed ✓';
-                    overlayMessage.textContent = 'Your video consultation has ended. Your prescription is being downloaded...';
-                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Prescription Again';
+        /* ===============================
+           PRESCRIPTION
+           =============================== */
+        function downloadPrescription() {
+            const url = `/api/prescription/download/${ROOM_ID}`;
+            const original = downloadBtn.innerHTML;
 
-                    // Automatically download prescription after a short delay
-                    setTimeout(() => {
-                        downloadPrescription(ROOM_ID);
-                    }, 500);
-                } else {
-                    overlayTitle.textContent = 'Consultation Ended';
-                    overlayMessage.textContent = 'Your video consultation has ended.';
-                    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Check for Prescription';
-                }
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+            downloadBtn.disabled = true;
 
-                // Show overlay
-                callEndedOverlay.style.display = 'flex';
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = url;
 
-                // Auto-redirect after delay
-                const redirectDelay = prescriptionReady ? 5000 : 10000;
+            iframe.onload = () => {
                 setTimeout(() => {
-                    window.location.href = "/user_video_dashboard";
-                }, redirectDelay);
-            }
+                    downloadBtn.innerHTML = original;
+                    downloadBtn.disabled = false;
+                    iframe.remove();
+                }, 3000);
+            };
 
-            // Update status display
-            function updateStatus(message, type) {
+            document.body.appendChild(iframe);
+            setTimeout(() => window.open(url, '_blank'), 1000);
+        }
+
+        /* ===============================
+           CALL END
+           =============================== */
+        function cleanupCall() {
+            clearInterval(timerInterval);
+            peerConnection?.close();
+            localStream?.getTracks().forEach(t => t.stop());
+            socket?.disconnect();
+        }
+
+        function showCallEndedOverlay(withPrescription) {
+            cleanupCall();
+
+            overlayTitle.textContent = withPrescription ? 'Consultation Completed ✓' : 'Consultation Ended';
+            overlayMessage.textContent = 'Your video consultation has ended.';
+            callEndedOverlay.style.display = 'flex';
+
+            setTimeout(() => {
+                window.location.href = '/user_video_dashboard';
+            }, withPrescription ? 5000 : 10000);
+        }
+
+        /* ===============================
+           TIMER
+           =============================== */
+        function startTimer() {
+            if (callStartTime) return;
+            callStartTime = Date.now();
+
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - callStartTime;
+                const h = String(Math.floor(elapsed / 3600000)).padStart(2, '0');
+                const m = String(Math.floor(elapsed % 3600000 / 60000)).padStart(2, '0');
+                const s = String(Math.floor(elapsed % 60000 / 1000)).padStart(2, '0');
+                document.querySelector('#callTimer span')?.textContent = `${h}:${m}:${s}`;
+            }, 1000);
+        }
+
+        /* ===============================
+           CONTROLS
+           =============================== */
+        toggleMic.addEventListener('click', () => {
+            localStream.getAudioTracks().forEach(t => t.enabled = !t.enabled);
+            isAudioMuted = !isAudioMuted;
+        });
+
+        toggleCam.addEventListener('click', () => {
+            localStream.getVideoTracks().forEach(t => t.enabled = !t.enabled);
+            isVideoOff = !isVideoOff;
+        });
+
+        downloadBtn.addEventListener('click', downloadPrescription);
+
+        /* ===============================
+           INIT
+           =============================== */
+        async function init() {
+            updateStatus('Initializing call...', 'warning');
+            await getLocalStream();
+            initSocket();
+            startRemotePresenceMonitor(); // ✅ ADD THIS
+        }
+
+        window.addEventListener('beforeunload', e => {
+            if (!callAlreadyEnded && !isAutoReloading) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+        function startRemotePresenceMonitor() {
+            // Wait for initial setup (media + socket)
+            setTimeout(() => {
                 if (callAlreadyEnded) return;
 
-                statusText.textContent = message;
-
-                // Update status indicator color
-                if (type === 'connected') {
-                    statusIndicator.style.background = 'var(--secondary)';
-                } else if (type === 'disconnected') {
-                    statusIndicator.style.background = 'var(--error)';
-                } else if (type === 'warning') {
-                    statusIndicator.style.background = 'var(--warning)';
-                }
-            }
-
-            // Get user media
-            async function getLocalStream() {
-                try {
-                    localStream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            width: { ideal: 640 },
-                            height: { ideal: 480 },
-                            frameRate: { ideal: 24 }
-                        },
-                        audio: {
-                            echoCancellation: true,
-                            noiseSuppression: true,
-                            autoGainControl: true
-                        }
-                    });
-
-                    localVideo.srcObject = localStream;
-                    document.getElementById('videoLoading').classList.add('hidden');
-                } catch (error) {
-                    updateStatus('Camera/mic permission required', 'disconnected');
-                    alert('Unable to access camera and microphone. Please check permissions and try again.');
-                }
-            }
-
-            // Initialize Socket.io
-            function initSocket() {
-                socket = io();
-
-                socket.on('connect', () => {
-                    updateStatus('Connecting to doctor...', 'warning');
-                    socket.emit('join-room', { roomId: ROOM_ID, role: 'user' });
-                });
-
-                socket.on('signal', async (data) => {
-                    if (!peerConnection) {
-                        await createPeerConnection();
-                    }
-
-                    if (data.offer) {
-                        updateStatus('Doctor connected, establishing call...', 'warning');
-
-                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
-
-                        const answer = await peerConnection.createAnswer();
-                        await peerConnection.setLocalDescription(answer);
-
-                        socket.emit('signal', {
-                            roomId: ROOM_ID,
-                            answer: answer
-                        });
-
-                    } else if (data.candidate) {
-                        try {
-                            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                        } catch (e) {
-                            console.error('Error adding ICE candidate:', e);
-                        }
-                    }
-                });
-
-                // When doctor ends the call with prescription
-                socket.on('call-ended-with-prescription', (data) => {
-                    showCallEndedOverlay(true);
-                });
-
-                // When doctor ends the call without prescription
-                socket.on('call-ended', (data) => {
-                    showCallEndedOverlay(false);
-                });
-
-                // When user is ready (doctor initiated)
-                socket.on('user-ready', () => {
-                    console.log('✅ User ready signal received');
-                });
-
-                socket.on('disconnect', (reason) => {
-                    if (!callAlreadyEnded) {
-                        updateStatus('Disconnected from server', 'disconnected');
-                    }
-                });
-
-                socket.on('connect_error', (error) => {
-                    updateStatus('Connection error', 'disconnected');
-                });
-
-                socket.on('error', (error) => {
-                    console.error('Socket error:', error);
-                });
-            }
-
-            // Create peer connection
-            async function createPeerConnection() {
-                const configuration = {
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun2.l.google.com:19302' },
-                        { urls: 'stun:stun3.l.google.com:19302' },
-                        { urls: 'stun:stun4.l.google.com:19302' }
-                    ],
-                    iceCandidatePoolSize: 10
-                };
-
-                peerConnection = new RTCPeerConnection(configuration);
-
-                // Add local stream tracks
-                if (localStream) {
-                    localStream.getTracks().forEach(track => {
-                        peerConnection.addTrack(track, localStream);
-                    });
-                }
-
-                // Handle remote stream
-                peerConnection.ontrack = (event) => {
-                    if (!remoteVideo.srcObject) {
-                        remoteVideo.srcObject = event.streams[0];
-                        remoteStream = event.streams[0];
-
-                        // Update UI
-                        updateStatus('Call connected', 'connected');
-                        startTimer();
-                    }
-                };
-
-                // Handle ICE candidates
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate) {
-                        socket.emit('signal', {
-                            roomId: ROOM_ID,
-                            candidate: event.candidate
-                        });
-                    }
-                };
-
-                // Handle connection state changes
-                peerConnection.oniceconnectionstatechange = () => {
-                    const state = peerConnection.iceConnectionState;
-
-                    switch (state) {
-                        case 'connected':
-                            updateStatus('Call connected', 'connected');
-                            startTimer();
-                            break;
-                        case 'disconnected':
-                            updateStatus('Connection lost', 'disconnected');
-                            break;
-                        case 'failed':
-                            updateStatus('Connection failed', 'disconnected');
-                            break;
-                        case 'closed':
-                            console.log('Peer connection closed');
-                            break;
-                    }
-                };
-
-                // Handle signaling state changes
-                peerConnection.onsignalingstatechange = () => {
-                    console.log('Signaling state:', peerConnection.signalingState);
-                };
-
-                // Handle connection state
-                peerConnection.onconnectionstatechange = () => {
-                    console.log('Connection state:', peerConnection.connectionState);
-                };
-            }
-
-            // Start call timer
-            function startTimer() {
-                if (!callStartTime) {
-                    callStartTime = Date.now();
-
-                    timerInterval = setInterval(() => {
-                        const elapsed = Date.now() - callStartTime;
-                        const hours = Math.floor(elapsed / 3600000);
-                        const minutes = Math.floor((elapsed % 3600000) / 60000);
-                        const seconds = Math.floor((elapsed % 60000) / 1000);
-
-                        const timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-
-                        // Update timer display (if exists)
-                        const timerElement = document.getElementById('callTimer');
-                        if (timerElement) {
-                            const timerSpan = timerElement.querySelector('span');
-                            if (timerSpan) {
-                                timerSpan.textContent = timeString;
-                            }
-                        }
-
-                    }, 1000);
-                }
-            }
-
-            // Toggle microphone
-            toggleMic.addEventListener('click', () => {
-                if (localStream) {
-                    localStream.getAudioTracks().forEach(track => {
-                        track.enabled = !track.enabled;
-                    });
-
-                    isAudioMuted = !localStream.getAudioTracks()[0].enabled;
-                    toggleMic.classList.toggle('active', !isAudioMuted);
-                    toggleMic.querySelector('.control-icon i').className = isAudioMuted ?
-                        'fas fa-microphone-slash' :
-                        'fas fa-microphone';
-                    toggleMic.querySelector('.control-label').textContent = isAudioMuted ? 'Unmute' : 'Mute';
-
-                    if (!isAudioMuted) {
-                        toggleMic.querySelector('.control-icon').style.borderColor = 'var(--primary)';
-                    } else {
-                        toggleMic.querySelector('.control-icon').style.borderColor = 'var(--border)';
-                    }
-                }
-            });
-
-            // Toggle camera
-            toggleCam.addEventListener('click', () => {
-                if (localStream) {
-                    localStream.getVideoTracks().forEach(track => {
-                        track.enabled = !track.enabled;
-                    });
-
-                    isVideoOff = !localStream.getVideoTracks()[0].enabled;
-                    toggleCam.classList.toggle('active', !isVideoOff);
-                    toggleCam.querySelector('.control-icon i').className = isVideoOff ?
-                        'fas fa-video-slash' :
-                        'fas fa-video';
-                    toggleCam.querySelector('.control-label').textContent = isVideoOff ? 'Camera On' : 'Camera Off';
-
-                    if (!isVideoOff) {
-                        toggleCam.querySelector('.control-icon').style.borderColor = 'var(--primary)';
-                    } else {
-                        toggleCam.querySelector('.control-icon').style.borderColor = 'var(--border)';
-                    }
-                }
-            });
-
-            // Manual download prescription button
-            downloadBtn.addEventListener('click', function () {
-                downloadPrescription(ROOM_ID);
-            });
-
-            // Initialize
-            async function init() {
-                updateStatus('Initializing call...', 'warning');
-                await getLocalStream();
-                initSocket();
-            }
-
-            // Start initialization
-            init();
-
-            // ===============================
-            // AUTO-RELOAD WHEN NO REMOTE DOCTOR IS CONNECTED (USER VERSION)
-            // ===============================
-
-            // Function to check connection status
-            function checkConnection() {
-                // Don't check if call has ended
-                if (callAlreadyEnded) {
-                    return true; // Don't reload if call ended normally
-                }
-
-                // Check if we have a socket connection
-                if (!socket || !socket.connected) {
-                    console.log('Socket not connected, connection check failed...');
-                    return false;
-                }
-
-                // Check if we have a peer connection
-                if (!peerConnection) {
-                    console.log('No peer connection, connection check failed...');
-                    return false;
-                }
-
-                // Check peer connection state
-                if (peerConnection.iceConnectionState === 'disconnected' ||
-                    peerConnection.iceConnectionState === 'failed' ||
-                    peerConnection.iceConnectionState === 'closed') {
-                    console.log('Peer connection state:', peerConnection.iceConnectionState, '- connection check failed...');
-                    return false;
-                }
-
-                // Check if we have a remote video stream (but wait longer for initial connection)
-                const callDuration = Date.now() - (callStartTime || Date.now());
-                if (!remoteVideo.srcObject && callDuration > 8000 && !callAlreadyEnded) { // Wait 8 seconds for initial connection
-                    console.log('No remote video stream after 8s, connection check failed...');
-                    return false;
-                }
-
-                return true;
-            }
-
-            // Function to reload the page without browser warning
-            function reloadPage() {
-                console.log('Auto-reloading page due to connection issues...');
-
-                // Don't reload if call has ended
-                if (callAlreadyEnded) {
-                    console.log('Call already ended, skipping reload...');
-                    return;
-                }
-
-                // Set flag to prevent browser warning
-                isAutoReloading = true;
-
-                // Show loading state
-                updateStatus('Reconnecting...', 'warning');
-
-                // Cleanup before reload
-                if (peerConnection) {
-                    peerConnection.close();
-                    peerConnection = null;
-                }
-
-                if (localStream) {
-                    localStream.getTracks().forEach(track => track.stop());
-                    localStream = null;
-                }
-
-                // Disconnect socket if exists
-                if (socket && socket.connected) {
-                    socket.disconnect();
-                }
-
-                // Add a small delay to ensure cleanup completes
-                setTimeout(() => {
-                    console.log('Performing auto-reload now...');
-                    window.location.reload();
-                }, 1000);
-            }
-
-            function startConnectionMonitor() {
-                // Clear any existing interval
-                if (connectionCheckInterval) {
-                    clearInterval(connectionCheckInterval);
-                }
-
-                // Don't start monitoring if call has ended
-                if (callAlreadyEnded) return;
-
-                connectionCheckInterval = setInterval(() => {
-                    // Don't monitor if call has ended
+                reloadCheckInterval = setInterval(() => {
                     if (callAlreadyEnded) {
-                        clearInterval(connectionCheckInterval);
+                        clearInterval(reloadCheckInterval);
                         return;
                     }
 
-                    const isConnected = checkConnection();
-
-                    if (isConnected) {
-                        consecutiveFailures = 0; // Reset failures on successful check
-                    } else {
-                        consecutiveFailures++;
-                        console.log(`Connection check failed (${consecutiveFailures}/${MAX_CONSECUTIVE_FAILURES})`);
-
-                        // Update status to show reconnecting
-                        if (consecutiveFailures === 1) {
-                            updateStatus('Checking connection...', 'warning');
-                        } else if (consecutiveFailures === 2) {
-                            updateStatus('Connection unstable...', 'warning');
-                        } else if (consecutiveFailures === 3) {
-                            updateStatus('Attempting to reconnect...', 'warning');
-                        }
-
-                        // Only reload after multiple consecutive failures
-                        if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-                            clearInterval(connectionCheckInterval);
-                            reloadPage();
-                        }
+                    // If doctor already connected at least once → NEVER reload
+                    if (doctorEverConnected) {
+                        clearInterval(reloadCheckInterval);
+                        return;
                     }
-                }, CHECK_INTERVAL);
-            }
 
-            // Socket connection monitoring
-            function monitorSocketEvents() {
-                if (socket) {
-                    // Listen for socket disconnect
-                    socket.on('disconnect', (reason) => {
-                        console.log('Socket disconnected:', reason);
+                    // Socket must be connected
+                    if (!socket || !socket.connected) return;
 
-                        // Don't reload if call has ended
-                        if (callAlreadyEnded) return;
+                    // Reload ONLY if doctor never connected AND no peer connection
+                    if (!doctorEverConnected && !peerConnection) {
+                        console.warn('⏳ Doctor not connected, auto-reloading...');
+                        isAutoReloading = true;
+                        clearInterval(reloadCheckInterval);
+                        window.location.reload();
+                    }
 
-                        // If disconnect wasn't initiated by user, start checking for reconnection
-                        if (reason !== 'io client disconnect' && reason !== 'transport close') {
-                            consecutiveFailures = MAX_CONSECUTIVE_FAILURES - 2; // Get closer to reload threshold
-                            updateStatus('Connection lost, reconnecting...', 'disconnected');
-                        }
-                    });
 
-                    // Listen for socket reconnect attempts
-                    socket.on('reconnect_attempt', (attemptNumber) => {
-                        console.log('Socket reconnect attempt:', attemptNumber);
-                        if (!callAlreadyEnded) {
-                            updateStatus(`Reconnecting (attempt ${attemptNumber})...`, 'warning');
-                        }
-                    });
+                }, 12000); // ⏱️ wait 12 seconds before reload
+            }, 5000);
+        }
 
-                    // Listen for successful reconnect
-                    socket.on('reconnect', () => {
-                        console.log('Socket reconnected');
-                        if (!callAlreadyEnded) {
-                            consecutiveFailures = 0;
-                            updateStatus('Reconnected, establishing call...', 'warning');
-                        }
-                    });
 
-                    // Listen for socket reconnect failure
-                    socket.on('reconnect_failed', () => {
-                        console.log('Socket reconnect failed');
-                        if (!callAlreadyEnded) {
-                            reloadPage();
-                        }
-                    });
+    });
+</script>
 
-                    // Listen for connection errors
-                    socket.on('connect_error', (error) => {
-                        console.log('Socket connection error:', error);
-                        if (!callAlreadyEnded) {
-                            consecutiveFailures++;
-                            if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-                                reloadPage();
-                            }
-                        }
-                    });
-                }
-            }
-
-            // Initialize connection monitoring with delay to allow initial connection
-            setTimeout(() => {
-                // Don't start monitoring if call has ended
-                if (!callAlreadyEnded) {
-                    startConnectionMonitor();
-                    monitorSocketEvents();
-                    console.log('Connection monitoring started');
-                }
-            }, 5000); // Start monitoring after 5 seconds to allow initial connection
-
-            // ===============================
-            // MODIFIED BEFOREUNLOAD EVENT (REMOVED BROWSER ALERT FOR AUTO-RELOAD)
-            // ===============================
-            window.addEventListener('beforeunload', function (e) {
-                // If we're auto-reloading, don't show the warning
-                if (isAutoReloading) {
-                    return undefined;
-                }
-
-                // If call has ended, don't show warning
-                if (callAlreadyEnded) {
-                    return undefined;
-                }
-
-                // Only show warning for user-initiated navigation during active call
-                if ((peerConnection && peerConnection.connectionState !== 'closed') ||
-                    (socket && socket.connected)) {
-                    e.preventDefault();
-                    e.returnValue = 'Are you sure you want to leave the video call?';
-                    return e.returnValue;
-                }
-            });
-
-            // Clean up media tracks on page unload
-            window.addEventListener('unload', function () {
-                if (localStream) {
-                    localStream.getTracks().forEach(track => track.stop());
-                }
-                if (peerConnection) {
-                    peerConnection.close();
-                }
-                if (socket) {
-                    socket.disconnect();
-                }
-            });
-
-            // Handle page visibility change
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    console.log('📱 Page hidden');
-                } else {
-                    console.log('📱 Page visible');
-                }
-            });
-        });
-            </script>
 
     <!-- Global Loader Script -->
     <script>

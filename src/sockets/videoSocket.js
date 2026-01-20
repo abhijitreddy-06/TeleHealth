@@ -2,58 +2,56 @@ const { pool } = require('../config/database');
 
 module.exports = function (io) {
     io.on('connection', (socket) => {
-        socket.on('join-room', async ({ roomId }) => {
+        socket.on('join-room', async ({ roomId, role }) => {
             try {
-                const allowed = await pool.query(
-                    `SELECT id FROM appointments 
-           WHERE room_id = $1 
-           AND (user_id = $2 OR doctor_id = $3)`,
-                    [roomId, socket.user.id, socket.user.id]
-                );
-
-                if (!allowed.rows.length) {
-                    socket.emit('error', { message: 'Unauthorized room access' });
-                    return;
-                }
-
+                // Join the room
                 socket.join(roomId);
                 socket.roomId = roomId;
-                if (socket.user && socket.user.role === 'user') {
+                socket.role = role;
+
+                console.log(`${role} joined room: ${roomId}`);
+
+                // If user joins, notify doctor
+                if (role === 'user') {
                     socket.to(roomId).emit('user-ready');
                 }
 
+                // If doctor joins, notify user (if present)
+                if (role === 'doctor') {
+                    socket.to(roomId).emit('doctor-ready');
+                }
+
             } catch (error) {
+                console.error('Join room error:', error);
                 socket.emit('error', { message: 'Failed to join room' });
             }
         });
-        socket.on('doctor-end-call', async ({ roomId, appointmentId }) => {
+
+        socket.on('doctor-end-call', async ({ roomId, appointmentId, notes }) => {
             try {
-                // Optional: verify socket is in the room
-                if (!socket.roomId || socket.roomId !== roomId) {
-                    return;
-                }
+                console.log(`Doctor ending call for room: ${roomId}, appointment: ${appointmentId}`);
 
-                // 🔹 Check if prescription exists for this appointment
-                const prescriptionResult = await pool.query(
-                    `SELECT id FROM prescriptions WHERE appointment_id = $1 LIMIT 1`,
-                    [appointmentId]
-                );
+                // Emit to all users in the room that call is ending
+                io.to(roomId).emit('call-ended-by-doctor', {
+                    roomId,
+                    appointmentId,
+                    notes,
+                    timestamp: new Date().toISOString()
+                });
 
-                const hasPrescription = prescriptionResult.rows.length > 0;
+                // Also emit specific prescription event
+                io.to(roomId).emit('prescription-ready', {
+                    roomId,
+                    appointmentId,
+                    message: 'Prescription is now available for download'
+                });
 
-                // 🔹 Notify USER in the room
-                if (hasPrescription) {
-                    socket.to(roomId).emit('call-ended-with-prescription', {
-                        appointmentId
-                    });
-                } else {
-                    socket.to(roomId).emit('call-ended', {
-                        appointmentId
-                    });
-                }
+                // Confirm to doctor
+                socket.emit('call-ended-confirmed', {
+                    message: 'Call ended successfully'
+                });
 
-                // 🔹 Also notify doctor (optional safety)
-                socket.emit('call-ended-confirmed');
+                console.log(`Call ended events emitted for room: ${roomId}`);
 
             } catch (error) {
                 console.error('Doctor end call error:', error);
@@ -66,7 +64,7 @@ module.exports = function (io) {
         });
 
         socket.on('disconnect', () => {
-            // Handle disconnect
+            console.log(`Socket disconnected: ${socket.id}, role: ${socket.role}, room: ${socket.roomId}`);
         });
     });
 };
