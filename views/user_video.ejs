@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <link rel="icon" href="/favicon.ico">
     <link rel="icon" type="image/png" href="/favicon.png">
-    <!-- Add to your EJS head section -->
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
     <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <title>User Video Call | TeleHealth</title>
@@ -71,7 +70,6 @@
             min-height: 100vh;
             line-height: 1.6;
             overflow: hidden;
-            /* Prevent body scrolling */
         }
 
         /* ===============================
@@ -262,7 +260,6 @@
             height: calc(100vh - var(--header-height));
             width: 100vw;
             overflow: hidden;
-            /* Prevent scrolling */
             transition: var(--transition);
         }
 
@@ -275,9 +272,7 @@
             flex-direction: column;
             transition: var(--transition);
             padding: 4px;
-            /* Minimal gap */
             min-width: 0;
-            /* Prevent overflow */
         }
 
         /* Video Container */
@@ -289,12 +284,10 @@
             position: relative;
             border: 2px solid var(--border);
             margin-bottom: 4px;
-            /* Minimal gap */
             min-height: 0;
-            /* Allow shrinking */
         }
 
-        /* Remote Video - FIXED SIZE TO PREVENT SCROLLING */
+        /* Remote Video */
         #remoteVideo {
             width: 100%;
             height: 100%;
@@ -535,7 +528,7 @@
         }
 
         /* ===============================
-           MOBILE VIEW - INCREASED FONT SIZES
+           MOBILE VIEW
            =============================== */
         @media (max-width: 768px) {
             :root {
@@ -543,28 +536,22 @@
                 --control-bar-height: 75px;
             }
 
-            /* INCREASED MOBILE FONT SIZES */
             body {
                 font-size: 16px;
-                /* Increased base font size */
             }
 
-            /* Header adjustments */
             .navbar {
                 padding: 1rem 4%;
             }
 
             .logo {
                 font-size: 1.6rem;
-                /* Increased */
             }
 
             .logo i {
                 font-size: 1.4rem;
-                /* Increased */
             }
 
-            /* Hide desktop nav, show mobile */
             .nav-links {
                 display: none;
             }
@@ -576,7 +563,6 @@
             .mobile-menu-btn {
                 display: flex;
                 font-size: 1.6rem;
-                /* Increased */
                 width: 44px;
                 height: 44px;
             }
@@ -585,13 +571,11 @@
                 display: none;
             }
 
-            /* Main container for mobile */
             .main-container {
                 flex-direction: column;
                 height: calc(100vh - var(--header-height));
             }
 
-            /* Video area for mobile */
             .video-area {
                 height: calc(100vh - var(--header-height) - var(--control-bar-height));
                 padding: 3px;
@@ -606,23 +590,18 @@
                 height: calc(100vh - 160px);
             }
 
-            /* Remote video fix for mobile */
             #remoteVideo {
                 height: 100%;
                 object-fit: cover;
-
             }
 
-            /* Local video PiP larger for mobile */
             .local-video-pip {
                 width: 120px;
                 height: 90px;
                 bottom: 6px;
                 right: 6px;
-                transition: transform 0.3s ease, bottom 0.3s ease;
             }
 
-            /* Status overlay larger */
             .call-status-overlay {
                 top: 6px;
                 left: 6px;
@@ -631,11 +610,9 @@
 
             #callStatusText {
                 font-size: 0.9rem;
-                /* Increased */
                 font-weight: 600;
             }
 
-            /* Timer adjustments for mobile */
             #callTimer {
                 font-size: 0.8rem;
                 padding: 0.2rem 0.5rem;
@@ -647,7 +624,6 @@
                 gap: 5px;
             }
 
-            /* INCREASED CONTROL BAR SIZES */
             .controls-bar {
                 padding: 0 0.8rem;
                 height: var(--control-bar-height);
@@ -662,23 +638,18 @@
 
             .control-btn {
                 min-width: 70px;
-                /* Increased */
                 padding: 0.7rem 0.5rem;
             }
 
             .control-icon {
                 width: 56px;
-                /* Increased */
                 height: 56px;
-                /* Increased */
                 font-size: 1.4rem;
-                /* Increased */
                 border-width: 2px;
             }
 
             .control-label {
                 font-size: 0.85rem;
-                /* Increased */
                 font-weight: 600;
             }
         }
@@ -690,7 +661,6 @@
             display: none !important;
         }
 
-        /* Remove all link underlines */
         a,
         a:hover,
         a:focus,
@@ -754,20 +724,15 @@
         }
 
         /* =====================================================
-   FINAL MOBILE VIEWPORT + CONTROL BAR FIX (DROP-IN)
-   ===================================================== */
-
-        /* Prevent mobile viewport height bugs */
+           FINAL MOBILE VIEWPORT + CONTROL BAR FIX
+           ===================================================== */
         html,
         body {
             height: 100%;
             overscroll-behavior: none;
         }
 
-        /* ---------- MAIN LAYOUT FIX ---------- */
         @media (max-width: 768px) {
-
-            /* Let flex manage height instead of vh math */
             .main-container {
                 height: calc(100dvh - var(--header-height));
                 display: flex;
@@ -775,7 +740,6 @@
                 overflow: hidden;
             }
 
-            /* Video area becomes flexible container */
             .video-area {
                 flex: 1;
                 min-height: 0;
@@ -784,7 +748,6 @@
                 overflow: hidden;
             }
 
-            /* Video container takes remaining space only */
             .video-container {
                 flex: 1;
                 min-height: 0;
@@ -792,14 +755,12 @@
                 overflow: hidden;
             }
 
-            /* Remote video sizing – no zoom, no overflow */
             #remoteVideo {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
             }
 
-            /* ---------- CONTROL BAR FIX ---------- */
             .controls-bar {
                 flex-shrink: 0;
                 height: var(--control-bar-height);
@@ -812,7 +773,6 @@
                 background-color: var(--card-bg);
             }
 
-            /* Ensure controls never wrap outside */
             .controls-wrapper {
                 flex-wrap: nowrap;
                 overflow-x: auto;
@@ -820,7 +780,6 @@
             }
         }
 
-        /* ---------- EXTRA SAFETY FOR SMALL HEIGHT DEVICES ---------- */
         @media (max-height: 700px) and (max-width: 768px) {
             .controls-bar {
                 height: 70px;
@@ -828,7 +787,6 @@
             }
         }
 
-        /* ---------- iOS / Android SAFE AREA SUPPORT ---------- */
         @supports (padding: env(safe-area-inset-bottom)) {
             .controls-bar {
                 padding-bottom: env(safe-area-inset-bottom);
@@ -836,8 +794,8 @@
         }
 
         /* ===============================
-   CALL ENDED OVERLAY
-   =============================== */
+           CALL ENDED OVERLAY
+           =============================== */
         .call-ended-overlay {
             position: fixed;
             top: 0;
@@ -972,7 +930,7 @@
 
 <body>
 
-    <!-- Header - EXACT FROM DOC_HOME -->
+    <!-- Header -->
     <header>
         <nav class="navbar">
             <a href="/user_video_dashboard" class="logo">
@@ -1000,7 +958,7 @@
         </nav>
     </header>
 
-    <!-- Mobile Menu - EXACT FROM DOC_HOME -->
+    <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
         <button class="close-menu" id="closeMenu">
             <i class="fas fa-times"></i>
@@ -1048,7 +1006,7 @@
                 </div>
             </div>
 
-            <!-- Control Bar (Not fixed) -->
+            <!-- Control Bar -->
             <div class="controls-bar">
                 <div class="controls-wrapper">
                     <!-- Microphone Toggle -->
@@ -1112,6 +1070,8 @@
                CONSTANTS & STATE
                =============================== */
             const ROOM_ID = "<%= roomId %>";
+            const USER_ID = "<%= userId || '' %>";  // Fixed EJS variable
+            const USER_NAME = "<%= userName || 'User' %>";  // Fixed EJS variable
 
             let localStream = null;
             let peerConnection = null;
@@ -1147,7 +1107,6 @@
 
             const callEndedOverlay = document.getElementById('callEndedOverlay');
             const callEndedMessage = document.getElementById('callEndedMessage');
-            const overlayTitle = document.querySelector('.call-ended-content h2');
             const downloadBtn = document.getElementById('manualDownloadBtn');
 
             const toast = document.getElementById('toast');
@@ -1186,7 +1145,6 @@
                 if (savedTheme) {
                     html.setAttribute('data-theme', savedTheme);
                 } else {
-                    // Default to dark theme
                     html.setAttribute('data-theme', 'dark');
                     localStorage.setItem('theme', 'dark');
                 }
@@ -1197,7 +1155,6 @@
                 const currentTheme = html.getAttribute('data-theme');
                 const icon = currentTheme === 'dark' ? 'fa-sun' : 'fa-moon';
 
-                // Update both theme toggles
                 if (themeToggle) {
                     themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
                 }
@@ -1392,32 +1349,34 @@
                         }
                     }
                 };
-
-                // Handle connection state
-                peerConnection.onconnectionstatechange = () => {
-                    console.log('Connection state:', peerConnection.connectionState);
-                };
             }
 
             /* ===============================
-               SOCKET.IO EVENTS
+               SOCKET.IO EVENTS - Fixed version
                =============================== */
+            /* ===============================
+   SOCKET.IO EVENTS - Matched with videoSocket.js
+   =============================== */
             function initSocket() {
                 socket = io();
 
                 socket.on('connect', () => {
+                    console.log('Socket connected:', socket.id);
                     updateStatus('Connecting to doctor...', 'warning');
                     socket.emit('join-room', {
                         roomId: ROOM_ID,
-                        role: 'user',
-                        userData: {
-                            userId: '<%= userId %>',
-                            userName: '<%= userName %>'
-                        }
+                        role: 'user'
                     });
                 });
 
-                socket.on('doctor-joined', (data) => {
+                socket.on('joined-room', (data) => {
+                    console.log('Joined room:', data);
+                    updateStatus('Waiting for doctor...', 'warning');
+                });
+
+                // When doctor is ready (has joined the room)
+                socket.on('doctor-ready', () => {
+                    console.log('Doctor ready in room:', ROOM_ID);
                     doctorEverConnected = true;
                     updateStatus('Doctor connected, establishing call...', 'warning');
                     showToast('Doctor joined the call', 'success');
@@ -1446,35 +1405,43 @@
                     }
                 });
 
-                socket.on('call-ended-by-doctor', (data) => {
+                // When call is ended (by doctor or user)
+                socket.on('call-ended', (data) => {
+                    console.log('Call ended:', data);
                     callAlreadyEnded = true;
-                    callEndedMessage.textContent = data.reason || 'Doctor ended the consultation.';
-                    showCallEndedOverlay(true, 'Doctor ended the call');
+                    const message = data.reason || 'Consultation has ended.';
+                    callEndedMessage.textContent = message;
+                    showCallEndedOverlay(true, message);
+                    showToast('Call ended', 'warning');
                 });
 
                 socket.on('prescription-ready', (data) => {
+                    console.log('Prescription ready:', data);
                     callEndedMessage.textContent = 'Your prescription is ready for download.';
-                    downloadBtn.classList.remove('hidden');
+                    downloadBtn.style.display = 'inline-flex';
                     showToast('Prescription is ready for download', 'success');
                 });
 
+                // Doctor disconnected unexpectedly
                 socket.on('doctor-disconnected', (data) => {
+                    console.log('Doctor disconnected:', data);
                     if (!callAlreadyEnded) {
                         callEndedMessage.textContent = 'Doctor disconnected from the call.';
                         showCallEndedOverlay(false, 'Doctor disconnected');
                     }
                 });
 
-                socket.on('user-mute-state', (data) => {
-                    console.log('Doctor mute state:', data);
-                    // You can show doctor's mute status if needed
-                });
-
-                socket.on('user-camera-state', (data) => {
-                    // You can show doctor's camera status if needed
+                // User left (for doctor's side)
+                socket.on('user-left', (data) => {
+                    console.log('User left:', data);
+                    if (!callAlreadyEnded) {
+                        callEndedMessage.textContent = 'User left the call.';
+                        showCallEndedOverlay(false, 'User left the call');
+                    }
                 });
 
                 socket.on('disconnect', (reason) => {
+                    console.log('Socket disconnected:', reason);
                     if (!callAlreadyEnded) {
                         updateStatus('Disconnected from server', 'disconnected');
                         showToast('Connection lost. Reconnecting...', 'error');
@@ -1482,10 +1449,10 @@
                 });
 
                 socket.on('error', (error) => {
+                    console.error('Socket error:', error);
                     showToast('Connection error: ' + error.message, 'error');
                 });
             }
-
             /* ===============================
                PRESCRIPTION DOWNLOAD
                =============================== */
@@ -1524,29 +1491,24 @@
                CALL END HANDLING
                =============================== */
             function cleanupCall() {
-                // Clear intervals
                 clearInterval(timerInterval);
                 clearInterval(connectionCheckInterval);
                 clearInterval(reloadCheckInterval);
 
-                // Stop all media tracks
                 if (localStream) {
                     localStream.getTracks().forEach(track => {
                         track.stop();
                     });
                 }
 
-                // Close peer connection
                 if (peerConnection) {
                     peerConnection.close();
                     peerConnection = null;
                 }
 
-                // Clear video elements
                 localVideo.srcObject = null;
                 remoteVideo.srcObject = null;
 
-                // Disconnect socket
                 if (socket) {
                     socket.disconnect();
                     socket = null;
@@ -1560,16 +1522,12 @@
                 callEndedMessage.textContent = message;
                 callEndedOverlay.style.display = 'flex';
 
-                // Show or hide prescription download button
                 if (showPrescription) {
-                    downloadBtn.classList.remove('hidden');
                     downloadBtn.style.display = 'inline-flex';
                 } else {
-                    downloadBtn.classList.add('hidden');
                     downloadBtn.style.display = 'none';
                 }
 
-                // Redirect after delay
                 const redirectTime = showPrescription ? 8000 : 5000;
                 setTimeout(() => {
                     window.location.href = '/user_video_dashboard';
@@ -1607,7 +1565,6 @@
                 isAudioMuted = !isAudioMuted;
                 updateMicButton();
 
-                // Send mute state to doctor
                 if (socket && socket.connected) {
                     socket.emit('user-mute-state', {
                         roomId: ROOM_ID,
@@ -1626,7 +1583,6 @@
                 isVideoOff = !isVideoOff;
                 updateCamButton();
 
-                // Send camera state to doctor
                 if (socket && socket.connected) {
                     socket.emit('user-camera-state', {
                         roomId: ROOM_ID,
@@ -1660,7 +1616,6 @@
                         return;
                     }
 
-                    // Check socket connection
                     if (!socket || !socket.connected) {
                         consecutiveFailures++;
                         if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
@@ -1673,7 +1628,6 @@
                         consecutiveFailures = 0;
                     }
 
-                    // Check peer connection
                     if (peerConnection) {
                         const state = peerConnection.iceConnectionState;
                         if (state === 'disconnected' || state === 'failed') {
@@ -1690,23 +1644,20 @@
                         return;
                     }
 
-                    // If doctor already connected at least once → NEVER reload
                     if (doctorEverConnected) {
                         clearInterval(reloadCheckInterval);
                         return;
                     }
 
-                    // Socket must be connected
                     if (!socket || !socket.connected) return;
 
-                    // Reload ONLY if doctor never connected AND no peer connection
                     if (!doctorEverConnected && !peerConnection) {
                         console.warn('Doctor not connected, auto-reloading...');
                         isAutoReloading = true;
                         clearInterval(reloadCheckInterval);
                         window.location.reload();
                     }
-                }, 15000); // Wait 15 seconds before reload
+                }, 15000);
             }
 
             /* ===============================
@@ -1728,7 +1679,6 @@
                     e.preventDefault();
                     e.returnValue = 'Are you sure you want to leave? The call will end.';
 
-                    // Notify doctor that user is leaving
                     if (socket && socket.connected) {
                         socket.emit('user-leaving', { roomId: ROOM_ID });
                     }
@@ -1741,7 +1691,6 @@
                 }
             });
 
-            // Handle visibility change (tab switch)
             document.addEventListener('visibilitychange', () => {
                 if (document.hidden && !callAlreadyEnded) {
                     showToast('You switched tabs. Call is still active.', 'warning');
@@ -1758,17 +1707,17 @@
         (function () {
             const style = document.createElement("style");
             style.innerHTML = `
-                    #global-loader {
-                        position: fixed;
-                        inset: 0;
-                        background: #ffffff;
-                        z-index: 99999;
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-                    }
+                #global-loader {
+                    position: fixed;
+                    inset: 0;
+                    background: #ffffff;
+                    z-index: 99999;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+                }
 
                 #global-loader.hidden {
                     opacity: 0;
@@ -1826,13 +1775,6 @@
                 loader.classList.remove("hidden");
                 loader.style.display = "flex";
             });
-
-            if (navigator.connection && navigator.connection.effectiveType) {
-                if (navigator.connection.effectiveType.includes("2g")) {
-                    loader.querySelector("p").innerText =
-                        "Slow network detected… loading";
-                }
-            }
 
             setTimeout(() => {
                 if (document.body.contains(loader)) {

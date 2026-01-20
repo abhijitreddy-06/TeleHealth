@@ -1335,16 +1335,32 @@ html, body {
     /* ===============================
        SOCKET
        =============================== */
+    /* ===============================
+       SOCKET.IO EVENTS - Matched with videoSocket.js
+       =============================== */
     function initSocket() {
         socket = io();
 
         socket.on('connect', () => {
-            socket.emit('join-room', { roomId: ROOM_ID, role: 'doctor' });
+            console.log('Socket connected:', socket.id);
+            updateStatus('Connecting to patient...', 'warning');
+            socket.emit('join-room', {
+                roomId: ROOM_ID,
+                role: 'doctor'
+            });
+        });
+
+        socket.on('joined-room', (data) => {
+            console.log('Joined room:', data);
+            updateStatus('Waiting for patient...', 'warning');
         });
 
         socket.on('user-ready', async () => {
+            console.log('User ready in room:', ROOM_ID);
+            updateStatus('Patient connected, establishing call...', 'warning');
             await createPeerConnection();
             await createOffer();
+            showToast('Patient joined the call', 'success');
         });
 
         socket.on('signal', async data => {
@@ -1356,7 +1372,67 @@ html, body {
             }
         });
 
-        socket.on('call-ended', () => callEnded = true);
+        // When call is ended (by user or system)
+        socket.on('call-ended', (data) => {
+            console.log('Call ended:', data);
+            callEnded = true;
+            updateStatus('Call ended', 'warning');
+            showToast('Call has ended', 'warning');
+
+            // Clean up and redirect
+            setTimeout(() => {
+                window.location.href = "/doc_video_dashboard";
+            }, 3000);
+        });
+
+        socket.on('call-ended-confirmed', (data) => {
+            console.log('Call end confirmed:', data);
+            callEnded = true;
+            showToast('Call ended successfully', 'success');
+        });
+
+        // User disconnected unexpectedly
+        socket.on('user-disconnected', (data) => {
+            console.log('User disconnected:', data);
+            if (!callEnded) {
+                updateStatus('Patient disconnected', 'warning');
+                showToast('Patient disconnected from the call', 'warning');
+
+                // Auto-end call after 30 seconds if user doesn't return
+                setTimeout(() => {
+                    if (!callEnded) {
+                        endCallHandler();
+                    }
+                }, 30000);
+            }
+        });
+
+        // User left gracefully
+        socket.on('user-left', (data) => {
+            console.log('User left:', data);
+            if (!callEnded) {
+                updateStatus('Patient left the call', 'warning');
+                showToast('Patient left the call', 'warning');
+                endCallHandler();
+            }
+        });
+
+        // User mute state updates
+        socket.on('user-mute-state', (data) => {
+            console.log('User mute state:', data);
+            // Update UI to show user's mute status if needed
+        });
+
+        // User camera state updates
+        socket.on('user-camera-state', (data) => {
+            console.log('User camera state:', data);
+            // Update UI to show user's camera status if needed
+        });
+
+        socket.on('error', (error) => {
+            console.error('Socket error:', error);
+            showToast('Connection error: ' + error.message, 'error');
+        });
     }
 
     /* ===============================
@@ -1364,14 +1440,19 @@ html, body {
        =============================== */
     function checkConnection() {
         if (callEnded) return true;
-        if (!socket || !socket.connected) return false;
-        if (!peerConnection) return false;
 
-        const state = peerConnection.iceConnectionState;
-        if (['disconnected', 'failed', 'closed'].includes(state)) return false;
+        // Check socket connection
+        if (!socket || !socket.connected) {
+            return false;
+        }
 
-        const elapsed = Date.now() - (callStartTime || Date.now());
-        if (!remoteVideo.srcObject && elapsed > 8000) return false;
+        // Check peer connection
+        if (peerConnection) {
+            const state = peerConnection.iceConnectionState;
+            if (['disconnected', 'failed', 'closed'].includes(state)) {
+                return false;
+            }
+        }
 
         return true;
     }
@@ -1396,16 +1477,34 @@ html, body {
     }
 
     function startConnectionMonitor() {
-        clearInterval(connectionCheckInterval);
         connectionCheckInterval = setInterval(() => {
             if (!checkConnection()) {
                 consecutiveFailures++;
                 if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
                     clearInterval(connectionCheckInterval);
-                    reloadPage();
+                    updateStatus('Connection lost', 'disconnected');
+                    showToast('Connection lost. Attempting to reconnect...', 'error');
+
+                    // Try to reconnect socket
+                    if (socket) {
+                        socket.connect();
+                    }
+
+                    // Reload page after 5 seconds if still disconnected
+                    setTimeout(() => {
+                        if (!checkConnection() && !callEnded) {
+                            reloadPage();
+                        }
+                    }, 5000);
                 }
             } else {
                 consecutiveFailures = 0;
+                if (peerConnection) {
+                    const state = peerConnection.iceConnectionState;
+                    if (state === 'checking' || state === 'connected') {
+                        updateStatus('Call connected', 'connected');
+                    }
+                }
             }
         }, CHECK_INTERVAL);
     }

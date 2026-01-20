@@ -2,6 +2,8 @@ const { pool } = require('../config/database');
 
 module.exports = function (io) {
     io.on('connection', (socket) => {
+        console.log('New socket connection:', socket.id);
+
         socket.on('join-room', async ({ roomId, role }) => {
             try {
                 // Join the room
@@ -13,13 +15,19 @@ module.exports = function (io) {
 
                 // If user joins, notify doctor
                 if (role === 'user') {
-                    socket.to(roomId).emit('user-ready');
+                    socket.to(roomId).emit('doctor-ready'); // User waits for 'doctor-ready'
                 }
 
                 // If doctor joins, notify user (if present)
                 if (role === 'doctor') {
-                    socket.to(roomId).emit('doctor-ready');
+                    socket.to(roomId).emit('user-ready'); // Doctor waits for 'user-ready'
                 }
+
+                // Confirm to the joining client
+                socket.emit('joined-room', {
+                    roomId,
+                    message: `${role} joined room successfully`
+                });
 
             } catch (error) {
                 console.error('Join room error:', error);
@@ -32,10 +40,10 @@ module.exports = function (io) {
                 console.log(`Doctor ending call for room: ${roomId}, appointment: ${appointmentId}`);
 
                 // Emit to all users in the room that call is ending
-                io.to(roomId).emit('call-ended-by-doctor', {
+                io.to(roomId).emit('call-ended', {
                     roomId,
                     appointmentId,
-                    notes,
+                    reason: notes || 'Doctor ended the consultation',
                     timestamp: new Date().toISOString()
                 });
 
@@ -59,12 +67,59 @@ module.exports = function (io) {
             }
         });
 
+        socket.on('user-ended-call', ({ roomId, reason }) => {
+            console.log(`User ended call for room: ${roomId}`);
+            io.to(roomId).emit('call-ended', {
+                roomId,
+                reason: reason || 'User ended the call',
+                timestamp: new Date().toISOString()
+            });
+        });
+
+        // WebRTC signaling
         socket.on('signal', ({ roomId, ...payload }) => {
             socket.to(roomId).emit('signal', payload);
         });
 
+        // Mute/Video state updates
+        socket.on('user-mute-state', ({ roomId, isMuted }) => {
+            socket.to(roomId).emit('user-mute-state', { isMuted });
+        });
+
+        socket.on('user-camera-state', ({ roomId, isVideoOff }) => {
+            socket.to(roomId).emit('user-camera-state', { isVideoOff });
+        });
+
+        socket.on('user-leaving', ({ roomId }) => {
+            console.log(`User leaving room: ${roomId}`);
+            socket.to(roomId).emit('user-left', {
+                roomId,
+                timestamp: new Date().toISOString()
+            });
+        });
+
         socket.on('disconnect', () => {
             console.log(`Socket disconnected: ${socket.id}, role: ${socket.role}, room: ${socket.roomId}`);
+
+            // Notify the other party if someone disconnects
+            if (socket.roomId) {
+                if (socket.role === 'user') {
+                    socket.to(socket.roomId).emit('user-disconnected', {
+                        roomId: socket.roomId,
+                        timestamp: new Date().toISOString()
+                    });
+                } else if (socket.role === 'doctor') {
+                    socket.to(socket.roomId).emit('doctor-disconnected', {
+                        roomId: socket.roomId,
+                        timestamp: new Date().toISOString()
+                    });
+                }
+            }
+        });
+
+        // Error handling
+        socket.on('error', (error) => {
+            console.error('Socket error:', error);
         });
     });
 };
