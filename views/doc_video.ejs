@@ -1295,15 +1295,90 @@ html, body {
         callStatusText.textContent = `CALL STATUS: ${msg}`;
     }
 
+    function showToast(message, type = 'info') {
+        // Create toast element if it doesn't exist
+        let toast = document.getElementById('global-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'global-toast';
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <i class="fas fa-info-circle"></i>
+                <span id="global-toast-message"></span>
+            `;
+            document.body.appendChild(toast);
+        }
+
+        const toastMessage = document.getElementById('global-toast-message');
+        toastMessage.textContent = message;
+
+        // Remove existing classes
+        toast.className = 'toast';
+
+        // Add type class
+        if (type === 'error') {
+            toast.classList.add('error');
+            toast.querySelector('i').className = 'fas fa-exclamation-circle';
+        } else if (type === 'warning') {
+            toast.classList.add('warning');
+            toast.querySelector('i').className = 'fas fa-exclamation-triangle';
+        } else if (type === 'success') {
+            toast.classList.add('success');
+            toast.querySelector('i').className = 'fas fa-check-circle';
+        } else {
+            toast.querySelector('i').className = 'fas fa-info-circle';
+        }
+
+        // Show toast
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('show'), 10);
+
+        // Hide after 3 seconds
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.classList.add('hidden'), 300);
+        }, 3000);
+    }
+
+    /* ===============================
+       USER CONNECTION TIMER FUNCTIONS
+       =============================== */
+    function startUserConnectionTimer() {
+        clearUserConnectionTimer();
+        console.log('Starting 10-second timer for user connection...');
+        userConnectionTimer = setTimeout(() => {
+            if (!userHasConnected && !callEnded) {
+                console.log('User not connected after 10 seconds, auto-reloading...');
+                updateStatus('User not connected - reloading...', 'warning');
+                showToast('User not connected. Reloading page...', 'warning');
+                reloadPage();
+            }
+        }, USER_CONNECTION_TIMEOUT);
+    }
+
+    function clearUserConnectionTimer() {
+        if (userConnectionTimer) {
+            clearTimeout(userConnectionTimer);
+            userConnectionTimer = null;
+        }
+    }
+
     /* ===============================
        MEDIA
        =============================== */
     async function getLocalStream() {
-        localStream = await navigator.mediaDevices.getUserMedia({
-            video: { width: 1280, height: 720 },
-            audio: true
-        });
-        localVideo.srcObject = localStream;
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 1280, height: 720 },
+                audio: true
+            });
+            localVideo.srcObject = localStream;
+            console.log('Local stream obtained successfully');
+        } catch (error) {
+            console.error('Error getting local stream:', error);
+            showToast('Failed to access camera/microphone', 'error');
+            updateStatus('Media access failed', 'disconnected');
+        }
     }
 
     /* ===============================
@@ -1319,6 +1394,7 @@ html, body {
         peerConnection.ontrack = e => {
             remoteVideo.srcObject = e.streams[0];
             remoteStream = e.streams[0];
+            console.log('Remote video stream received');
         };
 
         peerConnection.onicecandidate = e => {
@@ -1335,48 +1411,10 @@ html, body {
     }
 
     /* ===============================
-       SOCKET
+       SOCKET.IO EVENTS
        =============================== */
-       function startUserConnectionTimer() {
-            clearUserConnectionTimer();
-            userConnectionTimer = setTimeout(() => {
-                if (!userHasConnected && !callEnded) {
-                    console.log('User not connected after 10 seconds, auto-reloading...');
-                    reloadPage();
-                }
-            }, USER_CONNECTION_TIMEOUT);
-        }
-
-        function clearUserConnectionTimer() {
-            if (userConnectionTimer) {
-                clearTimeout(userConnectionTimer);
-                userConnectionTimer = null;
-            }
-        }
-    /* ===============================
-       SOCKET.IO EVENTS - Matched with videoSocket.js
-       =============================== */
-  async  function initSocket() {
-    // Check if this is a reload
-      const wasReloading = localStorage.getItem('doctor_reloading') === 'true';
-      const reloadRoomId = localStorage.getItem('reload_room_id');
-      const savedNotes = localStorage.getItem('reload_notes');
-
-      if (wasReloading && reloadRoomId === ROOM_ID && savedNotes) {
-          // Restore notes from before reload
-          notesText.value = savedNotes;
-          charCount.textContent = savedNotes.length;
-      }
-
-      // Clear reload flags
-      localStorage.removeItem('doctor_reloading');
-      localStorage.removeItem('reload_room_id');
-      localStorage.removeItem('reload_notes');
+    function initSocket() {
         socket = io();
-        await getLocalStream();
-        initSocket();
-        startConnectionMonitor();
-        startUserConnectionTimer();
 
         socket.on('connect', () => {
             console.log('Socket connected:', socket.id);
@@ -1438,7 +1476,7 @@ html, body {
                 updateStatus('Patient disconnected', 'warning');
                 showToast('Patient disconnected from the call', 'warning');
 
-                // Restart the timer to wait for reconnection
+                // Start timer again to wait for reconnection
                 startUserConnectionTimer();
             }
         });
@@ -1473,7 +1511,7 @@ html, body {
     }
 
     /* ===============================
-       CONNECTION MONITOR (SINGLE VERSION)
+       CONNECTION MONITOR
        =============================== */
     function checkConnection() {
         if (callEnded) return true;
@@ -1483,8 +1521,8 @@ html, body {
             return false;
         }
 
-        // Check peer connection
-        if (peerConnection) {
+        // Check peer connection if user has connected
+        if (userHasConnected && peerConnection) {
             const state = peerConnection.iceConnectionState;
             if (['disconnected', 'failed', 'closed'].includes(state)) {
                 return false;
@@ -1523,7 +1561,8 @@ html, body {
 
     function startConnectionMonitor() {
         connectionCheckInterval = setInterval(() => {
-            if (!checkConnection()) {
+            // Only monitor connection if user has connected
+            if (userHasConnected && !checkConnection()) {
                 consecutiveFailures++;
                 if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
                     clearInterval(connectionCheckInterval);
@@ -1555,19 +1594,23 @@ html, body {
     }
 
     /* ===============================
-       END CALL (UPDATED VERSION)
+       END CALL HANDLER
        =============================== */
     async function endCallHandler() {
-            if (callEnded) return;
+        if (callEnded) return;
         callEnded = true;
 
         // Clear any reload flags
         localStorage.removeItem('doctor_reloading');
         localStorage.removeItem('reload_room_id');
         localStorage.removeItem('reload_notes');
-        if (callEnded) return;
-        callEnded = true;
+
+        // Clear timers
         clearUserConnectionTimer();
+        if (connectionCheckInterval) {
+            clearInterval(connectionCheckInterval);
+        }
+
         try {
             const notes = notesText.value.trim();
 
@@ -1634,12 +1677,34 @@ html, body {
     endCall.addEventListener('click', endCallHandler);
 
     /* ===============================
-       INIT
+       INITIALIZATION
        =============================== */
     (async function init() {
-        await getLocalStream();
-        initSocket();
-        startConnectionMonitor();
+        // Check if this is a reload
+        const wasReloading = localStorage.getItem('doctor_reloading') === 'true';
+        const reloadRoomId = localStorage.getItem('reload_room_id');
+        const savedNotes = localStorage.getItem('reload_notes');
+
+        if (wasReloading && reloadRoomId === ROOM_ID && savedNotes) {
+            // Restore notes from before reload
+            notesText.value = savedNotes;
+            charCount.textContent = savedNotes.length;
+        }
+
+        // Clear reload flags
+        localStorage.removeItem('doctor_reloading');
+        localStorage.removeItem('reload_room_id');
+        localStorage.removeItem('reload_notes');
+
+        try {
+            await getLocalStream();
+            initSocket();
+            startUserConnectionTimer(); // Start waiting for user connection
+            console.log('Initialization complete. Waiting for user connection...');
+        } catch (error) {
+            console.error('Initialization error:', error);
+            showToast('Failed to initialize video call', 'error');
+        }
     })();
 
     window.addEventListener('beforeunload', e => {
@@ -1649,6 +1714,54 @@ html, body {
             e.returnValue = '';
         }
     });
+
+    // Add CSS for toast
+    const toastStyle = document.createElement('style');
+    toastStyle.textContent = `
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s, transform 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .toast.hidden {
+            display: none;
+        }
+        
+        .toast.success {
+            background: var(--secondary);
+        }
+        
+        .toast.warning {
+            background: var(--warning);
+        }
+        
+        .toast.error {
+            background: var(--error);
+        }
+        
+        .toast i {
+            font-size: 18px;
+        }
+    `;
+    document.head.appendChild(toastStyle);
 </script>
 
 
