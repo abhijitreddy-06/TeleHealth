@@ -1532,66 +1532,66 @@ html, body {
         return true;
     }
 
-    function reloadPage() {
-        if (callEnded) return;
-        isAutoReloading = true;
+    // function reloadPage() {
+    //     if (callEnded) return;
+    //     isAutoReloading = true;
 
-        // Set a flag in localStorage to indicate this is a reload, not call end
-        localStorage.setItem('doctor_reloading', 'true');
-        localStorage.setItem('reload_room_id', ROOM_ID);
-        localStorage.setItem('reload_notes', notesText.value.trim());
+    //     // Set a flag in localStorage to indicate this is a reload, not call end
+    //     localStorage.setItem('doctor_reloading', 'true');
+    //     localStorage.setItem('reload_room_id', ROOM_ID);
+    //     localStorage.setItem('reload_notes', notesText.value.trim());
 
-        // Don't end the call, just disconnect and reload
-        if (peerConnection) {
-            peerConnection.close();
-            peerConnection = null;
-        }
+    //     // Don't end the call, just disconnect and reload
+    //     if (peerConnection) {
+    //         peerConnection.close();
+    //         peerConnection = null;
+    //     }
 
-        if (localStream) {
-            localStream.getTracks().forEach(t => t.stop());
-            localStream = null;
-        }
+    //     if (localStream) {
+    //         localStream.getTracks().forEach(t => t.stop());
+    //         localStream = null;
+    //     }
 
-        if (socket) {
-            socket.disconnect();
-        }
+    //     if (socket) {
+    //         socket.disconnect();
+    //     }
 
-        setTimeout(() => window.location.reload(), 1000);
-    }
+    //     setTimeout(() => window.location.reload(), 1000);
+    // }
 
-    function startConnectionMonitor() {
-        connectionCheckInterval = setInterval(() => {
-            // Only monitor connection if user has connected
-            if (userHasConnected && !checkConnection()) {
-                consecutiveFailures++;
-                if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-                    clearInterval(connectionCheckInterval);
-                    updateStatus('Connection lost', 'disconnected');
-                    showToast('Connection lost. Attempting to reconnect...', 'error');
+    // function startConnectionMonitor() {
+    //     connectionCheckInterval = setInterval(() => {
+    //         // Only monitor connection if user has connected
+    //         if (userHasConnected && !checkConnection()) {
+    //             consecutiveFailures++;
+    //             if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+    //                 clearInterval(connectionCheckInterval);
+    //                 updateStatus('Connection lost', 'disconnected');
+    //                 showToast('Connection lost. Attempting to reconnect...', 'error');
 
-                    // Try to reconnect socket
-                    if (socket) {
-                        socket.connect();
-                    }
+    //                 // Try to reconnect socket
+    //                 if (socket) {
+    //                     socket.connect();
+    //                 }
 
-                    // Reload page after 5 seconds if still disconnected
-                    setTimeout(() => {
-                        if (!checkConnection() && !callEnded) {
-                            reloadPage();
-                        }
-                    }, 5000);
-                }
-            } else {
-                consecutiveFailures = 0;
-                if (peerConnection) {
-                    const state = peerConnection.iceConnectionState;
-                    if (state === 'checking' || state === 'connected') {
-                        updateStatus('Call connected', 'connected');
-                    }
-                }
-            }
-        }, CHECK_INTERVAL);
-    }
+    //                 // Reload page after 5 seconds if still disconnected
+    //                 setTimeout(() => {
+    //                     if (!checkConnection() && !callEnded) {
+    //                         reloadPage();
+    //                     }
+    //                 }, 5000);
+    //             }
+    //         } else {
+    //             consecutiveFailures = 0;
+    //             if (peerConnection) {
+    //                 const state = peerConnection.iceConnectionState;
+    //                 if (state === 'checking' || state === 'connected') {
+    //                     updateStatus('Call connected', 'connected');
+    //                 }
+    //             }
+    //         }
+    //     }, CHECK_INTERVAL);
+    // }
 
     /* ===============================
        END CALL HANDLER
