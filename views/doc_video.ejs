@@ -1212,7 +1212,9 @@ html, body {
     let consecutiveFailures = 0;
     const MAX_CONSECUTIVE_FAILURES = 3;
     const CHECK_INTERVAL = 2000;
-
+    let userConnectionTimer = null;
+    const USER_CONNECTION_TIMEOUT = 10000; // 10 seconds
+    let userHasConnected = false;
     let isAutoReloading = false;
     let callEnded = false;
 
@@ -1335,11 +1337,46 @@ html, body {
     /* ===============================
        SOCKET
        =============================== */
+       function startUserConnectionTimer() {
+            clearUserConnectionTimer();
+            userConnectionTimer = setTimeout(() => {
+                if (!userHasConnected && !callEnded) {
+                    console.log('User not connected after 10 seconds, auto-reloading...');
+                    reloadPage();
+                }
+            }, USER_CONNECTION_TIMEOUT);
+        }
+
+        function clearUserConnectionTimer() {
+            if (userConnectionTimer) {
+                clearTimeout(userConnectionTimer);
+                userConnectionTimer = null;
+            }
+        }
     /* ===============================
        SOCKET.IO EVENTS - Matched with videoSocket.js
        =============================== */
-    function initSocket() {
+  async  function initSocket() {
+    // Check if this is a reload
+      const wasReloading = localStorage.getItem('doctor_reloading') === 'true';
+      const reloadRoomId = localStorage.getItem('reload_room_id');
+      const savedNotes = localStorage.getItem('reload_notes');
+
+      if (wasReloading && reloadRoomId === ROOM_ID && savedNotes) {
+          // Restore notes from before reload
+          notesText.value = savedNotes;
+          charCount.textContent = savedNotes.length;
+      }
+
+      // Clear reload flags
+      localStorage.removeItem('doctor_reloading');
+      localStorage.removeItem('reload_room_id');
+      localStorage.removeItem('reload_notes');
         socket = io();
+        await getLocalStream();
+        initSocket();
+        startConnectionMonitor();
+        startUserConnectionTimer();
 
         socket.on('connect', () => {
             console.log('Socket connected:', socket.id);
@@ -1357,6 +1394,8 @@ html, body {
 
         socket.on('user-ready', async () => {
             console.log('User ready in room:', ROOM_ID);
+            userHasConnected = true;
+            clearUserConnectionTimer();
             updateStatus('Patient connected, establishing call...', 'warning');
             await createPeerConnection();
             await createOffer();
@@ -1395,15 +1434,12 @@ html, body {
         socket.on('user-disconnected', (data) => {
             console.log('User disconnected:', data);
             if (!callEnded) {
+                userHasConnected = false;
                 updateStatus('Patient disconnected', 'warning');
                 showToast('Patient disconnected from the call', 'warning');
 
-                // Auto-end call after 30 seconds if user doesn't return
-                setTimeout(() => {
-                    if (!callEnded) {
-                        endCallHandler();
-                    }
-                }, 30000);
+                // Restart the timer to wait for reconnection
+                startUserConnectionTimer();
             }
         });
 
@@ -1411,6 +1447,7 @@ html, body {
         socket.on('user-left', (data) => {
             console.log('User left:', data);
             if (!callEnded) {
+                userHasConnected = false;
                 updateStatus('Patient left the call', 'warning');
                 showToast('Patient left the call', 'warning');
                 endCallHandler();
@@ -1461,17 +1498,25 @@ html, body {
         if (callEnded) return;
         isAutoReloading = true;
 
-        if (notesText.value.trim()) {
-            fetch("/api/notes/save", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ roomId: ROOM_ID, notes: notesText.value })
-            }).catch(() => { });
+        // Set a flag in localStorage to indicate this is a reload, not call end
+        localStorage.setItem('doctor_reloading', 'true');
+        localStorage.setItem('reload_room_id', ROOM_ID);
+        localStorage.setItem('reload_notes', notesText.value.trim());
+
+        // Don't end the call, just disconnect and reload
+        if (peerConnection) {
+            peerConnection.close();
+            peerConnection = null;
         }
 
-        peerConnection?.close();
-        localStream?.getTracks().forEach(t => t.stop());
-        socket?.disconnect();
+        if (localStream) {
+            localStream.getTracks().forEach(t => t.stop());
+            localStream = null;
+        }
+
+        if (socket) {
+            socket.disconnect();
+        }
 
         setTimeout(() => window.location.reload(), 1000);
     }
@@ -1513,9 +1558,16 @@ html, body {
        END CALL (UPDATED VERSION)
        =============================== */
     async function endCallHandler() {
-        if (callEnded) return;
+            if (callEnded) return;
         callEnded = true;
 
+        // Clear any reload flags
+        localStorage.removeItem('doctor_reloading');
+        localStorage.removeItem('reload_room_id');
+        localStorage.removeItem('reload_notes');
+        if (callEnded) return;
+        callEnded = true;
+        clearUserConnectionTimer();
         try {
             const notes = notesText.value.trim();
 

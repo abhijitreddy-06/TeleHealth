@@ -90,16 +90,26 @@ module.exports = function (io) {
             socket.to(roomId).emit('doctor-camera-state', { isVideoOff });
         });
 
-        socket.on('disconnect', () => {
-            console.log(`Socket disconnected: ${socket.id}, role: ${socket.role}, room: ${socket.roomId}`);
+        socket.on('disconnect', (reason) => {
+            console.log(`Socket disconnected: ${socket.id}, role: ${socket.role}, room: ${socket.roomId}, reason: ${reason}`);
 
-            // Notify the other side about disconnection
+            // Only emit disconnection events for intentional disconnects
+            // (not for page reloads)
             if (socket.roomId) {
-                if (socket.role === 'user') {
-                    socket.to(socket.roomId).emit('user-disconnected');
-                } else if (socket.role === 'doctor') {
-                    socket.to(socket.roomId).emit('doctor-disconnected');
-                }
+                // Delay the disconnection notification to allow for reconnection
+                setTimeout(() => {
+                    // Check if socket has reconnected to the same room
+                    const hasReconnected = Array.from(io.sockets.adapter.rooms.get(socket.roomId) || []).some(sid => sid !== socket.id);
+
+                    if (!hasReconnected) {
+                        // No reconnection within timeout, emit disconnection
+                        if (socket.role === 'user') {
+                            socket.to(socket.roomId).emit('user-disconnected');
+                        } else if (socket.role === 'doctor') {
+                            socket.to(socket.roomId).emit('doctor-disconnected');
+                        }
+                    }
+                }, 2000); // 2 second delay to allow for reconnection
             }
         });
 

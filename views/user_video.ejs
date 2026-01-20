@@ -1080,8 +1080,11 @@
 
             let connectionCheckInterval = null;
             let doctorTimeoutId = null;
-            const DOCTOR_CONNECTION_TIMEOUT = 30000; // 30 seconds
-
+            const DOCTOR_CONNECTION_TIMEOUT = 5000; // 5 seconds
+            let doctorReconnectTimer = null;
+            const DOCTOR_RECONNECT_TIMEOUT = 15000; // 15 seconds
+            let doctorHasReconnected = false;
+            let isDoctorReloading = false;
             /* ===============================
                DOM ELEMENTS
                =============================== */
@@ -1351,6 +1354,18 @@
 
                 socket.on('doctor-ready', () => {
                     console.log('Doctor ready in room:', ROOM_ID);
+
+                    // Doctor has reconnected
+                    if (isDoctorReloading) {
+                        doctorHasReconnected = true;
+                        clearTimeout(doctorReconnectTimer);
+                        isDoctorReloading = false;
+                        updateStatus('Doctor reconnected', 'connected');
+                        showToast('Doctor reconnected to the call', 'success');
+                        return;
+                    }
+
+                    // Initial connection
                     doctorEverConnected = true;
                     clearDoctorTimeout();
                     updateStatus('Doctor connected, establishing call...', 'warning');
@@ -1385,6 +1400,7 @@
                     console.log('Call ended by doctor:', data);
                     callAlreadyEnded = true;
                     clearDoctorTimeout();
+                    clearTimeout(doctorReconnectTimer);
                     const message = data.reason || 'Doctor ended the consultation.';
                     callEndedMessage.textContent = message;
                     showCallEndedOverlay(true, message);
@@ -1401,8 +1417,20 @@
                 socket.on('doctor-disconnected', () => {
                     console.log('Doctor disconnected');
                     if (!callAlreadyEnded) {
-                        callEndedMessage.textContent = 'Doctor disconnected from the call.';
-                        showCallEndedOverlay(false, 'Doctor disconnected');
+                        updateStatus('Doctor disconnected. Waiting for reconnection...', 'warning');
+                        showToast('Doctor disconnected. Please wait...', 'warning');
+
+                        // Set a flag indicating doctor might be reloading
+                        isDoctorReloading = true;
+
+                        // Start a timer to wait for doctor to reconnect
+                        clearTimeout(doctorReconnectTimer);
+                        doctorReconnectTimer = setTimeout(() => {
+                            if (!callAlreadyEnded && !doctorHasReconnected) {
+                                callEndedMessage.textContent = 'Doctor did not reconnect. Call ended.';
+                                showCallEndedOverlay(false, 'Doctor did not reconnect');
+                            }
+                        }, DOCTOR_RECONNECT_TIMEOUT);
                     }
                 });
 
@@ -1496,7 +1524,13 @@
 
             function showCallEndedOverlay(showPrescription = false, message = 'Your video consultation has ended.') {
                 callAlreadyEnded = true;
-                cleanupCall();
+                clearDoctorTimeout();
+                clearTimeout(doctorReconnectTimer); // Clear reconnection timer
+
+                // Only cleanup if not a doctor reload scenario
+                if (!isDoctorReloading || showPrescription) {
+                    cleanupCall();
+                }
 
                 callEndedMessage.textContent = message;
                 callEndedOverlay.style.display = 'flex';
@@ -1507,7 +1541,7 @@
                     downloadBtn.style.display = 'none';
                 }
 
-                const redirectTime = showPrescription ? 8000 : 5000;
+                const redirectTime = showPrescription ? 15000 : 8000;
                 setTimeout(() => {
                     window.location.href = '/user_video_dashboard';
                 }, redirectTime);
