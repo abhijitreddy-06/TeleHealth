@@ -132,11 +132,6 @@ app.use('/api/ai/', apiLimiter);
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
-app.use((req, res, next) => {
-    console.log(`📡 [${req.method}] ${req.url} - IP: ${req.ip}, X-Forwarded-For: ${req.headers['x-forwarded-for']}`);
-    next();
-});
-
 // ============================================
 // STATIC FILES (MUST COME BEFORE ROUTES!)
 // ============================================
