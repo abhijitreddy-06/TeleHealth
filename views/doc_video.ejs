@@ -1681,15 +1681,15 @@ html, body {
        =============================== */
     (async function init() {
         // Check if this is a reload
-        const wasReloading = localStorage.getItem('doctor_reloading') === 'true';
-        const reloadRoomId = localStorage.getItem('reload_room_id');
+    //    const wasReloading = localStorage.getItem('doctor_reloading') === 'true';
+     //   const reloadRoomId = localStorage.getItem('reload_room_id');
         const savedNotes = localStorage.getItem('reload_notes');
 
-        if (wasReloading && reloadRoomId === ROOM_ID && savedNotes) {
-            // Restore notes from before reload
-            notesText.value = savedNotes;
-            charCount.textContent = savedNotes.length;
-        }
+        // if (wasReloading && reloadRoomId === ROOM_ID && savedNotes) {
+        //     // Restore notes from before reload
+        //     notesText.value = savedNotes;
+        //     charCount.textContent = savedNotes.length;
+        // }
 
         // Clear reload flags
         localStorage.removeItem('doctor_reloading');

@@ -1452,23 +1452,23 @@
         /* ===============================
            AUTO RELOAD WHEN DOCTOR NOT CONNECTED
            =============================== */
-        function startDoctorTimeout() {
-            clearDoctorTimeout();
-            doctorTimeoutId = setTimeout(() => {
-                if (!doctorEverConnected && !callAlreadyEnded) {
-                    console.log('Doctor not connected after timeout, reloading...');
-                    isAutoReloading = true;
-                    window.location.reload();
-                }
-            }, DOCTOR_CONNECTION_TIMEOUT);
-        }
+        // function startDoctorTimeout() {
+        //     clearDoctorTimeout();
+        //     doctorTimeoutId = setTimeout(() => {
+        //         if (!doctorEverConnected && !callAlreadyEnded) {
+        //             console.log('Doctor not connected after timeout, reloading...');
+        //             isAutoReloading = true;
+        //             window.location.reload();
+        //         }
+        //     }, DOCTOR_CONNECTION_TIMEOUT);
+        // }
 
-        function clearDoctorTimeout() {
-            if (doctorTimeoutId) {
-                clearTimeout(doctorTimeoutId);
-                doctorTimeoutId = null;
-            }
-        }
+        // function clearDoctorTimeout() {
+        //     if (doctorTimeoutId) {
+        //         clearTimeout(doctorTimeoutId);
+        //         doctorTimeoutId = null;
+        //     }
+        // }
 
         /* ===============================
            PRESCRIPTION DOWNLOAD
@@ -1620,9 +1620,9 @@
            WINDOW EVENT LISTENERS - Prevent browser reload prompt
            =============================== */
         window.addEventListener('beforeunload', (e) => {
-            if (isAutoReloading || callAlreadyEnded) {
-                return; // Allow auto-reload without prompt
-            }
+          //  if (isAutoReloading || callAlreadyEnded) {
+           //     return; // Allow auto-reload without prompt
+          //  }
             if (socket?.connected || peerConnection) {
                 e.preventDefault();
                 e.returnValue = 'Are you sure you want to leave? The call will end.';
