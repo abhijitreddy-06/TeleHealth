@@ -930,7 +930,7 @@
 
 <body>
 
-    <!-- Header -->
+    <!-- Header - EXACT FROM DOC_HOME -->
     <header>
         <nav class="navbar">
             <a href="/user_video_dashboard" class="logo">
@@ -958,7 +958,7 @@
         </nav>
     </header>
 
-    <!-- Mobile Menu -->
+    <!-- Mobile Menu - EXACT FROM DOC_HOME -->
     <div class="mobile-menu" id="mobileMenu">
         <button class="close-menu" id="closeMenu">
             <i class="fas fa-times"></i>
@@ -1006,7 +1006,7 @@
                 </div>
             </div>
 
-            <!-- Control Bar -->
+            <!-- Control Bar (Not fixed) -->
             <div class="controls-bar">
                 <div class="controls-wrapper">
                     <!-- Microphone Toggle -->
@@ -1024,14 +1024,7 @@
                         </div>
                         <span class="control-label">Camera</span>
                     </button>
-
-                    <!-- End Call Button -->
-                    <button class="control-btn danger" id="endCallBtn">
-                        <div class="control-icon">
-                            <i class="fas fa-phone-slash"></i>
-                        </div>
-                        <span class="control-label">End Call</span>
-                    </button>
+                    <!-- NO END CALL BUTTON FOR USER -->
                 </div>
             </div>
         </div>
@@ -1070,8 +1063,8 @@
                CONSTANTS & STATE
                =============================== */
             const ROOM_ID = "<%= roomId %>";
-            const USER_ID = "<%= userId || '' %>";  // Fixed EJS variable
-            const USER_NAME = "<%= userName || 'User' %>";  // Fixed EJS variable
+            const USER_ID = "<%= userId || '' %>";
+            const USER_NAME = "<%= userName || 'User' %>";
 
             let localStream = null;
             let peerConnection = null;
@@ -1083,14 +1076,11 @@
             let isVideoOff = false;
             let callAlreadyEnded = false;
             let isAutoReloading = false;
+            let doctorEverConnected = false;
 
             let connectionCheckInterval = null;
-            let consecutiveFailures = 0;
-            let doctorEverConnected = false;
-            let reloadCheckInterval = null;
-
-            const MAX_CONSECUTIVE_FAILURES = 3;
-            const CHECK_INTERVAL = 2000;
+            let doctorTimeoutId = null;
+            const DOCTOR_CONNECTION_TIMEOUT = 30000; // 30 seconds
 
             /* ===============================
                DOM ELEMENTS
@@ -1099,7 +1089,6 @@
             const remoteVideo = document.getElementById('remoteVideo');
             const toggleMic = document.getElementById('toggleMic');
             const toggleCam = document.getElementById('toggleCam');
-            const endCallBtn = document.getElementById('endCallBtn');
 
             const statusText = document.getElementById('statusText');
             const statusIndicator = document.getElementById('statusIndicator');
@@ -1141,13 +1130,8 @@
 
             // Initialize theme
             function initTheme() {
-                const savedTheme = localStorage.getItem('theme');
-                if (savedTheme) {
-                    html.setAttribute('data-theme', savedTheme);
-                } else {
-                    html.setAttribute('data-theme', 'dark');
-                    localStorage.setItem('theme', 'dark');
-                }
+                const savedTheme = localStorage.getItem('theme') || 'dark';
+                html.setAttribute('data-theme', savedTheme);
                 updateThemeIcon();
             }
 
@@ -1173,10 +1157,7 @@
                 showToast(`Theme changed to ${nextTheme} mode`);
             }
 
-            // Initialize theme
             initTheme();
-
-            // Event listeners for theme toggle
             themeToggle.addEventListener('click', toggleTheme);
             mobileThemeToggle.addEventListener('click', toggleTheme);
 
@@ -1284,7 +1265,6 @@
                     document.getElementById('videoLoading').classList.add('hidden');
                     updateStatus('Waiting for doctor...', 'warning');
 
-                    // Initialize button states
                     updateMicButton();
                     updateCamButton();
                 } catch (error) {
@@ -1307,12 +1287,10 @@
                     iceCandidatePoolSize: 10
                 });
 
-                // Add local tracks to peer connection
                 localStream.getTracks().forEach(track => {
                     peerConnection.addTrack(track, localStream);
                 });
 
-                // Handle incoming remote stream
                 peerConnection.ontrack = event => {
                     if (!remoteVideo.srcObject) {
                         remoteVideo.srcObject = event.streams[0];
@@ -1322,7 +1300,6 @@
                     }
                 };
 
-                // Handle ICE candidates
                 peerConnection.onicecandidate = event => {
                     if (event.candidate) {
                         socket.emit('signal', {
@@ -1332,7 +1309,6 @@
                     }
                 };
 
-                // Handle connection state changes
                 peerConnection.oniceconnectionstatechange = () => {
                     const state = peerConnection.iceConnectionState;
                     console.log('ICE connection state:', state);
@@ -1340,6 +1316,7 @@
                     if (state === 'connected' || state === 'completed') {
                         updateStatus('Call connected', 'connected');
                         doctorEverConnected = true;
+                        clearDoctorTimeout();
                     } else if (state === 'disconnected') {
                         updateStatus('Connection unstable', 'warning');
                     } else if (state === 'failed') {
@@ -1352,11 +1329,8 @@
             }
 
             /* ===============================
-               SOCKET.IO EVENTS - Fixed version
+               SOCKET.IO EVENTS
                =============================== */
-            /* ===============================
-   SOCKET.IO EVENTS - Matched with videoSocket.js
-   =============================== */
             function initSocket() {
                 socket = io();
 
@@ -1367,17 +1341,18 @@
                         roomId: ROOM_ID,
                         role: 'user'
                     });
+                    startDoctorTimeout();
                 });
 
-                socket.on('joined-room', (data) => {
-                    console.log('Joined room:', data);
+                socket.on('user-joined', (data) => {
+                    console.log('User joined room:', data);
                     updateStatus('Waiting for doctor...', 'warning');
                 });
 
-                // When doctor is ready (has joined the room)
                 socket.on('doctor-ready', () => {
                     console.log('Doctor ready in room:', ROOM_ID);
                     doctorEverConnected = true;
+                    clearDoctorTimeout();
                     updateStatus('Doctor connected, establishing call...', 'warning');
                     showToast('Doctor joined the call', 'success');
                 });
@@ -1390,6 +1365,7 @@
 
                         if (data.offer) {
                             doctorEverConnected = true;
+                            clearDoctorTimeout();
                             await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
                             const answer = await peerConnection.createAnswer();
                             await peerConnection.setLocalDescription(answer);
@@ -1405,14 +1381,14 @@
                     }
                 });
 
-                // When call is ended (by doctor or user)
-                socket.on('call-ended', (data) => {
-                    console.log('Call ended:', data);
+                socket.on('call-ended-by-doctor', (data) => {
+                    console.log('Call ended by doctor:', data);
                     callAlreadyEnded = true;
-                    const message = data.reason || 'Consultation has ended.';
+                    clearDoctorTimeout();
+                    const message = data.reason || 'Doctor ended the consultation.';
                     callEndedMessage.textContent = message;
                     showCallEndedOverlay(true, message);
-                    showToast('Call ended', 'warning');
+                    showToast('Doctor ended the call', 'warning');
                 });
 
                 socket.on('prescription-ready', (data) => {
@@ -1422,21 +1398,11 @@
                     showToast('Prescription is ready for download', 'success');
                 });
 
-                // Doctor disconnected unexpectedly
-                socket.on('doctor-disconnected', (data) => {
-                    console.log('Doctor disconnected:', data);
+                socket.on('doctor-disconnected', () => {
+                    console.log('Doctor disconnected');
                     if (!callAlreadyEnded) {
                         callEndedMessage.textContent = 'Doctor disconnected from the call.';
                         showCallEndedOverlay(false, 'Doctor disconnected');
-                    }
-                });
-
-                // User left (for doctor's side)
-                socket.on('user-left', (data) => {
-                    console.log('User left:', data);
-                    if (!callAlreadyEnded) {
-                        callEndedMessage.textContent = 'User left the call.';
-                        showCallEndedOverlay(false, 'User left the call');
                     }
                 });
 
@@ -1453,6 +1419,28 @@
                     showToast('Connection error: ' + error.message, 'error');
                 });
             }
+
+            /* ===============================
+               AUTO RELOAD WHEN DOCTOR NOT CONNECTED
+               =============================== */
+            function startDoctorTimeout() {
+                clearDoctorTimeout();
+                doctorTimeoutId = setTimeout(() => {
+                    if (!doctorEverConnected && !callAlreadyEnded) {
+                        console.log('Doctor not connected after timeout, reloading...');
+                        isAutoReloading = true;
+                        window.location.reload();
+                    }
+                }, DOCTOR_CONNECTION_TIMEOUT);
+            }
+
+            function clearDoctorTimeout() {
+                if (doctorTimeoutId) {
+                    clearTimeout(doctorTimeoutId);
+                    doctorTimeoutId = null;
+                }
+            }
+
             /* ===============================
                PRESCRIPTION DOWNLOAD
                =============================== */
@@ -1463,28 +1451,20 @@
                 downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
                 downloadBtn.disabled = true;
 
-                // Create hidden iframe for download
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = url;
+                // Silent download without prompt
+                const anchor = document.createElement('a');
+                anchor.style.display = 'none';
+                anchor.href = url;
+                anchor.download = `prescription-${ROOM_ID}.pdf`;
+                document.body.appendChild(anchor);
+                anchor.click();
+                document.body.removeChild(anchor);
 
-                iframe.onload = () => {
-                    setTimeout(() => {
-                        downloadBtn.innerHTML = original;
-                        downloadBtn.disabled = false;
-                        iframe.remove();
-                        showToast('Prescription downloaded successfully', 'success');
-                    }, 3000);
-                };
-
-                iframe.onerror = () => {
+                setTimeout(() => {
                     downloadBtn.innerHTML = original;
                     downloadBtn.disabled = false;
-                    iframe.remove();
-                    showToast('Failed to download prescription', 'error');
-                };
-
-                document.body.appendChild(iframe);
+                    showToast('Prescription download started', 'success');
+                }, 1000);
             }
 
             /* ===============================
@@ -1492,8 +1472,7 @@
                =============================== */
             function cleanupCall() {
                 clearInterval(timerInterval);
-                clearInterval(connectionCheckInterval);
-                clearInterval(reloadCheckInterval);
+                clearDoctorTimeout();
 
                 if (localStream) {
                     localStream.getTracks().forEach(track => {
@@ -1591,74 +1570,7 @@
                 }
             });
 
-            endCallBtn.addEventListener('click', () => {
-                if (confirm('Are you sure you want to end the call?')) {
-                    callAlreadyEnded = true;
-                    if (socket && socket.connected) {
-                        socket.emit('user-ended-call', {
-                            roomId: ROOM_ID,
-                            reason: 'User ended the call'
-                        });
-                    }
-                    showCallEndedOverlay(false, 'You ended the consultation.');
-                }
-            });
-
             downloadBtn.addEventListener('click', downloadPrescription);
-
-            /* ===============================
-               CONNECTION MONITORING
-               =============================== */
-            function startConnectionMonitor() {
-                connectionCheckInterval = setInterval(() => {
-                    if (callAlreadyEnded) {
-                        clearInterval(connectionCheckInterval);
-                        return;
-                    }
-
-                    if (!socket || !socket.connected) {
-                        consecutiveFailures++;
-                        if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
-                            updateStatus('Reconnecting...', 'warning');
-                            showToast('Connection lost. Reconnecting...', 'warning');
-                            socket.connect();
-                            consecutiveFailures = 0;
-                        }
-                    } else {
-                        consecutiveFailures = 0;
-                    }
-
-                    if (peerConnection) {
-                        const state = peerConnection.iceConnectionState;
-                        if (state === 'disconnected' || state === 'failed') {
-                            updateStatus('Connection unstable', 'warning');
-                        }
-                    }
-                }, CHECK_INTERVAL);
-            }
-
-            function startDoctorPresenceMonitor() {
-                reloadCheckInterval = setInterval(() => {
-                    if (callAlreadyEnded) {
-                        clearInterval(reloadCheckInterval);
-                        return;
-                    }
-
-                    if (doctorEverConnected) {
-                        clearInterval(reloadCheckInterval);
-                        return;
-                    }
-
-                    if (!socket || !socket.connected) return;
-
-                    if (!doctorEverConnected && !peerConnection) {
-                        console.warn('Doctor not connected, auto-reloading...');
-                        isAutoReloading = true;
-                        clearInterval(reloadCheckInterval);
-                        window.location.reload();
-                    }
-                }, 15000);
-            }
 
             /* ===============================
                INITIALIZATION
@@ -1667,33 +1579,18 @@
                 updateStatus('Initializing call...', 'warning');
                 await getLocalStream();
                 initSocket();
-                startConnectionMonitor();
-                startDoctorPresenceMonitor();
             }
 
             /* ===============================
-               WINDOW EVENT LISTENERS
+               WINDOW EVENT LISTENERS - Prevent browser reload prompt
                =============================== */
             window.addEventListener('beforeunload', (e) => {
-                if (!callAlreadyEnded && !isAutoReloading) {
+                if (isAutoReloading || callAlreadyEnded) {
+                    return; // Allow auto-reload without prompt
+                }
+                if (socket?.connected || peerConnection) {
                     e.preventDefault();
                     e.returnValue = 'Are you sure you want to leave? The call will end.';
-
-                    if (socket && socket.connected) {
-                        socket.emit('user-leaving', { roomId: ROOM_ID });
-                    }
-                }
-            });
-
-            window.addEventListener('pagehide', () => {
-                if (!callAlreadyEnded) {
-                    cleanupCall();
-                }
-            });
-
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden && !callAlreadyEnded) {
-                    showToast('You switched tabs. Call is still active.', 'warning');
                 }
             });
 
@@ -1757,23 +1654,6 @@
             window.addEventListener("load", () => {
                 loader.classList.add("hidden");
                 setTimeout(() => loader.remove(), 400);
-            });
-
-            document.addEventListener("click", (e) => {
-                const link = e.target.closest("a");
-                if (!link) return;
-                if (link.target === "_blank") return;
-                if (link.href.startsWith("mailto:")) return;
-                if (link.href.startsWith("tel:")) return;
-                if (link.hasAttribute("download")) return;
-
-                loader.classList.remove("hidden");
-                loader.style.display = "flex";
-            });
-
-            document.addEventListener("submit", () => {
-                loader.classList.remove("hidden");
-                loader.style.display = "flex";
             });
 
             setTimeout(() => {
