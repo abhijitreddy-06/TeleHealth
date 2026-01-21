@@ -1075,6 +1075,9 @@
         let isAudioMuted = false;
         let isVideoOff = false;
         let callEnded = false;
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT_ATTEMPTS = 5;
+        let iceCandidatesQueue = [];
 
         /* ===============================
            DOM ELEMENTS
@@ -1246,7 +1249,10 @@
                     { urls: 'stun:stun1.l.google.com:19302' },
                     { urls: 'stun:stun2.l.google.com:19302' }
                 ],
-                iceCandidatePoolSize: 10
+                iceCandidatePoolSize: 10,
+                iceTransportPolicy: 'all',
+                bundlePolicy: 'max-bundle',
+                rtcpMuxPolicy: 'require'
             };
 
             peerConnection = new RTCPeerConnection(configuration);
@@ -1269,12 +1275,17 @@
 
             // ICE candidate handling
             peerConnection.onicecandidate = (event) => {
-                if (event.candidate && socket) {
+                if (event.candidate && socket && socket.connected) {
                     socket.emit('signal', {
                         roomId: ROOM_ID,
                         candidate: event.candidate
                     });
                 }
+            };
+
+            // ICE gathering state
+            peerConnection.onicegatheringstatechange = () => {
+                console.log('ICE gathering state:', peerConnection.iceGatheringState);
             };
 
             // Connection state monitoring
@@ -1284,18 +1295,60 @@
 
                 if (state === 'connected' || state === 'completed') {
                     updateStatus('Call connected', 'connected');
+                    reconnectAttempts = 0;
+                    // Process any queued ICE candidates
+                    processQueuedCandidates();
                 } else if (state === 'disconnected') {
                     updateStatus('Connection unstable', 'warning');
                     showToast('Connection unstable', 'warning');
+                    attemptReconnect();
                 } else if (state === 'failed') {
                     updateStatus('Connection failed', 'disconnected');
                     showToast('Connection lost. Reconnecting...', 'error');
+                    attemptReconnect();
+                } else if (state === 'closed') {
+                    console.log('Peer connection closed');
                 }
             };
 
             peerConnection.onconnectionstatechange = () => {
                 console.log('Connection state:', peerConnection.connectionState);
             };
+
+            peerConnection.onsignalingstatechange = () => {
+                console.log('Signaling state:', peerConnection.signalingState);
+            };
+        }
+
+        function processQueuedCandidates() {
+            while (iceCandidatesQueue.length > 0) {
+                const candidate = iceCandidatesQueue.shift();
+                if (peerConnection && peerConnection.remoteDescription) {
+                    peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+                        .catch(err => console.error('Error adding queued candidate:', err));
+                }
+            }
+        }
+
+        /* ===============================
+           RECONNECTION LOGIC
+           =============================== */
+        function attemptReconnect() {
+            if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+                showToast('Max reconnection attempts reached', 'error');
+                return;
+            }
+
+            reconnectAttempts++;
+            console.log(`Reconnection attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`);
+
+            // Close existing connection
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+
+            showToast(`Reconnecting... Attempt ${reconnectAttempts}`, 'warning');
         }
 
         /* ===============================
@@ -1305,12 +1358,15 @@
             socket = io({
                 reconnection: true,
                 reconnectionAttempts: 5,
-                reconnectionDelay: 1000
+                reconnectionDelay: 1000,
+                reconnectionDelayMax: 5000,
+                timeout: 20000
             });
 
             socket.on('connect', () => {
                 console.log('Socket connected:', socket.id);
                 updateStatus('Connecting to doctor...', 'warning');
+                reconnectAttempts = 0;
 
                 socket.emit('join-room', {
                     roomId: ROOM_ID,
@@ -1354,11 +1410,24 @@
                         console.log('Answer created and sent');
                     } else if (data.candidate) {
                         console.log('Received ICE candidate');
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        // Queue candidates if connection isn't ready
+                        if (peerConnection.remoteDescription) {
+                            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                        } else {
+                            iceCandidatesQueue.push(data.candidate);
+                        }
                     }
                 } catch (error) {
                     console.error('Error handling signal:', error);
                 }
+            });
+
+            socket.on('doctor-mute-state', ({ isMuted }) => {
+                console.log('Doctor mute state:', isMuted);
+            });
+
+            socket.on('doctor-camera-state', ({ isVideoOff }) => {
+                console.log('Doctor camera state:', isVideoOff);
             });
 
             socket.on('call-ended-by-doctor', (data) => {
@@ -1392,6 +1461,22 @@
                     updateStatus('Disconnected from server', 'disconnected');
                     showToast('Connection lost. Reconnecting...', 'error');
                 }
+            });
+
+            socket.on('reconnect', (attemptNumber) => {
+                console.log('Socket reconnected on attempt:', attemptNumber);
+                showToast('Reconnected to server', 'success');
+
+                // Rejoin room
+                socket.emit('join-room', {
+                    roomId: ROOM_ID,
+                    role: 'user'
+                });
+            });
+
+            socket.on('reconnect_failed', () => {
+                console.log('Socket reconnection failed');
+                showToast('Failed to reconnect to server', 'error');
             });
 
             socket.on('error', (error) => {
@@ -1503,6 +1588,9 @@
                 socket.disconnect();
                 socket = null;
             }
+
+            // Clear ICE candidates queue
+            iceCandidatesQueue = [];
         }
 
         function showCallEndedOverlay(showPrescription = false, message = 'Your video consultation has ended.') {

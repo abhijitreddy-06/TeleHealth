@@ -1202,7 +1202,6 @@ html, body {
 
     // State Variables
     let localStream = null;
-    let remoteStream = null;
     let peerConnection = null;
     let socket = null;
     let callStartTime = null;
@@ -1210,6 +1209,9 @@ html, body {
     let isVideoOff = false;
     let callEnded = false;
     let isMobile = window.innerWidth <= 768;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 5;
+    let iceCandidatesQueue = [];
 
     /* ===============================
        THEME & UI MANAGEMENT
@@ -1277,12 +1279,17 @@ html, body {
             }
 
             try {
-                await fetch("/api/notes/save", {
+                const response = await fetch("/api/notes/save", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ roomId: ROOM_ID, notes: notesText.value })
                 });
-                showToast('Notes saved successfully', 'success');
+
+                if (response.ok) {
+                    showToast('Notes saved successfully', 'success');
+                } else {
+                    showToast('Failed to save notes', 'error');
+                }
             } catch (error) {
                 showToast('Failed to save notes', 'error');
             }
@@ -1298,6 +1305,8 @@ html, body {
        STATUS & NOTIFICATION FUNCTIONS
        =============================== */
     function updateStatus(message, type = 'info') {
+        if (callEnded) return;
+
         callStatusText.textContent = `CALL STATUS: ${message.toUpperCase()}`;
 
         // Update status styling based on type
@@ -1465,7 +1474,10 @@ html, body {
                 { urls: 'stun:stun1.l.google.com:19302' },
                 { urls: 'stun:stun2.l.google.com:19302' }
             ],
-            iceCandidatePoolSize: 10
+            iceCandidatePoolSize: 10,
+            iceTransportPolicy: 'all',
+            bundlePolicy: 'max-bundle',
+            rtcpMuxPolicy: 'require'
         };
 
         peerConnection = new RTCPeerConnection(configuration);
@@ -1480,20 +1492,25 @@ html, body {
             console.log('Received remote track:', event.track.kind);
             if (!remoteVideo.srcObject) {
                 remoteVideo.srcObject = event.streams[0];
-                remoteStream = event.streams[0];
                 updateStatus('Call connected', 'connected');
                 showToast('Video call connected successfully', 'success');
+                callStartTime = Date.now();
             }
         };
 
         // ICE candidate handling
         peerConnection.onicecandidate = (event) => {
-            if (event.candidate && socket) {
+            if (event.candidate && socket && socket.connected) {
                 socket.emit('signal', {
                     roomId: ROOM_ID,
                     candidate: event.candidate
                 });
             }
+        };
+
+        // ICE gathering state
+        peerConnection.onicegatheringstatechange = () => {
+            console.log('ICE gathering state:', peerConnection.iceGatheringState);
         };
 
         // Connection state monitoring
@@ -1503,18 +1520,39 @@ html, body {
 
             if (state === 'connected' || state === 'completed') {
                 updateStatus('Call connected', 'connected');
+                reconnectAttempts = 0;
+                // Process any queued ICE candidates
+                processQueuedCandidates();
             } else if (state === 'disconnected') {
                 updateStatus('Connection unstable', 'warning');
                 showToast('Connection unstable', 'warning');
+                attemptReconnect();
             } else if (state === 'failed') {
                 updateStatus('Connection failed', 'error');
                 showToast('Connection failed. Attempting to reconnect...', 'error');
+                attemptReconnect();
+            } else if (state === 'closed') {
+                console.log('Peer connection closed');
             }
         };
 
         peerConnection.onconnectionstatechange = () => {
             console.log('Connection state:', peerConnection.connectionState);
         };
+
+        peerConnection.onsignalingstatechange = () => {
+            console.log('Signaling state:', peerConnection.signalingState);
+        };
+    }
+
+    function processQueuedCandidates() {
+        while (iceCandidatesQueue.length > 0) {
+            const candidate = iceCandidatesQueue.shift();
+            if (peerConnection && peerConnection.remoteDescription) {
+                peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
+                    .catch(err => console.error('Error adding queued candidate:', err));
+            }
+        }
     }
 
     async function createOffer() {
@@ -1540,18 +1578,50 @@ html, body {
     }
 
     /* ===============================
+       RECONNECTION LOGIC
+       =============================== */
+    function attemptReconnect() {
+        if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+            showToast('Max reconnection attempts reached. Call ended.', 'error');
+            endCallHandler();
+            return;
+        }
+
+        reconnectAttempts++;
+        console.log(`Reconnection attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`);
+
+        // Close existing connection
+        if (peerConnection) {
+            peerConnection.close();
+            peerConnection = null;
+        }
+
+        // Recreate peer connection after delay
+        setTimeout(() => {
+            if (!callEnded && localStream) {
+                createPeerConnection();
+                createOffer();
+                showToast(`Reconnecting... Attempt ${reconnectAttempts}`, 'warning');
+            }
+        }, 2000 * reconnectAttempts); // Exponential backoff
+    }
+
+    /* ===============================
        SOCKET.IO COMMUNICATION
        =============================== */
     function initSocket() {
         socket = io({
             reconnection: true,
             reconnectionAttempts: 5,
-            reconnectionDelay: 1000
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            timeout: 20000
         });
 
         socket.on('connect', () => {
             console.log('Socket connected:', socket.id);
             updateStatus('Connecting to patient...', 'warning');
+            reconnectAttempts = 0;
 
             // Join the room
             socket.emit('join-room', {
@@ -1560,8 +1630,8 @@ html, body {
             });
         });
 
-        socket.on('joined-room', (data) => {
-            console.log('Joined room:', data);
+        socket.on('doctor-joined', (data) => {
+            console.log('Doctor joined room:', data);
             updateStatus('Waiting for patient to join...', 'warning');
             showToast('Room joined successfully', 'success');
         });
@@ -1572,7 +1642,9 @@ html, body {
             showToast('Patient has joined the call', 'success');
 
             // Create peer connection and send offer
-            createPeerConnection();
+            if (!peerConnection) {
+                createPeerConnection();
+            }
             await createOffer();
         });
 
@@ -1582,16 +1654,31 @@ html, body {
                     createPeerConnection();
                 }
 
-                if (data.answer) {
+                if (data.offer) {
+                    console.log('Unexpected offer received from patient');
+                } else if (data.answer) {
                     console.log('Received answer from patient');
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
                 } else if (data.candidate) {
                     console.log('Received ICE candidate');
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    // Queue candidates if connection isn't ready
+                    if (peerConnection.remoteDescription) {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    } else {
+                        iceCandidatesQueue.push(data.candidate);
+                    }
                 }
             } catch (error) {
                 console.error('Error handling signal:', error);
             }
+        });
+
+        socket.on('user-mute-state', ({ isMuted }) => {
+            console.log('Patient mute state:', isMuted);
+        });
+
+        socket.on('user-camera-state', ({ isVideoOff }) => {
+            console.log('Patient camera state:', isVideoOff);
         });
 
         socket.on('user-disconnected', () => {
@@ -1602,7 +1689,7 @@ html, body {
 
                 // Wait 30 seconds for patient to reconnect
                 setTimeout(() => {
-                    if (!callEnded) {
+                    if (!callEnded && peerConnection && peerConnection.iceConnectionState !== 'connected') {
                         endCallHandler();
                     }
                 }, 30000);
@@ -1629,6 +1716,22 @@ html, body {
                 showToast('Connection lost. Attempting to reconnect...', 'error');
             }
         });
+
+        socket.on('reconnect', (attemptNumber) => {
+            console.log('Socket reconnected on attempt:', attemptNumber);
+            showToast('Reconnected to server', 'success');
+
+            // Rejoin room
+            socket.emit('join-room', {
+                roomId: ROOM_ID,
+                role: 'doctor'
+            });
+        });
+
+        socket.on('reconnect_failed', () => {
+            console.log('Socket reconnection failed');
+            showToast('Failed to reconnect to server', 'error');
+        });
     }
 
     /* ===============================
@@ -1653,11 +1756,6 @@ html, body {
                 });
             }
 
-            // Complete appointment
-            await fetch(`/appointments/${APPOINTMENT_ID}/complete`, {
-                method: "POST"
-            });
-
             // Notify patient that call is ending
             if (socket && socket.connected) {
                 socket.emit('doctor-end-call', {
@@ -1677,6 +1775,9 @@ html, body {
                 peerConnection.close();
                 peerConnection = null;
             }
+
+            // Clear ICE candidates queue
+            iceCandidatesQueue = [];
 
             // Disconnect socket
             if (socket) {
@@ -1795,88 +1896,61 @@ html, body {
     `;
     document.head.appendChild(toastStyles);
 </script>
-
-
-    <!-- Global Loader Script -->
     <script>
         (function () {
             const style = document.createElement("style");
             style.innerHTML = `
-                #global-loader {
-                    position: fixed;
-                    inset: 0;
-                    background: #ffffff;
-                    z-index: 99999;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-                }
-
-                #global-loader.hidden {
-                    opacity: 0;
-                    pointer-events: none;
-                    transition: opacity 0.3s ease;
-                }
-
-                #global-loader .spinner {
-                    width: 46px;
-                    height: 46px;
-                    border: 4px solid #e5e7eb;
-                    border-top-color: #2563eb;
-                    border-radius: 50%;
-                    animation: spin 0.9s linear infinite;
-                    margin-bottom: 12px;
-                }
-
-                #global-loader p {
-                    font-size: 14px;
-                    color: #374151;
-                }
-
-                @keyframes spin {
-                    to { transform: rotate(360deg); }
-                }
-            `;
+                    #global-loader {
+                        position: fixed;
+                        inset: 0;
+                        background: #ffffff;
+                        z-index: 99999;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+                    }
+    
+                    #global-loader.hidden {
+                        opacity: 0;
+                        pointer-events: none;
+                        transition: opacity 0.3s ease;
+                    }
+    
+                    #global-loader .spinner {
+                        width: 46px;
+                        height: 46px;
+                        border: 4px solid #e5e7eb;
+                        border-top-color: #2563eb;
+                        border-radius: 50%;
+                        animation: spin 0.9s linear infinite;
+                        margin-bottom: 12px;
+                    }
+    
+                    #global-loader p {
+                        font-size: 14px;
+                        color: #374151;
+                    }
+    
+                    @keyframes spin {
+                        to { transform: rotate(360deg); }
+                    }
+                `;
             document.head.appendChild(style);
 
             const loader = document.createElement("div");
             loader.id = "global-loader";
             loader.innerHTML = `
-                <div class="spinner"></div>
-                <p>Loading, please wait…</p>
-            `;
+                    <div class="spinner"></div>
+                    <p>Loading, please wait…</p>
+                `;
             document.body.appendChild(loader);
 
             window.addEventListener("load", () => {
                 loader.classList.add("hidden");
                 setTimeout(() => loader.remove(), 400);
             });
-
-            document.addEventListener("click", (e) => {
-                const link = e.target.closest("a");
-                if (!link) return;
-                if (link.target === "_blank") return;
-                if (link.href.startsWith("mailto:")) return;
-                if (link.href.startsWith("tel:")) return;
-                if (link.hasAttribute("download")) return;
-
-                loader.classList.remove("hidden");
-                loader.style.display = "flex";
-            });
-
-            document.addEventListener("submit", () => {
-                loader.classList.remove("hidden");
-                loader.style.display = "flex";
-            });
-
-            if (navigator.connection && navigator.connection.effectiveType) {
-                if (navigator.connection.effectiveType.includes("2g")) {
-                    loader.querySelector("p").innerText =
-                        "Slow network detected… loading";
-                }
-            }
 
             setTimeout(() => {
                 if (document.body.contains(loader)) {
@@ -1885,7 +1959,6 @@ html, body {
             }, 10000);
         })();
     </script>
-
 </body>
 
 </html>
