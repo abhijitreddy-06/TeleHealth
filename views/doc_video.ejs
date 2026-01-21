@@ -1202,16 +1202,17 @@ html, body {
 
     // State Variables
     let localStream = null;
+    let remoteStream = null;
     let peerConnection = null;
     let socket = null;
+    let callStartTime = null;
     let isAudioMuted = false;
     let isVideoOff = false;
     let callEnded = false;
     let isMobile = window.innerWidth <= 768;
     let reconnectAttempts = 0;
     const MAX_RECONNECT_ATTEMPTS = 5;
-    let iceCandidatesQueue = [];
-    let pingInterval;
+    let iceCandidates = [];
 
     /* ===============================
        THEME & UI MANAGEMENT
@@ -1279,17 +1280,12 @@ html, body {
             }
 
             try {
-                const response = await fetch("/api/notes/save", {
+                await fetch("/api/notes/save", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ roomId: ROOM_ID, notes: notesText.value })
                 });
-
-                if (response.ok) {
-                    showToast('Notes saved successfully', 'success');
-                } else {
-                    showToast('Failed to save notes', 'error');
-                }
+                showToast('Notes saved successfully', 'success');
             } catch (error) {
                 showToast('Failed to save notes', 'error');
             }
@@ -1305,11 +1301,8 @@ html, body {
        STATUS & NOTIFICATION FUNCTIONS
        =============================== */
     function updateStatus(message, type = 'info') {
-        if (callEnded) return;
-
         callStatusText.textContent = `CALL STATUS: ${message.toUpperCase()}`;
 
-        // Update status styling based on type
         if (type === 'connected') {
             callStatusText.style.color = 'var(--secondary)';
         } else if (type === 'warning') {
@@ -1322,7 +1315,6 @@ html, body {
     }
 
     function showToast(message, type = 'info') {
-        // Create toast if it doesn't exist
         let toast = document.getElementById('global-toast');
         if (!toast) {
             toast = document.createElement('div');
@@ -1338,7 +1330,6 @@ html, body {
         const toastMessage = document.getElementById('global-toast-message');
         toastMessage.textContent = message;
 
-        // Set icon based on type
         const icon = toast.querySelector('i');
         if (type === 'success') {
             icon.className = 'fas fa-check-circle';
@@ -1354,11 +1345,9 @@ html, body {
             toast.className = 'toast info';
         }
 
-        // Show toast
         toast.classList.remove('hidden');
         setTimeout(() => toast.classList.add('show'), 10);
 
-        // Hide after 3 seconds
         setTimeout(() => {
             toast.classList.remove('show');
             setTimeout(() => toast.classList.add('hidden'), 300);
@@ -1385,7 +1374,6 @@ html, body {
             localVideo.srcObject = localStream;
             console.log('Local media stream obtained');
 
-            // Enable control buttons
             toggleMic.disabled = false;
             toggleCam.disabled = false;
 
@@ -1406,7 +1394,6 @@ html, body {
             track.enabled = !isAudioMuted;
         });
 
-        // Update button UI
         const icon = toggleMic.querySelector('.control-icon i');
         const label = toggleMic.querySelector('.control-label');
 
@@ -1422,7 +1409,6 @@ html, body {
             showToast('Microphone unmuted', 'success');
         }
 
-        // Notify other peer
         if (socket && socket.connected) {
             socket.emit('doctor-mute-state', {
                 roomId: ROOM_ID,
@@ -1439,7 +1425,6 @@ html, body {
             track.enabled = !isVideoOff;
         });
 
-        // Update button UI
         const icon = toggleCam.querySelector('.control-icon i');
         const label = toggleCam.querySelector('.control-label');
 
@@ -1455,7 +1440,6 @@ html, body {
             showToast('Camera turned on', 'success');
         }
 
-        // Notify other peer
         if (socket && socket.connected) {
             socket.emit('doctor-camera-state', {
                 roomId: ROOM_ID,
@@ -1468,67 +1452,67 @@ html, body {
        WEBRTC PEER CONNECTION
        =============================== */
     function createPeerConnection() {
+        console.log('Creating peer connection...');
         const configuration = {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun3.l.google.com:19302' }
+                { urls: 'stun:stun2.l.google.com:19302' }
             ],
-            iceCandidatePoolSize: 10,
-            iceTransportPolicy: 'all',
-            bundlePolicy: 'max-bundle',
-            rtcpMuxPolicy: 'require'
+            iceCandidatePoolSize: 10
         };
 
         peerConnection = new RTCPeerConnection(configuration);
 
         // Add local tracks
-        localStream.getTracks().forEach(track => {
-            peerConnection.addTrack(track, localStream);
-        });
+        if (localStream) {
+            localStream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, localStream);
+            });
+        }
 
         // Remote stream received
         peerConnection.ontrack = (event) => {
             console.log('Received remote track:', event.track.kind);
             if (!remoteVideo.srcObject) {
                 remoteVideo.srcObject = event.streams[0];
-                remoteVideo.play().catch(e => console.error('Error playing remote video:', e));
+                remoteStream = event.streams[0];
                 updateStatus('Call connected', 'connected');
                 showToast('Video call connected successfully', 'success');
+                callStartTime = Date.now();
+
+                // Add event listener for remote video
+                remoteVideo.onloadedmetadata = () => {
+                    console.log('Remote video metadata loaded');
+                    remoteVideo.play().catch(e => console.log('Remote video play error:', e));
+                };
             }
         };
 
         // ICE candidate handling
         peerConnection.onicecandidate = (event) => {
-            if (event.candidate && socket && socket.connected) {
+            if (event.candidate && socket) {
                 console.log('Sending ICE candidate');
                 socket.emit('signal', {
                     roomId: ROOM_ID,
                     candidate: event.candidate
                 });
+            } else if (event.candidate === null) {
+                console.log('ICE gathering complete');
             }
         };
 
-        // ICE gathering state
-        peerConnection.onicegatheringstatechange = () => {
-            console.log('ICE gathering state:', peerConnection.iceGatheringState);
-        };
-
-        // Connection state monitoring
+        // ICE connection state monitoring
         peerConnection.oniceconnectionstatechange = () => {
             const state = peerConnection.iceConnectionState;
             console.log('ICE connection state:', state);
 
             if (state === 'connected' || state === 'completed') {
                 updateStatus('Call connected', 'connected');
-                reconnectAttempts = 0;
-                // Process any queued ICE candidates
-                processQueuedCandidates();
+                reconnectAttempts = 0; // Reset reconnect attempts on successful connection
             } else if (state === 'disconnected') {
                 updateStatus('Connection unstable', 'warning');
                 showToast('Connection unstable', 'warning');
-                attemptReconnect();
             } else if (state === 'failed') {
                 updateStatus('Connection failed', 'error');
                 showToast('Connection failed. Attempting to reconnect...', 'error');
@@ -1542,23 +1526,32 @@ html, body {
             console.log('Connection state:', peerConnection.connectionState);
         };
 
-        peerConnection.onsignalingstatechange = () => {
-            console.log('Signaling state:', peerConnection.signalingState);
-        };
-    }
-
-    function processQueuedCandidates() {
-        while (iceCandidatesQueue.length > 0) {
-            const candidate = iceCandidatesQueue.shift();
-            if (peerConnection && peerConnection.remoteDescription) {
-                peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
-                    .catch(err => console.error('Error adding queued candidate:', err));
+        peerConnection.onnegotiationneeded = async () => {
+            console.log('Negotiation needed');
+            try {
+                await createOffer();
+            } catch (error) {
+                console.error('Negotiation error:', error);
             }
-        }
+        };
+
+        // Add stored ICE candidates
+        iceCandidates.forEach(candidate => {
+            if (candidate) {
+                peerConnection.addIceCandidate(candidate).catch(e => console.error('Error adding stored ICE candidate:', e));
+            }
+        });
+        iceCandidates = [];
     }
 
     async function createOffer() {
+        if (!peerConnection) {
+            console.error('No peer connection to create offer');
+            return;
+        }
+
         try {
+            console.log('Creating offer...');
             const offer = await peerConnection.createOffer({
                 offerToReceiveAudio: true,
                 offerToReceiveVideo: true
@@ -1579,36 +1572,87 @@ html, body {
         }
     }
 
+    async function handleSignal(data) {
+        try {
+            if (!peerConnection) {
+                console.log('Creating peer connection for incoming signal');
+                createPeerConnection();
+            }
+
+            if (data.offer) {
+                console.log('Received offer from user');
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+
+                const answer = await peerConnection.createAnswer({
+                    offerToReceiveAudio: true,
+                    offerToReceiveVideo: true
+                });
+
+                await peerConnection.setLocalDescription(answer);
+
+                socket.emit('signal', {
+                    roomId: ROOM_ID,
+                    answer: answer
+                });
+
+                console.log('Answer created and sent');
+            } else if (data.answer) {
+                console.log('Received answer from user');
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+            } else if (data.candidate) {
+                console.log('Received ICE candidate from user');
+                try {
+                    if (peerConnection.remoteDescription) {
+                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    } else {
+                        // Store candidate for later
+                        iceCandidates.push(new RTCIceCandidate(data.candidate));
+                        console.log('Stored ICE candidate for later');
+                    }
+                } catch (error) {
+                    console.error('Error adding ICE candidate:', error);
+                }
+            }
+        } catch (error) {
+            console.error('Error handling signal:', error);
+        }
+    }
+
     /* ===============================
-       RECONNECTION LOGIC
+       RECONNECTION HANDLING
        =============================== */
     function attemptReconnect() {
         if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
-            showToast('Max reconnection attempts reached. Call ended.', 'error');
-            endCallHandler();
+            showToast('Max reconnection attempts reached. Please refresh the page.', 'error');
             return;
         }
 
         reconnectAttempts++;
         console.log(`Reconnection attempt ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}`);
 
-        // Close existing connection
+        setTimeout(() => {
+            if (!callEnded && socket && !socket.connected) {
+                socket.connect();
+            } else if (!callEnded && peerConnection && peerConnection.iceConnectionState === 'failed') {
+                // Recreate peer connection
+                cleanupWebRTC();
+                if (localStream) {
+                    createPeerConnection();
+                    createOffer();
+                }
+            }
+        }, reconnectAttempts * 2000); // Exponential backoff
+    }
+
+    function cleanupWebRTC() {
         if (peerConnection) {
             peerConnection.close();
             peerConnection = null;
         }
-
-        // Clear ICE candidates queue
-        iceCandidatesQueue = [];
-
-        // Recreate peer connection after delay
-        setTimeout(() => {
-            if (!callEnded && localStream) {
-                createPeerConnection();
-                createOffer();
-                showToast(`Reconnecting... Attempt ${reconnectAttempts}`, 'warning');
-            }
-        }, 2000 * reconnectAttempts); // Exponential backoff
+        if (remoteVideo.srcObject) {
+            remoteVideo.srcObject = null;
+        }
+        iceCandidates = [];
     }
 
     /* ===============================
@@ -1617,11 +1661,10 @@ html, body {
     function initSocket() {
         socket = io({
             reconnection: true,
-            reconnectionAttempts: 10,
+            reconnectionAttempts: MAX_RECONNECT_ATTEMPTS,
             reconnectionDelay: 1000,
-            reconnectionDelayMax: 10000,
-            timeout: 20000,
-            transports: ['websocket', 'polling']
+            reconnectionDelayMax: 5000,
+            timeout: 20000
         });
 
         socket.on('connect', () => {
@@ -1634,13 +1677,6 @@ html, body {
                 roomId: ROOM_ID,
                 role: 'doctor'
             });
-
-            // Start ping interval
-            pingInterval = setInterval(() => {
-                if (socket.connected) {
-                    socket.emit('ping');
-                }
-            }, 30000);
         });
 
         socket.on('doctor-joined', (data) => {
@@ -1658,40 +1694,14 @@ html, body {
             if (!peerConnection) {
                 createPeerConnection();
             }
-            await createOffer();
-        });
-
-        socket.on('signal', async (data) => {
-            try {
-                console.log('Received signal:', Object.keys(data)[0]);
-
-                if (!peerConnection) {
-                    createPeerConnection();
-                }
-
-                if (data.answer) {
-                    console.log('Received answer from patient');
-                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-                } else if (data.candidate) {
-                    console.log('Received ICE candidate');
-                    // Queue candidates if connection isn't ready
-                    if (peerConnection.remoteDescription) {
-                        await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                    } else {
-                        iceCandidatesQueue.push(data.candidate);
-                    }
-                }
-            } catch (error) {
-                console.error('Error handling signal:', error);
+            if (peerConnection.signalingState === 'stable') {
+                await createOffer();
             }
         });
 
-        socket.on('user-mute-state', ({ isMuted }) => {
-            console.log('Patient mute state:', isMuted);
-        });
-
-        socket.on('user-camera-state', ({ isVideoOff }) => {
-            console.log('Patient camera state:', isVideoOff);
+        socket.on('signal', async (data) => {
+            console.log('Received signal:', data.type || 'candidate');
+            await handleSignal(data);
         });
 
         socket.on('user-disconnected', () => {
@@ -1702,7 +1712,7 @@ html, body {
 
                 // Wait 30 seconds for patient to reconnect
                 setTimeout(() => {
-                    if (!callEnded && peerConnection && peerConnection.iceConnectionState !== 'connected') {
+                    if (!callEnded) {
                         endCallHandler();
                     }
                 }, 30000);
@@ -1722,37 +1732,21 @@ html, body {
             showToast('Connection error: ' + error.message, 'error');
         });
 
+        socket.on('connect_error', (error) => {
+            console.error('Socket connection error:', error);
+            updateStatus('Connection error', 'error');
+            if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                attemptReconnect();
+            }
+        });
+
         socket.on('disconnect', (reason) => {
             console.log('Socket disconnected:', reason);
-            if (pingInterval) clearInterval(pingInterval);
-
-            if (!callEnded) {
+            if (!callEnded && reason !== 'io client disconnect') {
                 updateStatus('Connection lost', 'error');
                 showToast('Connection lost. Attempting to reconnect...', 'error');
+                attemptReconnect();
             }
-        });
-
-        socket.on('reconnect', (attemptNumber) => {
-            console.log('Socket reconnected on attempt:', attemptNumber);
-            showToast('Reconnected to server', 'success');
-
-            // Rejoin room
-            socket.emit('join-room', {
-                roomId: ROOM_ID,
-                role: 'doctor'
-            });
-        });
-
-        socket.on('reconnect_failed', () => {
-            console.log('Socket reconnection failed');
-            showToast('Failed to reconnect to server', 'error');
-            if (!callEnded) {
-                endCallHandler();
-            }
-        });
-
-        socket.on('pong', (data) => {
-            console.log('Pong received:', data.timestamp);
         });
     }
 
@@ -1763,13 +1757,13 @@ html, body {
         if (callEnded) return;
         callEnded = true;
 
-        // Update UI
         updateStatus('Ending call...', 'warning');
         endCall.disabled = true;
 
         try {
-            // Save notes if any
             const notes = notesText.value.trim();
+
+            // Save notes if any
             if (notes) {
                 await fetch("/api/notes/save", {
                     method: "POST",
@@ -1777,6 +1771,11 @@ html, body {
                     body: JSON.stringify({ roomId: ROOM_ID, notes })
                 });
             }
+
+            // Complete appointment
+            await fetch(`/appointments/${APPOINTMENT_ID}/complete`, {
+                method: "POST"
+            });
 
             // Notify patient that call is ending
             if (socket && socket.connected) {
@@ -1787,8 +1786,13 @@ html, body {
                 });
             }
 
-            // Cleanup
-            cleanup();
+            // Cleanup media streams
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+
+            cleanupWebRTC();
 
             showToast('Call ended successfully', 'success');
 
@@ -1800,35 +1804,9 @@ html, body {
         } catch (error) {
             console.error('Error ending call:', error);
             showToast('Error ending call', 'error');
-            cleanup();
             setTimeout(() => {
                 window.location.href = "/doc_video_dashboard";
             }, 1500);
-        }
-    }
-
-    function cleanup() {
-        // Cleanup media streams
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop());
-            localStream = null;
-        }
-
-        if (peerConnection) {
-            peerConnection.close();
-            peerConnection = null;
-        }
-
-        // Clear ICE candidates queue
-        iceCandidatesQueue = [];
-
-        // Clear ping interval
-        if (pingInterval) clearInterval(pingInterval);
-
-        // Disconnect socket
-        if (socket) {
-            socket.disconnect();
-            socket = null;
         }
     }
 
@@ -1839,16 +1817,13 @@ html, body {
         try {
             updateStatus('Initializing...', 'warning');
 
-            // Get local media stream
             const mediaSuccess = await getLocalStream();
             if (!mediaSuccess) {
                 showToast('Cannot start call without camera/microphone access', 'error');
                 return;
             }
 
-            // Initialize socket connection
             initSocket();
-
             updateStatus('Ready to connect', 'connected');
 
         } catch (error) {
