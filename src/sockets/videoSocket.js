@@ -4,9 +4,30 @@ module.exports = function (io) {
     io.on('connection', (socket) => {
         console.log('New socket connection:', socket.id, 'from IP:', socket.handshake.address);
 
+        // Store user data if authenticated
+        if (socket.user) {
+            console.log(`Socket ${socket.id} authenticated as ${socket.user.role}: ${socket.user.id}`);
+        }
+
         socket.on('join-room', async ({ roomId, role }) => {
             try {
                 console.log(`Attempting to join room: ${roomId} with role: ${role}, socket: ${socket.id}`);
+
+                // Validate user has access to this room
+                if (socket.user) {
+                    const allowed = await pool.query(
+                        `SELECT id FROM appointments 
+                         WHERE room_id = $1 
+                         AND (user_id = $2 OR doctor_id = $3)`,
+                        [roomId, socket.user.id, socket.user.id]
+                    );
+
+                    if (!allowed.rows.length) {
+                        socket.emit("error", { message: "Unauthorized room access" });
+                        console.log(`Unauthorized access attempt to room ${roomId} by ${socket.user.id}`);
+                        return;
+                    }
+                }
 
                 // Join the room
                 socket.join(roomId);
@@ -45,7 +66,8 @@ module.exports = function (io) {
                 const socketsInRoom = await io.in(roomId).fetchSockets();
                 console.log(`Sockets in room ${roomId}:`, socketsInRoom.map(s => ({
                     id: s.id,
-                    role: s.role
+                    role: s.role,
+                    userId: s.user?.id || 'anonymous'
                 })));
 
             } catch (error) {
@@ -107,9 +129,8 @@ module.exports = function (io) {
                     const sockets = await io.in(roomId).fetchSockets();
                     sockets.forEach(s => {
                         s.leave(roomId);
-                        s.disconnect(true);
                     });
-                    console.log(`Disconnected all sockets from room: ${roomId}`);
+                    console.log(`All sockets removed from room: ${roomId}`);
                 }, 5000);
 
             } catch (error) {
@@ -118,7 +139,7 @@ module.exports = function (io) {
             }
         });
 
-        // WebRTC signaling - FIXED: Ensure we're sending to the right room
+        // WebRTC signaling
         socket.on('signal', ({ roomId, ...payload }) => {
             console.log(`Signal from ${socket.id} to room ${roomId}:`, Object.keys(payload)[0]);
 
