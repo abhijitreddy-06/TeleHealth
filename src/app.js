@@ -180,44 +180,60 @@ app.use((err, req, res, next) => {
     });
 });
 
-// ============================================
-// SOCKET.IO SETUP
-// ============================================
+
+
+// Socket.IO authentication
+// io.use(async (socket, next) => {
+//     try {
+//         const token = socket.handshake.auth.token ||
+//             socket.handshake.headers.cookie?.split(';')
+//                 .find(c => c.trim().startsWith('accessToken='))
+//                 ?.split('=')[1];
+
+//         if (!token) {
+//             return next(new Error("Authentication required"));
+//         }
+
+//         const jwt = require('jsonwebtoken');
+//         const payload = jwt.verify(token, process.env.JWT_SECRET);
+//         socket.user = {
+//             id: payload.id,
+//             role: payload.role,
+//             phone: payload.phone
+//         };
+//         next();
+//     } catch (error) {
+//         next(new Error("Invalid token"));
+//     }
+// });
 const io = new Server(server, {
     cors: {
         origin: process.env.NODE_ENV === 'production'
             ? [process.env.FRONTEND_URL, 'https://telehealth-production.onrender.com']
             : ['http://localhost:3000', 'http://localhost:8080'],
-        credentials: true
+        credentials: true,
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['Content-Type', 'Authorization']
     },
-    transports: ['websocket', 'polling']
-});
-
-// Socket.IO authentication
-io.use(async (socket, next) => {
-    try {
-        const token = socket.handshake.auth.token ||
-            socket.handshake.headers.cookie?.split(';')
-                .find(c => c.trim().startsWith('accessToken='))
-                ?.split('=')[1];
-
-        if (!token) {
-            return next(new Error("Authentication required"));
-        }
-
-        const jwt = require('jsonwebtoken');
-        const payload = jwt.verify(token, process.env.JWT_SECRET);
-        socket.user = {
-            id: payload.id,
-            role: payload.role,
-            phone: payload.phone
-        };
-        next();
-    } catch (error) {
-        next(new Error("Invalid token"));
+    transports: ['websocket', 'polling'],
+    allowEIO3: true,  // Allow Engine.IO v3
+    pingTimeout: 60000,
+    pingInterval: 25000,
+    connectionStateRecovery: {
+        maxDisconnectionDuration: 2 * 60 * 1000, // 2 minutes
+        skipMiddlewares: true
     }
 });
-
+io.use(async (socket, next) => {
+    try {
+        // For video calls, we'll use room-based authentication
+        // Allow connection and authenticate in the join-room event
+        next();
+    } catch (error) {
+        next(new Error("Connection error"));
+    }
+});
+    
 // Import and initialize socket handlers
 require('./sockets/videoSocket')(io);
 

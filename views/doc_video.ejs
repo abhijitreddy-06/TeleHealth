@@ -1204,7 +1204,6 @@ html, body {
     let localStream = null;
     let peerConnection = null;
     let socket = null;
-    let callStartTime = null;
     let isAudioMuted = false;
     let isVideoOff = false;
     let callEnded = false;
@@ -1212,6 +1211,7 @@ html, body {
     let reconnectAttempts = 0;
     const MAX_RECONNECT_ATTEMPTS = 5;
     let iceCandidatesQueue = [];
+    let pingInterval;
 
     /* ===============================
        THEME & UI MANAGEMENT
@@ -1472,7 +1472,8 @@ html, body {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' }
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' }
             ],
             iceCandidatePoolSize: 10,
             iceTransportPolicy: 'all',
@@ -1492,15 +1493,16 @@ html, body {
             console.log('Received remote track:', event.track.kind);
             if (!remoteVideo.srcObject) {
                 remoteVideo.srcObject = event.streams[0];
+                remoteVideo.play().catch(e => console.error('Error playing remote video:', e));
                 updateStatus('Call connected', 'connected');
                 showToast('Video call connected successfully', 'success');
-                callStartTime = Date.now();
             }
         };
 
         // ICE candidate handling
         peerConnection.onicecandidate = (event) => {
             if (event.candidate && socket && socket.connected) {
+                console.log('Sending ICE candidate');
                 socket.emit('signal', {
                     roomId: ROOM_ID,
                     candidate: event.candidate
@@ -1596,6 +1598,9 @@ html, body {
             peerConnection = null;
         }
 
+        // Clear ICE candidates queue
+        iceCandidatesQueue = [];
+
         // Recreate peer connection after delay
         setTimeout(() => {
             if (!callEnded && localStream) {
@@ -1612,10 +1617,11 @@ html, body {
     function initSocket() {
         socket = io({
             reconnection: true,
-            reconnectionAttempts: 5,
+            reconnectionAttempts: 10,
             reconnectionDelay: 1000,
-            reconnectionDelayMax: 5000,
-            timeout: 20000
+            reconnectionDelayMax: 10000,
+            timeout: 20000,
+            transports: ['websocket', 'polling']
         });
 
         socket.on('connect', () => {
@@ -1628,6 +1634,13 @@ html, body {
                 roomId: ROOM_ID,
                 role: 'doctor'
             });
+
+            // Start ping interval
+            pingInterval = setInterval(() => {
+                if (socket.connected) {
+                    socket.emit('ping');
+                }
+            }, 30000);
         });
 
         socket.on('doctor-joined', (data) => {
@@ -1650,13 +1663,13 @@ html, body {
 
         socket.on('signal', async (data) => {
             try {
+                console.log('Received signal:', Object.keys(data)[0]);
+
                 if (!peerConnection) {
                     createPeerConnection();
                 }
 
-                if (data.offer) {
-                    console.log('Unexpected offer received from patient');
-                } else if (data.answer) {
+                if (data.answer) {
                     console.log('Received answer from patient');
                     await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
                 } else if (data.candidate) {
@@ -1711,6 +1724,8 @@ html, body {
 
         socket.on('disconnect', (reason) => {
             console.log('Socket disconnected:', reason);
+            if (pingInterval) clearInterval(pingInterval);
+
             if (!callEnded) {
                 updateStatus('Connection lost', 'error');
                 showToast('Connection lost. Attempting to reconnect...', 'error');
@@ -1731,6 +1746,13 @@ html, body {
         socket.on('reconnect_failed', () => {
             console.log('Socket reconnection failed');
             showToast('Failed to reconnect to server', 'error');
+            if (!callEnded) {
+                endCallHandler();
+            }
+        });
+
+        socket.on('pong', (data) => {
+            console.log('Pong received:', data.timestamp);
         });
     }
 
@@ -1765,24 +1787,8 @@ html, body {
                 });
             }
 
-            // Cleanup media streams
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-                localStream = null;
-            }
-
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-
-            // Clear ICE candidates queue
-            iceCandidatesQueue = [];
-
-            // Disconnect socket
-            if (socket) {
-                socket.disconnect();
-            }
+            // Cleanup
+            cleanup();
 
             showToast('Call ended successfully', 'success');
 
@@ -1794,9 +1800,35 @@ html, body {
         } catch (error) {
             console.error('Error ending call:', error);
             showToast('Error ending call', 'error');
+            cleanup();
             setTimeout(() => {
                 window.location.href = "/doc_video_dashboard";
             }, 1500);
+        }
+    }
+
+    function cleanup() {
+        // Cleanup media streams
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
+
+        if (peerConnection) {
+            peerConnection.close();
+            peerConnection = null;
+        }
+
+        // Clear ICE candidates queue
+        iceCandidatesQueue = [];
+
+        // Clear ping interval
+        if (pingInterval) clearInterval(pingInterval);
+
+        // Disconnect socket
+        if (socket) {
+            socket.disconnect();
+            socket = null;
         }
     }
 

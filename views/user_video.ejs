@@ -1078,6 +1078,7 @@
         let reconnectAttempts = 0;
         const MAX_RECONNECT_ATTEMPTS = 5;
         let iceCandidatesQueue = [];
+        let pingInterval;
 
         /* ===============================
            DOM ELEMENTS
@@ -1191,6 +1192,7 @@
                 });
 
                 localVideo.srcObject = localStream;
+                localVideo.play().catch(e => console.error('Error playing local video:', e));
                 document.getElementById('videoLoading').classList.add('hidden');
 
                 // Enable control buttons
@@ -1247,7 +1249,8 @@
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
                     { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' }
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' }
                 ],
                 iceCandidatePoolSize: 10,
                 iceTransportPolicy: 'all',
@@ -1267,6 +1270,7 @@
                 console.log('Received remote track:', event.track.kind);
                 if (!remoteVideo.srcObject) {
                     remoteVideo.srcObject = event.streams[0];
+                    remoteVideo.play().catch(e => console.error('Error playing remote video:', e));
                     updateStatus('Call connected', 'connected');
                     startTimer();
                     showToast('Connected to doctor', 'success');
@@ -1276,6 +1280,7 @@
             // ICE candidate handling
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate && socket && socket.connected) {
+                    console.log('Sending ICE candidate');
                     socket.emit('signal', {
                         roomId: ROOM_ID,
                         candidate: event.candidate
@@ -1348,6 +1353,9 @@
                 peerConnection = null;
             }
 
+            // Clear ICE candidates queue
+            iceCandidatesQueue = [];
+
             showToast(`Reconnecting... Attempt ${reconnectAttempts}`, 'warning');
         }
 
@@ -1357,10 +1365,11 @@
         function initSocket() {
             socket = io({
                 reconnection: true,
-                reconnectionAttempts: 5,
+                reconnectionAttempts: 10,
                 reconnectionDelay: 1000,
-                reconnectionDelayMax: 5000,
-                timeout: 20000
+                reconnectionDelayMax: 10000,
+                timeout: 20000,
+                transports: ['websocket', 'polling']
             });
 
             socket.on('connect', () => {
@@ -1372,6 +1381,13 @@
                     roomId: ROOM_ID,
                     role: 'user'
                 });
+
+                // Start ping interval
+                pingInterval = setInterval(() => {
+                    if (socket.connected) {
+                        socket.emit('ping');
+                    }
+                }, 30000);
             });
 
             socket.on('user-joined', (data) => {
@@ -1387,6 +1403,8 @@
 
             socket.on('signal', async (data) => {
                 try {
+                    console.log('Received signal:', Object.keys(data)[0]);
+
                     if (!peerConnection) {
                         createPeerConnection();
                     }
@@ -1457,6 +1475,8 @@
 
             socket.on('disconnect', (reason) => {
                 console.log('Socket disconnected:', reason);
+                if (pingInterval) clearInterval(pingInterval);
+
                 if (!callEnded) {
                     updateStatus('Disconnected from server', 'disconnected');
                     showToast('Connection lost. Reconnecting...', 'error');
@@ -1477,6 +1497,10 @@
             socket.on('reconnect_failed', () => {
                 console.log('Socket reconnection failed');
                 showToast('Failed to reconnect to server', 'error');
+            });
+
+            socket.on('pong', (data) => {
+                console.log('Pong received:', data.timestamp);
             });
 
             socket.on('error', (error) => {
@@ -1569,6 +1593,7 @@
            =============================== */
         function cleanupCall() {
             clearInterval(timerInterval);
+            if (pingInterval) clearInterval(pingInterval);
 
             if (localStream) {
                 localStream.getTracks().forEach(track => {
