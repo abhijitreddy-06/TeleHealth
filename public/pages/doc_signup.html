@@ -1142,11 +1142,15 @@ a:visited {
                 document.body.style.overflow = '';
             }
         });
-        phoneInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-            }
-        });
+
+            const phoneInput = document.getElementById('phone');
+            if (phoneInput) {
+            phoneInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                }
+            });
+        }
 
             const togglePassword = document.getElementById('togglePassword');
             const passwordInput = document.getElementById('password');

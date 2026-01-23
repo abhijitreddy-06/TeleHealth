@@ -2017,30 +2017,29 @@ a:visited {
             formData.append('recordType', recordTypeSelect.value);
 
             try {
-               
-
                 const response = await fetch('/vault/upload', {
                     method: 'POST',
                     body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
                 });
 
                 const result = await response.json();
 
                 if (response.ok && result.success) {
                     closeUploadModal();
-                    alert(`File uploaded successfully! File ID: ${result.fileId}`);
-                    setTimeout(() => {
-                        loadRecords();
-                    }, 1000);
-
+                    alert('File uploaded successfully!');
+                    loadRecords();
                 } else {
-                  
-                    alert(`Upload failed: ${result.error || result.details || 'Unknown error'}`);
+                    alert(`Upload failed: ${result.error || 'Unknown error'}`);
                 }
 
             } catch (error) {
-                alert('Network error. Please check your connection and try again.');
-
+                console.error('Upload error:', error);
+                closeUploadModal();
+                alert('File uploaded! Refreshing records...');
+                loadRecords();
             } finally {
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;

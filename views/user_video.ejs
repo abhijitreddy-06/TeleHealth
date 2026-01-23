@@ -1200,14 +1200,21 @@
                         socket = null;
                     }
                 } else {
-                    updateStatus('Doctor disconnected. Waiting for reconnection...', 'warning');
-                    showToast('Doctor disconnected. Please wait...', 'warning');
-                    attemptReconnect();
+                    updateStatus('Doctor disconnected. Checking status...', 'warning');
+                    setTimeout(() => {
+                        if (!callEnded) {
+                            checkAppointmentStatus();
+                        }
+                    }, 2000);
                 }
             } catch (error) {
                 console.error('Error checking appointment status:', error);
-                updateStatus('Connection issue. Please wait...', 'warning');
-                attemptReconnect();
+                updateStatus('Connection issue. Retrying...', 'warning');
+                setTimeout(() => {
+                    if (!callEnded) {
+                        checkAppointmentStatus();
+                    }
+                }, 2000);
             }
         }
 

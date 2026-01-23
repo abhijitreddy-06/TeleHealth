@@ -24,6 +24,13 @@ router.post("/vault/upload", authenticate, authorize("user"), upload.single("fil
             req.body.recordType || "general"
         );
 
+        const acceptHeader = req.get('Accept') || '';
+        const isAjax = req.xhr || acceptHeader.includes('application/json');
+
+        if (isAjax) {
+            return res.json({ success: true, fileId: result.id, message: 'File uploaded successfully!' });
+        }
+
         res.send(`
             <script>
                 alert("File uploaded successfully!");
@@ -33,6 +40,14 @@ router.post("/vault/upload", authenticate, authorize("user"), upload.single("fil
 
     } catch (err) {
         console.error(err);
+
+        const acceptHeader = req.get('Accept') || '';
+        const isAjax = req.xhr || acceptHeader.includes('application/json');
+
+        if (isAjax) {
+            return res.status(400).json({ success: false, error: err.message });
+        }
+
         res.send(`
             <script>
                 alert("Upload failed: ${escapeHtml(err.message)}");
