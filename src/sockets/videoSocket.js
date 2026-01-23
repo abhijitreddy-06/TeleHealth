@@ -13,12 +13,15 @@ module.exports = function (io) {
 
                 const room = io.sockets.adapter.rooms.get(roomId) || new Set();
                 const roomSize = room.size;
+                console.log(`${role} joined room ${roomId}, room size: ${roomSize}`);
 
                 if (role === 'user') {
                     const doctorInRoom = Array.from(room).some(socketId => {
                         const clientSocket = io.sockets.sockets.get(socketId);
-                        return clientSocket && clientSocket.role === 'doctor';
+                        return clientSocket && clientSocket.role === 'doctor' && socketId !== socket.id;
                     });
+
+                    console.log(`User joined, doctor in room: ${doctorInRoom}`);
 
                     socket.emit('user-joined', {
                         roomId,
@@ -26,13 +29,16 @@ module.exports = function (io) {
                     });
 
                     if (doctorInRoom) {
+                        console.log('Notifying doctor that user is ready');
                         socket.to(roomId).emit('user-ready');
                     }
                 } else if (role === 'doctor') {
                     const userInRoom = Array.from(room).some(socketId => {
                         const clientSocket = io.sockets.sockets.get(socketId);
-                        return clientSocket && clientSocket.role === 'user';
+                        return clientSocket && clientSocket.role === 'user' && socketId !== socket.id;
                     });
+
+                    console.log(`Doctor joined, user in room: ${userInRoom}`);
 
                     socket.emit('doctor-joined', {
                         roomId,
@@ -40,11 +46,13 @@ module.exports = function (io) {
                     });
 
                     if (userInRoom) {
+                        console.log('Notifying user that doctor is ready');
                         socket.to(roomId).emit('doctor-ready');
                     }
                 }
 
             } catch (error) {
+                console.error('Error in join-room:', error);
                 socket.emit('error', { message: 'Failed to join room' });
             }
         });
@@ -91,7 +99,13 @@ module.exports = function (io) {
         });
 
         socket.on('signal', ({ roomId, ...payload }) => {
+            console.log(`Signal from ${socket.role} in room ${roomId}:`, Object.keys(payload));
             socket.to(roomId).emit('signal', { ...payload, from: socket.role });
+        });
+
+        socket.on('user-ready-ack', ({ roomId }) => {
+            console.log(`User acknowledged ready in room ${roomId}`);
+            socket.to(roomId).emit('user-ready-ack');
         });
 
         socket.on('user-mute-state', ({ roomId, isMuted }) => {

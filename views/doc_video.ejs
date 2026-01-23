@@ -1399,9 +1399,23 @@ html, body {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
                 { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' }
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' },
+                { urls: 'stun:stun.stunprotocol.org:3478' },
+                {
+                    urls: 'turn:openrelay.metered.ca:80',
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
+                },
+                {
+                    urls: 'turn:openrelay.metered.ca:443',
+                    username: 'openrelayproject',
+                    credential: 'openrelayproject'
+                }
             ],
-            iceCandidatePoolSize: 10
+            iceCandidatePoolSize: 10,
+            iceTransportPolicy: 'all'
         };
 
         peerConnection = new RTCPeerConnection(configuration);
@@ -1458,14 +1472,6 @@ html, body {
             console.log('Connection state:', peerConnection.connectionState);
         };
 
-        peerConnection.onnegotiationneeded = async () => {
-            console.log('Negotiation needed');
-            try {
-                await createOffer();
-            } catch (error) {
-                console.error('Negotiation error:', error);
-            }
-        };
         iceCandidates.forEach(candidate => {
             if (candidate) {
                 peerConnection.addIceCandidate(candidate).catch(e => console.error('Error adding stored ICE candidate:', e));
@@ -1603,18 +1609,41 @@ html, body {
             console.log('Doctor joined room:', data);
             updateStatus('Waiting for patient to join...', 'warning');
             showToast('Room joined successfully', 'success');
+
+            if (!peerConnection) {
+                createPeerConnection();
+            }
         });
 
         socket.on('user-ready', async () => {
             console.log('Patient is ready to connect');
             updateStatus('Patient joined, establishing connection...', 'warning');
             showToast('Patient has joined the call', 'success');
+
             if (!peerConnection) {
                 createPeerConnection();
             }
-            if (peerConnection.signalingState === 'stable') {
-                await createOffer();
+
+            setTimeout(async () => {
+                if (peerConnection && peerConnection.signalingState === 'stable' && !remoteVideo.srcObject) {
+                    console.log('Sending offer to patient...');
+                    await createOffer();
+                }
+            }, 500);
+        });
+
+        socket.on('user-ready-ack', async () => {
+            console.log('Patient acknowledged ready');
+            if (!peerConnection) {
+                createPeerConnection();
             }
+
+            setTimeout(async () => {
+                if (peerConnection && peerConnection.signalingState === 'stable' && !remoteVideo.srcObject) {
+                    console.log('Sending offer after ack...');
+                    await createOffer();
+                }
+            }, 300);
         });
 
         socket.on('signal', async (data) => {

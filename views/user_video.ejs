@@ -1010,13 +1010,16 @@
             </div>
             <h2>Consultation Completed</h2>
             <p class="text-medium" id="callEndedMessage">Your video consultation has ended.</p>
-            <button class="prescription-download-btn" id="manualDownloadBtn">
-                <i class="fas fa-download"></i>
-                Download Prescription
-            </button>
-            <p class="text-medium" style="margin-top: 1.5rem; font-size: 0.9rem;">
-                You will be redirected to your dashboard shortly...
-            </p>
+            <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem;">
+                <button class="prescription-download-btn" id="manualDownloadBtn">
+                    <i class="fas fa-download"></i>
+                    Download Prescription
+                </button>
+                <button class="prescription-download-btn" id="skipDownloadBtn" style="background: var(--text-medium);">
+                    <i class="fas fa-arrow-right"></i>
+                    Skip & Go to Dashboard
+                </button>
+                </div>
         </div>
     </div>
 
@@ -1056,6 +1059,7 @@
         const callEndedOverlay = document.getElementById('callEndedOverlay');
         const callEndedMessage = document.getElementById('callEndedMessage');
         const downloadBtn = document.getElementById('manualDownloadBtn');
+        const skipDownloadBtn = document.getElementById('skipDownloadBtn');
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toastMessage');
 
@@ -1201,9 +1205,23 @@
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
                     { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' }
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stun4.l.google.com:19302' },
+                    { urls: 'stun:stun.stunprotocol.org:3478' },
+                    {
+                        urls: 'turn:openrelay.metered.ca:80',
+                        username: 'openrelayproject',
+                        credential: 'openrelayproject'
+                    },
+                    {
+                        urls: 'turn:openrelay.metered.ca:443',
+                        username: 'openrelayproject',
+                        credential: 'openrelayproject'
+                    }
                 ],
-                iceCandidatePoolSize: 10
+                iceCandidatePoolSize: 10,
+                iceTransportPolicy: 'all'
             };
 
             peerConnection = new RTCPeerConnection(configuration);
@@ -1366,15 +1384,22 @@
             socket.on('user-joined', (data) => {
                 console.log('User joined room:', data);
                 updateStatus('Waiting for doctor to join...', 'warning');
-            });
 
-            socket.on('doctor-ready', () => {
-                console.log('Doctor is ready in room');
-                updateStatus('Doctor connected, establishing call...', 'warning');
-                showToast('Doctor joined the call', 'success');
                 if (!peerConnection) {
                     createPeerConnection();
                 }
+            });
+
+            socket.on('doctor-ready', async () => {
+                console.log('Doctor is ready in room');
+                updateStatus('Doctor connected, establishing call...', 'warning');
+                showToast('Doctor joined the call', 'success');
+
+                if (!peerConnection) {
+                    createPeerConnection();
+                }
+
+                socket.emit('user-ready-ack', { roomId: ROOM_ID });
             });
 
             socket.on('signal', async (data) => {
@@ -1386,17 +1411,19 @@
                 console.log('Call ended by doctor:', data);
                 callEnded = true;
 
-                const message = data.reason || 'Doctor ended the consultation.';
+                cleanupCall();
+
+                const message = 'Your consultation has ended. Your prescription is ready.';
                 callEndedMessage.textContent = message;
-                showCallEndedOverlay(true, message);
-                showToast('Doctor ended the call', 'warning');
+                callEndedOverlay.style.display = 'flex';
+                downloadBtn.style.display = 'inline-flex';
+
+                showToast('Doctor ended the call. Prescription is ready!', 'success');
             });
 
             socket.on('prescription-ready', (data) => {
                 console.log('Prescription ready:', data);
-                callEndedMessage.textContent = 'Your prescription is ready for download.';
                 downloadBtn.style.display = 'inline-flex';
-                showToast('Prescription is ready for download', 'success');
             });
 
             socket.on('doctor-disconnected', () => {
@@ -1487,22 +1514,42 @@
 
             downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
             downloadBtn.disabled = true;
-            const anchor = document.createElement('a');
-            anchor.style.display = 'none';
-            anchor.href = url;
-            anchor.download = `prescription-${ROOM_ID}.pdf`;
-            document.body.appendChild(anchor);
-            anchor.click();
-            document.body.removeChild(anchor);
 
-            setTimeout(() => {
-                downloadBtn.innerHTML = original;
-                downloadBtn.disabled = false;
-                showToast('Prescription download started', 'success');
-            }, 1000);
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Download failed');
+                    return response.blob();
+                })
+                .then(blob => {
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    const anchor = document.createElement('a');
+                    anchor.style.display = 'none';
+                    anchor.href = blobUrl;
+                    anchor.download = `prescription-${ROOM_ID}.pdf`;
+                    document.body.appendChild(anchor);
+                    anchor.click();
+                    window.URL.revokeObjectURL(blobUrl);
+                    document.body.removeChild(anchor);
+                    
+                    showToast('Prescription downloaded successfully!', 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/user_video_dashboard';
+                    }, 1500);
+                })
+                .catch(error => {
+                    console.error('Download error:', error);
+                    downloadBtn.innerHTML = original;
+                    downloadBtn.disabled = false;
+                    showToast('Download failed. Please try again.', 'error');
+                });
         }
 
         downloadBtn.addEventListener('click', downloadPrescription);
+
+        skipDownloadBtn.addEventListener('click', () => {
+            window.location.href = '/user_video_dashboard';
+        });
 
         
         function cleanupCall() {
@@ -1534,12 +1581,10 @@
                 downloadBtn.style.display = 'inline-flex';
             } else {
                 downloadBtn.style.display = 'none';
+                setTimeout(() => {
+                    window.location.href = '/user_video_dashboard';
+                }, 3000);
             }
-
-            const redirectTime = showPrescription ? 5000 : 5000;
-            setTimeout(() => {
-                window.location.href = '/user_video_dashboard';
-            }, redirectTime);
         }
 
         
