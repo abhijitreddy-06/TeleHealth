@@ -5,8 +5,7 @@ const { blockAfterLogin } = require('../middleware/auth');
 
 const PROJECT_ROOT = path.join(__dirname, '..', '..');
 
-router.get("/role", (req, res) => {  // Removed blockAfterLogin
-    console.log('✅ /role route hit');
+router.get("/role", blockAfterLogin, (req, res) => { 
     res.sendFile(path.join(PROJECT_ROOT, 'public', 'pages', 'role.html'));
 });
 

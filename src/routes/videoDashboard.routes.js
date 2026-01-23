@@ -27,7 +27,7 @@ router.get("/doc_video_dashboard", authenticate, authorize("doctor"), async (req
         `);
     }
 });
-// Add to videoDashboard.routes.js
+
 router.get("/test-doc-video", authenticate, authorize("doctor"), async (req, res) => {
     console.log("Test route called");
     try {
@@ -47,7 +47,7 @@ router.get("/test-doc-video", authenticate, authorize("doctor"), async (req, res
         });
     }
 });
-// Add this route for starting video calls
+
 router.post("/appointments/:appointmentId/start", authenticate, authorize("doctor"), async (req, res) => {
     try {
         const { appointmentId } = req.params;

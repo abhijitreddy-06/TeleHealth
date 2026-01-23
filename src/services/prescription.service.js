@@ -134,117 +134,83 @@ class PrescriptionService {
     }
 
     addPrescriptionContent(doc, data) {
-        const { appointment, notes, prescriptionDate, patientInfo, roomId } = data;
+        const { appointment, notes, prescriptionDate, patientInfo } = data;
 
         const doctorName = appointment.doctor_name || "Dr. Unknown";
         const specialization = appointment.specialization || "General Physician";
         const qualification = appointment.qualification || "MD";
-        const hospital = appointment.hospital_name || "TeleHealth Clinic";
+        const hospital = appointment.hospital_name || "";
 
-        const appointmentDate = appointment.appointment_date
-            ? new Date(appointment.appointment_date).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            })
-            : new Date().toLocaleDateString();
-
-        const prescriptionDateStr = new Date(prescriptionDate).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+        const dateStr = new Date(prescriptionDate).toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
         });
+        doc
+            .fontSize(14)
+            .font('Helvetica-Bold')
+            .text(`Dr. ${doctorName}`);
 
-        doc.fontSize(18).text('TELEHEALTH PRESCRIPTION', {
-            align: 'center',
-            underline: true
-        });
+        doc
+            .fontSize(10)
+            .font('Helvetica')
+            .fillColor('#444')
+            .text(`${qualification} | ${specialization}`);
+
+        if (hospital) {
+            doc.text(hospital);
+        }
+
         doc.moveDown(0.5);
-        doc.fontSize(10).text('Electronic Medical Prescription', { align: 'center' });
-        doc.moveDown(1);
-
         doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke();
         doc.moveDown(1);
 
-        doc.fontSize(12).fillColor('#333333').text('PRESCRIBING PHYSICIAN:', {
-            underline: true
-        });
-        doc.moveDown(0.3);
-        doc.fontSize(11).fillColor('#000000');
-        doc.text(`Dr. ${doctorName}`, { continued: true });
-        doc.fontSize(9).fillColor('#666666').text(` (${qualification})`, {
-            align: 'left'
-        });
-        doc.fontSize(10);
-        doc.text(`Specialization: ${specialization}`);
-        doc.text(`Hospital/Clinic: ${hospital}`);
+        doc
+            .fontSize(11)
+            .fillColor('#000')
+            .font('Helvetica-Bold')
+            .text('Patient');
+
+        doc
+            .fontSize(10)
+            .font('Helvetica')
+            .text(patientInfo.info);
+
+        doc.text(`Date: ${dateStr}`);
+
         doc.moveDown(1);
 
-        doc.fontSize(12).fillColor('#333333').text('PATIENT INFORMATION:', {
-            underline: true
-        });
-        doc.moveDown(0.3);
-        doc.fontSize(10);
-        doc.text(patientInfo.info);
-        doc.moveDown(1);
+        doc
+            .fontSize(11)
+            .font('Helvetica-Bold')
+            .text('Prescription');
 
-        doc.fontSize(12).fillColor('#333333').text('CONSULTATION DETAILS:', {
-            underline: true
-        });
-        doc.moveDown(0.3);
-        doc.fontSize(10);
-        doc.text(`Appointment Date: ${appointmentDate}`);
-        doc.text(`Prescription Date: ${prescriptionDateStr}`);
-        doc.text(`Consultation ID: ${roomId}`);
-        doc.moveDown(1.5);
-
-        doc.fontSize(12).fillColor('#333333').text('MEDICAL PRESCRIPTION:', {
-            underline: true
-        });
         doc.moveDown(0.5);
 
-        const prescriptionY = doc.y;
-        doc.rect(50, prescriptionY, 500, 200).stroke();
-        doc.moveDown(0.1);
+        doc
+            .fontSize(11)
+            .font('Helvetica')
+            .fillColor('#000');
 
-        doc.fontSize(11).fillColor('#000000');
-        const lines = notes.split('\n');
-        let lineY = prescriptionY + 20;
+        const lines = notes.split('\n').filter(Boolean);
 
-        for (let line of lines) {
-            if (line.trim()) {
-                doc.text(`• ${line.trim()}`, 60, lineY, {
-                    width: 480,
-                    align: 'left'
-                });
-                lineY += 20;
-            }
-        }
-
-        doc.y = prescriptionY + 210;
-        doc.moveDown(2);
-
-        doc.fontSize(10).fillColor('#333333');
-        doc.text('________________________________', 400, doc.y, { align: 'right' });
-        doc.text(`Dr. ${doctorName}`, 400, doc.y + 20, { align: 'right' });
-        doc.text(qualification, 400, doc.y + 35, { align: 'right' });
-        doc.text(specialization, 400, doc.y + 50, { align: 'right' });
-
-        doc.moveDown(4);
-
-        doc.fontSize(8).fillColor('#666666');
-        doc.text('This is an electronically generated prescription from TeleHealth System.', {
-            align: 'center'
+        lines.forEach(line => {
+            doc.text(`• ${line.trim()}`, {
+                indent: 10,
+                lineGap: 4
+            });
         });
-        doc.text('For any queries, please contact: support@telehealth.com | Phone: 1800-TELEHEALTH', {
-            align: 'center'
-        });
-        doc.text('Prescription ID: ' + roomId + ' | Generated on: ' + new Date().toLocaleString(), {
-            align: 'center'
-        });
+
+        doc.moveDown(3);
+        doc
+            .fontSize(10)
+            .font('Helvetica')
+            .fillColor('#444')
+            .text(`Dr. ${doctorName}`, { align: 'right' });
+
+        doc.text(`${qualification}`, { align: 'right' });
     }
+
 
     async savePrescriptionNotes(roomId, appointmentId, notes) {
         if (!notes || !notes.trim()) {

@@ -6,21 +6,17 @@ module.exports = function (io) {
 
         socket.on('join-room', async ({ roomId, role }) => {
             try {
-                // Store room info
                 socket.roomId = roomId;
                 socket.role = role;
 
                 // Join the room
                 socket.join(roomId);
-                console.log(`${role} joined room: ${roomId}, socket: ${socket.id}`);
 
                 // Get current room members
                 const room = io.sockets.adapter.rooms.get(roomId) || new Set();
                 const roomSize = room.size;
 
-                // Notify both sides based on who's already in room
                 if (role === 'user') {
-                    // Check if doctor is already in room
                     const doctorInRoom = Array.from(room).some(socketId => {
                         const clientSocket = io.sockets.sockets.get(socketId);
                         return clientSocket && clientSocket.role === 'doctor';
@@ -32,12 +28,9 @@ module.exports = function (io) {
                     });
 
                     if (doctorInRoom) {
-                        // Doctor is already waiting, notify doctor
                         socket.to(roomId).emit('user-ready');
-                        console.log(`User ${socket.id} joined, doctor notified`);
                     }
                 } else if (role === 'doctor') {
-                    // Check if user is already in room
                     const userInRoom = Array.from(room).some(socketId => {
                         const clientSocket = io.sockets.sockets.get(socketId);
                         return clientSocket && clientSocket.role === 'user';
@@ -49,23 +42,18 @@ module.exports = function (io) {
                     });
 
                     if (userInRoom) {
-                        // User is already waiting, notify user
                         socket.to(roomId).emit('doctor-ready');
-                        console.log(`Doctor ${socket.id} joined, user notified`);
                     }
                 }
 
             } catch (error) {
-                console.error('Join room error:', error);
                 socket.emit('error', { message: 'Failed to join room' });
             }
         });
 
         socket.on('doctor-end-call', async ({ roomId, appointmentId, notes }) => {
             try {
-                console.log(`Doctor ending call for room: ${roomId}, appointment: ${appointmentId}`);
 
-                // Update appointment status
                 await pool.query(
                     `UPDATE appointments 
                      SET status = 'completed', completed_at = NOW() 
@@ -73,7 +61,6 @@ module.exports = function (io) {
                     [roomId]
                 );
 
-                // Save notes if provided
                 if (notes && notes.trim()) {
                     await pool.query(
                         `INSERT INTO doctor_notes (room_id, notes, created_at) 
@@ -84,7 +71,6 @@ module.exports = function (io) {
                     );
                 }
 
-                // Notify user that call is ending
                 io.to(roomId).emit('call-ended-by-doctor', {
                     roomId,
                     appointmentId,
@@ -92,7 +78,6 @@ module.exports = function (io) {
                     timestamp: new Date().toISOString()
                 });
 
-                // Emit prescription-ready
                 io.to(roomId).emit('prescription-ready', {
                     roomId,
                     appointmentId,
@@ -104,17 +89,13 @@ module.exports = function (io) {
                     message: 'Call ended successfully'
                 });
 
-                console.log(`Call ended for room: ${roomId}`);
-
             } catch (error) {
-                console.error('Doctor end call error:', error);
                 socket.emit('error', { message: 'Failed to end call properly' });
             }
         });
 
         // WebRTC signaling - send to everyone in room except sender
         socket.on('signal', ({ roomId, ...payload }) => {
-            console.log(`Signal from ${socket.role} in ${roomId}:`, payload.type || 'candidate');
             socket.to(roomId).emit('signal', { ...payload, from: socket.role });
         });
 
@@ -136,7 +117,6 @@ module.exports = function (io) {
         });
 
         socket.on('disconnect', (reason) => {
-            console.log(`Socket disconnected: ${socket.id}, role: ${socket.role}, room: ${socket.roomId}, reason: ${reason}`);
 
             if (socket.roomId) {
                 if (socket.role === 'user') {
@@ -145,7 +125,6 @@ module.exports = function (io) {
                     socket.to(socket.roomId).emit('doctor-disconnected');
                 }
 
-                // Clean up room if empty
                 setTimeout(() => {
                     const room = io.sockets.adapter.rooms.get(socket.roomId);
                     if (!room || room.size === 0) {

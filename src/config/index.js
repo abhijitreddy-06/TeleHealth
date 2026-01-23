@@ -1,7 +1,5 @@
-// Load environment variables first
 require('dotenv').config();
 
-// Define CORS options based on environment
 const corsOptions = {
     origin: process.env.NODE_ENV === 'production'
         ? [process.env.FRONTEND_URL, 'https://telehealth-production.onrender.com']

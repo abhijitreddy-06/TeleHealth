@@ -7,12 +7,11 @@ router.get("/user_video/:roomId", authenticate, authorize("user"), async (req, r
     try {
         const appointment = await videoService.validateVideoRoom(req.params.roomId, req.user.id);
 
-        // Get user info from database or from req.user
         res.render("user_video", {
             roomId: req.params.roomId,
             appointmentId: appointment.id,
-            userId: req.user.id,  // Add this
-            userName: req.user.name || req.user.username || "User"  // Add this
+            userId: req.user.id,
+            userName: req.user.name || req.user.username || "User"  
         });
     } catch (err) {
         console.error("User video route error:", err);

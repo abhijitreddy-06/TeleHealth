@@ -3,7 +3,6 @@ const router = express.Router();
 const appointmentService = require('../services/appointment.service');
 const { authenticate, authorize } = require('../middleware/auth');
 
-// Book appointment (form submission)
 router.post("/appointments/book", authenticate, authorize("user"), async (req, res) => {
     try {
         await appointmentService.bookAppointment(
@@ -12,8 +11,6 @@ router.post("/appointments/book", authenticate, authorize("user"), async (req, r
             req.body.appointment_date,
             req.body.appointment_time
         );
-
-        // Redirect to video dashboard for MPA
         res.redirect("/user_video_dashboard");
 
     } catch (err) {
@@ -37,7 +34,6 @@ router.post("/appointments/book", authenticate, authorize("user"), async (req, r
     }
 });
 
-// API endpoint for user appointments (for AJAX calls)
 router.get("/api/appointments/user", authenticate, authorize("user"), async (req, res) => {
     try {
         const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'user');
@@ -48,7 +44,6 @@ router.get("/api/appointments/user", authenticate, authorize("user"), async (req
     }
 });
 
-// Start appointment (doctor)
 router.post("/appointments/:id/start", authenticate, authorize("doctor"), async (req, res) => {
     try {
         const result = await appointmentService.startAppointment(req.params.id, req.user.id);
@@ -59,7 +54,6 @@ router.post("/appointments/:id/start", authenticate, authorize("doctor"), async 
     }
 });
 
-// API endpoint for doctor appointments
 router.get("/api/appointments/doctor", authenticate, authorize("doctor"), async (req, res) => {
     try {
         const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'doctor');
@@ -70,7 +64,6 @@ router.get("/api/appointments/doctor", authenticate, authorize("doctor"), async 
     }
 });
 
-// Get available doctors (for appointment booking form)
 router.get("/api/doctors", authenticate, authorize("user"), async (req, res) => {
     try {
         const doctors = await appointmentService.getAvailableDoctors();
@@ -81,7 +74,6 @@ router.get("/api/doctors", authenticate, authorize("user"), async (req, res) => 
     }
 });
 
-// Complete appointment
 router.post("/appointments/:id/complete", authenticate, authorize("doctor"), async (req, res) => {
     try {
         await appointmentService.completeAppointment(req.params.id, req.user.id);

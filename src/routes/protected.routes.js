@@ -4,7 +4,6 @@ const path = require('path');
 const { authenticate, authorize } = require('../middleware/auth');
 const { pool } = require('../config/database');
 
-// Helper function to get correct file path
 const getPublicPath = (fileName) => {
     return path.join(__dirname, '..', '..', 'public', 'pages', fileName);
 };

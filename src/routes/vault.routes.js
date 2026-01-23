@@ -4,7 +4,6 @@ const fileService = require('../services/file.service');
 const { authenticate, authorize } = require('../middleware/auth');
 const { upload } = require('../config/upload');
 
-// Upload file
 router.post("/vault/upload", authenticate, authorize("user"), upload.single("file"), async (req, res) => {
     try {
         await fileService.validateFileUpload(req.file);
@@ -15,7 +14,6 @@ router.post("/vault/upload", authenticate, authorize("user"), upload.single("fil
             req.body.recordType || "general"
         );
 
-        // For MPA, redirect with success message
         res.send(`
             <script>
                 alert("File uploaded successfully!");
@@ -34,7 +32,6 @@ router.post("/vault/upload", authenticate, authorize("user"), upload.single("fil
     }
 });
 
-// Get user files (API)
 router.get("/api/vault/user", authenticate, authorize("user"), async (req, res) => {
     try {
         const files = await fileService.getUserFiles(req.user.id);
@@ -45,7 +42,6 @@ router.get("/api/vault/user", authenticate, authorize("user"), async (req, res) 
     }
 });
 
-// Download file
 router.get("/vault/file/:id", authenticate, async (req, res) => {
     try {
         const file = await fileService.checkFileAccess(req.params.id, req.user.id, req.user.role);
@@ -67,7 +63,6 @@ router.get("/vault/file/:id", authenticate, async (req, res) => {
     }
 });
 
-// API download endpoint
 router.get("/api/vault/download/:id", authenticate, async (req, res) => {
     try {
         const file = await fileService.checkFileAccess(req.params.id, req.user.id, req.user.role);
