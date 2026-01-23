@@ -127,6 +127,19 @@ io.use(async (socket, next) => {
 });
 
 require('./sockets/videoSocket')(io);
+app.get('/api/redis-test', async (req, res) => {
+    try {
+        const { getClient } = require('./config/redis');
+        const client = await getClient();
+
+        await client.set('render-test', 'OK', { EX: 10 });
+        const val = await client.get('render-test');
+
+        res.json({ redis: val });
+    } catch (e) {
+        res.status(500).json({ redis: 'failed' });
+    }
+});
 
 app.use((req, res) => {
     console.log(`❌ 404: ${req.url} not found`);
