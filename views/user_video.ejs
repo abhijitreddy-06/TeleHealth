@@ -1034,6 +1034,7 @@
 
         
         const ROOM_ID = "<%= roomId %>";
+        const APPOINTMENT_ID = "<%= appointmentId %>";
         const USER_ID = "<%= userId || '' %>";
         const USER_NAME = "<%= userName || 'Patient' %>";
         let localStream = null;
@@ -1493,6 +1494,8 @@
             socket.on('doctor-disconnected', () => {
                 console.log('Doctor disconnected');
                 if (!callEnded) {
+                    updateStatus('Doctor disconnected. Checking if call ended...', 'warning');
+                    showToast('Doctor disconnected. Checking status...', 'warning');
                     checkAppointmentStatus();
                 }
             });
@@ -1500,7 +1503,8 @@
             socket.on('connect_error', (error) => {
                 console.error('Socket connection error:', error);
                 if (!callEnded) {
-                    updateStatus('Connection error', 'disconnected');
+                    updateStatus('Connection error. Checking status...', 'disconnected');
+                    showToast('Connection issue. Checking call status...', 'warning');
                     checkAppointmentStatus();
                 }
             });
@@ -1508,6 +1512,7 @@
             socket.on('disconnect', (reason) => {
                 console.log('Socket disconnected:', reason);
                 if (!callEnded && reason !== 'io client disconnect') {
+                    updateStatus('Disconnected. Checking call status...', 'warning');
                     checkAppointmentStatus();
                 }
             });
@@ -1675,6 +1680,36 @@
                 }
 
                 initSocket();
+
+                // Start periodic status check as fallback (every 5 seconds)
+                setInterval(() => {
+                    if (!callEnded && APPOINTMENT_ID) {
+                        fetch(`/api/appointments/${APPOINTMENT_ID}/status`)
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status === 'completed' && !callEnded) {
+                                    console.log('Periodic check: Appointment completed');
+                                    callEnded = true;
+                                    clearInterval(timerInterval);
+                                    cleanupWebRTC();
+                                    if (localStream) {
+                                        localStream.getTracks().forEach(track => track.stop());
+                                        localStream = null;
+                                    }
+                                    localVideo.srcObject = null;
+                                    callEndedMessage.textContent = 'Your consultation has ended. Your prescription is ready.';
+                                    callEndedOverlay.style.display = 'flex';
+                                    downloadBtn.style.display = 'inline-flex';
+                                    showToast('Consultation ended. Prescription is ready!', 'success');
+                                    if (socket) {
+                                        socket.disconnect();
+                                        socket = null;
+                                    }
+                                }
+                            })
+                            .catch(err => console.log('Periodic status check error:', err));
+                    }
+                }, 5000);
 
             } catch (error) {
                 console.error('Initialization error:', error);
