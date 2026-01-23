@@ -73,6 +73,24 @@ router.get("/api/doctors", authenticate, authorize("user"), async (req, res) => 
         res.status(500).json({ error: "Failed to load doctors" });
     }
 });
+/**
+ * 🔧 TEMP TEST ENDPOINT
+ * Purpose: Verify Redis caching for doctors list
+ * Safe to remove after testing
+ */
+router.get('/api/test/doctors-cache', async (req, res) => {
+    try {
+        const doctors = await appointmentService.getAvailableDoctors();
+        res.json({
+            source: 'ok',
+            count: doctors.length,
+            doctors
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to fetch doctors' });
+    }
+});
 
 router.post("/appointments/:id/complete", authenticate, authorize("doctor"), async (req, res) => {
     try {
