@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile | TeleHealth</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38BDF8;
+            --primary-hover: #0EA5E9;
+            --secondary: #10B981;
+            --background: #F9FAFB;
+            --dark-bg: #1E293B;
+            --card-bg: #FFFFFF;
+            --text-dark: #0F172A;
+            --text-light: #F1F5F9;
+            --text-medium: #475569;
+            --border: #E2E8F0;
+            --error: #EF4444;
+            --warning: #F59E0B;
+            --info: #60A5FA;
+            --disabled: #9CA3AF;
+            --footer-bg: #1E293B;
+            --transition: all 0.3s ease;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+        }
+
+        [data-theme="dark"] {
+            --background: #1E293B;
+            --card-bg: #334155;
+            --text-dark: #F1F5F9;
+            --text-light: #0F172A;
+            --text-medium: #CBD5E1;
+            --border: #475569;
+            --footer-bg: #0F172A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .logo i {
+            color: var(--secondary);
+            font-size: 1.5rem;
+        }
+
+        .logo-text {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-controls {
+            display: none;
+        }
+
+        .profile-section {
+            flex: 1;
+            padding: 3rem 5%;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-header h1 {
+            font-size: 2rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-header p {
+            color: var(--text-medium);
+        }
+
+        .profile-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-group label i {
+            color: var(--primary);
+            margin-right: 0.5rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.85rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .simple-footer {
+            background-color: var(--card-bg);
+            padding: 1rem 5%;
+            border-top: 1px solid var(--border);
+        }
+
+        .simple-footer .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+        }
+
+        .simple-footer .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .simple-footer .footer-center {
+            text-align: center;
+        }
+
+        .simple-footer .copyright {
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        .simple-footer .footer-name {
+            color: var(--text-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .simple-footer .footer-right {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .simple-footer .footer-socials a {
+            color: var(--text-dark);
+            font-size: 1.4rem;
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-controls {
+                display: flex;
+                gap: 0.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .simple-footer .footer-content {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 280px;
+            height: 100vh;
+            background-color: var(--card-bg);
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            transition: right 0.3s ease;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-menu a {
+            color: var(--text-dark);
+            text-decoration: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .close-menu {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+
+        .mobile-menu-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-dark);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="/doc_home" class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span class="logo-text">TeleHealth</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="/doc_home"><i class="fas fa-home"></i> Home</a>
+                <a href="/doc_video_dashboard"><i class="fas fa-video"></i> Video</a>
+                <a href="/appointments"><i class="fas fa-calendar-check"></i> Appointments</a>
+                <a href="/doc_profile" class="active"><i class="fas fa-user-md"></i> Profile</a>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </div>
+
+            <div class="mobile-controls">
+                <button class="theme-toggle" id="mobileThemeToggle"><i class="fas fa-moon"></i></button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="close-menu" id="closeMenu"><i class="fas fa-times"></i></button>
+        <a href="/doc_home"><i class="fas fa-home"></i> Home</a>
+        <a href="/doc_video_dashboard"><i class="fas fa-video"></i> Video</a>
+        <a href="/appointments"><i class="fas fa-calendar-check"></i> Appointments</a>
+        <a href="/doc_profile" class="active"><i class="fas fa-user-md"></i> Profile</a>
+    </div>
+
+    <main class="profile-section">
+        <div class="profile-header">
+            <h1><i class="fas fa-edit"></i> Edit Your Profile</h1>
+            <p>Update your professional information</p>
+        </div>
+
+        <div class="profile-card">
+            <form id="editProfileForm" action="/doc_profile/edit" method="POST">
+                <div class="form-group">
+                    <label><i class="fas fa-signature"></i> Full Name</label>
+                    <input type="text" name="fullName" class="form-control" value="<%= profile.fullName %>" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-stethoscope"></i> Specialization</label>
+                        <select name="specialization" class="form-control" required>
+                            <option value="">Select specialization</option>
+                            <option value="General Physician" <%=profile.specialization==='General Physician'
+                                ? 'selected' : '' %>>General Physician</option>
+                            <option value="Cardiologist" <%=profile.specialization==='Cardiologist' ? 'selected' : '' %>
+                                >Cardiologist</option>
+                            <option value="Dermatologist" <%=profile.specialization==='Dermatologist' ? 'selected' : ''
+                                %>>Dermatologist</option>
+                            <option value="Neurologist" <%=profile.specialization==='Neurologist' ? 'selected' : '' %>
+                                >Neurologist</option>
+                            <option value="Orthopedic" <%=profile.specialization==='Orthopedic' ? 'selected' : '' %>
+                                >Orthopedic</option>
+                            <option value="Pediatrician" <%=profile.specialization==='Pediatrician' ? 'selected' : '' %>
+                                >Pediatrician</option>
+                            <option value="Psychiatrist" <%=profile.specialization==='Psychiatrist' ? 'selected' : '' %>
+                                >Psychiatrist</option>
+                            <option value="Gynecologist" <%=profile.specialization==='Gynecologist' ? 'selected' : '' %>
+                                >Gynecologist</option>
+                            <option value="ENT Specialist" <%=profile.specialization==='ENT Specialist' ? 'selected'
+                                : '' %>>ENT Specialist</option>
+                            <option value="Ophthalmologist" <%=profile.specialization==='Ophthalmologist' ? 'selected'
+                                : '' %>>Ophthalmologist</option>
+                            <option value="Dentist" <%=profile.specialization==='Dentist' ? 'selected' : '' %>>Dentist
+                            </option>
+                            <option value="Other" <%=profile.specialization==='Other' ? 'selected' : '' %>>Other
+                            </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-briefcase-medical"></i> Experience (Years)</label>
+                        <input type="number" name="experience" class="form-control" value="<%= profile.experience %>"
+                            min="0" max="60" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-graduation-cap"></i> Qualification</label>
+                    <input type="text" name="qualification" class="form-control" value="<%= profile.qualification %>"
+                        placeholder="e.g., MBBS, MD, FRCS" required>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-hospital"></i> Hospital / Clinic</label>
+                    <input type="text" name="hospital" class="form-control" value="<%= profile.hospital %>"
+                        placeholder="Enter your workplace" required>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-info-circle"></i> Bio</label>
+                    <textarea name="bio" class="form-control"
+                        placeholder="Tell patients about yourself, your experience, and areas of expertise"><%= profile.bio || '' %></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <a href="/doc_profile" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="simple-footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <a href="/doc_home" class="footer-logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>TeleHealth</span>
+                </a>
+            </div>
+            <div class="footer-center">
+                <span class="copyright">© 2026 Built by <a href="https://abhijitreddy-portfolio.netlify.app/"
+                        target="_blank" class="footer-name">Abhijit Reddy😊</a></span>
+            </div>
+            <div class="footer-right footer-socials">
+                <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank"><i class="fab fa-linkedin"></i></a>
+                <a href="https://github.com/abhijitreddy-06" target="_blank"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Theme toggle
+            const themeToggle = document.getElementById('themeToggle');
+            const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+            const html = document.documentElement;
+
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            html.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+
+            function toggleTheme() {
+                const newTheme = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            }
+
+            function updateThemeIcon(theme) {
+                const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
+                themeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+                if (mobileThemeToggle) mobileThemeToggle.innerHTML = `<i class="fas ${icon}"></i>`;
+            }
+
+            themeToggle.addEventListener('click', toggleTheme);
+            if (mobileThemeToggle) mobileThemeToggle.addEventListener('click', toggleTheme);
+
+            // Mobile menu
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const closeMenuBtn = document.getElementById('closeMenu');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            }
+
+            if (closeMenuBtn) {
+                closeMenuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
