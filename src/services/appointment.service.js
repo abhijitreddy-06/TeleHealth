@@ -1,7 +1,20 @@
 const { pool } = require('../config/database');
 const crypto = require('crypto');
+const { getClient } = require('../config/redis'); // Add Redis
 
 class AppointmentService {
+    constructor() {
+        this.redisClient = null;
+    }
+
+    // Why: Lazy initialization
+    async _getRedisClient() {
+        if (!this.redisClient) {
+            this.redisClient = await getClient();
+        }
+        return this.redisClient;
+    }
+
     async bookAppointment(userId, doctorId, date, time) {
         const client = await pool.connect();
         try {
@@ -95,9 +108,23 @@ class AppointmentService {
         return result.rows[0] || null;
     }
 
+    // Why: Doctors list is heavily accessed (every user sees it when booking)
     async getAvailableDoctors() {
+        // Try cache first
+        try {
+            const client = await this._getRedisClient();
+            const cached = await client.get('doctors:available');
+            if (cached) {
+                return JSON.parse(cached);
+            }
+        } catch (err) {
+            // Fail silently
+            console.log('Redis cache read failed for doctors (non-critical)');
+        }
+
         const result = await pool.query(
-            `SELECT d.docid AS id, p.full_name, p.specialization
+            `SELECT d.docid AS id, p.full_name, p.specialization,
+                    p.experience_years, p.qualification, p.hospital_name
              FROM doc_login d
              JOIN doc_profile p ON p.doc_id = d.docid
              WHERE d.docid IN (
@@ -105,10 +132,30 @@ class AppointmentService {
                  FROM appointments 
                  WHERE status NOT IN ('started', 'scheduled')
                  OR appointment_date < CURRENT_DATE
+                 OR doctor_id NOT IN (
+                     SELECT doctor_id FROM appointments 
+                     WHERE status IN ('started', 'scheduled')
+                     AND appointment_date >= CURRENT_DATE
+                 )
              )
              ORDER BY p.full_name`
         );
-        return result.rows;
+
+        const doctors = result.rows;
+
+        // Cache the result (5 minutes TTL)
+        try {
+            const client = await this._getRedisClient();
+            await client.set(
+                'doctors:available',
+                JSON.stringify(doctors),
+                { EX: 300 } // 5 minutes
+            );
+        } catch (err) {
+            // Fail silently
+        }
+
+        return doctors;
     }
 
     async getAppointmentByRoomId(roomId, userId, role) {
