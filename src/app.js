@@ -114,7 +114,6 @@ io.use(async (socket, next) => {
             return next();
         }
 
-        // Verify token
         const payload = jwt.verify(token, ACCESS_TOKEN_SECRET);
         socket.user = {
             id: payload.id,

@@ -13,7 +13,7 @@
 <style>
     
         :root {
-            /* Color Variables */
+            
             --primary: #38bdf8;
             --primary-hover: #0ea5e9;
             --secondary: #10b981;
@@ -30,14 +30,14 @@
             --disabled: #9ca3af;
             --footer-bg: #1e293b;
 
-            /* Other Variables */
+            
             --transition: all 0.3s ease;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 12px;
         }
 
-        /* Dark Theme Variables */
+        
         [data-theme="dark"] {
             --background: #1e293b;
             --card-bg: #334155;
@@ -65,7 +65,7 @@
             line-height: 1.6;
         }
 
-        /* Header & Navigation */
+        
         header {
             background-color: var(--card-bg);
             box-shadow: var(--shadow);
@@ -198,7 +198,7 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* Mobile Menu */
+        
         .mobile-controls {
             display: none;
             align-items: center;
@@ -279,7 +279,7 @@
             color: var(--primary);
         }
 
-        /* Main Content */
+        
         .container {
             max-width: 1400px;
             margin: 2rem auto;
@@ -302,7 +302,7 @@
             font-size: 1.1rem;
         }
 
-        /* Records Section */
+        
         .records-section {
             margin-top: 2rem;
         }
@@ -319,7 +319,7 @@
             color: var(--text-dark);
         }
 
-        /* Records Grid - 3 per row */
+        
         .records-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -406,7 +406,7 @@
             font-size: 0.9rem;
         }
 
-        /* Upload Modal - Large for Web View */
+        
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -494,7 +494,7 @@
             color: var(--error);
         }
 
-        /* Upload Options - Side by Side */
+        
         .upload-content {
             display: flex;
             flex-direction: column;
@@ -551,7 +551,7 @@
             line-height: 1.5;
         }
 
-        /* File Preview */
+        
         .file-preview-section {
             margin-bottom: 2rem;
         }
@@ -632,7 +632,7 @@
             background-color: rgba(239, 68, 68, 0.1);
         }
 
-        /* Form Elements */
+        
         .form-section {
             background-color: rgba(56, 189, 248, 0.02);
             border-radius: var(--radius);
@@ -689,7 +689,7 @@
             font-size: 1.05rem;
         }
 
-        /* Drag & Drop Area */
+        
         .drop-area {
             border: 2px dashed var(--border);
             border-radius: var(--radius);
@@ -714,12 +714,12 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* File Input */
+        
         #fileInput {
             display: none;
         }
 
-        /* View/Preview Modal */
+        
         .preview-modal {
             position: fixed;
             top: 0;
@@ -828,7 +828,7 @@
             border-top: 1px solid var(--border);
         }
 
-        /* Simple Footer */
+        
         .simple-footer {
             background-color: var(--card-bg);
             border-top: 1px solid var(--border);
@@ -892,7 +892,7 @@
             color: var(--border);
         }
 
-        /* Empty State */
+        
         .empty-state {
             text-align: center;
             padding: 4rem 2rem;
@@ -919,7 +919,7 @@
             margin-bottom: 1.5rem;
         }
 
-        /* Scrollbar Styling */
+        
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -938,7 +938,7 @@
             background: var(--primary-hover);
         }
 
-        /* Responsive Design */
+        
         @media (max-width: 1200px) {
             .records-grid {
                 grid-template-columns: repeat(2, 1fr);
@@ -1093,13 +1093,13 @@
             color: var(--text-dark);
             opacity: 0.9;
         }
-        /* Disable Drag & Drop on mobile */
+        
 @media (max-width: 768px) {
     .drop-area {
         display: none !important;
     }
 }
-/* Smaller Browse Files box on mobile */
+
 @media (max-width: 768px) {
     #chooseFileOption {
         padding: 1rem 0.5rem !important;
@@ -1119,20 +1119,18 @@
     }
 }
 
-/* ===============================
-   STRICT SIMPLE FOOTER OVERRIDE
-   =============================== */
+
 
 .simple-footer {
     all: unset;
     display: block;
     background-color: var(--card-bg);
     border-top: 1px solid var(--border);
-    padding: 0.6rem 5%;          /* compact height */
+    padding: 0.6rem 5%;          
     margin-top: auto;
 }
 
-/* GRID LAYOUT – DESKTOP SAFE */
+
 .simple-footer .footer-content {
     all: unset;
     max-width: 1400px;
@@ -1142,7 +1140,7 @@
     align-items: center;
 }
 
-/* LEFT */
+
 .simple-footer .footer-left {
     display: flex;
     align-items: center;
@@ -1162,7 +1160,7 @@
     font-size: 1.2rem;
 }
 
-/* CENTER TEXT */
+
 .simple-footer .footer-center {
     text-align: center;
 }
@@ -1183,7 +1181,7 @@
     text-decoration: underline;
 }
 
-/* RIGHT ICONS */
+
 .simple-footer .footer-right {
     display: flex;
     gap: 1rem;
@@ -1192,7 +1190,7 @@
 
 .simple-footer .footer-socials a {
     color: var(--text-dark);
-    font-size: 1.4rem; /* BIG icons */
+    font-size: 1.4rem; 
     text-decoration: none;
 }
 
@@ -1200,12 +1198,10 @@
     opacity: 0.7;
 }
 
-/* ===============================
-   MOBILE – SMALLER HEIGHT
-   =============================== */
+
 @media (max-width: 768px) {
     .simple-footer {
-        padding: 0.5rem 5%;     /* reduced height */
+        padding: 0.5rem 5%;     
     }
 
     .simple-footer .footer-content {
@@ -1242,12 +1238,12 @@ a:visited {
   .global-loader {
     position: fixed;
     inset: 0;
-    background: transparent; /* fully transparent */
+    background: transparent; 
     z-index: 99999;
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: all; /* blocks clicks */
+    pointer-events: all; 
   }
 
   .global-loader.hidden {
@@ -1255,7 +1251,7 @@ a:visited {
     pointer-events: none;
   }
 
-  /* Center loader box */
+  
   .global-loader .loader-box {
     display: flex;
     flex-direction: column;
@@ -1263,7 +1259,7 @@ a:visited {
     justify-content: center;
     padding: 16px 20px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.85); /* small card only */
+    background: rgba(255, 255, 255, 0.85); 
     backdrop-filter: blur(6px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -1308,15 +1304,11 @@ a:visited {
 
     let loaderTimer = null;
     let loaderVisible = false;
-
-    // 👉 Only show loader if loading takes longer than 300ms
     loaderTimer = setTimeout(() => {
         loader.classList.remove('hidden');
         loader.style.display = 'flex';
         loaderVisible = true;
     }, 300);
-
-    // Hide loader as soon as DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
       clearTimeout(loaderTimer);
 
@@ -1326,12 +1318,9 @@ a:visited {
               loader.style.display = 'none';
           }, 300);
       } else {
-          // Page loaded fast → never show loader
           loader.style.display = 'none';
       }
   });
-
-    // Same-origin navigation handling (MPA)
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a');
         if (!link) return;
@@ -1346,8 +1335,6 @@ a:visited {
 
       const nextUrl = new URL(link.href, location.href);
       if (nextUrl.origin !== location.origin) return;
-
-      // Delay loader again for navigation
       loaderTimer = setTimeout(() => {
           loader.classList.remove('hidden');
           loader.style.display = 'flex';
@@ -1359,8 +1346,6 @@ a:visited {
           location.href = link.href;
       }, 50);
   });
-
-            // Handle back/forward cache
             window.addEventListener('pageshow', (e) => {
                 if (e.persisted) {
                     loader.classList.add('hidden');
@@ -1430,14 +1415,12 @@ a:visited {
 
         <div class="records-section">
             <div class="records-grid" id="recordsGrid">
-                <!-- Records will be loaded here -->
             </div>
         </div>
    
  
     </div>
 
-    <!-- Upload Modal - Large for Web View -->
     <div class="modal-overlay" id="uploadModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -1450,7 +1433,6 @@ a:visited {
             <div class="upload-content">
                 <form id="uploadForm" action="/vault/upload" method="POST" enctype="multipart/form-data">
                     <div class="upload-options">
-                        <!-- Choose File Option -->
                         <div class="upload-option" onclick="document.getElementById('fileInput').click()"
                             id="chooseFileOption">
                             <div class="upload-icon">
@@ -1461,7 +1443,6 @@ a:visited {
                             <input type="file" name="file" id="fileInput" required style="display: none;" />
                         </div>
 
-                        <!-- Drag & Drop Option -->
                         <div class="upload-option drop-area" id="dropArea">
                             <div class="upload-icon">
                                 <i class="fas fa-file-upload"></i>
@@ -1471,7 +1452,6 @@ a:visited {
                         </div>
                     </div>
 
-                    <!-- File Preview Section -->
                     <div class="file-preview-section">
                         <div class="file-preview" id="filePreview">
                             <div class="file-icon" id="fileIcon">
@@ -1521,7 +1501,6 @@ a:visited {
         </div>
     </div>
 
-    <!-- View/Preview Modal -->
     <div class="preview-modal" id="previewModal">
         <div class="preview-content">
             <div class="preview-header">
@@ -1531,22 +1510,18 @@ a:visited {
                 </button>
             </div>
             <div class="preview-body" id="previewBody">
-                <!-- Preview content will be loaded here -->
             </div>
         </div>
     </div>
 
-    <!-- Simple Footer -->
 <footer class="simple-footer">
     <div class="footer-content">
-        <!-- LEFT -->
         <div class="footer-left">
             <a href="/user_home" class="footer-logo">
                 <i class="fas fa-heartbeat"></i>
                 <span>TeleHealth</span>
             </a>
         </div>
-<!-- CENTER -->
 <div class="footer-center">
     <span class="copyright">
         © 2026 Built by
@@ -1556,7 +1531,6 @@ a:visited {
     </span>
         </div>
 
-        <!-- RIGHT -->
         <div class="footer-right footer-socials">
             <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" aria-label="LinkedIn">
                 <i class="fab fa-linkedin"></i>
@@ -1570,15 +1544,12 @@ a:visited {
 
 <script defer>
     document.addEventListener('DOMContentLoaded', function () {
-        // Make functions globally available
         window.openUploadModal = openUploadModal;
         window.closeUploadModal = closeUploadModal;
         window.removeSelectedFile = removeSelectedFile;
         window.openPreviewModal = openPreviewModal;
         window.closePreviewModal = closePreviewModal;
         window.loadRecords = loadRecords;
-
-        // Theme Toggle
         const themeToggle = document.getElementById('themeToggle');
         const mobileThemeToggle = document.getElementById('mobileThemeToggle');
         const html = document.documentElement;
@@ -1606,8 +1577,6 @@ a:visited {
 
         themeToggle.addEventListener('click', toggleTheme);
         mobileThemeToggle.addEventListener('click', toggleTheme);
-
-        // Mobile Menu
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
         const closeMenuBtn = document.getElementById('closeMenu');
         const mobileMenu = document.getElementById('mobileMenu');
@@ -1631,8 +1600,6 @@ a:visited {
                 document.body.style.overflow = '';
             }
         });
-
-        // Upload Modal Functions
         function openUploadModal() {
             document.getElementById('uploadModal').classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -1668,8 +1635,6 @@ a:visited {
             fileIcon.innerHTML = '<i class="fas fa-file"></i>';
             fileIcon.style.color = 'var(--primary)';
         }
-
-        // View/Preview Modal Functions
         function openPreviewModal(recordId) {
             const record = getRecordById(recordId);
             if (!record) {
@@ -1736,8 +1701,6 @@ a:visited {
             }
             return null;
         }
-
-        // Helper Functions
         function getFileTypeFromName(fileName) {
             const extension = fileName.split('.').pop().toLowerCase();
             return extension || 'unknown';
@@ -1778,8 +1741,6 @@ a:visited {
                 day: 'numeric'
             });
         }
-
-        // Drag and Drop functionality
         const dropArea = document.getElementById('dropArea');
         const fileInput = document.getElementById('fileInput');
         const filePreview = document.getElementById('filePreview');
@@ -1787,11 +1748,7 @@ a:visited {
         const fileSize = document.getElementById('fileSize');
         const fileType = document.getElementById('fileType');
         const fileIcon = document.getElementById('fileIcon');
-
-        // Make drop area always visible
         dropArea.classList.add('active');
-
-        // Prevent default drag behaviors
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, preventDefaults, false);
             document.body.addEventListener(eventName, preventDefaults, false);
@@ -1801,8 +1758,6 @@ a:visited {
             e.preventDefault();
             e.stopPropagation();
         }
-
-        // Highlight drop area when item is dragged over it
         ['dragenter', 'dragover'].forEach(eventName => {
             dropArea.addEventListener(eventName, highlight, false);
         });
@@ -1818,8 +1773,6 @@ a:visited {
         function unhighlight() {
             dropArea.classList.remove('drag-over');
         }
-
-        // Handle dropped files
         dropArea.addEventListener('drop', handleDrop, false);
 
         function handleDrop(e) {
@@ -1831,8 +1784,6 @@ a:visited {
                 updateFilePreview(files[0]);
             }
         }
-
-        // Handle file input change
         fileInput.addEventListener('change', function () {
             if (this.files.length > 0) {
                 updateFilePreview(this.files[0]);
@@ -1842,8 +1793,6 @@ a:visited {
         function updateFilePreview(file) {
             filePreview.classList.add('active');
             fileName.textContent = file.name;
-
-            // Format file size
             const sizeInKB = Math.round(file.size / 1024);
             const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
 
@@ -1852,12 +1801,8 @@ a:visited {
             } else {
                 fileSize.innerHTML = `<i class="fas fa-weight-hanging"></i> ${sizeInKB} KB`;
             }
-
-            // Get file type and extension
             const fileExtension = file.name.split('.').pop().toLowerCase();
             fileType.innerHTML = `<i class="fas fa-file-alt"></i> ${fileExtension.toUpperCase()} File`;
-
-            // Update icon based on file type
             const iconElement = fileIcon.querySelector('i');
             let iconClass = 'fa-file';
             let iconColor = 'var(--primary)';
@@ -1885,8 +1830,6 @@ a:visited {
             iconElement.className = `fas ${iconClass}`;
             fileIcon.style.color = iconColor;
         }
-
-        // Load Records Function
         async function loadRecords() {
             try {
                 const res = await fetch("/api/vault/user");
@@ -1943,8 +1886,6 @@ a:visited {
                     `;
                     recordsGrid.appendChild(recordCard);
                 });
-
-                // Store records for preview modal access
                 localStorage.setItem('telehealth_records', JSON.stringify(data));
 
             } catch (error) {
@@ -1964,19 +1905,11 @@ a:visited {
                 `;
             }
         }
-
-        // File Download Function - UPDATED
-        // Simplified downloadFile function for public bucket
         async function downloadFile(fileId, fileName, button) {
             try {
-         
-
-                // Show loading state
                 const originalText = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
                 button.disabled = true;
-
-                // Method 1: Use the streaming API endpoint
                 try {
                     const response = await fetch(`/api/vault/download/${fileId}`);
 
@@ -1999,8 +1932,6 @@ a:visited {
                 } catch (apiError) {
                     console.log('API download failed, trying redirect method:', apiError);
                 }
-
-                // Method 2: Use redirect method (fallback)
              
                 const iframe = document.createElement('iframe');
                 iframe.style.display = 'none';
@@ -2032,10 +1963,7 @@ a:visited {
                 alert('Unable to download file. Please try again.');
             }
         }
-
-        // Event delegation for download buttons
         document.addEventListener('click', function (e) {
-            // Handle download button clicks
             if (e.target.closest('.download-btn')) {
                 e.preventDefault();
                 const button = e.target.closest('.download-btn');
@@ -2050,10 +1978,6 @@ a:visited {
                 }
             }
         });
-
-        // Form submission handling
-        // Form submission handling - UPDATED FOR AJAX
-        // Form submission handling - UPDATED WITH BETTER ERROR HANDLING
         const uploadForm = document.getElementById('uploadForm');
         uploadForm.addEventListener('submit', async function (e) {
             e.preventDefault();
@@ -2065,15 +1989,11 @@ a:visited {
                 alert('Please select a file to upload.');
                 return;
             }
-
-            // Validate file size (10MB limit)
             const file = fileInput.files[0];
             if (file.size > 10 * 1024 * 1024) {
                 alert('File size must be less than 10MB.');
                 return;
             }
-
-            // Validate file type
             const allowedTypes = [
                 'application/pdf',
                 'image/jpeg',
@@ -2088,14 +2008,10 @@ a:visited {
                 alert('Please upload a valid file type (PDF, JPG, PNG, GIF, DOC, DOCX).');
                 return;
             }
-
-            // Show loading state
             const submitBtn = uploadForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
             submitBtn.disabled = true;
-
-            // Create FormData
             const formData = new FormData();
             formData.append('file', file);
             formData.append('recordType', recordTypeSelect.value);
@@ -2106,21 +2022,13 @@ a:visited {
                 const response = await fetch('/vault/upload', {
                     method: 'POST',
                     body: formData,
-                    // Note: Don't set Content-Type header for FormData - browser sets it automatically
                 });
 
                 const result = await response.json();
 
                 if (response.ok && result.success) {
-               
-
-                    // Close modal
                     closeUploadModal();
-
-                    // Show success message
                     alert(`File uploaded successfully! File ID: ${result.fileId}`);
-
-                    // Refresh records list after a short delay
                     setTimeout(() => {
                         loadRecords();
                     }, 1000);
@@ -2134,28 +2042,21 @@ a:visited {
                 alert('Network error. Please check your connection and try again.');
 
             } finally {
-                // Reset button
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;
             }
         });
-        // Close modals with Escape key
         document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 closeUploadModal();
                 closePreviewModal();
             }
         });
-
-        // Initialize
         loadRecords();
-
-        // Check for URL parameters to show success message
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('upload') && urlParams.get('upload') === 'success') {
             setTimeout(() => {
                 alert('File uploaded successfully!');
-                // Remove the parameter from URL
                 window.history.replaceState({}, document.title, window.location.pathname);
             }, 500);
         }

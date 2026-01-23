@@ -9,10 +9,8 @@ module.exports = function (io) {
                 socket.roomId = roomId;
                 socket.role = role;
 
-                // Join the room
                 socket.join(roomId);
 
-                // Get current room members
                 const room = io.sockets.adapter.rooms.get(roomId) || new Set();
                 const roomSize = room.size;
 
@@ -84,7 +82,6 @@ module.exports = function (io) {
                     message: 'Prescription is now available for download'
                 });
 
-                // Confirm to doctor
                 socket.emit('call-ended-confirmed', {
                     message: 'Call ended successfully'
                 });
@@ -94,12 +91,10 @@ module.exports = function (io) {
             }
         });
 
-        // WebRTC signaling - send to everyone in room except sender
         socket.on('signal', ({ roomId, ...payload }) => {
             socket.to(roomId).emit('signal', { ...payload, from: socket.role });
         });
 
-        // Mute state updates
         socket.on('user-mute-state', ({ roomId, isMuted }) => {
             socket.to(roomId).emit('user-mute-state', { isMuted });
         });

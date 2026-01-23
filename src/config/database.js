@@ -1,7 +1,6 @@
 const { Pool } = require('pg');
 const path = require('path');
 
-// Load environment variables
 require('dotenv').config();
 
 const pool = new Pool({

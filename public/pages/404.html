@@ -90,20 +90,18 @@
                 padding: 30px 20px;
             }
         }
-    /* ===============================
-   STRICT SIMPLE FOOTER OVERRIDE
-   =============================== */
+    
 
 .simple-footer {
     all: unset;
     display: block;
     background-color: var(--card-bg);
     border-top: 1px solid var(--border);
-    padding: 0.6rem 5%;          /* compact height */
+    padding: 0.6rem 5%;          
     margin-top: auto;
 }
 
-/* GRID LAYOUT – DESKTOP SAFE */
+
 .simple-footer .footer-content {
     all: unset;
     max-width: 1400px;
@@ -113,7 +111,7 @@
     align-items: center;
 }
 
-/* LEFT */
+
 .simple-footer .footer-left {
     display: flex;
     align-items: center;
@@ -133,7 +131,7 @@
     font-size: 1.2rem;
 }
 
-/* CENTER TEXT */
+
 .simple-footer .footer-center {
     text-align: center;
 }
@@ -154,7 +152,7 @@
     text-decoration: underline;
 }
 
-/* RIGHT ICONS */
+
 .simple-footer .footer-right {
     display: flex;
     gap: 1rem;
@@ -163,7 +161,7 @@
 
 .simple-footer .footer-socials a {
     color: var(--text-dark);
-    font-size: 1.4rem; /* BIG icons */
+    font-size: 1.4rem; 
     text-decoration: none;
 }
 
@@ -171,12 +169,10 @@
     opacity: 0.7;
 }
 
-/* ===============================
-   MOBILE – SMALLER HEIGHT
-   =============================== */
+
 @media (max-width: 768px) {
     .simple-footer {
-        padding: 0.5rem 5%;     /* reduced height */
+        padding: 0.5rem 5%;     
     }
 
     .simple-footer .footer-content {
@@ -213,12 +209,12 @@ a:visited {
   .global-loader {
     position: fixed;
     inset: 0;
-    background: transparent; /* fully transparent */
+    background: transparent; 
     z-index: 99999;
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: all; /* blocks clicks */
+    pointer-events: all; 
   }
 
   .global-loader.hidden {
@@ -226,7 +222,7 @@ a:visited {
     pointer-events: none;
   }
 
-  /* Center loader box */
+  
   .global-loader .loader-box {
     display: flex;
     flex-direction: column;
@@ -234,7 +230,7 @@ a:visited {
     justify-content: center;
     padding: 16px 20px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.85); /* small card only */
+    background: rgba(255, 255, 255, 0.85); 
     backdrop-filter: blur(6px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -278,15 +274,11 @@ a:visited {
 
     let loaderTimer = null;
     let loaderVisible = false;
-
-    // 👉 Only show loader if loading takes longer than 300ms
     loaderTimer = setTimeout(() => {
         loader.classList.remove('hidden');
         loader.style.display = 'flex';
         loaderVisible = true;
     }, 300);
-
-    // Hide loader as soon as DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
       clearTimeout(loaderTimer);
 
@@ -296,12 +288,9 @@ a:visited {
               loader.style.display = 'none';
           }, 300);
       } else {
-          // Page loaded fast → never show loader
           loader.style.display = 'none';
       }
   });
-
-    // Same-origin navigation handling (MPA)
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a');
         if (!link) return;
@@ -316,8 +305,6 @@ a:visited {
 
       const nextUrl = new URL(link.href, location.href);
       if (nextUrl.origin !== location.origin) return;
-
-      // Delay loader again for navigation
       loaderTimer = setTimeout(() => {
           loader.classList.remove('hidden');
           loader.style.display = 'flex';
@@ -329,8 +316,6 @@ a:visited {
           location.href = link.href;
       }, 50);
   });
-
-    // Handle back/forward cache
     window.addEventListener('pageshow', (e) => {
         if (e.persisted) {
             loader.classList.add('hidden');

@@ -5,17 +5,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Doctor Video Dashboard | TeleHealth</title>
-<!-- Add to your EJS head section -->
 <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
-    <!-- Fonts & Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
 
     <style>
         :root {
-            /* Color Variables */
+            
             --primary: #38bdf8;
             --primary-hover: #0ea5e9;
             --secondary: #10b981;
@@ -34,13 +32,13 @@
             --success: #22c55e;
             --muted: #94a3b8;
 
-            /* Other Variables */
+            
             --transition: all 0.3s ease;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 12px;
         }
 
-        /* Dark Theme Variables */
+        
         [data-theme="dark"] {
             --background: #1e293b;
             --card-bg: #334155;
@@ -68,7 +66,7 @@
             line-height: 1.6;
         }
 
-        /* ================= HEADER & NAVIGATION ================= */
+        
         header {
             background-color: var(--card-bg);
             box-shadow: var(--shadow);
@@ -159,7 +157,7 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* Mobile Controls */
+        
         .mobile-controls {
             display: none;
             align-items: center;
@@ -184,7 +182,7 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* Mobile Menu */
+        
         .mobile-menu {
             position: fixed;
             top: 0;
@@ -241,7 +239,7 @@
             color: var(--primary);
         }
 
-        /* ================= MAIN CONTENT ================= */
+        
         main {
             flex: 1;
             padding: 3rem 5%;
@@ -425,7 +423,7 @@
             cursor: not-allowed;
         }
 
-        /* Instructions Card */
+        
         .instructions-card {
             background-color: var(--card-bg);
             padding: 2.5rem;
@@ -483,7 +481,7 @@
             font-size: 0.95rem;
         }
 
-        /* Simple Footer */
+        
         .simple-footer {
             background-color: var(--card-bg);
             border-top: 1px solid var(--border);
@@ -547,7 +545,7 @@
             color: var(--border);
         }
 
-        /* Responsive adjustments */
+        
         @media (max-width: 768px) {
             .nav-links {
                 display: none;
@@ -625,7 +623,7 @@
             }
         }
 
-        /* Dark theme adjustments */
+        
         [data-theme="dark"] footer {
             color: var(--text-dark);
         }
@@ -639,20 +637,18 @@
         [data-theme="dark"] .status-container {
             background-color: rgba(56, 189, 248, 0.2);
         }
-    /* ===============================
-   STRICT SIMPLE FOOTER OVERRIDE
-   =============================== */
+    
 
 .simple-footer {
     all: unset;
     display: block;
     background-color: var(--card-bg);
     border-top: 1px solid var(--border);
-    padding: 0.6rem 5%;          /* compact height */
+    padding: 0.6rem 5%;          
     margin-top: auto;
 }
 
-/* GRID LAYOUT – DESKTOP SAFE */
+
 .simple-footer .footer-content {
     all: unset;
     max-width: 1400px;
@@ -662,7 +658,7 @@
     align-items: center;
 }
 
-/* LEFT */
+
 .simple-footer .footer-left {
     display: flex;
     align-items: center;
@@ -682,7 +678,7 @@
     font-size: 1.2rem;
 }
 
-/* CENTER TEXT */
+
 .simple-footer .footer-center {
     text-align: center;
 }
@@ -703,7 +699,7 @@
     text-decoration: underline;
 }
 
-/* RIGHT ICONS */
+
 .simple-footer .footer-right {
     display: flex;
     gap: 1rem;
@@ -712,7 +708,7 @@
 
 .simple-footer .footer-socials a {
     color: var(--text-dark);
-    font-size: 1.4rem; /* BIG icons */
+    font-size: 1.4rem; 
     text-decoration: none;
 }
 
@@ -720,12 +716,10 @@
     opacity: 0.7;
 }
 
-/* ===============================
-   MOBILE – SMALLER HEIGHT
-   =============================== */
+
 @media (max-width: 768px) {
     .simple-footer {
-        padding: 0.5rem 5%;     /* reduced height */
+        padding: 0.5rem 5%;     
     }
 
     .simple-footer .footer-content {
@@ -791,7 +785,6 @@ a:visited {
         </nav>
     </header>
 
-    <!-- ================= MOBILE MENU ================= -->
     <div class="mobile-menu" id="mobileMenu">
         <button class="close-menu" id="closeMenu">
             <i class="fas fa-times"></i>
@@ -801,7 +794,6 @@ a:visited {
         <a href="/doc_profile"><i class="fas fa-user-md"></i> Profile</a>
     </div>
 
-    <!-- ================= MAIN CONTENT ================= -->
     <main>
         <div class="dashboard-header">
             <h1>Video Consultation Dashboard</h1>
@@ -809,7 +801,6 @@ a:visited {
         </div>
 
         <div class="dashboard-grid">
-            <!-- Appointment Details Card -->
             <div class="appointment-card">
                 <div class="appointment-header">
                     <div class="appointment-icon">
@@ -907,7 +898,6 @@ a:visited {
                         <% } %>
             </div>
 
-            <!-- Instructions Card -->
             <div class="instructions-card">
                 <h3><i class="fas fa-info-circle"></i> Consultation Guidelines</h3>
                 <div class="instructions-list">
@@ -944,17 +934,14 @@ a:visited {
         </div>
     </main>
 
-    <!-- ================= FOOTER ================= -->
 <footer class="simple-footer">
     <div class="footer-content">
-        <!-- LEFT -->
         <div class="footer-left">
             <a href="/user_home" class="footer-logo">
                 <i class="fas fa-heartbeat"></i>
                 <span>TeleHealth</span>
             </a>
         </div>
-<!-- CENTER -->
 <div class="footer-center">
     <span class="copyright">
         © 2026 Built by
@@ -964,7 +951,6 @@ a:visited {
     </span>
         </div>
 
-        <!-- RIGHT -->
         <div class="footer-right footer-socials">
             <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" aria-label="LinkedIn">
                 <i class="fab fa-linkedin"></i>
@@ -976,9 +962,7 @@ a:visited {
         </div>
         </footer>
 
-    <!-- ================= SCRIPTS ================= -->
     <script>
-        // Theme toggle functionality
         document.addEventListener('DOMContentLoaded', function () {
             const themeToggle = document.getElementById('themeToggle');
             const mobileThemeToggle = document.getElementById('mobileThemeToggle');
@@ -1007,8 +991,6 @@ a:visited {
 
             themeToggle.addEventListener('click', toggleTheme);
             mobileThemeToggle.addEventListener('click', toggleTheme);
-
-            // Mobile menu functionality
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const closeMenuBtn = document.getElementById('closeMenu');
             const mobileMenu = document.getElementById('mobileMenu');
@@ -1032,14 +1014,10 @@ a:visited {
                     document.body.style.overflow = '';
                 }
             });
-
-                // Auto-refresh page every 10 seconds to check for new appointments
             setInterval(() => {
                 window.location.reload();
             }, 10000);
         });
-
-        // Global functions for starting/joining calls
         async function startCall(appointmentId) {
             if (!appointmentId) return;
 
@@ -1057,8 +1035,6 @@ a:visited {
                     alert(data.error || "Unable to start call");
                     return;
                 }
-
-                // Redirect to video call room
                 window.location.href = `/doc_video/${data.roomId}`;
             } catch (err) {
       
@@ -1071,29 +1047,21 @@ a:visited {
             window.location.href = `/doc_video/${roomId}`;
         }
         console.log("Script loaded - checking button setup");
-
-            // Add click event listener to check if button exists
             document.addEventListener('DOMContentLoaded', function () {
                 console.log("DOM loaded");
-
-                // Find all start call buttons
                 const startButtons = document.querySelectorAll('button[onclick*="startCall"]');
                 console.log("Found start call buttons:", startButtons.length);
 
                 if (startButtons.length > 0) {
                     console.log("First button onclick attribute:", startButtons[0].getAttribute('onclick'));
-                    // In your EJS file, add this
                     console.log("User logged in? Check cookies");
                     console.log("Cookies:", document.cookie);
-
-                    // Check if there's an accessToken
                     const tokenMatch = document.cookie.match(/accessToken=([^;]+)/);
                     if (tokenMatch) {
                         console.log("Access token found");
                     } else {
                         console.error("No access token found!");
                     }
-                    // Also attach event listener to log clicks
                     startButtons.forEach(button => {
                         button.addEventListener('click', function (e) {
                             console.log("Button clicked via event listener");
@@ -1103,9 +1071,7 @@ a:visited {
                     });
                 }
             });
-    // Event delegation for start call buttons
     document.addEventListener('click', function (event) {
-        // Check if click is on a start-call button or its child
         const startBtn = event.target.closest('.start-call-btn');
         if (startBtn) {
             event.preventDefault();
@@ -1114,8 +1080,6 @@ a:visited {
             startCall(appointmentId);
             return;
         }
-
-        // Check if click is on a join-call button or its child
         const joinBtn = event.target.closest('.join-call-btn');
         if (joinBtn) {
             event.preventDefault();

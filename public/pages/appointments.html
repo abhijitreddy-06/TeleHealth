@@ -67,7 +67,7 @@
             line-height: 1.6;
         }
 
-        /* Header & Navigation */
+        
         header {
             background-color: var(--card-bg);
             box-shadow: var(--shadow);
@@ -156,7 +156,7 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* Mobile Controls */
+        
         .mobile-controls {
             display: none;
             align-items: center;
@@ -237,7 +237,7 @@
             color: var(--primary);
         }
 
-        /* Main Content */
+        
         main {
             flex: 1;
             padding: 3rem 5%;
@@ -272,7 +272,7 @@
             margin: 0 auto;
         }
 
-        /* Calendar Styling */
+        
         .calendar-card {
             background-color: var(--card-bg);
             padding: 2rem;
@@ -388,7 +388,7 @@
             cursor: not-allowed;
         }
 
-        /* Time Slots */
+        
         .time-slots-container {
             margin-top: 1.5rem;
         }
@@ -440,7 +440,7 @@
             background-color: var(--disabled);
         }
 
-        /* Form Styling */
+        
         .form-card {
             background-color: var(--card-bg);
             padding: 2rem;
@@ -604,7 +604,7 @@
             box-shadow: none;
         }
 
-        /* Footer */
+        
         footer {
             background-color: var(--footer-bg);
             color: var(--text-light);
@@ -713,7 +713,7 @@
             color: var(--primary);
         }
 
-        /* Responsive */
+        
         @media (max-width: 992px) {
             .page-header h1 {
                 font-size: 2.5rem;
@@ -785,7 +785,7 @@
             }
         }
 
-        /* Dark theme adjustments */
+        
         [data-theme="dark"] footer {
             color: var(--text-dark);
         }
@@ -796,7 +796,7 @@
             opacity: 0.9;
         }
 
-        /* Simple Footer */
+        
         .simple-footer {
             background-color: var(--card-bg);
             border-top: 1px solid var(--border);
@@ -860,7 +860,7 @@
             color: var(--border);
         }
 
-        /* Responsive adjustments */
+        
         @media (max-width: 768px) {
             .simple-footer {
                 padding: 1rem 5%;
@@ -929,7 +929,7 @@
                 padding-bottom: 5px;
             }
 
-            /* Make calendar days responsive */
+            
             .calendar-day {
                 font-size: 0.85rem;
                 min-height: 40px;
@@ -955,10 +955,10 @@
                 font-size: 0.8rem;
             }
 
-            /* Fix form elements for mobile */
+            
             .form-control {
                 font-size: 16px;
-                /* Prevents zoom on iOS */
+                
                 padding: 0.8rem 1rem;
             }
 
@@ -988,7 +988,7 @@
                 font-size: 1rem;
             }
 
-            /* Fix horizontal scrolling */
+            
             html,
             body {
                 overflow-x: hidden;
@@ -1045,7 +1045,7 @@
                 display: grid;
                 grid-template-columns: repeat(7, 1fr);
                 min-width: 320px;
-                /* Prevents grid from becoming too small */
+                
             }
 
             .calendar-day {
@@ -1101,7 +1101,7 @@
                 margin: 0;
             }
 
-            /* Ensure no horizontal scroll on very small screens */
+            
             .booking-container {
                 padding: 0;
                 margin: 0;
@@ -1117,7 +1117,7 @@
             }
         }
 
-        /* Additional media query for very small screens */
+        
         @media (max-width: 360px) {
             .calendar-grid {
                 min-width: 300px;
@@ -1152,7 +1152,7 @@
             }
         }
 
-        /* Fix for landscape mode on mobile */
+        
         @media (max-height: 500px) and (orientation: landscape) {
             .booking-container {
                 grid-template-columns: repeat(2, 1fr);
@@ -1169,20 +1169,18 @@
                 max-height: 150px;
             }
         }
-    /* ===============================
-   STRICT SIMPLE FOOTER OVERRIDE
-   =============================== */
+    
 
 .simple-footer {
     all: unset;
     display: block;
     background-color: var(--card-bg);
     border-top: 1px solid var(--border);
-    padding: 0.6rem 5%;          /* compact height */
+    padding: 0.6rem 5%;          
     margin-top: auto;
 }
 
-/* GRID LAYOUT – DESKTOP SAFE */
+
 .simple-footer .footer-content {
     all: unset;
     max-width: 1400px;
@@ -1192,7 +1190,7 @@
     align-items: center;
 }
 
-/* LEFT */
+
 .simple-footer .footer-left {
     display: flex;
     align-items: center;
@@ -1212,7 +1210,7 @@
     font-size: 1.2rem;
 }
 
-/* CENTER TEXT */
+
 .simple-footer .footer-center {
     text-align: center;
 }
@@ -1233,7 +1231,7 @@
     text-decoration: underline;
 }
 
-/* RIGHT ICONS */
+
 .simple-footer .footer-right {
     display: flex;
     gap: 1rem;
@@ -1242,7 +1240,7 @@
 
 .simple-footer .footer-socials a {
     color: var(--text-dark);
-    font-size: 1.4rem; /* BIG icons */
+    font-size: 1.4rem; 
     text-decoration: none;
 }
 
@@ -1250,12 +1248,10 @@
     opacity: 0.7;
 }
 
-/* ===============================
-   MOBILE – SMALLER HEIGHT
-   =============================== */
+
 @media (max-width: 768px) {
     .simple-footer {
-        padding: 0.5rem 5%;     /* reduced height */
+        padding: 0.5rem 5%;     
     }
 
     .simple-footer .footer-content {
@@ -1292,12 +1288,12 @@ a:visited {
   .global-loader {
     position: fixed;
     inset: 0;
-    background: transparent; /* fully transparent */
+    background: transparent; 
     z-index: 99999;
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: all; /* blocks clicks */
+    pointer-events: all; 
   }
 
   .global-loader.hidden {
@@ -1305,7 +1301,7 @@ a:visited {
     pointer-events: none;
   }
 
-  /* Center loader box */
+  
   .global-loader .loader-box {
     display: flex;
     flex-direction: column;
@@ -1313,7 +1309,7 @@ a:visited {
     justify-content: center;
     padding: 16px 20px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.85); /* small card only */
+    background: rgba(255, 255, 255, 0.85); 
     backdrop-filter: blur(6px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -1358,15 +1354,11 @@ a:visited {
 
     let loaderTimer = null;
     let loaderVisible = false;
-
-    // 👉 Only show loader if loading takes longer than 300ms
     loaderTimer = setTimeout(() => {
         loader.classList.remove('hidden');
         loader.style.display = 'flex';
         loaderVisible = true;
     }, 300);
-
-    // Hide loader as soon as DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
       clearTimeout(loaderTimer);
 
@@ -1376,12 +1368,9 @@ a:visited {
               loader.style.display = 'none';
           }, 300);
       } else {
-          // Page loaded fast → never show loader
           loader.style.display = 'none';
       }
   });
-
-    // Same-origin navigation handling (MPA)
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a');
         if (!link) return;
@@ -1396,8 +1385,6 @@ a:visited {
 
       const nextUrl = new URL(link.href, location.href);
       if (nextUrl.origin !== location.origin) return;
-
-      // Delay loader again for navigation
       loaderTimer = setTimeout(() => {
           loader.classList.remove('hidden');
           loader.style.display = 'flex';
@@ -1409,8 +1396,6 @@ a:visited {
           location.href = link.href;
       }, 50);
   });
-
-            // Handle back/forward cache
             window.addEventListener('pageshow', (e) => {
                 if (e.persisted) {
                     loader.classList.add('hidden');
@@ -1472,7 +1457,6 @@ a:visited {
         </div>
 
         <div class="booking-container">
-            <!-- Calendar Card -->
             <div class="calendar-card">
                 <div class="calendar-header">
                     <h2><i class="fas fa-calendar-alt"></i> Select Date</h2>
@@ -1483,7 +1467,6 @@ a:visited {
                 </div>
 
                 <div class="calendar-grid" id="calendarGrid">
-                    <!-- Calendar headers -->
                     <div class="day-header">Sun</div>
                     <div class="day-header">Mon</div>
                     <div class="day-header">Tue</div>
@@ -1491,18 +1474,16 @@ a:visited {
                     <div class="day-header">Thu</div>
                     <div class="day-header">Fri</div>
                     <div class="day-header">Sat</div>
-                    <!-- Days will be populated by JavaScript -->
                 </div>
 
                 <div class="time-slots-container">
                     <h3><i class="fas fa-clock"></i> Available Times</h3>
                     <div class="time-slots-grid" id="timeSlots">
-                        <!-- Time slots will be populated by JavaScript -->
+                    </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Booking Form Card -->
             <div class="form-card">
                 <div class="form-header">
                     <div class="form-icon">
@@ -1557,14 +1538,12 @@ a:visited {
 
     <footer class="simple-footer">
         <div class="footer-content">
-            <!-- LEFT -->
             <div class="footer-left">
                 <a href="/user_home" class="footer-logo">
                     <i class="fas fa-heartbeat"></i>
                     <span>TeleHealth</span>
                 </a>
             </div>
-            <!-- CENTER -->
             <div class="footer-center">
                 <span class="copyright">
                     © 2026 Built by
@@ -1574,7 +1553,6 @@ a:visited {
                 </span>
             </div>
 
-            <!-- RIGHT -->
             <div class="footer-right footer-socials">
                 <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" aria-label="LinkedIn">
                     <i class="fab fa-linkedin"></i>
@@ -1640,8 +1618,6 @@ a:visited {
                     document.body.style.overflow = '';
                 }
             });
-
-            // Calendar and Time Picker Logic
             let currentDate = new Date();
             let selectedDate = null;
             let selectedTime = null;
@@ -1651,8 +1627,6 @@ a:visited {
             ];
 
             const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-            // Business hours based on your requirements
             const businessHours = {
                 0: { start: 10, end: 16 }, // Sunday: 10 AM - 4 PM
                 1: { start: 8, end: 20 },  // Monday: 8 AM - 8 PM
@@ -1666,33 +1640,21 @@ a:visited {
             function generateCalendar() {
                 const calendarGrid = document.getElementById('calendarGrid');
                 const calendarHeader = document.querySelector('.calendar-header h2');
-
-                // Clear existing days (keeping headers)
                 const existingDays = Array.from(calendarGrid.children).slice(7);
                 existingDays.forEach(day => day.remove());
-
-                // Update header
                 calendarHeader.innerHTML = `<i class="fas fa-calendar-alt"></i> ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
 
                 const year = currentDate.getFullYear();
                 const month = currentDate.getMonth();
-
-                // Get first day of month and total days
                 const firstDay = new Date(year, month, 1);
                 const lastDay = new Date(year, month + 1, 0);
                 const totalDays = lastDay.getDate();
-
-                // Get day of week for first day (0 = Sunday, 6 = Saturday)
                 const firstDayIndex = firstDay.getDay();
-
-                // Add empty cells for days before first day of month
                 for (let i = 0; i < firstDayIndex; i++) {
                     const emptyDay = document.createElement('div');
                     emptyDay.className = 'calendar-day empty';
                     calendarGrid.appendChild(emptyDay);
                 }
-
-                // Add days of month
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
 
@@ -1701,27 +1663,18 @@ a:visited {
                     const dayElement = document.createElement('div');
                     dayElement.className = 'calendar-day';
                     dayElement.textContent = day;
-
-                    // Check if it's a weekend
                     const dayOfWeek = date.getDay();
                     if (dayOfWeek === 0 || dayOfWeek === 6) {
                         dayElement.classList.add('weekend');
                     }
-
-                    // Check if it's today
                     if (date.getTime() === today.getTime()) {
                         dayElement.classList.add('today');
                     }
-
-                    // Check if it's in the past
                     if (date < today) {
                         dayElement.classList.add('past');
                         dayElement.classList.add('disabled');
                     } else {
-                        // Add click event for selectable days
                         dayElement.addEventListener('click', () => selectDate(date));
-
-                        // Check if it's currently selected
                         if (selectedDate &&
                             date.getDate() === selectedDate.getDate() &&
                             date.getMonth() === selectedDate.getMonth() &&
@@ -1732,8 +1685,6 @@ a:visited {
 
                     calendarGrid.appendChild(dayElement);
                 }
-
-                // Generate time slots for selected date
                 if (selectedDate && !isDatePast(selectedDate)) {
                     generateTimeSlots(selectedDate);
                 }
@@ -1753,8 +1704,6 @@ a:visited {
                 const hours = businessHours[dayOfWeek];
 
                 if (!hours) return;
-
-                // Generate 30-minute intervals
                 for (let hour = hours.start; hour < hours.end; hour++) {
                     for (let minute = 0; minute < 60; minute += 30) {
                         const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
@@ -1762,8 +1711,6 @@ a:visited {
                         timeSlot.className = 'time-slot';
                         timeSlot.textContent = formatTime(hour, minute);
                         timeSlot.dataset.time = timeString;
-
-                        // Check if this time is in the past for today
                         const now = new Date();
                         if (isToday(date)) {
                             const slotTime = new Date();
@@ -1776,8 +1723,6 @@ a:visited {
                         } else {
                             timeSlot.addEventListener('click', () => selectTime(timeString));
                         }
-
-                        // Check if this time is currently selected
                         if (selectedTime === timeString) {
                             timeSlot.classList.add('selected');
                         }
@@ -1805,16 +1750,10 @@ a:visited {
 
                 selectedDate = date;
                 selectedTime = null;
-
-                // Update hidden inputs
                 document.getElementById('selectedDate').value = formatDateForInput(date);
                 document.getElementById('selectedTime').value = '';
-
-                // Update display
                 document.getElementById('displayDate').textContent = formatDate(date);
                 document.getElementById('displayTime').textContent = 'Not selected';
-
-                // Regenerate calendar with new selection
                 generateCalendar();
                 generateTimeSlots(date);
 
@@ -1825,15 +1764,9 @@ a:visited {
                 if (!selectedDate) return;
 
                 selectedTime = time;
-
-                // Update hidden input
                 document.getElementById('selectedTime').value = time;
-
-                // Update display
                 const [hour, minute] = time.split(':').map(Number);
                 document.getElementById('displayTime').textContent = formatTime(hour, minute);
-
-                // Update time slots UI
                 document.querySelectorAll('.time-slot').forEach(slot => {
                     slot.classList.remove('selected');
                     if (slot.dataset.time === time) {
@@ -1856,8 +1789,6 @@ a:visited {
             function formatDateForInput(date) {
                 return date.toISOString().split('T')[0];
             }
-
-            // Navigation between months
             document.getElementById('prevMonth').addEventListener('click', () => {
                 currentDate.setMonth(currentDate.getMonth() - 1);
                 generateCalendar();
@@ -1867,8 +1798,6 @@ a:visited {
                 currentDate.setMonth(currentDate.getMonth() + 1);
                 generateCalendar();
             });
-
-            // Update submit button state
             function updateSubmitButton() {
                 const submitBtn = document.getElementById('submitBtn');
                 const doctorSelect = document.getElementById('doctorSelect');
@@ -1879,8 +1808,6 @@ a:visited {
                     submitBtn.disabled = true;
                 }
             }
-
-            // Your original loadDoctors function
             async function loadDoctors() {
                 try {
                     const res = await fetch("/api/doctors");
@@ -1895,8 +1822,6 @@ a:visited {
                         opt.textContent = `${doc.full_name} (${doc.specialization})`;
                         select.appendChild(opt);
                     });
-
-                    // Add event listener for doctor selection
                     select.addEventListener('change', () => {
                         updateDoctorDisplay();
                         updateSubmitButton();
@@ -1913,8 +1838,6 @@ a:visited {
                 const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
                 document.getElementById('displayDoctor').textContent = selectedOption.textContent || 'Not selected';
             }
-
-            // Form submission
             document.getElementById('appointmentForm').addEventListener('submit', function (e) {
                 if (!selectedDate || !selectedTime) {
                     e.preventDefault();
@@ -1926,16 +1849,9 @@ a:visited {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Booking...';
             });
-
-            // Initialize
             window.addEventListener('DOMContentLoaded', () => {
-                // Set initial date to today
                 selectDate(new Date());
-
-                // Generate calendar
                 generateCalendar();
-
-                // Load doctors
                 loadDoctors();
             });
 

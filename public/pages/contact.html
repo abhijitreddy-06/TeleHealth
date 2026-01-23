@@ -12,7 +12,7 @@
         rel="stylesheet">
     <style>
         :root {
-            /* Color Variables */
+            
             --primary: #38BDF8;
             --primary-hover: #0EA5E9;
             --secondary: #10B981;
@@ -29,13 +29,13 @@
             --disabled: #9CA3AF;
             --footer-bg: #1E293B;
 
-            /* Other Variables */
+            
             --transition: all 0.3s ease;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 12px;
         }
 
-        /* Dark Theme Variables */
+        
         [data-theme="dark"] {
             --background: #1E293B;
             --card-bg: #334155;
@@ -63,7 +63,7 @@
             line-height: 1.6;
         }
 
-        /* Header & Navigation */
+        
         header {
             background-color: var(--card-bg);
             box-shadow: var(--shadow);
@@ -179,7 +179,7 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* Mobile Menu */
+        
         .mobile-controls {
             display: none;
             align-items: center;
@@ -266,7 +266,7 @@
             margin-top: 1rem;
         }
 
-        /* Main Content */
+        
         .container {
             flex: 1;
             padding: 3rem 5%;
@@ -470,7 +470,7 @@
             }
         }
 
-        /* Footer */
+        
         footer {
             background-color: var(--footer-bg);
             color: var(--text-light);
@@ -578,7 +578,7 @@
             color: var(--primary);
         }
 
-        /* Chatbot */
+        
         .chatbot-container {
             position: fixed;
             bottom: 30px;
@@ -638,7 +638,7 @@
             transform: scale(1.1);
         }
 
-        /* Responsive Design */
+        
         @media (max-width: 992px) {
             .contact-container {
                 grid-template-columns: 1fr;
@@ -780,7 +780,7 @@
             color: var(--border);
         }
 
-        /* Responsive adjustments */
+        
         @media (max-width: 768px) {
             .simple-footer {
                 padding: 1rem 5%;
@@ -825,7 +825,7 @@
             flex-direction: column;
         }
 
-        /* Ensure both containers have equal height on large screens */
+        
         @media (min-width: 769px) {
             .contact-info {
                 min-height: 100%;
@@ -836,7 +836,7 @@
             }
         }
 
-        /* Contact Information Container */
+        
         .contact-info {
             padding: 2rem;
         }
@@ -884,7 +884,7 @@
         .contact-details {
             flex: 1;
             min-width: 0;
-            /* Prevents overflow */
+            
         }
 
         .contact-details h3 {
@@ -925,7 +925,7 @@
             border-bottom: none;
         }
 
-        /* Contact Form Container */
+        
         .contact-form {
             padding: 2rem;
         }
@@ -983,7 +983,7 @@
             resize: vertical;
         }
 
-        /* Responsive Design for Contact Page */
+        
         @media (max-width: 992px) {
             .contact-container {
                 grid-template-columns: 1fr;
@@ -1039,7 +1039,7 @@
             .form-control {
                 padding: 0.8rem 1rem;
                 font-size: 16px;
-                /* Prevents zoom on iOS */
+                
             }
 
             textarea.form-control {
@@ -1124,7 +1124,7 @@
             }
         }
 
-        /* Fix for landscape mode */
+        
         @media (max-height: 600px) and (orientation: landscape) {
             .contact-container {
                 grid-template-columns: 1fr 1fr;
@@ -1141,27 +1141,25 @@
             }
         }
 
-        /* Ensure form button is properly styled */
+        
         .contact-form button[type="submit"] {
             width: 100%;
             padding: 1rem;
             font-size: 1.1rem;
             margin-top: 0.5rem;
         }
-    /* ===============================
-   STRICT SIMPLE FOOTER OVERRIDE
-   =============================== */
+    
 
 .simple-footer {
     all: unset;
     display: block;
     background-color: var(--card-bg);
     border-top: 1px solid var(--border);
-    padding: 0.6rem 5%;          /* compact height */
+    padding: 0.6rem 5%;          
     margin-top: auto;
 }
 
-/* GRID LAYOUT – DESKTOP SAFE */
+
 .simple-footer .footer-content {
     all: unset;
     max-width: 1400px;
@@ -1171,7 +1169,7 @@
     align-items: center;
 }
 
-/* LEFT */
+
 .simple-footer .footer-left {
     display: flex;
     align-items: center;
@@ -1191,7 +1189,7 @@
     font-size: 1.2rem;
 }
 
-/* CENTER TEXT */
+
 .simple-footer .footer-center {
     text-align: center;
 }
@@ -1212,7 +1210,7 @@
     text-decoration: underline;
 }
 
-/* RIGHT ICONS */
+
 .simple-footer .footer-right {
     display: flex;
     gap: 1rem;
@@ -1221,7 +1219,7 @@
 
 .simple-footer .footer-socials a {
     color: var(--text-dark);
-    font-size: 1.4rem; /* BIG icons */
+    font-size: 1.4rem; 
     text-decoration: none;
 }
 
@@ -1229,12 +1227,10 @@
     opacity: 0.7;
 }
 
-/* ===============================
-   MOBILE – SMALLER HEIGHT
-   =============================== */
+
 @media (max-width: 768px) {
     .simple-footer {
-        padding: 0.5rem 5%;     /* reduced height */
+        padding: 0.5rem 5%;     
     }
 
     .simple-footer .footer-content {
@@ -1266,9 +1262,7 @@ a:active,
 a:visited {
     text-decoration: none !important;
 }
-/* ===============================
-   CONTACT STATUS MODAL
-   =============================== */
+
 .contact-modal {
     position: fixed;
     inset: 0;
@@ -1318,12 +1312,12 @@ a:visited {
   .global-loader {
     position: fixed;
     inset: 0;
-    background: transparent; /* fully transparent */
+    background: transparent; 
     z-index: 99999;
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: all; /* blocks clicks */
+    pointer-events: all; 
   }
 
   .global-loader.hidden {
@@ -1331,7 +1325,7 @@ a:visited {
     pointer-events: none;
   }
 
-  /* Center loader box */
+  
   .global-loader .loader-box {
     display: flex;
     flex-direction: column;
@@ -1339,7 +1333,7 @@ a:visited {
     justify-content: center;
     padding: 16px 20px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.85); /* small card only */
+    background: rgba(255, 255, 255, 0.85); 
     backdrop-filter: blur(6px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -1384,15 +1378,11 @@ a:visited {
 
     let loaderTimer = null;
     let loaderVisible = false;
-
-    // 👉 Only show loader if loading takes longer than 300ms
     loaderTimer = setTimeout(() => {
         loader.classList.remove('hidden');
         loader.style.display = 'flex';
         loaderVisible = true;
     }, 300);
-
-    // Hide loader as soon as DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
       clearTimeout(loaderTimer);
 
@@ -1402,12 +1392,9 @@ a:visited {
               loader.style.display = 'none';
           }, 300);
       } else {
-          // Page loaded fast → never show loader
           loader.style.display = 'none';
       }
   });
-
-    // Same-origin navigation handling (MPA)
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a');
         if (!link) return;
@@ -1422,8 +1409,6 @@ a:visited {
 
       const nextUrl = new URL(link.href, location.href);
       if (nextUrl.origin !== location.origin) return;
-
-      // Delay loader again for navigation
       loaderTimer = setTimeout(() => {
           loader.classList.remove('hidden');
           loader.style.display = 'flex';
@@ -1435,8 +1420,6 @@ a:visited {
           location.href = link.href;
       }, 50);
   });
-
-    // Handle back/forward cache
     window.addEventListener('pageshow', (e) => {
         if (e.persisted) {
             loader.classList.add('hidden');
@@ -1589,14 +1572,12 @@ a:visited {
 
     <footer class="simple-footer">
         <div class="footer-content">
-            <!-- LEFT -->
             <div class="footer-left">
                 <a href="/user_home" class="footer-logo">
                     <i class="fas fa-heartbeat"></i>
                     <span>TeleHealth</span>
                 </a>
             </div>
-            <!-- CONTACT STATUS MODAL -->
             <div id="contactModal" class="contact-modal">
                 <div class="contact-modal-content">
                     <div id="contactModalIcon" class="modal-icon"></div>
@@ -1606,7 +1587,6 @@ a:visited {
                 </div>
             </div>
 
-<!-- CENTER -->
 <div class="footer-center">
     <span class="copyright">
         © 2026 Built by
@@ -1616,7 +1596,6 @@ a:visited {
     </span>
             </div>
 
-            <!-- RIGHT -->
             <div class="footer-right footer-socials">
                 <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" aria-label="LinkedIn">
                     <i class="fab fa-linkedin"></i>
@@ -1685,8 +1664,6 @@ a:visited {
                     document.body.style.overflow = '';
                 }
             });
-
-            // Show chatbot bubble after delay
             setTimeout(() => {
                 document.getElementById('chat-bubble').classList.add('active');
             }, 3000);
@@ -1738,8 +1715,6 @@ a:visited {
             showModal("error", "Missing Information", "Please fill all required fields.");
             return;
         }
-
-        // Button loading state
         submitBtn.disabled = true;
         submitBtn.innerHTML = `
         <i class="fas fa-spinner fa-spin"></i> Sending...

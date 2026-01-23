@@ -19,7 +19,6 @@ class AuthService {
         return this.redisClient;
     }
 
-    // Why: Cache key helper functions
     _userProfileKey(userId) {
         return `user:profile:${userId}`;
     }

@@ -5,7 +5,6 @@
         <meta charset="UTF-8">
 <link rel="icon" href="/favicon.ico">
 <link rel="icon" type="image/png" href="/favicon.png">
-<!-- Add to your EJS head section -->
 <link rel="icon" href="/favicon.ico" type="image/x-icon">
 <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     <title>Doctor Video Call | TeleHealth</title>
@@ -14,11 +13,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <style>
-        /* ===============================
-           BASE STYLES FROM DOC_HOME (works)
-           =============================== */
+        
         :root {
-            /* Color Variables */
+            
             --primary: #38bdf8;
             --primary-hover: #0ea5e9;
             --secondary: #10b981;
@@ -35,18 +32,18 @@
             --disabled: #9ca3af;
             --footer-bg: #1e293b;
 
-            /* Other Variables */
+            
             --transition: all 0.3s ease;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 12px;
 
-            /* Height variables */
+            
             --header-height: 80px;
             --control-bar-height: 80px;
         }
 
-        /* Dark Theme Variables */
+        
         [data-theme="dark"] {
             --background: #1e293b;
             --card-bg: #334155;
@@ -71,12 +68,10 @@
             min-height: 100vh;
             line-height: 1.6;
             overflow: hidden;
-            /* Prevent body scrolling */
+            
         }
 
-        /* ===============================
-           HEADER - EXACT FROM DOC_HOME
-           =============================== */
+        
         header {
             background-color: var(--card-bg);
             box-shadow: var(--shadow);
@@ -171,9 +166,7 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* ===============================
-           MOBILE MENU - EXACT FROM DOC_HOME
-           =============================== */
+        
         .mobile-controls {
             display: none;
             align-items: center;
@@ -254,33 +247,29 @@
             color: var(--primary);
         }
 
-        /* ===============================
-           MAIN LAYOUT CONTAINER
-           =============================== */
+        
         .main-container {
             display: flex;
             height: calc(100vh - var(--header-height));
             width: 100vw;
             overflow: hidden;
-            /* Prevent scrolling */
+            
             transition: var(--transition);
         }
 
-        /* ===============================
-           VIDEO AREA (Left side)
-           =============================== */
+        
         .video-area {
             flex: 1;
             display: flex;
             flex-direction: column;
             transition: var(--transition);
             padding: 4px;
-            /* Minimal gap */
+            
             min-width: 0;
-            /* Prevent overflow */
+            
         }
 
-        /* Video Container */
+        
         .video-container {
             flex: 1;
             background-color: #000;
@@ -289,12 +278,12 @@
             position: relative;
             border: 2px solid var(--border);
             margin-bottom: 4px;
-            /* Minimal gap */
+            
             min-height: 0;
-            /* Allow shrinking */
+            
         }
 
-        /* Remote Video - FIXED SIZE TO PREVENT SCROLLING */
+        
         #remoteVideo {
             width: 100%;
             height: 100%;
@@ -303,7 +292,7 @@
             display: block;
         }
 
-        /* Local Video (PiP) */
+        
         .local-video-pip {
             position: absolute;
             bottom: 8px;
@@ -339,7 +328,7 @@
             justify-content: center;
         }
 
-        /* Status Overlay */
+        
         .call-status-overlay {
             position: absolute;
             top: 8px;
@@ -392,7 +381,7 @@
             font-weight: 500;
         }
 
-        /* Video Loading State */
+        
         .video-loading {
             position: absolute;
             top: 0;
@@ -424,9 +413,7 @@
             }
         }
 
-        /* ===============================
-           CONTROL BAR (Not fixed)
-           =============================== */
+        
         .controls-bar {
             height: var(--control-bar-height);
             background-color: var(--card-bg);
@@ -447,7 +434,7 @@
             align-items: center;
         }
 
-        /* MODERN CONTROL BUTTONS */
+        
         .control-btn {
             display: flex;
             flex-direction: column;
@@ -517,9 +504,7 @@
             font-weight: 500;
         }
 
-        /* ===============================
-           NOTES PANEL - DESKTOP (Slides from right)
-           =============================== */
+        
         .notes-panel {
             width: 0;
             overflow: hidden;
@@ -560,7 +545,7 @@
             color: var(--primary);
         }
 
-        /* Close button for mobile notes panel */
+        
         .mobile-close-notes {
             display: none;
             background: none;
@@ -646,37 +631,35 @@
             font-size: 0.85rem;
         }
 
-        /* ===============================
-           MOBILE VIEW - INCREASED FONT SIZES
-           =============================== */
+        
         @media (max-width: 768px) {
             :root {
                 --header-height: 75px;
                 --control-bar-height: 75px;
             }
 
-            /* INCREASED MOBILE FONT SIZES */
+            
             body {
                 font-size: 16px;
-                /* Increased base font size */
+                
             }
 
-            /* Header adjustments */
+            
             .navbar {
                 padding: 1rem 4%;
             }
 
             .logo {
                 font-size: 1.6rem;
-                /* Increased */
+                
             }
 
             .logo i {
                 font-size: 1.4rem;
-                /* Increased */
+                
             }
 
-            /* Hide desktop nav, show mobile */
+            
             .nav-links {
                 display: none;
             }
@@ -688,7 +671,7 @@
             .mobile-menu-btn {
                 display: flex;
                 font-size: 1.6rem;
-                /* Increased */
+                
                 width: 44px;
                 height: 44px;
             }
@@ -697,13 +680,13 @@
                 display: none;
             }
 
-            /* Main container for mobile */
+            
             .main-container {
                 flex-direction: column;
                 height: calc(100vh - var(--header-height));
             }
 
-            /* Video area for mobile */
+            
             .video-area {
                 height: calc(100vh - var(--header-height) - var(--control-bar-height));
                 padding: 3px;
@@ -718,14 +701,14 @@
                 height: calc(100vh - 160px);
             }
 
-            /* Remote video fix for mobile */
+            
             #remoteVideo {
                 height: 100%; 
                 object-fit: cover;
                 
             }
 
-            /* Local video PiP larger for mobile */
+            
             .local-video-pip {
                 width: 120px;
                 height: 90px;
@@ -734,12 +717,12 @@
                 transition: transform 0.3s ease, bottom 0.3s ease;
             }
 
-            /* When notes panel opens, move local video up */
+            
             .notes-panel.active~.video-area .local-video-pip {
                 transform: translateY(-25vh);
             }
 
-            /* Status overlay larger */
+            
             .call-status-overlay {
                 top: 6px;
                 left: 6px;
@@ -748,11 +731,11 @@
 
             #callStatusText {
                 font-size: 0.9rem;
-                /* Increased */
+                
                 font-weight: 600;
             }
 
-            /* INCREASED CONTROL BAR SIZES */
+            
             .controls-bar {
                 padding: 0 0.8rem;
                 height: var(--control-bar-height);
@@ -767,29 +750,27 @@
 
             .control-btn {
                 min-width: 70px;
-                /* Increased */
+                
                 padding: 0.7rem 0.5rem;
             }
 
             .control-icon {
                 width: 56px;
-                /* Increased */
+                
                 height: 56px;
-                /* Increased */
+                
                 font-size: 1.4rem;
-                /* Increased */
+                
                 border-width: 2px;
             }
 
             .control-label {
                 font-size: 0.85rem;
-                /* Increased */
+                
                 font-weight: 600;
             }
 
-            /* ===============================
-               NOTES PANEL - MOBILE (Slides from bottom)
-               =============================== */
+            
             .notes-panel {
                 position: fixed;
                 top: 100vh;
@@ -822,14 +803,14 @@
 
             .notes-header h3 {
                 font-size: 1.3rem;
-                /* Increased */
+                
             }
 
-            /* Show mobile close button */
+            
             .mobile-close-notes {
                 display: flex;
                 font-size: 1.5rem;
-                /* Increased */
+                
                 width: 40px;
                 height: 40px;
             }
@@ -837,31 +818,29 @@
             #notesText {
                 min-height: 140px;
                 font-size: 1rem;
-                /* Increased */
+                
                 padding: 1rem;
             }
 
             .notes-actions button {
                 padding: 0.6rem 1.2rem;
                 font-size: 0.95rem;
-                /* Increased */
+                
                 font-weight: 600;
             }
 
             .char-count {
                 font-size: 0.9rem;
-                /* Increased */
+                
             }
         }
 
-        /* ===============================
-           UTILITY CLASSES
-           =============================== */
+        
         .hidden {
             display: none !important;
         }
 
-        /* Remove all link underlines */
+        
         a,
         a:hover,
         a:focus,
@@ -870,7 +849,7 @@
             text-decoration: none !important;
         }
 
-        /* Responsive adjustments for very small screens */
+        
         @media (max-width: 480px) {
             :root {
                 --header-height: 70px;
@@ -928,7 +907,7 @@
             }
         }
 
-        /* Small height devices */
+        
         @media (max-height: 700px) and (max-width: 768px) {
             .notes-panel {
                 height: 60vh;
@@ -947,20 +926,18 @@
                 height: 75px;
             }
         }
-        /* =====================================================
-   FINAL MOBILE VIEWPORT + CONTROL BAR FIX (DROP-IN)
-   ===================================================== */
+        
 
-/* Prevent mobile viewport height bugs */
+
 html, body {
   height: 100%;
   overscroll-behavior: none;
 }
 
-/* ---------- MAIN LAYOUT FIX ---------- */
+
 @media (max-width: 768px) {
 
-  /* Let flex manage height instead of vh math */
+  
   .main-container {
     height: calc(100dvh - var(--header-height));
     display: flex;
@@ -968,7 +945,7 @@ html, body {
     overflow: hidden;
   }
 
-  /* Video area becomes flexible container */
+  
   .video-area {
     flex: 1;
     min-height: 0;
@@ -977,7 +954,7 @@ html, body {
     overflow: hidden;
   }
 
-  /* Video container takes remaining space only */
+  
   .video-container {
     flex: 1;
     min-height: 0;
@@ -985,14 +962,14 @@ html, body {
     overflow: hidden;
   }
 
-  /* Remote video sizing – no zoom, no overflow */
+  
   #remoteVideo {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
 
-  /* ---------- CONTROL BAR FIX ---------- */
+  
   .controls-bar {
     flex-shrink: 0;
     height: var(--control-bar-height);
@@ -1005,7 +982,7 @@ html, body {
     background-color: var(--card-bg);
   }
 
-  /* Ensure controls never wrap outside */
+  
   .controls-wrapper {
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -1013,7 +990,7 @@ html, body {
   }
 }
 
-/* ---------- EXTRA SAFETY FOR SMALL HEIGHT DEVICES ---------- */
+
 @media (max-height: 700px) and (max-width: 768px) {
   .controls-bar {
     height: 70px;
@@ -1021,7 +998,7 @@ html, body {
   }
 }
 
-/* ---------- iOS / Android SAFE AREA SUPPORT ---------- */
+
 @supports (padding: env(safe-area-inset-bottom)) {
   .controls-bar {
     padding-bottom: env(safe-area-inset-bottom);
@@ -1033,7 +1010,6 @@ html, body {
 
 <body>
 
-    <!-- Header - EXACT FROM DOC_HOME -->
     <header>
         <nav class="navbar">
             <a href="/doc_home" class="logo">
@@ -1061,7 +1037,6 @@ html, body {
         </nav>
     </header>
 
-    <!-- Mobile Menu - EXACT FROM DOC_HOME -->
     <div class="mobile-menu" id="mobileMenu">
         <button class="close-menu" id="closeMenu">
             <i class="fas fa-times"></i>
@@ -1071,13 +1046,9 @@ html, body {
         <a href="/doc_profile"><i class="fas fa-user-circle"></i> Profile</a>
     </div>
 
-    <!-- Main Content Area -->
     <div class="main-container">
-        <!-- Video Area (Left side) -->
         <div class="video-area">
-            <!-- Video Container -->
             <div class="video-container">
-                <!-- Status Overlay -->
                 <div class="call-status-overlay" id="callStatusOverlay">
                     <div class="status-indicator">
                         <div class="status-dot"></div>
@@ -1086,10 +1057,8 @@ html, body {
                     <span id="callStatusText">CALL STATUS: CONNECTING...</span>
                 </div>
 
-                <!-- Remote Video Stream -->
                 <video id="remoteVideo" autoplay playsinline></video>
 
-                <!-- Local Video (Picture-in-Picture) -->
                 <div class="local-video-pip">
                     <video id="localVideo" autoplay muted playsinline></video>
                     <div class="local-video-label">
@@ -1098,17 +1067,14 @@ html, body {
                     </div>
                 </div>
 
-                <!-- Loading State -->
                 <div class="video-loading hidden" id="videoLoading">
                     <div class="loading-spinner"></div>
                     <p>Establishing connection...</p>
                 </div>
             </div>
 
-            <!-- Control Bar (Not fixed) -->
             <div class="controls-bar">
                 <div class="controls-wrapper">
-                    <!-- Microphone Toggle -->
                     <button class="control-btn active" id="toggleMic">
                         <div class="control-icon">
                             <i class="fas fa-microphone"></i>
@@ -1116,7 +1082,6 @@ html, body {
                         <span class="control-label">Mute</span>
                     </button>
 
-                    <!-- Camera Toggle -->
                     <button class="control-btn active" id="toggleCam">
                         <div class="control-icon">
                             <i class="fas fa-video"></i>
@@ -1124,7 +1089,6 @@ html, body {
                         <span class="control-label">Camera</span>
                     </button>
 
-                    <!-- Notes Button -->
                     <button class="control-btn" id="toggleNotes">
                         <div class="control-icon">
                             <i class="fas fa-notes-medical"></i>
@@ -1132,7 +1096,6 @@ html, body {
                         <span class="control-label">Notes</span>
                     </button>
 
-                    <!-- End Call -->
                     <button class="control-btn danger" id="endCall">
                         <div class="control-icon">
                             <i class="fas fa-phone-slash"></i>
@@ -1143,7 +1106,6 @@ html, body {
             </div>
         </div>
 
-        <!-- Notes Panel (Right side) -->
         <div class="notes-panel" id="notesPanel">
             <div class="notes-content">
                 <div class="notes-header">
@@ -1178,16 +1140,11 @@ html, body {
         </div>
     </div>
 
-    <!-- Scripts -->
 <script src="/socket.io/socket.io.js"></script>
 <script>
-    /* ===============================
-       VARIABLES & CONSTANTS
-       =============================== */
+    
     const ROOM_ID = "<%= roomId %>";
     const APPOINTMENT_ID = "<%= appointment.id %>";
-
-    // DOM Elements
     const localVideo = document.getElementById('localVideo');
     const remoteVideo = document.getElementById('remoteVideo');
     const toggleMic = document.getElementById('toggleMic');
@@ -1199,8 +1156,6 @@ html, body {
     const notesPanel = document.getElementById('notesPanel');
     const toggleNotesBtn = document.getElementById('toggleNotes');
     const mobileCloseNotes = document.getElementById('mobileCloseNotes');
-
-    // State Variables
     let localStream = null;
     let remoteStream = null;
     let peerConnection = null;
@@ -1214,11 +1169,8 @@ html, body {
     const MAX_RECONNECT_ATTEMPTS = 5;
     let iceCandidates = [];
 
-    /* ===============================
-       THEME & UI MANAGEMENT
-       =============================== */
+    
     document.addEventListener('DOMContentLoaded', () => {
-        // Theme Management
         const themeToggle = document.getElementById('themeToggle');
         const mobileThemeToggle = document.getElementById('mobileThemeToggle');
         const html = document.documentElement;
@@ -1246,8 +1198,6 @@ html, body {
 
         themeToggle.addEventListener('click', toggleTheme);
         mobileThemeToggle?.addEventListener('click', toggleTheme);
-
-        // Notes Panel Management
         notesPanel.classList.remove('active');
 
         toggleNotesBtn.addEventListener('click', () => {
@@ -1290,16 +1240,12 @@ html, body {
                 showToast('Failed to save notes', 'error');
             }
         });
-
-        // Control Buttons
         toggleMic.addEventListener('click', toggleMicrophone);
         toggleCam.addEventListener('click', toggleCamera);
         endCall.addEventListener('click', endCallHandler);
     });
 
-    /* ===============================
-       STATUS & NOTIFICATION FUNCTIONS
-       =============================== */
+    
     function updateStatus(message, type = 'info') {
         callStatusText.textContent = `CALL STATUS: ${message.toUpperCase()}`;
 
@@ -1354,9 +1300,7 @@ html, body {
         }, 3000);
     }
 
-    /* ===============================
-       MEDIA STREAM MANAGEMENT
-       =============================== */
+    
     async function getLocalStream() {
         try {
             localStream = await navigator.mediaDevices.getUserMedia({
@@ -1448,9 +1392,7 @@ html, body {
         }
     }
 
-    /* ===============================
-       WEBRTC PEER CONNECTION
-       =============================== */
+    
     function createPeerConnection() {
         console.log('Creating peer connection...');
         const configuration = {
@@ -1463,15 +1405,11 @@ html, body {
         };
 
         peerConnection = new RTCPeerConnection(configuration);
-
-        // Add local tracks
         if (localStream) {
             localStream.getTracks().forEach(track => {
                 peerConnection.addTrack(track, localStream);
             });
         }
-
-        // Remote stream received
         peerConnection.ontrack = (event) => {
             console.log('Received remote track:', event.track.kind);
             if (!remoteVideo.srcObject) {
@@ -1480,16 +1418,12 @@ html, body {
                 updateStatus('Call connected', 'connected');
                 showToast('Video call connected successfully', 'success');
                 callStartTime = Date.now();
-
-                // Add event listener for remote video
                 remoteVideo.onloadedmetadata = () => {
                     console.log('Remote video metadata loaded');
                     remoteVideo.play().catch(e => console.log('Remote video play error:', e));
                 };
             }
         };
-
-        // ICE candidate handling
         peerConnection.onicecandidate = (event) => {
             if (event.candidate && socket) {
                 console.log('Sending ICE candidate');
@@ -1501,8 +1435,6 @@ html, body {
                 console.log('ICE gathering complete');
             }
         };
-
-        // ICE connection state monitoring
         peerConnection.oniceconnectionstatechange = () => {
             const state = peerConnection.iceConnectionState;
             console.log('ICE connection state:', state);
@@ -1534,8 +1466,6 @@ html, body {
                 console.error('Negotiation error:', error);
             }
         };
-
-        // Add stored ICE candidates
         iceCandidates.forEach(candidate => {
             if (candidate) {
                 peerConnection.addIceCandidate(candidate).catch(e => console.error('Error adding stored ICE candidate:', e));
@@ -1558,8 +1488,6 @@ html, body {
             });
 
             await peerConnection.setLocalDescription(offer);
-
-            // Send offer to remote peer
             socket.emit('signal', {
                 roomId: ROOM_ID,
                 offer: offer
@@ -1605,7 +1533,6 @@ html, body {
                     if (peerConnection.remoteDescription) {
                         await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
                     } else {
-                        // Store candidate for later
                         iceCandidates.push(new RTCIceCandidate(data.candidate));
                         console.log('Stored ICE candidate for later');
                     }
@@ -1618,9 +1545,7 @@ html, body {
         }
     }
 
-    /* ===============================
-       RECONNECTION HANDLING
-       =============================== */
+    
     function attemptReconnect() {
         if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
             showToast('Max reconnection attempts reached. Please refresh the page.', 'error');
@@ -1634,7 +1559,6 @@ html, body {
             if (!callEnded && socket && !socket.connected) {
                 socket.connect();
             } else if (!callEnded && peerConnection && peerConnection.iceConnectionState === 'failed') {
-                // Recreate peer connection
                 cleanupWebRTC();
                 if (localStream) {
                     createPeerConnection();
@@ -1655,9 +1579,7 @@ html, body {
         iceCandidates = [];
     }
 
-    /* ===============================
-       SOCKET.IO COMMUNICATION
-       =============================== */
+    
     function initSocket() {
         socket = io({
             reconnection: true,
@@ -1671,8 +1593,6 @@ html, body {
             console.log('Socket connected:', socket.id);
             updateStatus('Connecting to patient...', 'warning');
             reconnectAttempts = 0;
-
-            // Join the room
             socket.emit('join-room', {
                 roomId: ROOM_ID,
                 role: 'doctor'
@@ -1689,8 +1609,6 @@ html, body {
             console.log('Patient is ready to connect');
             updateStatus('Patient joined, establishing connection...', 'warning');
             showToast('Patient has joined the call', 'success');
-
-            // Create peer connection and send offer
             if (!peerConnection) {
                 createPeerConnection();
             }
@@ -1709,8 +1627,6 @@ html, body {
             if (!callEnded) {
                 updateStatus('Patient disconnected', 'warning');
                 showToast('Patient disconnected from the call', 'warning');
-
-                // Wait 30 seconds for patient to reconnect
                 setTimeout(() => {
                     if (!callEnded) {
                         endCallHandler();
@@ -1750,9 +1666,7 @@ html, body {
         });
     }
 
-    /* ===============================
-       CALL MANAGEMENT
-       =============================== */
+    
     async function endCallHandler() {
         if (callEnded) return;
         callEnded = true;
@@ -1762,8 +1676,6 @@ html, body {
 
         try {
             const notes = notesText.value.trim();
-
-            // Save notes if any
             if (notes) {
                 await fetch("/api/notes/save", {
                     method: "POST",
@@ -1771,13 +1683,9 @@ html, body {
                     body: JSON.stringify({ roomId: ROOM_ID, notes })
                 });
             }
-
-            // Complete appointment
             await fetch(`/appointments/${APPOINTMENT_ID}/complete`, {
                 method: "POST"
             });
-
-            // Notify patient that call is ending
             if (socket && socket.connected) {
                 socket.emit('doctor-end-call', {
                     roomId: ROOM_ID,
@@ -1785,8 +1693,6 @@ html, body {
                     notes: notes
                 });
             }
-
-            // Cleanup media streams
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
@@ -1795,8 +1701,6 @@ html, body {
             cleanupWebRTC();
 
             showToast('Call ended successfully', 'success');
-
-            // Redirect after delay
             setTimeout(() => {
                 window.location.href = "/doc_video_dashboard";
             }, 1500);
@@ -1810,9 +1714,7 @@ html, body {
         }
     }
 
-    /* ===============================
-       INITIALIZATION
-       =============================== */
+    
     async function initializeCall() {
         try {
             updateStatus('Initializing...', 'warning');
@@ -1832,13 +1734,9 @@ html, body {
             showToast('Failed to initialize video call', 'error');
         }
     }
-
-    // Start the call when page loads
     window.addEventListener('load', () => {
         setTimeout(initializeCall, 500);
     });
-
-    // Prevent accidental page leave during call
     window.addEventListener('beforeunload', (e) => {
         if (!callEnded && (socket?.connected || peerConnection)) {
             e.preventDefault();
@@ -1846,9 +1744,7 @@ html, body {
         }
     });
 
-    /* ===============================
-       TOAST STYLES
-       =============================== */
+    
     const toastStyles = document.createElement('style');
     toastStyles.textContent = `
         .toast {

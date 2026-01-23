@@ -13,7 +13,7 @@
 <style>
     
         :root {
-            /* Color Variables */
+            
             --primary: #38BDF8;
             --primary-hover: #0EA5E9;
             --secondary: #10B981;
@@ -30,13 +30,13 @@
             --disabled: #9CA3AF;
             --footer-bg: #1E293B;
 
-            /* Other Variables */
+            
             --transition: all 0.3s ease;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 12px;
         }
 
-        /* Dark Theme Variables */
+        
         [data-theme="dark"] {
             --background: #1E293B;
             --card-bg: #334155;
@@ -69,7 +69,7 @@
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
         }
 
-        /* Header & Navigation */
+        
         header {
             background-color: var(--card-bg);
             box-shadow: var(--shadow);
@@ -193,7 +193,7 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* Mobile Menu - Added from Home Page */
+        
         .mobile-controls {
             display: none;
             align-items: center;
@@ -281,7 +281,7 @@
             margin-top: 1rem;
         }
 
-        /* Profile Creation Section */
+        
         .profile-section {
             padding: 3rem 5%;
             max-width: 700px;
@@ -535,7 +535,7 @@
             pointer-events: none;
         }
 
-        /* Success Section */
+        
         .success-container {
             text-align: center;
             padding: 3rem;
@@ -569,7 +569,7 @@
             font-size: 1.1rem;
         }
 
-        /* Footer */
+        
         footer {
             background-color: var(--footer-bg);
             color: var(--text-light);
@@ -678,7 +678,7 @@
             color: var(--primary);
         }
 
-        /* Animations */
+        
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -705,7 +705,7 @@
             }
         }
 
-        /* Responsive Design - Enhanced */
+        
         @media (max-width: 992px) {
             .profile-header h1 {
                 font-size: 2.3rem;
@@ -790,7 +790,7 @@
             }
         }
 
-        /* Simple Footer */
+        
         .simple-footer {
             background-color: var(--card-bg);
             border-top: 1px solid var(--border);
@@ -854,7 +854,7 @@
             color: var(--border);
         }
     
-        /* Responsive adjustments */
+        
         @media (max-width: 768px) {
             .simple-footer {
                 padding: 1rem 5%;
@@ -881,20 +881,18 @@
             }
         }
 
-/* ===============================
-   STRICT SIMPLE FOOTER OVERRIDE
-   =============================== */
+
 
 .simple-footer {
     all: unset;
     display: block;
     background-color: var(--card-bg);
     border-top: 1px solid var(--border);
-    padding: 0.6rem 5%;          /* compact height */
+    padding: 0.6rem 5%;          
     margin-top: auto;
 }
 
-/* GRID LAYOUT – DESKTOP SAFE */
+
 .simple-footer .footer-content {
     all: unset;
     max-width: 1400px;
@@ -904,7 +902,7 @@
     align-items: center;
 }
 
-/* LEFT */
+
 .simple-footer .footer-left {
     display: flex;
     align-items: center;
@@ -924,7 +922,7 @@
     font-size: 1.2rem;
 }
 
-/* CENTER TEXT */
+
 .simple-footer .footer-center {
     text-align: center;
 }
@@ -945,7 +943,7 @@
     text-decoration: underline;
 }
 
-/* RIGHT ICONS */
+
 .simple-footer .footer-right {
     display: flex;
     gap: 1rem;
@@ -954,7 +952,7 @@
 
 .simple-footer .footer-socials a {
     color: var(--text-dark);
-    font-size: 1.4rem; /* BIG icons */
+    font-size: 1.4rem; 
     text-decoration: none;
 }
 
@@ -962,12 +960,10 @@
     opacity: 0.7;
 }
 
-/* ===============================
-   MOBILE – SMALLER HEIGHT
-   =============================== */
+
 @media (max-width: 768px) {
     .simple-footer {
-        padding: 0.5rem 5%;     /* reduced height */
+        padding: 0.5rem 5%;     
     }
 
     .simple-footer .footer-content {
@@ -1004,12 +1000,12 @@ a:visited {
   .global-loader {
     position: fixed;
     inset: 0;
-    background: transparent; /* fully transparent */
+    background: transparent; 
     z-index: 99999;
     display: flex;
     align-items: center;
     justify-content: center;
-    pointer-events: all; /* blocks clicks */
+    pointer-events: all; 
   }
 
   .global-loader.hidden {
@@ -1017,7 +1013,7 @@ a:visited {
     pointer-events: none;
   }
 
-  /* Center loader box */
+  
   .global-loader .loader-box {
     display: flex;
     flex-direction: column;
@@ -1025,7 +1021,7 @@ a:visited {
     justify-content: center;
     padding: 16px 20px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.85); /* small card only */
+    background: rgba(255, 255, 255, 0.85); 
     backdrop-filter: blur(6px);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -1070,15 +1066,11 @@ a:visited {
 
     let loaderTimer = null;
     let loaderVisible = false;
-
-    // 👉 Only show loader if loading takes longer than 300ms
     loaderTimer = setTimeout(() => {
         loader.classList.remove('hidden');
         loader.style.display = 'flex';
         loaderVisible = true;
     }, 300);
-
-    // Hide loader as soon as DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
       clearTimeout(loaderTimer);
 
@@ -1088,12 +1080,9 @@ a:visited {
               loader.style.display = 'none';
           }, 300);
       } else {
-          // Page loaded fast → never show loader
           loader.style.display = 'none';
       }
   });
-
-    // Same-origin navigation handling (MPA)
     document.addEventListener('click', (e) => {
         const link = e.target.closest('a');
         if (!link) return;
@@ -1108,8 +1097,6 @@ a:visited {
 
       const nextUrl = new URL(link.href, location.href);
       if (nextUrl.origin !== location.origin) return;
-
-      // Delay loader again for navigation
       loaderTimer = setTimeout(() => {
           loader.classList.remove('hidden');
           loader.style.display = 'flex';
@@ -1121,8 +1108,6 @@ a:visited {
           location.href = link.href;
       }, 50);
   });
-
-            // Handle back/forward cache
             window.addEventListener('pageshow', (e) => {
                 if (e.persisted) {
                     loader.classList.add('hidden');
@@ -1151,7 +1136,6 @@ a:visited {
                 </button>
             </div>
 
-            <!-- Mobile controls added from home page -->
             <div class="mobile-controls">
                 <button class="theme-toggle" id="mobileThemeToggle">
                     <i class="fas fa-moon"></i>
@@ -1163,7 +1147,6 @@ a:visited {
         </nav>
     </header>
 
-    <!-- Mobile Menu added from home page -->
     <div class="mobile-menu" id="mobileMenu">
         <button class="close-menu" id="closeMenu">
             <i class="fas fa-times"></i>
@@ -1176,7 +1159,6 @@ a:visited {
             <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
     </div>
 
-    <!-- Profile Creation Section -->
     <main class="profile-section">
         <div class="profile-header">
             <h1>Create Your Health Profile</h1>
@@ -1212,10 +1194,8 @@ a:visited {
             </div>
 
             <form class="profile-form" id="profileForm" action="/user_profile" method="post">
-                <!-- Hidden Gender Field -->
                 <input type="hidden" name="gender" id="genderInput">
 
-                <!-- Personal Info Step -->
                 <div class="form-step" id="step1">
                     <div class="form-group">
                         <label for="fullName"><i class="fas fa-signature"></i> Full Name</label>
@@ -1257,7 +1237,6 @@ a:visited {
                     </div>
                 </div>
 
-                <!-- Measurements Step -->
                 <div class="form-step" id="step2" style="display: none;">
                     <div class="form-row">
                         <div class="form-group">
@@ -1300,7 +1279,6 @@ a:visited {
                     </div>
                 </div>
 
-                <!-- Health Info Step -->
                 <div class="form-step" id="step3" style="display: none;">
                     <div class="form-group">
                         <label for="bloodGroup"><i class="fas fa-tint"></i> Blood Group</label>
@@ -1333,7 +1311,6 @@ a:visited {
                     </div>
                 </div>
 
-                <!-- Success Step (optional - but form will submit before reaching this) -->
                 <div class="success-container" id="successStep" style="display: none;">
                     <div class="success-icon">
                         <i class="fas fa-check"></i>
@@ -1349,14 +1326,12 @@ a:visited {
 
 <footer class="simple-footer">
     <div class="footer-content">
-        <!-- LEFT -->
         <div class="footer-left">
             <a href="/user_home" class="footer-logo">
                 <i class="fas fa-heartbeat"></i>
                 <span>TeleHealth</span>
             </a>
         </div>
-<!-- CENTER -->
 <div class="footer-center">
     <span class="copyright">
         © 2026 Built by
@@ -1366,7 +1341,6 @@ a:visited {
     </span>
         </div>
 
-        <!-- RIGHT -->
         <div class="footer-right footer-socials">
             <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" aria-label="LinkedIn">
                 <i class="fab fa-linkedin"></i>
@@ -1441,8 +1415,6 @@ a:visited {
                 }
             });
         }
-
-        // Profile Form Functionality
         const step1 = document.getElementById('step1');
         const step2 = document.getElementById('step2');
         const step3 = document.getElementById('step3');
@@ -1462,14 +1434,10 @@ a:visited {
         const dobInput = document.getElementById('dob');
         const genderInput = document.getElementById('genderInput');
         const customGenderInput = document.getElementById('customGenderInput');
-
-        // Initialize hidden gender to the initially selected option:
         const initiallySelected = document.querySelector('.gender-option.selected');
         if (initiallySelected) {
             genderInput.value = initiallySelected.dataset.gender;
         }
-
-        // Show/hide other gender field and set selection
         genderOptions.forEach(option => {
             option.addEventListener('click', function () {
                 genderOptions.forEach(opt => opt.classList.remove('selected'));
@@ -1481,14 +1449,10 @@ a:visited {
                     otherGenderField.style.display = 'none';
                     customGenderInput.value = '';
                 }
-                // Set hidden input right away (will be finalized on submit)
                 genderInput.value = selected;
             });
         });
-
-        // Form navigation
         nextBtn1.addEventListener('click', function () {
-            // Validate step 1
             if (document.getElementById('fullName').value.trim() === '') {
                 alert('Please enter your name');
                 return;
@@ -1503,7 +1467,6 @@ a:visited {
         });
 
         nextBtn2.addEventListener('click', function () {
-            // Validate step 2
             if (weightInput.value.trim() === '') {
                 alert('Please enter your weight');
                 return;
@@ -1528,16 +1491,12 @@ a:visited {
             step2.style.display = 'block';
             updateProgress(2);
         });
-
-        // Form submission: only preventDefault on validation failure; otherwise allow POST
         profileForm.addEventListener('submit', function (e) {
-            // Validate step 3
             if (document.getElementById('bloodGroup').value === '') {
                 e.preventDefault();
                 alert('Please select your blood group');
                 return;
             }
-            // Before submit, set final gender value:
             let finalGender = genderInput.value;
             if (finalGender === 'other') {
                 const cg = customGenderInput.value.trim();
@@ -1551,8 +1510,6 @@ a:visited {
             genderInput.value = finalGender;
 
         });
-
-        // Update progress indicators
         function updateProgress(step) {
             const stepIcons = document.querySelectorAll('.step-icon');
             const stepTexts = document.querySelectorAll('.step-text');
@@ -1573,27 +1530,20 @@ a:visited {
                 }
             });
         }
-
-        // Sync weight input and range slider
         weightRange.addEventListener('input', function () {
             weightInput.value = this.value;
         });
         weightInput.addEventListener('input', function () {
             weightRange.value = this.value;
         });
-        // Sync height input and range slider
         heightRange.addEventListener('input', function () {
             heightInput.value = this.value;
         });
         heightInput.addEventListener('input', function () {
             heightRange.value = this.value;
         });
-
-        // Set default values
         weightInput.value = weightRange.value = 70;
         heightInput.value = heightRange.value = 170;
-
-        // Set a reasonable default date (30 years ago)
         const today = new Date();
         const defaultDob = new Date(today.getFullYear() - 30, today.getMonth(), today.getDate());
         dobInput.value = defaultDob.toISOString().split('T')[0];

@@ -13,11 +13,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <style>
-        /* ===============================
-           BASE STYLES FROM DOC_HOME (works)
-           =============================== */
+        
         :root {
-            /* Color Variables */
+            
             --primary: #38bdf8;
             --primary-hover: #0ea5e9;
             --secondary: #10b981;
@@ -34,18 +32,18 @@
             --disabled: #9ca3af;
             --footer-bg: #1e293b;
 
-            /* Other Variables */
+            
             --transition: all 0.3s ease;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --radius: 12px;
 
-            /* Height variables */
+            
             --header-height: 80px;
             --control-bar-height: 80px;
         }
 
-        /* Dark Theme Variables */
+        
         [data-theme="dark"] {
             --background: #1e293b;
             --card-bg: #334155;
@@ -72,9 +70,7 @@
             overflow: hidden;
         }
 
-        /* ===============================
-           HEADER - EXACT FROM DOC_HOME
-           =============================== */
+        
         header {
             background-color: var(--card-bg);
             box-shadow: var(--shadow);
@@ -169,9 +165,7 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        /* ===============================
-           MOBILE MENU - EXACT FROM DOC_HOME
-           =============================== */
+        
         .mobile-controls {
             display: none;
             align-items: center;
@@ -252,9 +246,7 @@
             color: var(--primary);
         }
 
-        /* ===============================
-           MAIN LAYOUT CONTAINER
-           =============================== */
+        
         .main-container {
             display: flex;
             height: calc(100vh - var(--header-height));
@@ -263,9 +255,7 @@
             transition: var(--transition);
         }
 
-        /* ===============================
-           VIDEO AREA (Left side)
-           =============================== */
+        
         .video-area {
             flex: 1;
             display: flex;
@@ -275,7 +265,7 @@
             min-width: 0;
         }
 
-        /* Video Container */
+        
         .video-container {
             flex: 1;
             background-color: #000;
@@ -287,7 +277,7 @@
             min-height: 0;
         }
 
-        /* Remote Video */
+        
         #remoteVideo {
             width: 100%;
             height: 100%;
@@ -296,7 +286,7 @@
             display: block;
         }
 
-        /* Local Video (PiP) */
+        
         .local-video-pip {
             position: absolute;
             bottom: 8px;
@@ -332,7 +322,7 @@
             justify-content: center;
         }
 
-        /* Status Overlay */
+        
         .call-status-overlay {
             position: absolute;
             top: 8px;
@@ -385,7 +375,7 @@
             font-weight: 500;
         }
 
-        /* Timer Styles */
+        
         #callTimer {
             margin-left: 15px;
             display: flex;
@@ -402,7 +392,7 @@
             color: var(--primary);
         }
 
-        /* Video Loading State */
+        
         .video-loading {
             position: absolute;
             top: 0;
@@ -434,9 +424,7 @@
             }
         }
 
-        /* ===============================
-           CONTROL BAR (Not fixed)
-           =============================== */
+        
         .controls-bar {
             height: var(--control-bar-height);
             background-color: var(--card-bg);
@@ -457,7 +445,7 @@
             align-items: center;
         }
 
-        /* MODERN CONTROL BUTTONS */
+        
         .control-btn {
             display: flex;
             flex-direction: column;
@@ -527,9 +515,7 @@
             font-weight: 500;
         }
 
-        /* ===============================
-           MOBILE VIEW
-           =============================== */
+        
         @media (max-width: 768px) {
             :root {
                 --header-height: 75px;
@@ -654,9 +640,7 @@
             }
         }
 
-        /* ===============================
-           UTILITY CLASSES
-           =============================== */
+        
         .hidden {
             display: none !important;
         }
@@ -669,7 +653,7 @@
             text-decoration: none !important;
         }
 
-        /* Responsive adjustments for very small screens */
+        
         @media (max-width: 480px) {
             :root {
                 --header-height: 70px;
@@ -715,7 +699,7 @@
             }
         }
 
-        /* Small height devices */
+        
         @media (max-height: 700px) and (max-width: 768px) {
             .local-video-pip {
                 width: 100px;
@@ -723,9 +707,7 @@
             }
         }
 
-        /* =====================================================
-           FINAL MOBILE VIEWPORT + CONTROL BAR FIX
-           ===================================================== */
+        
         html,
         body {
             height: 100%;
@@ -793,9 +775,7 @@
             }
         }
 
-        /* ===============================
-           CALL ENDED OVERLAY
-           =============================== */
+        
         .call-ended-overlay {
             position: fixed;
             top: 0;
@@ -871,7 +851,7 @@
             color: var(--text-dark);
         }
 
-        /* Toast Notification */
+        
         .toast {
             position: fixed;
             bottom: 20px;
@@ -930,7 +910,6 @@
 
 <body>
 
-    <!-- Header - EXACT FROM DOC_HOME -->
     <header>
         <nav class="navbar">
             <a href="/user_video_dashboard" class="logo">
@@ -961,7 +940,6 @@
         </nav>
     </header>
 
-    <!-- Mobile Menu - EXACT FROM DOC_HOME -->
     <div class="mobile-menu" id="mobileMenu">
         <button class="close-menu" id="closeMenu">
             <i class="fas fa-times"></i>
@@ -974,29 +952,22 @@
                 <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
     </div>
 
-    <!-- Main Content Area -->
     <div class="main-container">
-        <!-- Video Area (Left side) -->
         <div class="video-area">
-            <!-- Video Container -->
             <div class="video-container">
-                <!-- Status Overlay -->
                 <div class="call-status-overlay" id="connectionStatus">
                     <div class="status-indicator">
                         <div class="status-dot" id="statusIndicator"></div>
                     </div>
                     <span id="statusText">Connecting to doctor...</span>
-                    <!-- Timer Element -->
                     <div id="callTimer">
                         <i class="fas fa-clock"></i>
                         <span>00:00:00</span>
                     </div>
                 </div>
 
-                <!-- Remote Video Stream -->
                 <video id="remoteVideo" autoplay playsinline></video>
 
-                <!-- Local Video (Picture-in-Picture) -->
                 <div class="local-video-pip">
                     <video id="localVideo" autoplay muted playsinline></video>
                     <div class="local-video-label">
@@ -1005,17 +976,14 @@
                     </div>
                 </div>
 
-                <!-- Loading State -->
                 <div class="video-loading hidden" id="videoLoading">
                     <div class="loading-spinner"></div>
                     <p>Establishing connection...</p>
                 </div>
             </div>
 
-            <!-- Control Bar (Not fixed) -->
             <div class="controls-bar">
                 <div class="controls-wrapper">
-                    <!-- Microphone Toggle -->
                     <button class="control-btn active" id="toggleMic">
                         <div class="control-icon">
                             <i class="fas fa-microphone"></i>
@@ -1030,13 +998,11 @@
                         </div>
                         <span class="control-label">Camera</span>
                     </button>
-                    <!-- NO END CALL BUTTON FOR USER -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Call Ended Overlay -->
     <div class="call-ended-overlay" id="callEndedOverlay">
         <div class="call-ended-content">
             <div class="call-ended-icon">
@@ -1054,25 +1020,19 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
     <div class="toast hidden" id="toast">
         <i class="fas fa-info-circle"></i>
         <span id="toastMessage"></span>
     </div>
 
-    <!-- Scripts -->
 <script src="/socket.io/socket.io.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
 
-        /* ===============================
-           CONSTANTS & STATE
-           =============================== */
+        
         const ROOM_ID = "<%= roomId %>";
         const USER_ID = "<%= userId || '' %>";
         const USER_NAME = "<%= userName || 'Patient' %>";
-
-        // State Variables
         let localStream = null;
         let peerConnection = null;
         let socket = null;
@@ -1085,9 +1045,7 @@
         const MAX_RECONNECT_ATTEMPTS = 5;
         let iceCandidates = [];
 
-        /* ===============================
-           DOM ELEMENTS
-           =============================== */
+        
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
         const toggleMic = document.getElementById('toggleMic');
@@ -1101,9 +1059,7 @@
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toastMessage');
 
-        /* ===============================
-           TOAST NOTIFICATION
-           =============================== */
+        
         function showToast(message, type = 'info') {
             toastMessage.textContent = message;
             toast.className = `toast ${type}`;
@@ -1120,9 +1076,7 @@
             }, 3000);
         }
 
-        /* ===============================
-           THEME TOGGLE
-           =============================== */
+        
         const themeToggle = document.getElementById('themeToggle');
         const mobileThemeToggle = document.getElementById('mobileThemeToggle');
         const html = document.documentElement;
@@ -1159,9 +1113,7 @@
         themeToggle.addEventListener('click', toggleTheme);
         mobileThemeToggle.addEventListener('click', toggleTheme);
 
-        /* ===============================
-           STATUS UI
-           =============================== */
+        
         function updateStatus(message, type = 'warning') {
             if (callEnded) return;
             statusText.textContent = message;
@@ -1178,9 +1130,7 @@
             }
         }
 
-        /* ===============================
-           MEDIA STREAM MANAGEMENT
-           =============================== */
+        
         async function getLocalStream() {
             try {
                 localStream = await navigator.mediaDevices.getUserMedia({
@@ -1244,9 +1194,7 @@
             }
         }
 
-        /* ===============================
-           WEBRTC PEER CONNECTION
-           =============================== */
+        
         function createPeerConnection() {
             console.log('Creating peer connection...');
             const configuration = {
@@ -1259,15 +1207,11 @@
             };
 
             peerConnection = new RTCPeerConnection(configuration);
-
-            // Add local tracks
             if (localStream) {
                 localStream.getTracks().forEach(track => {
                     peerConnection.addTrack(track, localStream);
                 });
             }
-
-            // Remote stream received
             peerConnection.ontrack = (event) => {
                 console.log('Received remote track:', event.track.kind);
                 if (!remoteVideo.srcObject) {
@@ -1275,16 +1219,12 @@
                     updateStatus('Call connected', 'connected');
                     startTimer();
                     showToast('Connected to doctor', 'success');
-
-                    // Add event listener for remote video
                     remoteVideo.onloadedmetadata = () => {
                         console.log('Remote video metadata loaded');
                         remoteVideo.play().catch(e => console.log('Remote video play error:', e));
                     };
                 }
             };
-
-            // ICE candidate handling
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate && socket) {
                     console.log('Sending ICE candidate');
@@ -1296,8 +1236,6 @@
                     console.log('ICE gathering complete');
                 }
             };
-
-            // Connection state monitoring
             peerConnection.oniceconnectionstatechange = () => {
                 const state = peerConnection.iceConnectionState;
                 console.log('ICE connection state:', state);
@@ -1318,8 +1256,6 @@
             peerConnection.onconnectionstatechange = () => {
                 console.log('Connection state:', peerConnection.connectionState);
             };
-
-            // Add stored ICE candidates
             iceCandidates.forEach(candidate => {
                 if (candidate) {
                     peerConnection.addIceCandidate(candidate).catch(e => console.error('Error adding stored ICE candidate:', e));
@@ -1361,7 +1297,6 @@
                         if (peerConnection.remoteDescription) {
                             await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
                         } else {
-                            // Store candidate for later
                             iceCandidates.push(new RTCIceCandidate(data.candidate));
                             console.log('Stored ICE candidate for later');
                         }
@@ -1374,9 +1309,7 @@
             }
         }
 
-        /* ===============================
-           RECONNECTION HANDLING
-           =============================== */
+        
         function attemptReconnect() {
             if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
                 showToast('Max reconnection attempts reached. Please refresh the page.', 'error');
@@ -1409,9 +1342,7 @@
             iceCandidates = [];
         }
 
-        /* ===============================
-           SOCKET.IO COMMUNICATION
-           =============================== */
+        
         function initSocket() {
             socket = io({
                 reconnection: true,
@@ -1441,8 +1372,6 @@
                 console.log('Doctor is ready in room');
                 updateStatus('Doctor connected, establishing call...', 'warning');
                 showToast('Doctor joined the call', 'success');
-
-                // Doctor is ready, wait for offer
                 if (!peerConnection) {
                     createPeerConnection();
                 }
@@ -1502,9 +1431,7 @@
             });
         }
 
-        /* ===============================
-           CONTROL BUTTON EVENT LISTENERS
-           =============================== */
+        
         toggleMic.addEventListener('click', () => {
             if (!localStream) return;
 
@@ -1553,17 +1480,13 @@
             }
         });
 
-        /* ===============================
-           PRESCRIPTION DOWNLOAD
-           =============================== */
+        
         function downloadPrescription() {
             const url = `/api/prescription/download/${ROOM_ID}`;
             const original = downloadBtn.innerHTML;
 
             downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
             downloadBtn.disabled = true;
-
-            // Create hidden download link
             const anchor = document.createElement('a');
             anchor.style.display = 'none';
             anchor.href = url;
@@ -1581,9 +1504,7 @@
 
         downloadBtn.addEventListener('click', downloadPrescription);
 
-        /* ===============================
-           CALL END HANDLING
-           =============================== */
+        
         function cleanupCall() {
             clearInterval(timerInterval);
             cleanupWebRTC();
@@ -1621,9 +1542,7 @@
             }, redirectTime);
         }
 
-        /* ===============================
-           CALL TIMER
-           =============================== */
+        
         function startTimer() {
             if (callStartTime) return;
             callStartTime = Date.now();
@@ -1639,9 +1558,7 @@
             }, 1000);
         }
 
-        /* ===============================
-           INITIALIZATION
-           =============================== */
+        
         async function initializeCall() {
             try {
                 updateStatus('Initializing call...', 'warning');
@@ -1660,15 +1577,11 @@
                 showToast('Failed to initialize video call', 'error');
             }
         }
-
-        // Start the call when page loads
         window.addEventListener('load', () => {
             setTimeout(initializeCall, 500);
         });
 
-        /* ===============================
-           WINDOW EVENT LISTENERS
-           =============================== */
+        
         window.addEventListener('beforeunload', (e) => {
             if (callEnded) return;
             if (socket?.connected || peerConnection) {

@@ -15,7 +15,6 @@ const userVideoRoutes = require('./userVideo.routes');
 const publicRoutes = require('./public.routes');
 const protectedRoutes = require('./protected.routes');
 
-// Load all routes
 router.use('/', publicRoutes);
 router.use('/', authRoutes);
 router.use('/', profileRoutes);

@@ -53,7 +53,6 @@ router.post("/appointments/:appointmentId/start", authenticate, authorize("docto
         const { appointmentId } = req.params;
         const doctorId = req.user.id;
 
-        // Use video service to start call
         const roomId = await videoService.startVideoCall(appointmentId, doctorId);
 
         res.json({
