@@ -78,19 +78,30 @@ router.get("/api/doctors", authenticate, authorize("user"), async (req, res) => 
  * Purpose: Verify Redis caching for doctors list
  * Safe to remove after testing
  */
+/**
+ * 🔧 TEMP – Redis cache test endpoint (NO AUTH)
+ * Safe to remove after verification
+ */
 router.get('/api/test/doctors-cache', async (req, res) => {
     try {
+        const start = Date.now();
+
         const doctors = await appointmentService.getAvailableDoctors();
+
+        const durationMs = Date.now() - start;
+
         res.json({
-            source: 'ok',
+            ok: true,
             count: doctors.length,
+            responseTimeMs: durationMs,
             doctors
         });
     } catch (err) {
-        console.error(err);
+        console.error('Doctors cache test error:', err);
         res.status(500).json({ error: 'Failed to fetch doctors' });
     }
 });
+
 
 router.post("/appointments/:id/complete", authenticate, authorize("doctor"), async (req, res) => {
     try {
