@@ -46,7 +46,7 @@ app.use(cors(corsOptions));
 // ============================================
 // SECURITY MIDDLEWARE (Helmet with CSP)
 // ============================================
-// app.use(helmet({
+// app.use(helmet({j
 //     contentSecurityPolicy: {
 //         directives: {
 //             defaultSrc: ["'self'"],
