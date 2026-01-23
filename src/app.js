@@ -50,16 +50,26 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 app.use((req, res, next) => {
+
+    // 🚫 Skip token verification logs for test routes
+    if (req.path.startsWith('/api/test')) {
+        return next();
+    }
+
     if (req.cookies.accessToken) {
         try {
             const payload = jwt.verify(req.cookies.accessToken, ACCESS_TOKEN_SECRET);
             req.user = payload;
         } catch (err) {
-            console.log('Token verification failed:', err.message);
+            // Log only once per request type
+            if (process.env.NODE_ENV !== 'production') {
+                console.log('Token verification failed:', err.message);
+            }
         }
     }
     next();
 });
+
 
 app.use(express.static(path.join(PROJECT_ROOT, 'public')));
 

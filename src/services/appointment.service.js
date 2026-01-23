@@ -115,8 +115,13 @@ class AppointmentService {
             const client = await this._getRedisClient();
             const cached = await client.get('doctors:available');
             if (cached) {
+                console.log('🟢 Redis HIT: doctors:available');
                 return JSON.parse(cached);
             }
+            console.log('🔵 Redis MISS: doctors:available');
+            const ttl = await client.ttl('doctors:available');
+            console.log('⏱ Redis TTL (seconds):', ttl);
+
         } catch (err) {
             // Fail silently
             console.log('Redis cache read failed for doctors (non-critical)');
