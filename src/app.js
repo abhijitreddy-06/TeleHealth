@@ -50,18 +50,11 @@ app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 app.use((req, res, next) => {
-
-    // 🚫 Skip token verification logs for test routes
-    if (req.path.startsWith('/api/test')) {
-        return next();
-    }
-
     if (req.cookies.accessToken) {
         try {
             const payload = jwt.verify(req.cookies.accessToken, ACCESS_TOKEN_SECRET);
             req.user = payload;
         } catch (err) {
-            // Log only once per request type
             if (process.env.NODE_ENV !== 'production') {
                 console.log('Token verification failed:', err.message);
             }
@@ -69,7 +62,6 @@ app.use((req, res, next) => {
     }
     next();
 });
-
 
 app.use(express.static(path.join(PROJECT_ROOT, 'public')));
 
@@ -156,8 +148,6 @@ async function startServer() {
     try {
         await testConnection();
         await initializeDatabase();
-
-        // Start token cleanup interval
         setInterval(cleanupExpiredTokens, 60 * 60 * 1000);
 
         server.listen(PORT, HOST, () => {

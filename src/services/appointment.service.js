@@ -1,13 +1,11 @@
 const { pool } = require('../config/database');
 const crypto = require('crypto');
-const { getClient } = require('../config/redis'); // Add Redis
+const { getClient } = require('../config/redis');
 
 class AppointmentService {
     constructor() {
         this.redisClient = null;
     }
-
-    // Why: Lazy initialization
     async _getRedisClient() {
         if (!this.redisClient) {
             this.redisClient = await getClient();
@@ -108,22 +106,15 @@ class AppointmentService {
         return result.rows[0] || null;
     }
 
-    // Why: Doctors list is heavily accessed (every user sees it when booking)
     async getAvailableDoctors() {
-        // Try cache first
         try {
             const client = await this._getRedisClient();
             const cached = await client.get('doctors:available');
             if (cached) {
-                console.log('🟢 Redis HIT: doctors:available');
                 return JSON.parse(cached);
             }
-            console.log('🔵 Redis MISS: doctors:available');
-            const ttl = await client.ttl('doctors:available');
-            console.log('⏱ Redis TTL (seconds):', ttl);
 
         } catch (err) {
-            // Fail silently
             console.log('Redis cache read failed for doctors (non-critical)');
         }
 
@@ -147,17 +138,14 @@ class AppointmentService {
         );
 
         const doctors = result.rows;
-
-        // Cache the result (5 minutes TTL)
         try {
             const client = await this._getRedisClient();
             await client.set(
                 'doctors:available',
                 JSON.stringify(doctors),
-                { EX: 300 } // 5 minutes
+                { EX: 300 } 
             );
         } catch (err) {
-            // Fail silently
         }
 
         return doctors;

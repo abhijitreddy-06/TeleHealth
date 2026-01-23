@@ -2,7 +2,7 @@ const { pool } = require('../config/database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const config = require('../config/auth');
-const { getClient } = require('../config/redis'); // Add Redis
+const { getClient } = require('../config/redis'); 
 
 class AuthService {
     constructor() {
@@ -12,8 +12,6 @@ class AuthService {
         this.REFRESH_TOKEN_EXPIRY = config.REFRESH_TOKEN_EXPIRY;
         this.redisClient = null;
     }
-
-    // Why: Lazy initialization - connect only when needed
     async _getRedisClient() {
         if (!this.redisClient) {
             this.redisClient = await getClient();
@@ -201,13 +199,11 @@ class AuthService {
                 allergies || null
             ]
         );
-
-        // Why: Invalidate cache after update
         try {
             const client = await this._getRedisClient();
             await client.del(this._userProfileKey(userId));
         } catch (err) {
-            // Fail silently if Redis is down
+
             console.log('Redis cache invalidation failed (non-critical)');
         }
     }
@@ -246,19 +242,15 @@ class AuthService {
             ]
         );
 
-        // Why: Invalidate cache after update
         try {
             const client = await this._getRedisClient();
             await client.del(this._doctorProfileKey(doctorId));
         } catch (err) {
-            // Fail silently if Redis is down
             console.log('Redis cache invalidation failed (non-critical)');
         }
     }
 
-    // Why: User profile accessed frequently (dashboard loads)
     async getUserProfile(userId) {
-        // Try cache first
         try {
             const client = await this._getRedisClient();
             const cached = await client.get(this._userProfileKey(userId));
@@ -266,11 +258,9 @@ class AuthService {
                 return JSON.parse(cached);
             }
         } catch (err) {
-            // Fail silently - continue to database
+    
             console.log('Redis cache read failed (non-critical)');
         }
-
-        // If not in cache or Redis is down, query database
         const result = await pool.query(
             `SELECT full_name, gender, custom_gender, date_of_birth,
                     weight_kg, height_cm, blood_group, allergies
@@ -281,26 +271,24 @@ class AuthService {
 
         const profile = result.rows[0];
 
-        // Cache the result if found (30 minutes TTL)
         if (profile) {
             try {
                 const client = await this._getRedisClient();
                 await client.set(
                     this._userProfileKey(userId),
                     JSON.stringify(profile),
-                    { EX: 1800 } // 30 minutes
+                    { EX: 1800 }
                 );
             } catch (err) {
-                // Fail silently
+                
             }
         }
 
         return profile;
     }
 
-    // Why: Doctor profile shown in multiple places (appointments, dashboards)
+
     async getDoctorProfile(doctorId) {
-        // Try cache first
         try {
             const client = await this._getRedisClient();
             const cached = await client.get(this._doctorProfileKey(doctorId));
@@ -308,11 +296,8 @@ class AuthService {
                 return JSON.parse(cached);
             }
         } catch (err) {
-            // Fail silently - continue to database
             console.log('Redis cache read failed (non-critical)');
         }
-
-        // If not in cache or Redis is down, query database
         const result = await pool.query(
             `SELECT full_name, specialization, experience_years,
                     qualification, hospital_name, bio
@@ -322,18 +307,16 @@ class AuthService {
         );
 
         const profile = result.rows[0];
-
-        // Cache the result if found (30 minutes TTL)
         if (profile) {
             try {
                 const client = await this._getRedisClient();
                 await client.set(
                     this._doctorProfileKey(doctorId),
                     JSON.stringify(profile),
-                    { EX: 1800 } // 30 minutes
+                    { EX: 1800 } 
                 );
             } catch (err) {
-                // Fail silently
+                
             }
         }
 
