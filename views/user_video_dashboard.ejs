@@ -943,39 +943,15 @@ a:visited {
         </div>
 
             <div class="instructions-card">
-                <h3><i class="fas fa-info-circle"></i> Video Call Instructions</h3>
-                <div class="instructions-list">
-                    <div class="instruction-item">
-                        <div class="instruction-number">1</div>
-                        <div class="instruction-content">
-                            <h4>Prepare Your Environment</h4>
-                            <p>Find a quiet, well-lit room with a stable internet connection</p>
-                        </div>
-                    </div>
-                    <div class="instruction-item">
-                        <div class="instruction-number">2</div>
-                        <div class="instruction-content">
-                            <h4>Test Your Equipment</h4>
-                            <p>Check your camera, microphone, and speakers before joining</p>
-                        </div>
-                    </div>
-                    <div class="instruction-item">
-                        <div class="instruction-number">3</div>
-                        <div class="instruction-content">
-                            <h4>Join on Time</h4>
-                            <p>Join the call a few minutes before your scheduled time</p>
-                        </div>
-                    </div>
-                    <div class="instruction-item">
-                        <div class="instruction-number">4</div>
-                        <div class="instruction-content">
-                            <h4>Have Information Ready</h4>
-                            <p>Keep your ID and any medical information accessible</p>
-                        </div>
-                    </div>
-
-
-                </div>
+                <h3><i class="fas fa-prescription"></i> Missed Your Prescription?</h3>
+                <p style="color: var(--text-medium); margin-bottom: 1.5rem;">
+                    If you missed downloading your prescription after your last consultation, you can download it here.
+                </p>
+                <button id="downloadMissedPrescription" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem;">
+                    <i class="fas fa-download"></i> Download Recent Prescription
+                </button>
+                <p id="prescriptionError" style="color: var(--error); margin-top: 1rem; display: none;"></p>
+                <p id="prescriptionSuccess" style="color: var(--success); margin-top: 1rem; display: none;"></p>
             </div>
         </div>
     </main>
@@ -1062,6 +1038,57 @@ a:visited {
                 document.body.style.overflow = '';
             }
         });
+
+        const downloadBtn = document.getElementById('downloadMissedPrescription');
+        const errorMsg = document.getElementById('prescriptionError');
+        const successMsg = document.getElementById('prescriptionSuccess');
+
+        downloadBtn.addEventListener('click', async () => {
+            downloadBtn.disabled = true;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/appointments/recent-prescription');
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    throw new Error(data.error || 'No recent prescription found');
+                }
+
+                const data = await response.json();
+
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Downloading...';
+
+                const pdfResponse = await fetch(`/api/prescription/download/${data.roomId}`);
+
+                if (!pdfResponse.ok) {
+                    throw new Error('Failed to download prescription');
+                }
+
+                const blob = await pdfResponse.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Prescription_${data.roomId}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+
+                successMsg.textContent = 'Prescription downloaded successfully!';
+                successMsg.style.display = 'block';
+
+            } catch (error) {
+                errorMsg.textContent = error.message || 'No recent prescription available to download.';
+                errorMsg.style.display = 'block';
+            } finally {
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Recent Prescription';
+            }
+        });
+
         setInterval(() => {
             window.location.reload();
         }, 10000);

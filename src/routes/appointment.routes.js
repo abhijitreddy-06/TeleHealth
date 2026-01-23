@@ -94,5 +94,28 @@ router.post("/appointments/:id/complete", authenticate, authorize("doctor"), asy
     }
 });
 
+router.get("/api/appointments/:id/status", authenticate, async (req, res) => {
+    try {
+        const status = await appointmentService.getAppointmentStatus(req.params.id, req.user.id, req.user.role);
+        res.json({ status });
+    } catch (err) {
+        console.error("Get appointment status error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.get("/api/appointments/recent-prescription", authenticate, authorize("user"), async (req, res) => {
+    try {
+        const appointment = await appointmentService.getRecentCompletedAppointment(req.user.id);
+        if (!appointment) {
+            return res.status(404).json({ error: "No recent completed appointment found" });
+        }
+        res.json({ roomId: appointment.room_id, appointmentId: appointment.id });
+    } catch (err) {
+        console.error("Get recent prescription error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 module.exports = router;

@@ -236,6 +236,35 @@ class AppointmentService {
             client.release();
         }
     }
+
+    async getAppointmentStatus(appointmentId, userId, role) {
+        const query = role === 'doctor'
+            ? `SELECT status FROM appointments WHERE id = $1 AND doctor_id = $2`
+            : `SELECT status FROM appointments WHERE id = $1 AND user_id = $2`;
+
+        const result = await pool.query(query, [appointmentId, userId]);
+
+        if (!result.rows.length) {
+            throw new Error('Appointment not found');
+        }
+
+        return result.rows[0].status;
+    }
+
+    async getRecentCompletedAppointment(userId) {
+        const result = await pool.query(
+            `SELECT a.id, a.room_id, a.completed_at
+             FROM appointments a
+             WHERE a.user_id = $1 
+               AND a.status = 'completed'
+               AND a.room_id IS NOT NULL
+             ORDER BY a.completed_at DESC
+             LIMIT 1`,
+            [userId]
+        );
+
+        return result.rows[0] || null;
+    }
 }
 
 module.exports = new AppointmentService();

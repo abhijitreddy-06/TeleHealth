@@ -1168,6 +1168,49 @@
             }
         }
 
+        async function checkAppointmentStatus() {
+            if (callEnded) return;
+
+            try {
+                const response = await fetch(`/api/appointments/${APPOINTMENT_ID}/status`);
+                const data = await response.json();
+
+                if (data.status === 'completed') {
+                    console.log('Appointment was completed by doctor');
+                    callEnded = true;
+
+                    clearInterval(timerInterval);
+                    cleanupWebRTC();
+
+                    if (localStream) {
+                        localStream.getTracks().forEach(track => track.stop());
+                        localStream = null;
+                    }
+                    localVideo.srcObject = null;
+
+                    const message = 'Your consultation has ended. Your prescription is ready.';
+                    callEndedMessage.textContent = message;
+                    callEndedOverlay.style.display = 'flex';
+                    downloadBtn.style.display = 'inline-flex';
+
+                    showToast('Consultation ended. Prescription is ready!', 'success');
+
+                    if (socket) {
+                        socket.disconnect();
+                        socket = null;
+                    }
+                } else {
+                    updateStatus('Doctor disconnected. Waiting for reconnection...', 'warning');
+                    showToast('Doctor disconnected. Please wait...', 'warning');
+                    attemptReconnect();
+                }
+            } catch (error) {
+                console.error('Error checking appointment status:', error);
+                updateStatus('Connection issue. Please wait...', 'warning');
+                attemptReconnect();
+            }
+        }
+
         function updateMicButton() {
             const icon = toggleMic.querySelector('.control-icon i');
             const label = toggleMic.querySelector('.control-label');
@@ -1411,7 +1454,14 @@
                 console.log('Call ended by doctor:', data);
                 callEnded = true;
 
-                cleanupCall();
+                clearInterval(timerInterval);
+                cleanupWebRTC();
+
+                if (localStream) {
+                    localStream.getTracks().forEach(track => track.stop());
+                    localStream = null;
+                }
+                localVideo.srcObject = null;
 
                 const message = 'Your consultation has ended. Your prescription is ready.';
                 callEndedMessage.textContent = message;
@@ -1419,6 +1469,13 @@
                 downloadBtn.style.display = 'inline-flex';
 
                 showToast('Doctor ended the call. Prescription is ready!', 'success');
+
+                setTimeout(() => {
+                    if (socket) {
+                        socket.disconnect();
+                        socket = null;
+                    }
+                }, 1000);
             });
 
             socket.on('prescription-ready', (data) => {
@@ -1429,26 +1486,22 @@
             socket.on('doctor-disconnected', () => {
                 console.log('Doctor disconnected');
                 if (!callEnded) {
-                    updateStatus('Doctor disconnected. Waiting for reconnection...', 'warning');
-                    showToast('Doctor disconnected. Please wait...', 'warning');
-                    attemptReconnect();
+                    checkAppointmentStatus();
                 }
             });
 
             socket.on('connect_error', (error) => {
                 console.error('Socket connection error:', error);
-                updateStatus('Connection error', 'disconnected');
-                if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-                    attemptReconnect();
+                if (!callEnded) {
+                    updateStatus('Connection error', 'disconnected');
+                    checkAppointmentStatus();
                 }
             });
 
             socket.on('disconnect', (reason) => {
                 console.log('Socket disconnected:', reason);
                 if (!callEnded && reason !== 'io client disconnect') {
-                    updateStatus('Disconnected from server', 'disconnected');
-                    showToast('Connection lost. Reconnecting...', 'error');
-                    attemptReconnect();
+                    checkAppointmentStatus();
                 }
             });
 

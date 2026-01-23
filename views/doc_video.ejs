@@ -1715,13 +1715,28 @@ html, body {
             await fetch(`/appointments/${APPOINTMENT_ID}/complete`, {
                 method: "POST"
             });
+
             if (socket && socket.connected) {
-                socket.emit('doctor-end-call', {
-                    roomId: ROOM_ID,
-                    appointmentId: APPOINTMENT_ID,
-                    notes: notes
+                await new Promise((resolve) => {
+                    const timeout = setTimeout(() => {
+                        console.log('End call confirmation timeout, proceeding anyway');
+                        resolve();
+                    }, 3000);
+
+                    socket.once('call-ended-confirmed', () => {
+                        clearTimeout(timeout);
+                        console.log('Call end confirmed by server');
+                        resolve();
+                    });
+
+                    socket.emit('doctor-end-call', {
+                        roomId: ROOM_ID,
+                        appointmentId: APPOINTMENT_ID,
+                        notes: notes
+                    });
                 });
             }
+
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
