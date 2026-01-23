@@ -4,6 +4,16 @@ const fileService = require('../services/file.service');
 const { authenticate, authorize } = require('../middleware/auth');
 const { upload } = require('../config/upload');
 
+const escapeHtml = (str) => {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
 router.post("/vault/upload", authenticate, authorize("user"), upload.single("file"), async (req, res) => {
     try {
         await fileService.validateFileUpload(req.file);
@@ -25,7 +35,7 @@ router.post("/vault/upload", authenticate, authorize("user"), upload.single("fil
         console.error(err);
         res.send(`
             <script>
-                alert("Upload failed: ${err.message}");
+                alert("Upload failed: ${escapeHtml(err.message)}");
                 window.history.back();
             </script>
         `);

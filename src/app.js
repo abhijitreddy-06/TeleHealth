@@ -129,6 +129,40 @@ io.use(async (socket, next) => {
 
 require('./sockets/videoSocket')(io);
 
+const { pool } = require('./config/database');
+const { getClient } = require('./config/redis');
+
+app.get('/health', async (req, res) => {
+    const checks = {
+        server: true,
+        database: false,
+        redis: false,
+        timestamp: new Date().toISOString()
+    };
+
+    try {
+        await pool.query('SELECT 1');
+        checks.database = true;
+    } catch (err) {
+        checks.database = false;
+    }
+
+    try {
+        const redisClient = await getClient();
+        if (redisClient) {
+            await redisClient.ping();
+            checks.redis = true;
+        }
+    } catch (err) {
+        checks.redis = false;
+    }
+
+    const isHealthy = checks.server && checks.database;
+    res.status(isHealthy ? 200 : 503).json({
+        status: isHealthy ? 'healthy' : 'degraded',
+        checks
+    });
+});
 
 app.use((req, res) => {
     console.log(`❌ 404: ${req.url} not found`);

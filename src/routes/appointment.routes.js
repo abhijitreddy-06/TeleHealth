@@ -3,6 +3,16 @@ const router = express.Router();
 const appointmentService = require('../services/appointment.service');
 const { authenticate, authorize } = require('../middleware/auth');
 
+const escapeHtml = (str) => {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
 router.post("/appointments/book", authenticate, authorize("user"), async (req, res) => {
     try {
         await appointmentService.bookAppointment(
@@ -19,7 +29,7 @@ router.post("/appointments/book", authenticate, authorize("user"), async (req, r
         if (err.message.includes('already has an active appointment')) {
             return res.send(`
                 <script>
-                    alert("${err.message}");
+                    alert("${escapeHtml(err.message)}");
                     window.location.href = "/appointments";
                 </script>
             `);
@@ -73,35 +83,6 @@ router.get("/api/doctors", authenticate, authorize("user"), async (req, res) => 
         res.status(500).json({ error: "Failed to load doctors" });
     }
 });
-/**
- * 🔧 TEMP TEST ENDPOINT
- * Purpose: Verify Redis caching for doctors list
- * Safe to remove after testing
- */
-/**
- * 🔧 TEMP – Redis cache test endpoint (NO AUTH)
- * Safe to remove after verification
- */
-router.get('/api/test/doctors-cache', async (req, res) => {
-    try {
-        const start = Date.now();
-
-        const doctors = await appointmentService.getAvailableDoctors();
-
-        const durationMs = Date.now() - start;
-
-        res.json({
-            ok: true,
-            count: doctors.length,
-            responseTimeMs: durationMs,
-            doctors
-        });
-    } catch (err) {
-        console.error('Doctors cache test error:', err);
-        res.status(500).json({ error: 'Failed to fetch doctors' });
-    }
-});
-
 
 router.post("/appointments/:id/complete", authenticate, authorize("doctor"), async (req, res) => {
     try {

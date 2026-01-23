@@ -4,6 +4,16 @@ const authService = require('../services/auth.service');
 const { clearAuthCookies } = require('../middleware/auth');
 const { accessTokenCookieOptions, refreshTokenCookieOptions } = require('../config/auth');
 
+const escapeHtml = (str) => {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
 router.post("/user_signup", async (req, res) => {
     const { phone, password, confirmpassword } = req.body;
 
@@ -21,7 +31,7 @@ router.post("/user_signup", async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.send(`<script>alert('${err.message}');location='/user_signup'</script>`);
+        res.send(`<script>alert('${escapeHtml(err.message)}');location='/user_signup'</script>`);
     }
 });
 
@@ -35,23 +45,11 @@ router.post("/user_login", async (req, res) => {
         res.cookie("accessToken", tokens.accessToken, accessTokenCookieOptions);
         res.cookie("refreshToken", tokens.refreshToken, refreshTokenCookieOptions);
 
-        res.send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta http-equiv="refresh" content="0;url=/user_home">
-        </head>
-        <body>
-            <script>
-                window.location.href = '/user_home';
-            </script>
-        </body>
-        </html>
-    `);
+        res.redirect('/user_home');
 
     } catch (err) {
         console.error(err);
-        res.send(`<script>alert('${err.message}');location='/user_login'</script>`);
+        res.send(`<script>alert('${escapeHtml(err.message)}');location='/user_login'</script>`);
     }
 });
 
@@ -72,7 +70,7 @@ router.post("/doc_signup", async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.send(`<script>alert('${err.message}');location='/doc_signup'</script>`);
+        res.send(`<script>alert('${escapeHtml(err.message)}');location='/doc_signup'</script>`);
     }
 });
 
@@ -86,23 +84,11 @@ router.post("/doc_login", async (req, res) => {
         res.cookie("accessToken", tokens.accessToken, accessTokenCookieOptions);
         res.cookie("refreshToken", tokens.refreshToken, refreshTokenCookieOptions);
 
-        res.send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta http-equiv="refresh" content="0;url=/doc_home">
-        </head>
-        <body>
-            <script>
-                window.location.href = '/doc_home';
-            </script>
-        </body>
-        </html>
-    `);
+        res.redirect('/doc_home');
 
     } catch (err) {
         console.error(err);
-        res.send(`<script>alert('${err.message}');location='/doc_login'</script>`);
+        res.send(`<script>alert('${escapeHtml(err.message)}');location='/doc_login'</script>`);
     }
 });
 

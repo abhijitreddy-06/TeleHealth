@@ -6,11 +6,12 @@ const path = require('path');
 class FileService {
     async uploadFile(userId, file, recordType = 'general') {
         const client = await pool.connect();
+        let filePath = null;
 
         try {
             const safeFileName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, '_');
             const fileName = `${Date.now()}-${safeFileName}`;
-            const filePath = `user_${userId}/${fileName}`;
+            filePath = `user_${userId}/${fileName}`;
 
             const fileBuffer = fs.readFileSync(file.path);
 

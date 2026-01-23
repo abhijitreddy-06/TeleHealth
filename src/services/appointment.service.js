@@ -1,6 +1,7 @@
 const { pool } = require('../config/database');
 const crypto = require('crypto');
 const { getClient } = require('../config/redis');
+const cacheService = require('./cache.service');
 
 class AppointmentService {
     constructor() {
@@ -39,6 +40,9 @@ class AppointmentService {
             );
 
             await client.query('COMMIT');
+
+            await cacheService.invalidateDoctorsList();
+
             return result.rows[0];
         } catch (error) {
             await client.query('ROLLBACK');
@@ -80,6 +84,8 @@ class AppointmentService {
             throw new Error('Appointment not found');
         }
 
+        await cacheService.invalidateDoctorsList();
+
         return result.rows[0];
     }
 
@@ -109,11 +115,12 @@ class AppointmentService {
     async getAvailableDoctors() {
         try {
             const client = await this._getRedisClient();
-            const cached = await client.get('doctors:available');
-            if (cached) {
-                return JSON.parse(cached);
+            if (client) {
+                const cached = await client.get('doctors:available');
+                if (cached) {
+                    return JSON.parse(cached);
+                }
             }
-
         } catch (err) {
             console.log('Redis cache read failed for doctors (non-critical)');
         }
@@ -123,16 +130,11 @@ class AppointmentService {
                     p.experience_years, p.qualification, p.hospital_name
              FROM doc_login d
              JOIN doc_profile p ON p.doc_id = d.docid
-             WHERE d.docid IN (
-                 SELECT DISTINCT doctor_id 
-                 FROM appointments 
-                 WHERE status NOT IN ('started', 'scheduled')
-                 OR appointment_date < CURRENT_DATE
-                 OR doctor_id NOT IN (
-                     SELECT doctor_id FROM appointments 
-                     WHERE status IN ('started', 'scheduled')
-                     AND appointment_date >= CURRENT_DATE
-                 )
+             WHERE NOT EXISTS (
+                 SELECT 1 FROM appointments a
+                 WHERE a.doctor_id = d.docid
+                 AND a.status IN ('started', 'scheduled')
+                 AND a.appointment_date >= CURRENT_DATE
              )
              ORDER BY p.full_name`
         );
@@ -140,11 +142,13 @@ class AppointmentService {
         const doctors = result.rows;
         try {
             const client = await this._getRedisClient();
-            await client.set(
-                'doctors:available',
-                JSON.stringify(doctors),
-                { EX: 300 } 
-            );
+            if (client) {
+                await client.set(
+                    'doctors:available',
+                    JSON.stringify(doctors),
+                    { EX: 300 }
+                );
+            }
         } catch (err) {
         }
 

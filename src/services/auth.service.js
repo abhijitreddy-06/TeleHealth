@@ -27,9 +27,28 @@ class AuthService {
         return `doctor:profile:${doctorId}`;
     }
 
+    _validateRole(role) {
+        const VALID_ROLES = ['user', 'doctor'];
+        if (!VALID_ROLES.includes(role)) {
+            throw new Error('Invalid role specified');
+        }
+        return role;
+    }
+
+    _getTableConfig(role) {
+        const config = {
+            user: { table: 'login', idField: 'id' },
+            doctor: { table: 'doc_login', idField: 'docid' }
+        };
+        return config[role];
+    }
+
     async registerUser(phone, password, role = 'user') {
+        this._validateRole(role);
+        const { table, idField } = this._getTableConfig(role);
+
         const exists = await pool.query(
-            `SELECT ${role === 'user' ? 'id' : 'docid'} FROM ${role === 'user' ? 'login' : 'doc_login'} WHERE phone=$1`,
+            `SELECT ${idField} FROM ${table} WHERE phone=$1`,
             [phone]
         );
 
@@ -38,8 +57,6 @@ class AuthService {
         }
 
         const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
-        const table = role === 'user' ? 'login' : 'doc_login';
-        const idField = role === 'user' ? 'id' : 'docid';
 
         const result = await pool.query(
             `INSERT INTO ${table} (phone, password) VALUES ($1, $2) RETURNING ${idField}`,
@@ -54,8 +71,8 @@ class AuthService {
     }
 
     async authenticateUser(phone, password, role = 'user') {
-        const table = role === 'user' ? 'login' : 'doc_login';
-        const idField = role === 'user' ? 'id' : 'docid';
+        this._validateRole(role);
+        const { table, idField } = this._getTableConfig(role);
 
         const result = await pool.query(
             `SELECT * FROM ${table} WHERE phone=$1`,
@@ -200,7 +217,9 @@ class AuthService {
         );
         try {
             const client = await this._getRedisClient();
-            await client.del(this._userProfileKey(userId));
+            if (client) {
+                await client.del(this._userProfileKey(userId));
+            }
         } catch (err) {
 
             console.log('Redis cache invalidation failed (non-critical)');
@@ -243,7 +262,9 @@ class AuthService {
 
         try {
             const client = await this._getRedisClient();
-            await client.del(this._doctorProfileKey(doctorId));
+            if (client) {
+                await client.del(this._doctorProfileKey(doctorId));
+            }
         } catch (err) {
             console.log('Redis cache invalidation failed (non-critical)');
         }
@@ -252,9 +273,11 @@ class AuthService {
     async getUserProfile(userId) {
         try {
             const client = await this._getRedisClient();
-            const cached = await client.get(this._userProfileKey(userId));
-            if (cached) {
-                return JSON.parse(cached);
+            if (client) {
+                const cached = await client.get(this._userProfileKey(userId));
+                if (cached) {
+                    return JSON.parse(cached);
+                }
             }
         } catch (err) {
     
@@ -273,11 +296,13 @@ class AuthService {
         if (profile) {
             try {
                 const client = await this._getRedisClient();
-                await client.set(
-                    this._userProfileKey(userId),
-                    JSON.stringify(profile),
-                    { EX: 1800 }
-                );
+                if (client) {
+                    await client.set(
+                        this._userProfileKey(userId),
+                        JSON.stringify(profile),
+                        { EX: 1800 }
+                    );
+                }
             } catch (err) {
                 
             }
@@ -290,9 +315,11 @@ class AuthService {
     async getDoctorProfile(doctorId) {
         try {
             const client = await this._getRedisClient();
-            const cached = await client.get(this._doctorProfileKey(doctorId));
-            if (cached) {
-                return JSON.parse(cached);
+            if (client) {
+                const cached = await client.get(this._doctorProfileKey(doctorId));
+                if (cached) {
+                    return JSON.parse(cached);
+                }
             }
         } catch (err) {
             console.log('Redis cache read failed (non-critical)');
@@ -309,11 +336,13 @@ class AuthService {
         if (profile) {
             try {
                 const client = await this._getRedisClient();
-                await client.set(
-                    this._doctorProfileKey(doctorId),
-                    JSON.stringify(profile),
-                    { EX: 1800 } 
-                );
+                if (client) {
+                    await client.set(
+                        this._doctorProfileKey(doctorId),
+                        JSON.stringify(profile),
+                        { EX: 1800 }
+                    );
+                }
             } catch (err) {
                 
             }

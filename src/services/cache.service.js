@@ -15,6 +15,7 @@ class CacheService {
     async getDoctorsList() {
         try {
             const client = await getClient();
+            if (!client) return null;
             const cached = await client.get(CACHE_KEYS.DOCTORS_LIST);
             return cached ? JSON.parse(cached) : null;
         } catch {
@@ -25,6 +26,7 @@ class CacheService {
     async setDoctorsList(doctors) {
         try {
             const client = await getClient();
+            if (!client) return;
             await client.set(
                 CACHE_KEYS.DOCTORS_LIST,
                 JSON.stringify(doctors),
@@ -38,6 +40,7 @@ class CacheService {
     async invalidateDoctorsList() {
         try {
             const client = await getClient();
+            if (!client) return;
             await client.del(CACHE_KEYS.DOCTORS_LIST);
         } catch {
             
@@ -48,6 +51,7 @@ class CacheService {
     async getUserProfile(userId) {
         try {
             const client = await getClient();
+            if (!client) return null;
             const cached = await client.get(CACHE_KEYS.USER_PROFILE(userId));
             return cached ? JSON.parse(cached) : null;
         } catch {
@@ -58,6 +62,7 @@ class CacheService {
     async setUserProfile(userId, profile) {
         try {
             const client = await getClient();
+            if (!client) return;
             await client.set(
                 CACHE_KEYS.USER_PROFILE(userId),
                 JSON.stringify(profile),
@@ -71,6 +76,7 @@ class CacheService {
     async invalidateUserProfile(userId) {
         try {
             const client = await getClient();
+            if (!client) return;
             await client.del(CACHE_KEYS.USER_PROFILE(userId));
         } catch {
            
@@ -80,6 +86,7 @@ class CacheService {
     async getDoctorProfile(doctorId) {
         try {
             const client = await getClient();
+            if (!client) return null;
             const cached = await client.get(CACHE_KEYS.DOCTOR_PROFILE(doctorId));
             return cached ? JSON.parse(cached) : null;
         } catch {
@@ -90,6 +97,7 @@ class CacheService {
     async setDoctorProfile(doctorId, profile) {
         try {
             const client = await getClient();
+            if (!client) return;
             await client.set(
                 CACHE_KEYS.DOCTOR_PROFILE(doctorId),
                 JSON.stringify(profile),
@@ -103,6 +111,7 @@ class CacheService {
     async invalidateDoctorProfile(doctorId) {
         try {
             const client = await getClient();
+            if (!client) return;
             await client.del(CACHE_KEYS.DOCTOR_PROFILE(doctorId));
         } catch {
            

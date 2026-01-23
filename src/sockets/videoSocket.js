@@ -51,7 +51,6 @@ module.exports = function (io) {
 
         socket.on('doctor-end-call', async ({ roomId, appointmentId, notes }) => {
             try {
-
                 await pool.query(
                     `UPDATE appointments 
                      SET status = 'completed', completed_at = NOW() 
@@ -61,11 +60,11 @@ module.exports = function (io) {
 
                 if (notes && notes.trim()) {
                     await pool.query(
-                        `INSERT INTO doctor_notes (room_id, notes, created_at) 
-                         VALUES ($1, $2, NOW()) 
+                        `INSERT INTO doctor_notes (room_id, appointment_id, notes, sent, created_at)
+                         VALUES ($1, $2, $3, TRUE, NOW())
                          ON CONFLICT (room_id) 
-                         DO UPDATE SET notes = EXCLUDED.notes, updated_at = NOW()`,
-                        [roomId, notes.trim()]
+                         DO UPDATE SET notes = EXCLUDED.notes, sent = TRUE, created_at = NOW()`,
+                        [roomId, appointmentId, notes.trim()]
                     );
                 }
 
