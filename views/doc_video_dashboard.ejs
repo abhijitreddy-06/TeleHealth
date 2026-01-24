@@ -976,156 +976,128 @@ a:visited {
         });
 </script>
     <script>
-        // Cancel Appointment Modal for Doctors
-    function showCancelModal(appointmentId) {
-            const existingModal = document.getElementById('cancelModal');
-    if (existingModal) existingModal.remove();
+            // Start Call Function
+            async function startCall(appointmentId) {
+                if (!appointmentId) return;
 
-    const modal = document.createElement('div');
-    modal.id = 'cancelModal';
-    modal.className = 'modal-overlay active';
-    modal.innerHTML = `
-    <div class="modal" style="max-width: 450px;">
-        <div class="modal-header">
-            <h2><i class="fas fa-calendar-times" style="color: var(--error)"></i> Cancel Appointment</h2>
-            <button class="modal-close" onclick="closeCancelModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-body">
-            <p style="margin-bottom: 1rem;">Are you sure you want to cancel this appointment?</p>
-            <div class="form-group">
-                <label for="cancelReason"><i class="fas fa-comment-alt"></i> Reason (optional)</label>
-                <textarea id="cancelReason" class="form-control" rows="3" placeholder="Please provide a reason for cancellation..."></textarea>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-outline" onclick="closeCancelModal()">Keep Appointment</button>
-            <button class="btn btn-danger" onclick="cancelAppointment('${appointmentId}')">Cancel Appointment</button>
-        </div>
-    </div>
-    `;
-    document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
-        }
+                try {
+                    const res = await fetch(`/appointments/${appointmentId}/start`, {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
 
-    function closeCancelModal() {
-            const modal = document.getElementById('cancelModal');
-    if (modal) {
-        modal.remove();
-    document.body.style.overflow = '';
-            }
-        }
+                    const data = await res.json();
 
-    async function cancelAppointment(appointmentId) {
-            const reason = document.getElementById('cancelReason').value;
-    const confirmBtn = document.querySelector('#cancelModal .btn-danger');
-    confirmBtn.disabled = true;
-    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
-
-    try {
-                const response = await fetch(`/api/appointments/${appointmentId}/cancel`, {
-        method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    'Accept': 'application/json'
-                    },
-    body: JSON.stringify({reason})
-                });
-
-    const result = await response.json();
-
-    if (response.ok && result.success) {
-        closeCancelModal();
-    Toast.success('The appointment has been cancelled.', 'Appointment Cancelled');
-                    setTimeout(() => window.location.reload(), 1500);
-                } else {
-        Toast.error(result.error || 'Failed to cancel appointment');
-    confirmBtn.disabled = false;
-    confirmBtn.innerHTML = 'Cancel Appointment';
+                    if (!res.ok) {
+                        Toast.error(data.error || "Unable to start call");
+                        return;
+                    }
+                    window.location.href = `/doc_video/${data.roomId}`;
+                } catch (err) {
+                    Toast.error("Server error while starting call");
                 }
-            } catch (error) {
-        console.error('Cancel error:', error);
-    Toast.error('Unable to cancel appointment. Please try again.');
-    confirmBtn.disabled = false;
-    confirmBtn.innerHTML = 'Cancel Appointment';
+            }
+
+            function joinCall(roomId) {
+                if (!roomId) return;
+                window.location.href = `/doc_video/${roomId}`;
+            }
+
+        // Cancel Appointment Modal for Doctors
+            function showCancelModal(appointmentId) {
+            const existingModal = document.getElementById('cancelModal');
+            if (existingModal) existingModal.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'cancelModal';
+            modal.className = 'modal-overlay active';
+            modal.innerHTML = `
+                <div class="modal" style="max-width: 450px;">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-calendar-times" style="color: var(--error)"></i> Cancel Appointment</h2>
+                        <button class="modal-close" onclick="closeCancelModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p style="margin-bottom: 1rem;">Are you sure you want to cancel this appointment?</p>
+                        <div class="form-group">
+                            <label for="cancelReason"><i class="fas fa-comment-alt"></i> Reason (optional)</label>
+                            <textarea id="cancelReason" class="form-control" rows="3" placeholder="Please provide a reason for cancellation..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" onclick="closeCancelModal()">Keep Appointment</button>
+                        <button class="btn btn-danger" onclick="cancelAppointment('${appointmentId}')">Cancel Appointment</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.body.style.overflow = 'hidden';
+        }
+
+            function closeCancelModal() {
+            const modal = document.getElementById('cancelModal');
+            if (modal) {
+                modal.remove();
+                document.body.style.overflow = '';
             }
         }
-</script>
-<script>
-            if (!appointmentId) return;
+
+            async function cancelAppointment(appointmentId) {
+            const reason = document.getElementById('cancelReason').value;
+            const confirmBtn = document.querySelector('#cancelModal .btn-danger');
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
 
             try {
-                const res = await fetch(`/appointments/${appointmentId}/start`, {
-                    method: "POST",
+                const response = await fetch(`/api/appointments/${appointmentId}/cancel`, {
+                    method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
-                    }
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ reason })
                 });
 
-                const data = await res.json();
+                const result = await response.json();
 
-                if (!res.ok) {
-        Toast.error(data.error || "Unable to start call");
-                    return;
+                if (response.ok && result.success) {
+                    closeCancelModal();
+                    Toast.success('The appointment has been cancelled.', 'Appointment Cancelled');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    Toast.error(result.error || 'Failed to cancel appointment');
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = 'Cancel Appointment';
                 }
-                window.location.href = `/doc_video/${data.roomId}`;
-            } catch (err) {
-      
-        Toast.error("Server error while starting call");
+            } catch (error) {
+                console.error('Cancel error:', error);
+                Toast.error('Unable to cancel appointment. Please try again.');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = 'Cancel Appointment';
             }
         }
 
-        function joinCall(roomId) {
-            if (!roomId) return;
-            window.location.href = `/doc_video/${roomId}`;
-        }
-        console.log("Script loaded - checking button setup");
-            document.addEventListener('DOMContentLoaded', function () {
-                console.log("DOM loaded");
-                const startButtons = document.querySelectorAll('button[onclick*="startCall"]');
-                console.log("Found start call buttons:", startButtons.length);
-
-                if (startButtons.length > 0) {
-                    console.log("First button onclick attribute:", startButtons[0].getAttribute('onclick'));
-                    console.log("User logged in? Check cookies");
-                    console.log("Cookies:", document.cookie);
-                    const tokenMatch = document.cookie.match(/accessToken=([^;]+)/);
-                    if (tokenMatch) {
-                        console.log("Access token found");
-                    } else {
-                        console.error("No access token found!");
-                    }
-                    startButtons.forEach(button => {
-                        button.addEventListener('click', function (e) {
-                            console.log("Button clicked via event listener");
-                            console.log("Button text:", this.innerText);
-                            console.log("Onclick value:", this.getAttribute('onclick'));
-                        });
-                    });
-                }
-            });
-    document.addEventListener('click', function (event) {
-        const startBtn = event.target.closest('.start-call-btn');
-        if (startBtn) {
-            event.preventDefault();
-            const appointmentId = startBtn.getAttribute('data-appointment-id');
-            console.log("Start call button clicked via event delegation, appointmentId:", appointmentId);
-            startCall(appointmentId);
-            return;
-        }
-        const joinBtn = event.target.closest('.join-call-btn');
-        if (joinBtn) {
-            event.preventDefault();
-            const roomId = joinBtn.getAttribute('data-room-id');
-            console.log("Join call button clicked via event delegation, roomId:", roomId);
-            joinCall(roomId);
-            return;
-        }
-    });
-</script>
-
-
+            document.addEventListener('click', function (event) {
+                const startBtn = event.target.closest('.start-call-btn');
+                if (startBtn) {
+                    event.preventDefault();
+                    const appointmentId = startBtn.getAttribute('data-appointment-id');
+                startCall(appointmentId);
+                return;
+            }
+            const joinBtn = event.target.closest('.join-call-btn');
+            if (joinBtn) {
+                event.preventDefault();
+                const roomId = joinBtn.getAttribute('data-room-id');
+                joinCall(roomId);
+                return;
+            }
+        });
+                </script>
 </body>
 
 </html>

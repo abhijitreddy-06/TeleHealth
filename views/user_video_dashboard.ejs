@@ -929,12 +929,11 @@ a:visited {
             </div>
 
             <% if (hasAppointment && appointment.status==='started' ) { %>
-                <button id="joinBtn" class="btn btn-primary btn-full">
+                <a href="/user_video/<%= appointment.room_id %>" class="btn btn-primary btn-full"
+                    style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                     <i class="fas fa-video"></i>
-                    <a href="/user_video/<%= appointment.room_id %>" style="color: white; text-decoration: none;">
-                        Join Video Call
+                    Join Video Call
                     </a>
-                </button>
                 <% } else if (hasAppointment && appointment.status==='scheduled' ) { %>
                     <button id="joinBtn" class="btn btn-primary btn-full" disabled>
                         <i class="fas fa-video"></i>
