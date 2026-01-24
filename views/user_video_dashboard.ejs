@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet" />
+    <link rel="stylesheet" href="/css/shared.css" />
 
     <style>
         :root {
@@ -934,6 +935,17 @@ a:visited {
                         Join Video Call
                     </a>
                 </button>
+                <% } else if (hasAppointment && appointment.status==='scheduled' ) { %>
+                    <button id="joinBtn" class="btn btn-primary btn-full" disabled>
+                        <i class="fas fa-video"></i>
+                        Join Video Call
+                    </button>
+                    <button id="cancelAppointmentBtn" class="btn btn-outline btn-full"
+                        style="margin-top: 0.75rem; border-color: var(--error); color: var(--error);"
+                        data-appointment-id="<%= appointment.id %>">
+                        <i class="fas fa-times-circle"></i>
+                        Cancel Appointment
+                    </button>
                 <% } else { %>
                     <button id="joinBtn" class="btn btn-primary btn-full" disabled>
                         <i class="fas fa-video"></i>
@@ -984,7 +996,7 @@ a:visited {
         </div>
         </footer>
 
-
+<script src="/js/shared.js"></script>
 
 <script defer>
     document.addEventListener('DOMContentLoaded', function () {
@@ -1088,6 +1100,94 @@ a:visited {
                 downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download Recent Prescription';
             }
         });
+
+        // Cancel Appointment
+        const cancelBtn = document.getElementById('cancelAppointmentBtn');
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => {
+                const appointmentId = cancelBtn.dataset.appointmentId;
+                showCancelModal(appointmentId);
+            });
+        }
+
+        function showCancelModal(appointmentId) {
+            const existingModal = document.getElementById('cancelModal');
+            if (existingModal) existingModal.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'cancelModal';
+            modal.className = 'modal-overlay active';
+            modal.innerHTML = `
+                <div class="modal" style="max-width: 450px;">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-calendar-times" style="color: var(--error)"></i> Cancel Appointment</h2>
+                        <button class="modal-close" onclick="closeCancelModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p style="margin-bottom: 1rem;">Are you sure you want to cancel this appointment?</p>
+                        <div class="form-group">
+                            <label for="cancelReason"><i class="fas fa-comment-alt"></i> Reason (optional)</label>
+                            <textarea id="cancelReason" class="form-control" rows="3" placeholder="Please provide a reason for cancellation..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" onclick="closeCancelModal()">Keep Appointment</button>
+                        <button class="btn btn-danger" id="confirmCancelBtn">Cancel Appointment</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.body.style.overflow = 'hidden';
+
+            document.getElementById('confirmCancelBtn').addEventListener('click', () => {
+                const reason = document.getElementById('cancelReason').value;
+                cancelAppointment(appointmentId, reason);
+            });
+        }
+
+        window.closeCancelModal = function () {
+            const modal = document.getElementById('cancelModal');
+            if (modal) {
+                modal.remove();
+                document.body.style.overflow = '';
+            }
+        }
+
+        async function cancelAppointment(appointmentId, reason) {
+            const confirmBtn = document.getElementById('confirmCancelBtn');
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
+
+            try {
+                const response = await fetch(`/api/appointments/${appointmentId}/cancel`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ reason })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    closeCancelModal();
+                    Toast.success('Your appointment has been cancelled.', 'Appointment Cancelled');
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    Toast.error(result.error || 'Failed to cancel appointment');
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = 'Cancel Appointment';
+                }
+            } catch (error) {
+                console.error('Cancel error:', error);
+                Toast.error('Unable to cancel appointment. Please try again.');
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = 'Cancel Appointment';
+            }
+        }
 
         setInterval(() => {
             window.location.reload();

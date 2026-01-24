@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="/css/shared.css">
     <style>
         :root {
             --primary: #38bdf8;
@@ -1563,6 +1564,7 @@ a:visited {
             </div>
         </div>
     </footer>
+    <script src="/js/shared.js"></script>
     <script defer>
         document.addEventListener('DOMContentLoaded', function () {
 
@@ -1838,16 +1840,52 @@ a:visited {
                 const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
                 document.getElementById('displayDoctor').textContent = selectedOption.textContent || 'Not selected';
             }
-            document.getElementById('appointmentForm').addEventListener('submit', function (e) {
+            document.getElementById('appointmentForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+            
                 if (!selectedDate || !selectedTime) {
-                    e.preventDefault();
-                    alert('Please select both date and time before booking.');
+                    Toast.warning('Please select both date and time before booking.');
                     return;
                 }
 
                 const submitBtn = this.querySelector('.submit-btn');
+                const originalText = submitBtn.innerHTML;
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Booking...';
+
+                try {
+                    const formData = new FormData(this);
+                    const response = await fetch('/appointments/book', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            doctorId: formData.get('doctorId'),
+                            appointment_date: formData.get('appointment_date'),
+                            appointment_time: formData.get('appointment_time')
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        Toast.success('Your appointment has been booked!', 'Appointment Confirmed');
+                        setTimeout(() => {
+                            window.location.href = '/user_video_dashboard';
+                        }, 1500);
+                    } else {
+                        Toast.error(result.error || 'Failed to book appointment');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalText;
+                    }
+                } catch (error) {
+                    console.error('Booking error:', error);
+                    Toast.error('Unable to book appointment. Please try again.');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalText;
+                }
             });
             window.addEventListener('DOMContentLoaded', () => {
                 selectDate(new Date());

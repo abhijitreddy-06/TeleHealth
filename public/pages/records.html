@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="/css/shared.css">
 <style>
     
         :root {
@@ -1542,6 +1543,7 @@ a:visited {
         </div>
         </footer>
 
+<script src="/js/shared.js"></script>
 <script defer>
     document.addEventListener('DOMContentLoaded', function () {
         window.openUploadModal = openUploadModal;
@@ -1638,7 +1640,7 @@ a:visited {
         function openPreviewModal(recordId) {
             const record = getRecordById(recordId);
             if (!record) {
-                alert('Record not found!');
+                Toast.error('Record not found!');
                 return;
             }
 
@@ -1877,10 +1879,12 @@ a:visited {
                                 ${formatDate(date)}
                             </div>
                             <div class="record-actions">
-                                <button class="btn btn-primary download-btn" data-file-id="${r.id}" data-file-name="${r.file_name}" title="Download">
-                                    <i class="fas fa-download"></i> Download
+                                <button class="btn btn-primary btn-sm download-btn" data-file-id="${r.id}" data-file-name="${r.file_name}" title="Download">
+                                    <i class="fas fa-download"></i>
                                 </button>
-
+                                <button class="btn btn-danger btn-sm delete-btn" data-file-id="${r.id}" data-file-name="${r.file_name}" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </div>
                     `;
@@ -1951,7 +1955,7 @@ a:visited {
                     button.innerHTML = '<i class="fas fa-download"></i> Try Again';
                     button.disabled = false;
                     document.body.removeChild(iframe);
-                    alert('Download failed. Please try again.');
+                    Toast.error('Download failed. Please try again.');
                 };
 
                 document.body.appendChild(iframe);
@@ -1960,7 +1964,82 @@ a:visited {
       
                 button.innerHTML = '<i class="fas fa-download"></i> Try Again';
                 button.disabled = false;
-                alert('Unable to download file. Please try again.');
+                Toast.error('Unable to download file. Please try again.');
+            }
+        }
+
+        // Delete confirmation and handling
+        function showDeleteConfirmation(fileId, fileName, button) {
+            // Create confirmation modal
+            const existingModal = document.getElementById('deleteConfirmModal');
+            if (existingModal) existingModal.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'deleteConfirmModal';
+            modal.className = 'modal-overlay active';
+            modal.innerHTML = `
+                <div class="modal" style="max-width: 400px;">
+                    <div class="modal-header">
+                        <h2><i class="fas fa-exclamation-triangle" style="color: var(--error)"></i> Delete Record</h2>
+                        <button class="modal-close" onclick="closeDeleteModal()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete <strong>${fileName}</strong>?</p>
+                        <p style="color: var(--text-medium); font-size: 0.9rem; margin-top: 0.5rem;">This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+                        <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.body.style.overflow = 'hidden';
+
+            document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+                deleteRecord(fileId, fileName, button);
+                closeDeleteModal();
+            });
+        }
+
+        window.closeDeleteModal = function () {
+            const modal = document.getElementById('deleteConfirmModal');
+            if (modal) {
+                modal.remove();
+                document.body.style.overflow = '';
+            }
+        }
+
+        async function deleteRecord(fileId, fileName, button) {
+            try {
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                button.disabled = true;
+
+                const response = await fetch(`/api/vault/${fileId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    Toast.success(`"${fileName}" has been deleted.`, 'Record Deleted');
+                    loadRecords();
+                } else {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    Toast.error(result.error || 'Failed to delete record');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                Toast.error('Unable to delete record. Please try again.');
+                button.innerHTML = '<i class="fas fa-trash"></i>';
+                button.disabled = false;
             }
         }
         document.addEventListener('click', function (e) {
@@ -1973,8 +2052,18 @@ a:visited {
                 if (fileId && fileName) {
                     downloadFile(fileId, fileName, button);
                 } else {
-             
-                    alert('Unable to download: Missing file information.');
+                    Toast.error('Unable to download: Missing file information.');
+                }
+            }
+
+            if (e.target.closest('.delete-btn')) {
+                e.preventDefault();
+                const button = e.target.closest('.delete-btn');
+                const fileId = button.getAttribute('data-file-id');
+                const fileName = button.getAttribute('data-file-name');
+
+                if (fileId) {
+                    showDeleteConfirmation(fileId, fileName, button);
                 }
             }
         });
@@ -1986,12 +2075,12 @@ a:visited {
             const recordTypeSelect = document.getElementById('recordType');
 
             if (!fileInput.files.length) {
-                alert('Please select a file to upload.');
+                Toast.warning('Please select a file to upload.');
                 return;
             }
             const file = fileInput.files[0];
             if (file.size > 10 * 1024 * 1024) {
-                alert('File size must be less than 10MB.');
+                Toast.warning('File size must be less than 10MB.');
                 return;
             }
             const allowedTypes = [
@@ -2005,7 +2094,7 @@ a:visited {
             ];
 
             if (!allowedTypes.includes(file.type) && !file.name.match(/\.(pdf|jpe?g|png|gif|docx?)$/i)) {
-                alert('Please upload a valid file type (PDF, JPG, PNG, GIF, DOC, DOCX).');
+                Toast.warning('Please upload a valid file type (PDF, JPG, PNG, GIF, DOC, DOCX).');
                 return;
             }
             const submitBtn = uploadForm.querySelector('button[type="submit"]');
@@ -2029,16 +2118,16 @@ a:visited {
 
                 if (response.ok && result.success) {
                     closeUploadModal();
-                    alert('File uploaded successfully!');
+                    Toast.success('Your file has been uploaded successfully!', 'Upload Complete');
                     loadRecords();
                 } else {
-                    alert(`Upload failed: ${result.error || 'Unknown error'}`);
+                    Toast.error(result.error || 'Unknown error', 'Upload Failed');
                 }
 
             } catch (error) {
                 console.error('Upload error:', error);
                 closeUploadModal();
-                alert('File uploaded! Refreshing records...');
+                Toast.success('File uploaded! Refreshing records...');
                 loadRecords();
             } finally {
                 submitBtn.innerHTML = originalText;
@@ -2055,7 +2144,7 @@ a:visited {
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.has('upload') && urlParams.get('upload') === 'success') {
             setTimeout(() => {
-                alert('File uploaded successfully!');
+                Toast.success('File uploaded successfully!');
                 window.history.replaceState({}, document.title, window.location.pathname);
             }, 500);
         }

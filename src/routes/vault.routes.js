@@ -104,4 +104,20 @@ router.get("/api/vault/download/:id", authenticate, async (req, res) => {
     }
 });
 
+// Delete a medical record
+router.delete("/api/vault/:id", authenticate, authorize("user"), async (req, res) => {
+    try {
+        await fileService.deleteFile(req.params.id, req.user.id);
+        res.json({ success: true, message: 'Record deleted successfully' });
+    } catch (err) {
+        console.error("Delete file error:", err);
+
+        if (err.message.includes('not found')) {
+            return res.status(404).json({ success: false, error: 'Record not found' });
+        }
+
+        res.status(500).json({ success: false, error: err.message || 'Failed to delete record' });
+    }
+});
+
 module.exports = router;

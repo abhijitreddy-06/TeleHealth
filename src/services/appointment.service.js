@@ -265,6 +265,80 @@ class AppointmentService {
 
         return result.rows[0] || null;
     }
+
+    async cancelAppointment(appointmentId, userId, role, reason) {
+        const client = await pool.connect();
+        try {
+            await client.query('BEGIN');
+
+            // Check if appointment exists and belongs to user/doctor
+            const checkQuery = role === 'doctor'
+                ? `SELECT id, status FROM appointments WHERE id = $1 AND doctor_id = $2`
+                : `SELECT id, status FROM appointments WHERE id = $1 AND user_id = $2`;
+
+            const existing = await client.query(checkQuery, [appointmentId, userId]);
+
+            if (!existing.rows.length) {
+                throw new Error('Appointment not found');
+            }
+
+            const appointment = existing.rows[0];
+
+            if (appointment.status === 'completed') {
+                throw new Error('Cannot cancel a completed appointment');
+            }
+
+            if (appointment.status === 'cancelled') {
+                throw new Error('Appointment is already cancelled');
+            }
+
+            // Update appointment status to cancelled
+            await client.query(
+                `UPDATE appointments
+                 SET status = 'cancelled',
+                     cancellation_reason = $1,
+                     cancelled_by = $2,
+                     cancelled_at = NOW()
+                 WHERE id = $3`,
+                [reason || 'No reason provided', role, appointmentId]
+            );
+
+            await client.query('COMMIT');
+
+            // Invalidate cache
+            await cacheService.invalidateDoctorsList();
+
+            return { success: true, message: 'Appointment cancelled successfully' };
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
+    async getCancelledAppointments(userId, role) {
+        const query = role === 'doctor'
+            ? `SELECT a.id, a.appointment_date, a.appointment_time, a.cancellation_reason,
+                      a.cancelled_by, a.cancelled_at,
+                      COALESCE(up.full_name, 'Patient') AS patient_name
+               FROM appointments a
+               LEFT JOIN user_profile up ON up.user_id = a.user_id
+               WHERE a.doctor_id = $1 AND a.status = 'cancelled'
+               ORDER BY a.cancelled_at DESC
+               LIMIT 10`
+            : `SELECT a.id, a.appointment_date, a.appointment_time, a.cancellation_reason,
+                      a.cancelled_by, a.cancelled_at,
+                      COALESCE(dp.full_name, 'Doctor') AS doctor_name
+               FROM appointments a
+               LEFT JOIN doc_profile dp ON dp.doc_id = a.doctor_id
+               WHERE a.user_id = $1 AND a.status = 'cancelled'
+               ORDER BY a.cancelled_at DESC
+               LIMIT 10`;
+
+        const result = await pool.query(query, [userId]);
+        return result.rows;
+    }
 }
 
 module.exports = new AppointmentService();
