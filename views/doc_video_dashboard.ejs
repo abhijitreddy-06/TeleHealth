@@ -447,6 +447,129 @@
             gap: 0.5rem;
         }
 
+        /* Appointments List Styles */
+        .appointments-list-container {
+            max-height: 350px;
+            overflow: hidden;
+        }
+
+        .appointments-scroll-list {
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .appointments-scroll-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .appointments-scroll-list::-webkit-scrollbar-track {
+            background: var(--border);
+            border-radius: 3px;
+        }
+
+        .appointments-scroll-list::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 3px;
+        }
+
+        .appointment-list-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: var(--background);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid var(--primary);
+            transition: var(--transition);
+        }
+
+        .appointment-list-item:hover {
+            background: var(--border);
+        }
+
+        .appointment-list-item.in-progress {
+            border-left-color: var(--secondary);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .appt-patient-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex: 1;
+        }
+
+        .appt-patient-info i {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .appt-patient-name {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .appt-details {
+            display: flex;
+            gap: 1rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .appt-details span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+            color: var(--text-medium);
+        }
+
+        .appt-details i {
+            color: var(--primary);
+        }
+
+        .appt-status {
+            flex-shrink: 0;
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .status-badge.scheduled {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--primary);
+        }
+
+        .status-badge.active {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--secondary);
+        }
+
+        .no-appointments-message {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-medium);
+        }
+
+        .no-appointments-message i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .no-appointments-message p {
+            font-size: 1rem;
+        }
+
         .instructions-list {
             display: flex;
             flex-direction: column;
@@ -591,6 +714,18 @@
             .appointment-card,
             .instructions-card {
                 padding: 2rem;
+            }
+
+            .appointment-list-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .appt-details {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: flex-start;
             }
 
             .status-container {
@@ -904,36 +1039,42 @@ a:visited {
             </div>
 
             <div class="instructions-card">
-                <h3><i class="fas fa-info-circle"></i> Consultation Guidelines</h3>
-                <div class="instructions-list">
-                    <div class="instruction-item">
-                        <div class="instruction-number">1</div>
-                        <div class="instruction-content">
-                            <h4>Prepare Consultation Room</h4>
-                            <p>Ensure your environment is professional, quiet, and well-lit</p>
+                <h3><i class="fas fa-calendar-check"></i> All Booked Appointments</h3>
+                <div class="appointments-list-container">
+                    <% if (allAppointments && allAppointments.length> 0) { %>
+                        <div class="appointments-scroll-list">
+                            <% allAppointments.forEach(function(appt) { %>
+                                <div class="appointment-list-item <%= appt.status === 'started' ? 'in-progress' : '' %>">
+                                    <div class="appt-patient-info">
+                                        <i class="fas fa-user-circle"></i>
+                                        <span class="appt-patient-name">
+                                            <%= appt.patient_name %>
+                                        </span>
+                                    </div>
+                                    <div class="appt-details">
+                                        <span class="appt-date"><i class="fas fa-calendar-day"></i>
+                                            <%= appt.appointment_date %>
+                                        </span>
+                                        <span class="appt-time"><i class="fas fa-clock"></i>
+                                            <%= appt.appointment_time %>
+                                        </span>
+                                    </div>
+                                    <div class="appt-status">
+                                        <% if (appt.status==='started' ) { %>
+                                            <span class="status-badge active"><i class="fas fa-video"></i> In Progress</span>
+                                            <% } else { %>
+                                                <span class="status-badge scheduled"><i class="fas fa-hourglass-half"></i> Scheduled</span>
+                                                <% } %>
+                                    </div>
+                                    </div>
+                            <% }); %>
                         </div>
-                    </div>
-                    <div class="instruction-item">
-                        <div class="instruction-number">2</div>
-                        <div class="instruction-content">
-                            <h4>Check Equipment</h4>
-                            <p>Test your camera, microphone, and internet connection before starting</p>
+                    <% } else { %>
+                        <div class="no-appointments-message">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>No appointments booked yet</p>
                         </div>
-                    </div>
-                    <div class="instruction-item">
-                        <div class="instruction-number">3</div>
-                        <div class="instruction-content">
-                            <h4>Review Patient Information</h4>
-                            <p>Have the patient's medical history and notes ready</p>
-                        </div>
-                    </div>
-                    <div class="instruction-item">
-                        <div class="instruction-number">4</div>
-                        <div class="instruction-content">
-                            <h4>End Consultation Properly</h4>
-                            <p>Summarize the consultation and provide follow-up instructions</p>
-                        </div>
-                    </div>
+                    <% } %>
                 </div>
             </div>
         </div>

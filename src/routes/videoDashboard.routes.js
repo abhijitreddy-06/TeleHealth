@@ -17,11 +17,13 @@ const escapeHtml = (str) => {
 router.get("/doc_video_dashboard", authenticate, authorize("doctor"), async (req, res) => {
     try {
         const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'doctor');
+        const allAppointments = await appointmentService.getDoctorAllAppointments(req.user.id);
         const hasAppointment = !!appointment;
 
         res.render("doc_video_dashboard", {
             appointment: appointment,
-            hasAppointment: hasAppointment
+            hasAppointment: hasAppointment,
+            allAppointments: allAppointments
         });
 
     } catch (err) {

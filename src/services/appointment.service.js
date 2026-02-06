@@ -339,6 +339,19 @@ class AppointmentService {
         const result = await pool.query(query, [userId]);
         return result.rows;
     }
+
+    async getDoctorAllAppointments(doctorId) {
+        const query = `
+            SELECT a.id, a.appointment_date, a.appointment_time, a.status, a.room_id,
+                   COALESCE(up.full_name, 'Patient') AS patient_name
+            FROM appointments a
+            LEFT JOIN user_profile up ON up.user_id = a.user_id
+            WHERE a.doctor_id = $1 AND a.status IN ('scheduled', 'started')
+            ORDER BY a.appointment_date ASC, a.appointment_time ASC`;
+
+        const result = await pool.query(query, [doctorId]);
+        return result.rows;
+    }
 }
 
 module.exports = new AppointmentService();
