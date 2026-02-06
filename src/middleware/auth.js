@@ -85,24 +85,41 @@ function authorize(...allowedRoles) {
     };
 }
 
-function blockAfterLogin(req, res, next) {
+async function blockAfterLogin(req, res, next) {
     const accessToken = req.cookies.accessToken;
     const refreshToken = req.cookies.refreshToken;
 
     if (!accessToken && !refreshToken) return next();
 
     try {
-        if (accessToken) {
-            const payload = jwt.verify(accessToken, config.ACCESS_TOKEN_SECRET);
-            return redirectBasedOnRole(res, payload.role);
-        }
 
-        if (refreshToken) {
-            const payload = jwt.decode(refreshToken);
-            if (payload && payload.role) {
+        if (accessToken) {
+            try {
+                const payload = jwt.verify(accessToken, config.ACCESS_TOKEN_SECRET);
                 return redirectBasedOnRole(res, payload.role);
+            } catch (accessError) {
+
             }
         }
+
+
+        if (refreshToken) {
+            try {
+                const user = await authService.verifyRefreshToken(refreshToken);
+                await authService.revokeRefreshToken(refreshToken);
+                const tokens = await authService.generateTokens(user);
+
+                res.cookie("accessToken", tokens.accessToken, config.accessTokenCookieOptions);
+                res.cookie("refreshToken", tokens.refreshToken, config.refreshTokenCookieOptions);
+
+                return redirectBasedOnRole(res, user.role);
+            } catch (refreshError) {
+
+                clearAuthCookies(res);
+                return next();
+            }
+        }
+
         return next();
     } catch {
         return next();
