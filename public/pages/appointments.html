@@ -1943,7 +1943,8 @@
             try {
                 const res = await apiFetch('/api/doctors/available');
                 if (!res.ok) throw new Error('Failed to load doctors');
-                const doctors = await res.json();
+                const json = await res.json();
+                const doctors = json.data || json;
 
                 if (!doctors || doctors.length === 0) {
                     grid.innerHTML = '<div class="doctors-empty"><i class="fas fa-user-md"></i><p>No doctors available at this time. Please try again later.</p></div>';
@@ -2112,7 +2113,8 @@
             try {
                 const res = await apiFetch(`/api/slots?doctorId=${doctorId}&date=${dateStr}`);
                 if (!res.ok) throw new Error('Failed to load slots');
-                const slots = await res.json();
+                const slotsJson = await res.json();
+                const slots = slotsJson.data || slotsJson;
 
                 if (!slots || slots.length === 0) {
                     container.innerHTML = '<div class="slots-empty"><i class="fas fa-calendar-times"></i><p>No slots available for this date. Please choose another date.</p></div>';
@@ -2197,7 +2199,8 @@
                 }
 
                 const data = await res.json();
-                state.lockToken = data.lockToken || data.token;
+                const lockData = data.data || data;
+                state.lockToken = lockData.lockToken || lockData.token;
                 state.lockExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
 
                 // Populate summary

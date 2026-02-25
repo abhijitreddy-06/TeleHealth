@@ -1482,10 +1482,9 @@ a:visited {
                             <select name="recordType" id="recordType" required>
                                 <option value="general">General Document</option>
                                 <option value="prescription">Prescription</option>
-                                <option value="report">Medical Report</option>
-                                <option value="lab">Lab Results</option>
+                                <option value="lab_report">Lab Results</option>
                                 <option value="imaging">Imaging (X-Ray, MRI, etc.)</option>
-                                <option value="insurance">Insurance Document</option>
+                                <option value="discharge_summary">Discharge Summary</option>
                             </select>
                         </div>
                     </div>
@@ -1663,10 +1662,9 @@ a:visited {
         function getRecordIcon(recordType) {
             const icons = {
                 'prescription': 'fa-prescription-bottle-alt',
-                'report': 'fa-file-medical-alt',
-                'lab': 'fa-flask',
+                'lab_report': 'fa-flask',
                 'imaging': 'fa-x-ray',
-                'insurance': 'fa-file-invoice-dollar',
+                'discharge_summary': 'fa-file-medical-alt',
                 'general': 'fa-file-medical'
             };
             return icons[recordType] || 'fa-file-medical';
@@ -1675,10 +1673,9 @@ a:visited {
         function getRecordTypeClass(recordType) {
             const classes = {
                 'prescription': 'prescription',
-                'report': 'report',
-                'lab': 'lab',
+                'lab_report': 'lab',
                 'imaging': 'imaging',
-                'insurance': 'insurance',
+                'discharge_summary': 'report',
                 'general': 'general'
             };
             return classes[recordType] || 'general';
