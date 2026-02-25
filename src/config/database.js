@@ -8,17 +8,25 @@ const pool = new Pool({
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
     max: 20,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 10000,
 });
 
-async function testConnection() {
-    try {
-        await pool.query('SELECT 1');
-        console.log('✅ Database connection established');
-    } catch (error) {
-        console.error('❌ Database connection failed:', error);
-        process.exit(1);
+async function testConnection(retries = 5, delay = 3000) {
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            await pool.query('SELECT 1');
+            console.log('✅ Database connection established');
+            return;
+        } catch (error) {
+            console.error(`❌ Database connection attempt ${attempt}/${retries} failed:`, error.message);
+            if (attempt < retries) {
+                console.log(`Retrying in ${delay / 1000}s...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
     }
+    console.error('❌ All database connection attempts failed. Exiting.');
+    process.exit(1);
 }
 
 async function cleanupExpiredTokens() {
