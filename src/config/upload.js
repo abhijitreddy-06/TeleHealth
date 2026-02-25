@@ -1,6 +1,7 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { ALLOWED_FILE_MIMES, ALLOWED_FILE_EXTENSIONS, MAX_FILE_SIZE } = require('../middleware/validation');
 
 const uploadDir = path.join(process.cwd(), 'temp_uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -17,12 +18,16 @@ const storage = multer.diskStorage({
 
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 10 * 1024 * 1024 },
+    limits: { fileSize: MAX_FILE_SIZE },
     fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|pdf|doc|docx/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-        mimetype && extname ? cb(null, true) : cb(new Error('Only images, PDFs, and Word documents are allowed'));
+        const ext = path.extname(file.originalname).toLowerCase();
+        const validExt = ALLOWED_FILE_EXTENSIONS.includes(ext);
+        const validMime = ALLOWED_FILE_MIMES.includes(file.mimetype);
+        if (validExt && validMime) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only images, PDFs, and Word documents are allowed'));
+        }
     }
 });
 

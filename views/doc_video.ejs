@@ -1020,6 +1020,7 @@ html, body {
             <div class="nav-links">
                 <a href="/doc_home"><i class="fas fa-home"></i> Home</a>
                 <a href="/doc_video_dashboard" class="active"><i class="fas fa-video"></i>Video</a>
+                <a href="/doc_schedule"><i class="fas fa-calendar-alt"></i> Schedule</a>
                 <a href="/doc_profile"><i class="fas fa-user-circle"></i> Profile</a>
                 <button class="theme-toggle" id="themeToggle">
                     <i class="fas fa-moon"></i>
@@ -1043,6 +1044,7 @@ html, body {
         </button>
         <a href="/doc_home"><i class="fas fa-home"></i> Home</a>
         <a href="/doc_video_dashboard" class="active"><i class="fas fa-video"></i>Video</a>
+        <a href="/doc_schedule"><i class="fas fa-calendar-alt"></i> Schedule</a>
         <a href="/doc_profile"><i class="fas fa-user-circle"></i> Profile</a>
     </div>
 
@@ -1055,6 +1057,10 @@ html, body {
                         <div class="status-dot"></div>
                     </div>
                     <span id="callStatusText">CALL STATUS: CONNECTING...</span>
+                </div>
+
+                <div id="networkQuality" style="position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.6); color:white; padding:4px 10px; border-radius:6px; font-size:0.8rem; z-index:10;">
+                    <i class="fas fa-signal"></i> --
                 </div>
 
                 <video id="remoteVideo" autoplay playsinline></video>
@@ -1432,6 +1438,7 @@ html, body {
                 updateStatus('Call connected', 'connected');
                 showToast('Video call connected successfully', 'success');
                 callStartTime = Date.now();
+                startNetworkQualityMonitoring();
                 remoteVideo.onloadedmetadata = () => {
                     console.log('Remote video metadata loaded');
                     remoteVideo.play().catch(e => console.log('Remote video play error:', e));
@@ -1460,9 +1467,14 @@ html, body {
                 updateStatus('Connection unstable', 'warning');
                 showToast('Connection unstable', 'warning');
             } else if (state === 'failed') {
-                updateStatus('Connection failed', 'error');
-                showToast('Connection failed. Attempting to reconnect...', 'error');
-                attemptReconnect();
+                updateStatus('Connection failed, attempting ICE restart...', 'error');
+                // ICE restart instead of full reconnection
+                if (peerConnection && peerConnection.restartIce) {
+                    peerConnection.restartIce();
+                    socket.emit('ice-restart-request', { roomId: ROOM_ID });
+                } else {
+                    attemptReconnect();
+                }
             } else if (state === 'closed') {
                 console.log('Peer connection closed');
             }
@@ -1575,6 +1587,7 @@ html, body {
     }
 
     function cleanupWebRTC() {
+        stopNetworkQualityMonitoring();
         if (peerConnection) {
             peerConnection.close();
             peerConnection = null;
@@ -1600,8 +1613,7 @@ html, body {
             updateStatus('Connecting to patient...', 'warning');
             reconnectAttempts = 0;
             socket.emit('join-room', {
-                roomId: ROOM_ID,
-                role: 'doctor'
+                roomId: ROOM_ID
             });
         });
 
@@ -1654,13 +1666,58 @@ html, body {
         socket.on('user-disconnected', () => {
             console.log('Patient disconnected');
             if (!callEnded) {
-                updateStatus('Patient disconnected', 'warning');
-                showToast('Patient disconnected from the call', 'warning');
-                setTimeout(() => {
-                    if (!callEnded) {
-                        endCallHandler();
-                    }
-                }, 30000);
+                updateStatus('Patient disconnected, waiting for reconnection...', 'warning');
+                showToast('Patient disconnected. Waiting for reconnection (30s)...', 'warning');
+            }
+        });
+
+        // --- ICE Restart Handler ---
+        socket.on('ice-restart-needed', async ({ from }) => {
+            console.log('ICE restart needed from:', from);
+            if (peerConnection) {
+                try {
+                    const offer = await peerConnection.createOffer({ iceRestart: true });
+                    await peerConnection.setLocalDescription(offer);
+                    socket.emit('signal', { roomId: ROOM_ID, offer });
+                } catch (err) {
+                    console.error('ICE restart failed:', err);
+                    attemptReconnect();
+                }
+            }
+        });
+
+        // --- Grace Period / Reconnection Handlers ---
+        socket.on('participant-disconnected', ({ role, grace, graceMs }) => {
+            if (role === 'user' && grace) {
+                updateStatus(`Patient disconnected. Reconnecting (${Math.round((graceMs || 30000) / 1000)}s)...`, 'warning');
+                showToast('Patient disconnected. Waiting for reconnection...', 'warning');
+            }
+        });
+
+        socket.on('participant-reconnected', ({ role }) => {
+            if (role === 'user') {
+                updateStatus('Patient reconnected', 'connected');
+                showToast('Patient reconnected successfully', 'success');
+            }
+        });
+
+        socket.on('participant-left', ({ role, permanent }) => {
+            if (role === 'user' && permanent) {
+                updateStatus('Patient has left permanently', 'error');
+                showToast('Patient has left the call permanently. You may end the call.', 'warning');
+            }
+        });
+
+        // --- Unified media state handlers ---
+        socket.on('participant-mute-state', ({ role, isMuted }) => {
+            if (role === 'user') {
+                showToast(isMuted ? 'Patient muted their mic' : 'Patient unmuted their mic', 'info');
+            }
+        });
+
+        socket.on('participant-camera-state', ({ role, isVideoOff }) => {
+            if (role === 'user') {
+                showToast(isVideoOff ? 'Patient turned off camera' : 'Patient turned on camera', 'info');
             }
         });
 
@@ -1758,7 +1815,59 @@ html, body {
         }
     }
 
-    
+    // --- Network Quality Monitoring ---
+    let networkQualityInterval = null;
+
+    function startNetworkQualityMonitoring() {
+        networkQualityInterval = setInterval(async () => {
+            if (!peerConnection) return;
+            try {
+                const stats = await peerConnection.getStats();
+                let packetsLost = 0, packetsReceived = 0, roundTripTime = 0;
+
+                stats.forEach(report => {
+                    if (report.type === 'inbound-rtp' && report.kind === 'video') {
+                        packetsLost = report.packetsLost || 0;
+                        packetsReceived = report.packetsReceived || 0;
+                    }
+                    if (report.type === 'candidate-pair' && report.state === 'succeeded') {
+                        roundTripTime = report.currentRoundTripTime || 0;
+                    }
+                });
+
+                const lossRate = packetsReceived > 0
+                    ? (packetsLost / (packetsLost + packetsReceived)) * 100 : 0;
+
+                updateNetworkIndicator(lossRate, roundTripTime);
+            } catch (e) { /* stats not available */ }
+        }, 3000);
+    }
+
+    function stopNetworkQualityMonitoring() {
+        if (networkQualityInterval) {
+            clearInterval(networkQualityInterval);
+            networkQualityInterval = null;
+        }
+    }
+
+    function updateNetworkIndicator(lossRate, rtt) {
+        const indicator = document.getElementById('networkQuality');
+        if (!indicator) return;
+
+        let quality, color;
+        if (rtt < 0.1 && lossRate < 1) {
+            quality = 'Excellent'; color = 'var(--secondary)';
+        } else if (rtt < 0.3 && lossRate < 5) {
+            quality = 'Good'; color = 'var(--primary)';
+        } else if (rtt < 0.5 && lossRate < 10) {
+            quality = 'Fair'; color = 'var(--warning)';
+        } else {
+            quality = 'Poor'; color = 'var(--error)';
+        }
+
+        indicator.innerHTML = `<i class="fas fa-signal" style="color:${color}"></i> ${quality}`;
+    }
+
     async function initializeCall() {
         try {
             updateStatus('Initializing...', 'warning');
@@ -1843,6 +1952,7 @@ html, body {
     `;
     document.head.appendChild(toastStyles);
 </script>
+<script>window.history.replaceState(null, document.title, window.location.href);</script>
 </body>
 
 </html>

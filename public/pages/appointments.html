@@ -2,14 +2,13 @@
 <html lang="en">
 
 <head>
-        <meta charset="UTF-8">
-<link rel="icon" href="/favicon.ico">
-<link rel="icon" type="image/png" href="/favicon.png">
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/png" href="/favicon.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Appointment | TeleHealth</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/shared.css">
     <style>
         :root {
@@ -23,10 +22,9 @@
             --text-medium: #475569;
             --border: #e2e8f0;
             --error: #ef4444;
-            --success: #22c55e;
             --warning: #f59e0b;
+            --success: #22c55e;
             --disabled: #9ca3af;
-            --footer-bg: #1e293b;
             --calendar-bg: #ffffff;
             --calendar-hover: #f1f5f9;
             --calendar-selected: #38bdf8;
@@ -44,7 +42,6 @@
             --text-light: #0f172a;
             --text-medium: #cbd5e1;
             --border: #475569;
-            --footer-bg: #0f172a;
             --calendar-bg: #334155;
             --calendar-hover: #475569;
             --calendar-selected: #0ea5e9;
@@ -58,6 +55,14 @@
             font-family: "Poppins", sans-serif;
         }
 
+        a,
+        a:hover,
+        a:focus,
+        a:active,
+        a:visited {
+            text-decoration: none !important;
+        }
+
         body {
             background-color: var(--background);
             color: var(--text-dark);
@@ -68,7 +73,7 @@
             line-height: 1.6;
         }
 
-        
+        /* ── Header / Nav ── */
         header {
             background-color: var(--card-bg);
             box-shadow: var(--shadow);
@@ -157,7 +162,7 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        
+        /* ── Mobile Menu ── */
         .mobile-controls {
             display: none;
             align-items: center;
@@ -238,7 +243,7 @@
             color: var(--primary);
         }
 
-        
+        /* ── Main Content ── */
         main {
             flex: 1;
             padding: 3rem 5%;
@@ -265,26 +270,284 @@
             font-size: 1.1rem;
         }
 
-        .booking-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 3rem;
-            max-width: 1200px;
-            margin: 0 auto;
+        /* ── Step Indicator ── */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
         }
 
-        
-        .calendar-card {
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--disabled);
+            transition: var(--transition);
+        }
+
+        .step-item.active {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .step-item.completed {
+            color: var(--success);
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background-color: var(--border);
+            color: var(--text-medium);
+            transition: var(--transition);
+        }
+
+        .step-item.active .step-number {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .step-item.completed .step-number {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .step-connector {
+            width: 40px;
+            height: 2px;
+            background-color: var(--border);
+            margin: 0 0.3rem;
+        }
+
+        .step-connector.completed {
+            background-color: var(--success);
+        }
+
+        /* ── Section Cards (shared) ── */
+        .section-card {
             background-color: var(--card-bg);
             padding: 2rem;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
             transition: var(--transition);
+            margin-bottom: 2rem;
         }
 
-        .calendar-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        .section-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-card h2 {
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .section-card h2 i {
+            color: var(--primary);
+        }
+
+        /* ── Step 1: Doctor Selection ── */
+        .doctors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .doctor-card {
+            background-color: var(--background);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            transition: var(--transition);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .doctor-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(56, 189, 248, 0.15);
+        }
+
+        .doctor-card.selected {
+            border-color: var(--primary);
+            background-color: rgba(56, 189, 248, 0.08);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+
+        .doctor-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .doctor-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .doctor-info h3 {
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .doctor-info .specialization {
+            font-size: 0.9rem;
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .doctor-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            font-size: 0.85rem;
+            color: var(--text-medium);
+        }
+
+        .doctor-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .doctor-meta i {
+            width: 16px;
+            text-align: center;
+            color: var(--primary);
+        }
+
+        .doctor-select-btn {
+            margin-top: auto;
+            padding: 0.6rem 1.2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .doctor-select-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+        }
+
+        .doctor-card.selected .doctor-select-btn {
+            background: var(--success);
+        }
+
+        .doctors-loading,
+        .doctors-empty {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-medium);
+        }
+
+        .doctors-loading i,
+        .doctors-empty i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: block;
+            color: var(--primary);
+        }
+
+        /* ── Step 2: Date & Time ── */
+        .step-section {
+            display: none;
+        }
+
+        .step-section.visible {
+            display: block;
+        }
+
+        .selected-doctor-banner {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            background-color: rgba(56, 189, 248, 0.08);
+            border-left: 4px solid var(--primary);
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .selected-doctor-banner i {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .selected-doctor-banner .doctor-name {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .selected-doctor-banner .change-btn {
+            margin-left: auto;
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-medium);
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .selected-doctor-banner .change-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .date-time-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        /* ── Calendar ── */
+        .calendar-card {
+            background-color: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
         }
 
         .calendar-header {
@@ -296,8 +559,8 @@
             border-bottom: 2px solid var(--border);
         }
 
-        .calendar-header h2 {
-            font-size: 1.5rem;
+        .calendar-header h3 {
+            font-size: 1.2rem;
             color: var(--text-dark);
             display: flex;
             align-items: center;
@@ -355,7 +618,7 @@
             border: 2px solid transparent;
         }
 
-        .calendar-day:hover:not(.empty):not(.disabled) {
+        .calendar-day:hover:not(.empty):not(.disabled):not(.past) {
             background-color: var(--calendar-hover);
         }
 
@@ -370,7 +633,8 @@
             border-color: var(--primary);
         }
 
-        .calendar-day.disabled {
+        .calendar-day.disabled,
+        .calendar-day.past {
             color: var(--disabled);
             cursor: not-allowed;
             opacity: 0.5;
@@ -384,17 +648,14 @@
             color: var(--warning);
         }
 
-        .calendar-day.past {
-            opacity: 0.5;
-            cursor: not-allowed;
+        /* ── Time Slots ── */
+        .time-slots-panel {
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
         }
 
-        
-        .time-slots-container {
-            margin-top: 1.5rem;
-        }
-
-        .time-slots-container h3 {
+        .time-slots-panel h3 {
             font-size: 1.2rem;
             margin-bottom: 1rem;
             color: var(--text-dark);
@@ -403,11 +664,48 @@
             gap: 0.5rem;
         }
 
+        .slots-legend {
+            display: flex;
+            gap: 1.2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.8rem;
+            color: var(--text-medium);
+        }
+
+        .slots-legend span {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+
+        .legend-dot.available {
+            background-color: rgba(34, 197, 94, 0.2);
+            border: 2px solid var(--success);
+        }
+
+        .legend-dot.locked {
+            background-color: rgba(245, 158, 11, 0.2);
+            border: 2px solid var(--warning);
+        }
+
+        .legend-dot.booked {
+            background-color: var(--disabled);
+            opacity: 0.5;
+        }
+
         .time-slots-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             gap: 0.5rem;
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
             padding-right: 0.5rem;
         }
@@ -417,16 +715,18 @@
             text-align: center;
             border-radius: 8px;
             background-color: var(--background);
-            border: 2px solid var(--border);
+            border: 2px solid var(--success);
             cursor: pointer;
             transition: var(--transition);
             font-size: 0.9rem;
             font-weight: 500;
+            color: var(--text-dark);
         }
 
-        .time-slot:hover:not(.disabled) {
+        .time-slot:hover:not(.disabled):not(.locked):not(.booked) {
             border-color: var(--primary);
             background-color: rgba(56, 189, 248, 0.1);
+            transform: translateY(-1px);
         }
 
         .time-slot.selected {
@@ -435,149 +735,149 @@
             border-color: var(--primary);
         }
 
-        .time-slot.disabled {
-            opacity: 0.5;
+        .time-slot.locked {
+            border-color: var(--warning);
+            background-color: rgba(245, 158, 11, 0.1);
             cursor: not-allowed;
-            background-color: var(--disabled);
+            color: var(--warning);
         }
 
-        
-        .form-card {
-            background-color: var(--card-bg);
-            padding: 2rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            transition: var(--transition);
+        .time-slot.booked {
+            border-color: var(--disabled);
+            background-color: var(--border);
+            cursor: not-allowed;
+            opacity: 0.6;
+            color: var(--text-medium);
         }
 
-        .form-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
-
-        .form-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .form-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-        }
-
-        .form-header h2 {
-            font-size: 1.8rem;
-            color: var(--text-dark);
-        }
-
-        .appointment-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .form-group label {
-            font-weight: 600;
-            color: var(--text-dark);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .form-group label i {
-            color: var(--primary);
-            font-size: 1.1rem;
-        }
-
-        .form-control {
-            padding: 0.9rem 1.2rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: var(--transition);
-            background-color: var(--card-bg);
-            color: var(--text-dark);
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
-        }
-
-        select.form-control {
-            appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 1rem center;
-            background-size: 1.2rem;
-            padding-right: 3rem;
-        }
-
-        .selected-info {
-            background-color: rgba(56, 189, 248, 0.1);
-            padding: 1.5rem;
-            border-radius: 8px;
-            border-left: 4px solid var(--primary);
-            margin-top: 1rem;
-        }
-
-        .selected-info h4 {
-            color: var(--text-dark);
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .selected-info p {
+        .slots-loading,
+        .slots-empty,
+        .slots-prompt {
+            text-align: center;
+            padding: 2rem 1rem;
             color: var(--text-medium);
             font-size: 0.95rem;
-            line-height: 1.5;
         }
 
-        .selected-details {
+        .slots-loading i,
+        .slots-empty i,
+        .slots-prompt i {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        /* ── Step 3: Confirm ── */
+        .confirm-layout {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .summary-card {
+            background-color: var(--background);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-card h3 {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            margin-bottom: 1.5rem;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             gap: 0.5rem;
-            margin-top: 0.5rem;
         }
 
-        .detail-item {
+        .summary-card h3 i {
+            color: var(--primary);
+        }
+
+        .summary-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.5rem 0;
+            padding: 0.8rem 0;
             border-bottom: 1px solid var(--border);
         }
 
-        .detail-label {
-            color: var(--text-medium);
-            font-weight: 500;
+        .summary-row:last-child {
+            border-bottom: none;
         }
 
-        .detail-value {
+        .summary-label {
+            color: var(--text-medium);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .summary-label i {
+            color: var(--primary);
+            width: 18px;
+            text-align: center;
+        }
+
+        .summary-value {
             color: var(--text-dark);
             font-weight: 600;
         }
 
-        .submit-btn {
-            margin-top: 1.5rem;
+        .lock-timer {
+            text-align: center;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: var(--radius);
+            background-color: rgba(245, 158, 11, 0.08);
+            border: 2px solid var(--warning);
+        }
+
+        .lock-timer-label {
+            font-size: 0.9rem;
+            color: var(--text-medium);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .lock-timer-label i {
+            color: var(--warning);
+        }
+
+        .lock-timer-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--warning);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .lock-timer.expiring {
+            border-color: var(--error);
+            background-color: rgba(239, 68, 68, 0.08);
+        }
+
+        .lock-timer.expiring .lock-timer-display {
+            color: var(--error);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .confirm-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-confirm {
+            flex: 1;
             padding: 1rem;
             font-size: 1.1rem;
             font-weight: 600;
@@ -593,235 +893,363 @@
             gap: 0.5rem;
         }
 
-        .submit-btn:hover:not(:disabled) {
+        .btn-confirm:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(56, 189, 248, 0.3);
         }
 
-        .submit-btn:disabled {
+        .btn-confirm:disabled {
             background: var(--disabled);
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
         }
 
-        
-        footer {
-            background-color: var(--footer-bg);
-            color: var(--text-light);
-            padding: 3rem 5% 1.5rem;
+        .btn-cancel-booking {
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            background: none;
+            color: var(--error);
+            border: 2px solid var(--error);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-cancel-booking:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        /* ── Upcoming Appointments ── */
+        .appointments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .appointment-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            background-color: var(--background);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            transition: var(--transition);
+        }
+
+        .appointment-item:hover {
+            border-color: var(--primary);
+        }
+
+        .appt-date-box {
+            text-align: center;
+            min-width: 60px;
+            padding: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .appt-date-box .appt-day {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .appt-date-box .appt-month {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .appt-details {
+            flex: 1;
+        }
+
+        .appt-details .appt-time {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .appt-details .appt-time i {
+            color: var(--primary);
+            font-size: 0.9rem;
+        }
+
+        .appt-details .appt-doctor {
+            color: var(--text-medium);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .appt-details .appt-doctor i {
+            color: var(--secondary);
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .status-badge.scheduled {
+            background-color: rgba(56, 189, 248, 0.15);
+            color: var(--primary);
+        }
+
+        .status-badge.completed {
+            background-color: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+        }
+
+        .status-badge.cancelled {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+        }
+
+        .status-badge.in-progress {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .appt-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .appt-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .appt-btn.cancel-btn {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        .appt-btn.cancel-btn:hover {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .appt-btn.reschedule-btn {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .appt-btn.reschedule-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-medium);
+        }
+
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+            color: var(--border);
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+        }
+
+        /* ── Pagination ── */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .pagination button {
+            padding: 0.5rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-info {
+            color: var(--text-medium);
+            font-size: 0.9rem;
+        }
+
+        /* ── Cancel Modal ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 5000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 2rem;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-box h3 {
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-box h3 i {
+            color: var(--error);
+        }
+
+        .modal-box p {
+            color: var(--text-medium);
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .modal-box textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: "Poppins", sans-serif;
+            resize: vertical;
+            min-height: 100px;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+            transition: var(--transition);
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-box textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .modal-btn.primary {
+            background-color: var(--error);
+            color: white;
+        }
+
+        .modal-btn.primary:hover {
+            background-color: #dc2626;
+        }
+
+        .modal-btn.secondary {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-medium);
+        }
+
+        .modal-btn.secondary:hover {
+            border-color: var(--text-dark);
+            color: var(--text-dark);
+        }
+
+        /* ── Footer ── */
+        .simple-footer {
+            all: unset;
+            display: block;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 0.6rem 5%;
             margin-top: auto;
         }
 
-        .footer-content {
+        .simple-footer .footer-content {
+            all: unset;
             max-width: 1400px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2.5rem;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
         }
 
-        .footer-logo {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary);
+        .simple-footer .footer-left {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
         }
 
-        .footer-about p {
-            margin: 1rem 0;
-            line-height: 1.6;
-            color: var(--text-light);
-            opacity: 0.9;
-        }
-
-        .footer-links h3 {
-            font-size: 1.2rem;
-            margin-bottom: 1.5rem;
-            position: relative;
-            display: inline-block;
-            color: var(--text-light);
-        }
-
-        .footer-links h3::after {
-            content: "";
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 40px;
-            height: 3px;
-            background: var(--primary);
-            border-radius: 2px;
-        }
-
-        .footer-links ul {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 0.8rem;
-        }
-
-        .footer-links a {
-            color: var(--text-light);
-            text-decoration: none;
-            transition: var(--transition);
-            opacity: 0.9;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .footer-links a:hover {
-            color: var(--primary);
-            opacity: 1;
-            padding-left: 5px;
-        }
-
-        .footer-bottom {
-            max-width: 1400px;
-            margin: 2.5rem auto 0;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .copyright {
-            opacity: 0.8;
-            color: var(--text-light);
-        }
-
-        .footer-bottom-links {
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        .footer-bottom-links a {
-            color: var(--text-light);
-            text-decoration: none;
-            opacity: 0.8;
-            transition: var(--transition);
-        }
-
-        .footer-bottom-links a:hover {
-            opacity: 1;
-            color: var(--primary);
-        }
-
-        
-        @media (max-width: 992px) {
-            .page-header h1 {
-                font-size: 2.5rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-
-            .mobile-controls {
-                display: flex;
-            }
-
-            .mobile-menu-btn {
-                display: flex;
-            }
-
-            .mobile-menu {
-                display: flex;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-            }
-
-            .booking-container {
-                grid-template-columns: 1fr;
-            }
-
-            .calendar-card,
-            .form-card {
-                padding: 1.5rem;
-            }
-
-            .calendar-grid {
-                gap: 0.3rem;
-            }
-
-            .calendar-day {
-                font-size: 0.9rem;
-            }
-
-            .time-slots-grid {
-                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-            }
-        }
-
-        @media (max-width: 576px) {
-            .page-header h1 {
-                font-size: 2rem;
-            }
-
-            .calendar-header h2 {
-                font-size: 1.3rem;
-            }
-
-            .form-header h2 {
-                font-size: 1.5rem;
-            }
-
-            .navbar {
-                padding: 1rem 5%;
-            }
-
-            main {
-                padding: 2rem 5%;
-            }
-        }
-
-        
-        [data-theme="dark"] footer {
-            color: var(--text-dark);
-        }
-
-        [data-theme="dark"] .footer-links a,
-        [data-theme="dark"] .footer-bottom-links a {
-            color: var(--text-dark);
-            opacity: 0.9;
-        }
-
-        
-        .simple-footer {
-            background-color: var(--card-bg);
-            border-top: 1px solid var(--border);
-            padding: 1.5rem 5%;
-            text-align: center;
-            margin-top: auto;
-        }
-
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .footer-left {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        .footer-logo {
+        .simple-footer .footer-logo {
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -830,61 +1258,104 @@
             text-decoration: none;
         }
 
-        .footer-logo i {
+        .simple-footer .footer-logo i {
             color: var(--secondary);
             font-size: 1.2rem;
         }
 
-        .copyright {
-            color: var(--text-medium);
+        .simple-footer .footer-center {
+            text-align: center;
+        }
+
+        .simple-footer .copyright {
+            color: var(--text-dark);
             font-size: 0.9rem;
+            white-space: nowrap;
         }
 
-        .footer-links {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-
-        .footer-links a {
-            color: var(--text-medium);
+        .simple-footer .footer-name {
+            color: var(--text-dark);
+            font-weight: 600;
             text-decoration: none;
-            font-size: 0.9rem;
-            transition: var(--transition);
         }
 
-        .footer-links a:hover {
-            color: var(--primary);
+        .simple-footer .footer-name:hover {
+            text-decoration: underline;
         }
 
-        .footer-links .separator {
-            color: var(--border);
+        .simple-footer .footer-right {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
         }
 
-        
-        @media (max-width: 768px) {
-            .simple-footer {
-                padding: 1rem 5%;
+        .simple-footer .footer-socials a {
+            color: var(--text-dark);
+            font-size: 1.4rem;
+            text-decoration: none;
+        }
+
+        .simple-footer .footer-socials a:hover {
+            opacity: 0.7;
+        }
+
+        /* ── Global Loader ── */
+        .global-loader {
+            position: fixed;
+            inset: 0;
+            background: transparent;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: all;
+        }
+
+        .global-loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .global-loader .loader-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .spinner {
+            width: 42px;
+            height: 42px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        .global-loader p {
+            font-size: 13px;
+            color: #374151;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 992px) {
+            .page-header h1 {
+                font-size: 2rem;
             }
 
-            .footer-content {
-                flex-direction: column;
-                gap: 0.8rem;
-                text-align: center;
-            }
-
-            .footer-links {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 1rem;
-            }
-
-            .separator {
-                display: none;
-            }
-
-            .footer-links a {
-                font-size: 0.85rem;
+            .date-time-layout {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -905,50 +1376,105 @@
                 display: flex;
             }
 
-            .footer-content {
+            .doctors-grid {
                 grid-template-columns: 1fr;
             }
 
-            .booking-container {
-                grid-template-columns: 1fr;
-                gap: 2rem;
+            .appointment-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.8rem;
+            }
+
+            .appt-actions {
                 width: 100%;
-                max-width: 100%;
             }
 
-            .calendar-card,
-            .form-card {
+            .appt-actions .appt-btn {
+                flex: 1;
+                justify-content: center;
+            }
+
+            .confirm-actions {
+                flex-direction: column;
+            }
+
+            .simple-footer {
+                padding: 0.5rem 5%;
+            }
+
+            .simple-footer .footer-content {
+                display: flex;
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+
+            .simple-footer .footer-center {
+                text-align: center;
+            }
+
+            .simple-footer .footer-right {
+                justify-content: center;
+            }
+
+            .simple-footer .copyright {
+                font-size: 0.8rem;
+            }
+
+            .simple-footer .footer-socials a {
+                font-size: 1.3rem;
+            }
+
+            .step-indicator {
+                gap: 0;
+            }
+
+            .step-item {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.6rem;
+            }
+
+            .step-connector {
+                width: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar {
+                padding: 1rem 5%;
+            }
+
+            main {
+                padding: 2rem 4%;
+            }
+
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+
+            .page-header p {
+                font-size: 1rem;
+            }
+
+            .section-card {
                 padding: 1.5rem;
-                width: 100%;
-                overflow: hidden;
             }
 
             .calendar-grid {
                 gap: 0.3rem;
-                width: 100%;
-                overflow-x: auto;
-                padding-bottom: 5px;
             }
 
-            
             .calendar-day {
                 font-size: 0.85rem;
-                min-height: 40px;
-                min-width: 40px;
-                padding: 5px;
+                min-height: 38px;
             }
 
             .day-header {
                 font-size: 0.8rem;
-                padding: 0.5rem 0.3rem;
-                min-width: 40px;
             }
 
             .time-slots-grid {
-                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-                gap: 0.5rem;
-                max-height: 250px;
-                overflow-y: auto;
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             }
 
             .time-slot {
@@ -956,85 +1482,28 @@
                 font-size: 0.8rem;
             }
 
-            
-            .form-control {
-                font-size: 16px;
-                
-                padding: 0.8rem 1rem;
+            .lock-timer-display {
+                font-size: 2rem;
             }
 
-            select.form-control {
-                padding-right: 2.5rem;
-                background-position: right 0.8rem center;
-            }
-
-            .selected-info {
-                padding: 1.2rem;
-                margin-top: 1rem;
-            }
-
-            .detail-item {
-                flex-wrap: wrap;
-                gap: 0.5rem;
-            }
-
-            .detail-label,
-            .detail-value {
-                width: 100%;
-                text-align: left;
-            }
-
-            .submit-btn {
-                padding: 0.9rem;
-                font-size: 1rem;
-            }
-
-            
-            html,
-            body {
-                overflow-x: hidden;
-                width: 100%;
-            }
-
-            main {
-                padding: 2rem 4%;
-                width: 100%;
-                box-sizing: border-box;
-            }
-
-            .page-header {
-                padding: 0 1rem;
-            }
-
-            .page-header h1 {
-                font-size: 1.8rem;
-                word-wrap: break-word;
-            }
-
-            .page-header p {
-                font-size: 1rem;
-                line-height: 1.5;
+            .step-item span:not(.step-number) {
+                display: none;
             }
         }
 
         @media (max-width: 480px) {
-            .page-header h1 {
-                font-size: 1.6rem;
+            main {
+                padding: 1.5rem 3%;
             }
 
-            .page-header p {
-                font-size: 0.95rem;
+            .navbar {
+                padding: 1rem 4%;
             }
 
             .calendar-header {
                 flex-direction: column;
-                gap: 1rem;
+                gap: 0.8rem;
                 align-items: flex-start;
-            }
-
-            .calendar-header h2 {
-                font-size: 1.2rem;
-                width: 100%;
             }
 
             .month-nav {
@@ -1043,95 +1512,44 @@
             }
 
             .calendar-grid {
-                display: grid;
-                grid-template-columns: repeat(7, 1fr);
-                min-width: 320px;
-                
+                min-width: 280px;
             }
 
             .calendar-day {
                 font-size: 0.8rem;
-                min-height: 35px;
-                min-width: 35px;
-                height: 35px;
-                width: 100%;
-                aspect-ratio: 1;
+                min-height: 34px;
             }
 
             .day-header {
                 font-size: 0.75rem;
-                min-width: 35px;
             }
 
             .time-slots-grid {
-                grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
             }
 
-            .time-slot {
-                font-size: 0.75rem;
-                padding: 0.5rem 0.2rem;
-            }
-
-            .form-header {
-                flex-direction: column;
-                text-align: center;
-                gap: 0.8rem;
-            }
-
-            .form-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.3rem;
-            }
-
-            .form-header h2 {
-                font-size: 1.3rem;
-            }
-
-            .selected-details {
-                gap: 0.8rem;
-            }
-
-            .detail-item {
-                padding: 0.3rem 0;
-            }
-
-            .calendar-card,
-            .form-card {
+            .doctor-card {
                 padding: 1.2rem;
-                margin: 0;
             }
 
-            
-            .booking-container {
-                padding: 0;
-                margin: 0;
-                width: 100%;
-            }
-
-            main {
-                padding: 1.5rem 3%;
-            }
-
-            .navbar {
-                padding: 1rem 4%;
+            .summary-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.3rem;
             }
         }
 
-        
         @media (max-width: 360px) {
             .calendar-grid {
-                min-width: 300px;
+                min-width: 260px;
             }
 
             .calendar-day {
-                min-height: 32px;
-                min-width: 32px;
+                min-height: 30px;
                 font-size: 0.75rem;
             }
 
             .day-header {
-                min-width: 32px;
                 font-size: 0.7rem;
             }
 
@@ -1140,263 +1558,72 @@
             }
 
             .time-slot {
-                font-size: 0.7rem;
+                font-size: 0.75rem;
                 padding: 0.4rem 0.2rem;
-            }
-
-            .calendar-header h2 {
-                font-size: 1.1rem;
-            }
-
-            .time-slots-container h3 {
-                font-size: 1rem;
             }
         }
 
-        
         @media (max-height: 500px) and (orientation: landscape) {
-            .booking-container {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
-            }
-
-            .calendar-card,
-            .form-card {
-                max-height: 400px;
-                overflow-y: auto;
+            .date-time-layout {
+                grid-template-columns: 1fr 1fr;
             }
 
             .time-slots-grid {
                 max-height: 150px;
             }
         }
-    
-
-.simple-footer {
-    all: unset;
-    display: block;
-    background-color: var(--card-bg);
-    border-top: 1px solid var(--border);
-    padding: 0.6rem 5%;          
-    margin-top: auto;
-}
-
-
-.simple-footer .footer-content {
-    all: unset;
-    max-width: 1400px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-}
-
-
-.simple-footer .footer-left {
-    display: flex;
-    align-items: center;
-}
-
-.simple-footer .footer-logo {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--primary);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.simple-footer .footer-logo i {
-    color: var(--secondary);
-    font-size: 1.2rem;
-}
-
-
-.simple-footer .footer-center {
-    text-align: center;
-}
-
-.simple-footer .copyright {
-    color: var(--text-dark);
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-.simple-footer .footer-name {
-    color: var(--text-dark);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.simple-footer .footer-name:hover {
-    text-decoration: underline;
-}
-
-
-.simple-footer .footer-right {
-    display: flex;
-    gap: 1rem;
-    justify-content: flex-end;
-}
-
-.simple-footer .footer-socials a {
-    color: var(--text-dark);
-    font-size: 1.4rem; 
-    text-decoration: none;
-}
-
-.simple-footer .footer-socials a:hover {
-    opacity: 0.7;
-}
-
-
-@media (max-width: 768px) {
-    .simple-footer {
-        padding: 0.5rem 5%;     
-    }
-
-    .simple-footer .footer-content {
-        display: flex;
-        flex-direction: column;
-        gap: 0.3rem;
-    }
-
-    .simple-footer .footer-center {
-        text-align: center;
-    }
-
-    .simple-footer .footer-right {
-        justify-content: center;
-    }
-
-    .simple-footer .copyright {
-        font-size: 0.8rem;
-    }
-
-    .simple-footer .footer-socials a {
-        font-size: 1.3rem;
-    }
-}
-a,
-a:hover,
-a:focus,
-a:active,
-a:visited {
-    text-decoration: none !important;
-}
-</style>
-<style>
-  .global-loader {
-    position: fixed;
-    inset: 0;
-    background: transparent; 
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: all; 
-  }
-
-  .global-loader.hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  
-  .global-loader .loader-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 16px 20px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.85); 
-    backdrop-filter: blur(6px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  }
-
-  .spinner {
-    width: 42px;
-    height: 42px;
-    border: 4px solid #e5e7eb;
-    border-top-color: #2563eb;
-    border-radius: 50%;
-    animation: spin 0.9s linear infinite;
-    margin-bottom: 10px;
-  }
-
-  .global-loader p {
-    font-size: 13px;
-    color: #374151;
-  }
-
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-</style>
-
+    </style>
 </head>
 
 <body>
-<div id="global-loader" class="global-loader">
-<div class="loader-box">
-    <div class="spinner"></div>
-    <p>Loading, please wait…</p>
-</div>
-</div>
+    <div id="global-loader" class="global-loader">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <p>Loading, please wait...</p>
+        </div>
+    </div>
 
-<script>
-    (function () {
-        const loader = document.getElementById('global-loader');
-        if (!loader) return;
+    <script>
+        (function () {
+            const loader = document.getElementById('global-loader');
+            if (!loader) return;
 
-    let loaderTimer = null;
-    let loaderVisible = false;
-    loaderTimer = setTimeout(() => {
-        loader.classList.remove('hidden');
-        loader.style.display = 'flex';
-        loaderVisible = true;
-    }, 300);
-    document.addEventListener('DOMContentLoaded', () => {
-      clearTimeout(loaderTimer);
-
-      if (loaderVisible) {
-          loader.classList.add('hidden');
-          setTimeout(() => {
-              loader.style.display = 'none';
-          }, 300);
-      } else {
-          loader.style.display = 'none';
-      }
-  });
-    document.addEventListener('click', (e) => {
-        const link = e.target.closest('a');
-        if (!link) return;
-
-      if (
-          link.target === '_blank' ||
-          link.href.startsWith('mailto:') ||
-          link.href.startsWith('tel:') ||
-          link.href.startsWith('#') ||
-          link.hasAttribute('download')
-      ) return;
-
-      const nextUrl = new URL(link.href, location.href);
-      if (nextUrl.origin !== location.origin) return;
-      loaderTimer = setTimeout(() => {
-          loader.classList.remove('hidden');
-          loader.style.display = 'flex';
-        loaderVisible = true;
-    }, 200);
-
-      e.preventDefault();
-      setTimeout(() => {
-          location.href = link.href;
-      }, 50);
-  });
+            let loaderTimer = null;
+            let loaderVisible = false;
+            loaderTimer = setTimeout(() => {
+                loader.classList.remove('hidden');
+                loader.style.display = 'flex';
+                loaderVisible = true;
+            }, 300);
+            document.addEventListener('DOMContentLoaded', () => {
+                clearTimeout(loaderTimer);
+                if (loaderVisible) {
+                    loader.classList.add('hidden');
+                    setTimeout(() => { loader.style.display = 'none'; }, 300);
+                } else {
+                    loader.style.display = 'none';
+                }
+            });
+            document.addEventListener('click', (e) => {
+                const link = e.target.closest('a');
+                if (!link) return;
+                if (
+                    link.target === '_blank' ||
+                    link.href.startsWith('mailto:') ||
+                    link.href.startsWith('tel:') ||
+                    link.href.startsWith('#') ||
+                    link.hasAttribute('download')
+                ) return;
+                const nextUrl = new URL(link.href, location.href);
+                if (nextUrl.origin !== location.origin) return;
+                loaderTimer = setTimeout(() => {
+                    loader.classList.remove('hidden');
+                    loader.style.display = 'flex';
+                    loaderVisible = true;
+                }, 200);
+                e.preventDefault();
+                setTimeout(() => { location.href = link.href; }, 50);
+            });
             window.addEventListener('pageshow', (e) => {
                 if (e.persisted) {
                     loader.classList.add('hidden');
@@ -1406,50 +1633,33 @@ a:visited {
         })();
     </script>
 
-<header>
+    <header>
         <nav class="navbar">
             <a href="/user_home" class="logo">
                 <i class="fas fa-heartbeat"></i>
                 <span class="logo-text">TeleHealth</span>
             </a>
-
             <div class="nav-links">
-                <a href="/user_home" class="active"><i class="fas fa-home"></i> Home</a>
-                <a href="/predict"><i class="fas fa-robot"></i>AI Pre Advice</a>
-                <a href="/user_video_dashboard"><i class="fas fa-video"></i>video</a>
-                <a href="/appointments"><i class="fas fa-user-md"></i>Appointments</a>
-                <a href="/records"><i class="fas fa-folder"></i> My Records</a>
-                <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
-
-                <button class="theme-toggle" id="themeToggle">
-                    <i class="fas fa-moon"></i>
-                </button>
+                <a href="/user_home"><i class="fas fa-home"></i> Home</a>
+                <a href="/appointments" class="active"><i class="fas fa-calendar-check"></i> Appointments</a>
+                <a href="/records"><i class="fas fa-file-medical"></i> Records</a>
+                <a href="/user_profile"><i class="fas fa-user"></i> Profile</a>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
-
             <div class="mobile-controls">
-                <button class="theme-toggle" id="mobileThemeToggle">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <button class="theme-toggle" id="mobileThemeToggle"><i class="fas fa-moon"></i></button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
             </div>
         </nav>
     </header>
 
-
     <div class="mobile-menu" id="mobileMenu">
-        <button class="close-menu" id="closeMenu">
-            <i class="fas fa-times"></i>
-        </button>
-        <a href="/user_home" class="active"><i class="fas fa-home"></i> Home</a>
-        <a href="/predict"><i class="fas fa-robot"></i>AI Pre Advice</a>
-        <a href="/user_video_dashboard"><i class="fas fa-video"></i>video</a>
-        <a href="/appointments"><i class="fas fa-user-md"></i>Appointments</a>
-        <a href="/records"><i class="fas fa-folder"></i> My Records</a>
-        <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
+        <button class="close-menu" id="closeMenu"><i class="fas fa-times"></i></button>
+        <a href="/user_home"><i class="fas fa-home"></i> Home</a>
+        <a href="/appointments" class="active"><i class="fas fa-calendar-check"></i> Appointments</a>
+        <a href="/records"><i class="fas fa-file-medical"></i> Records</a>
+        <a href="/user_profile"><i class="fas fa-user"></i> Profile</a>
     </div>
-
 
     <main>
         <div class="page-header">
@@ -1457,85 +1667,161 @@ a:visited {
             <p>Select your preferred doctor, date, and time for your virtual consultation</p>
         </div>
 
-        <div class="booking-container">
-            <div class="calendar-card">
-                <div class="calendar-header">
-                    <h2><i class="fas fa-calendar-alt"></i> Select Date</h2>
-                    <div class="month-nav">
-                        <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
-                        <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step-item active" id="stepIndicator1">
+                <span class="step-number">1</span>
+                <span>Select Doctor</span>
+            </div>
+            <div class="step-connector" id="stepConn1"></div>
+            <div class="step-item" id="stepIndicator2">
+                <span class="step-number">2</span>
+                <span>Date & Time</span>
+            </div>
+            <div class="step-connector" id="stepConn2"></div>
+            <div class="step-item" id="stepIndicator3">
+                <span class="step-number">3</span>
+                <span>Confirm</span>
+            </div>
+        </div>
+
+        <!-- Step 1: Select Doctor -->
+        <div class="section-card step-section visible" id="step1Section">
+            <h2><i class="fas fa-user-md"></i> Choose a Doctor</h2>
+            <div class="doctors-grid" id="doctorsGrid">
+                <div class="doctors-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading available doctors...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Select Date & Time -->
+        <div class="section-card step-section" id="step2Section">
+            <h2><i class="fas fa-calendar-alt"></i> Select Date & Time</h2>
+
+            <div class="selected-doctor-banner" id="selectedDoctorBanner">
+                <i class="fas fa-user-md"></i>
+                <span class="doctor-name" id="bannerDoctorName">--</span>
+                <button class="change-btn" id="changeDoctorBtn"><i class="fas fa-exchange-alt"></i> Change</button>
+            </div>
+
+            <div class="date-time-layout">
+                <div class="calendar-card">
+                    <div class="calendar-header">
+                        <h3><i class="fas fa-calendar-alt"></i> <span id="calendarMonthLabel"></span></h3>
+                        <div class="month-nav">
+                            <button id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+                            <button id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <div class="day-header">Sun</div>
+                        <div class="day-header">Mon</div>
+                        <div class="day-header">Tue</div>
+                        <div class="day-header">Wed</div>
+                        <div class="day-header">Thu</div>
+                        <div class="day-header">Fri</div>
+                        <div class="day-header">Sat</div>
                     </div>
                 </div>
 
-                <div class="calendar-grid" id="calendarGrid">
-                    <div class="day-header">Sun</div>
-                    <div class="day-header">Mon</div>
-                    <div class="day-header">Tue</div>
-                    <div class="day-header">Wed</div>
-                    <div class="day-header">Thu</div>
-                    <div class="day-header">Fri</div>
-                    <div class="day-header">Sat</div>
-                </div>
-
-                <div class="time-slots-container">
-                    <h3><i class="fas fa-clock"></i> Available Times</h3>
-                    <div class="time-slots-grid" id="timeSlots">
-                    
+                <div class="time-slots-panel">
+                    <h3><i class="fas fa-clock"></i> Available Slots</h3>
+                    <div class="slots-legend">
+                        <span><span class="legend-dot available"></span> Available</span>
+                        <span><span class="legend-dot locked"></span> Locked</span>
+                        <span><span class="legend-dot booked"></span> Booked</span>
+                    </div>
+                    <div id="timeSlotsContainer">
+                        <div class="slots-prompt">
+                            <i class="fas fa-hand-pointer"></i>
+                            <p>Select a date to view available slots</p>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="form-card">
-                <div class="form-header">
-                    <div class="form-icon">
-                        <i class="fas fa-calendar-plus"></i>
-                    </div>
-                    <h2>Appointment Details</h2>
+        <!-- Step 3: Confirm Booking -->
+        <div class="section-card step-section" id="step3Section">
+            <h2><i class="fas fa-check-circle"></i> Confirm Booking</h2>
+
+            <div class="confirm-layout">
+                <div class="lock-timer" id="lockTimer">
+                    <div class="lock-timer-label"><i class="fas fa-hourglass-half"></i> Slot reserved for</div>
+                    <div class="lock-timer-display" id="lockTimerDisplay">5:00</div>
                 </div>
 
-                <form action="/appointments/book" method="POST" class="appointment-form" id="appointmentForm">
-                    <input type="hidden" name="appointment_date" id="selectedDate">
-                    <input type="hidden" name="appointment_time" id="selectedTime">
-
-
-                    <div class="form-group">
-                        <label for="doctorSelect">
-                            <i class="fas fa-user-md"></i>
-                            Select Doctor
-                        </label>
-                        <select name="doctorId" id="doctorSelect" class="form-control" required>
-                            <option value="">Loading doctors...</option>
-                        </select>
+                <div class="summary-card">
+                    <h3><i class="fas fa-clipboard-list"></i> Appointment Summary</h3>
+                    <div class="summary-row">
+                        <span class="summary-label"><i class="fas fa-user-md"></i> Doctor</span>
+                        <span class="summary-value" id="summaryDoctor">--</span>
                     </div>
-
-                    <div class="selected-info">
-                        <h4><i class="fas fa-calendar-check"></i> Selected Appointment</h4>
-                        <p>Your appointment details will appear here after selection</p>
-
-                        <div class="selected-details" id="selectedDetails">
-                            <div class="detail-item">
-                                <span class="detail-label">Date:</span>
-                                <span class="detail-value" id="displayDate">Not selected</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Time:</span>
-                                <span class="detail-value" id="displayTime">Not selected</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">Doctor:</span>
-                                <span class="detail-value" id="displayDoctor">Not selected</span>
-                            </div>
-                        </div>
+                    <div class="summary-row">
+                        <span class="summary-label"><i class="fas fa-calendar-day"></i> Date</span>
+                        <span class="summary-value" id="summaryDate">--</span>
                     </div>
+                    <div class="summary-row">
+                        <span class="summary-label"><i class="fas fa-clock"></i> Time</span>
+                        <span class="summary-value" id="summaryTime">--</span>
+                    </div>
+                </div>
 
-                    <button type="submit" class="submit-btn" id="submitBtn" disabled>
-                        <i class="fas fa-calendar-check"></i>
-                        Book Appointment
+                <div class="confirm-actions">
+                    <button class="btn-confirm" id="confirmBookingBtn">
+                        <i class="fas fa-calendar-check"></i> Confirm Booking
                     </button>
-                </form>
+                    <button class="btn-cancel-booking" id="cancelLockBtn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Appointments -->
+        <div class="section-card" id="upcomingSection">
+            <h2><i class="fas fa-calendar-check"></i> Your Upcoming Appointments</h2>
+            <div class="appointments-list" id="upcomingList">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading appointments...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Past Appointments -->
+        <div class="section-card" id="historySection">
+            <h2><i class="fas fa-history"></i> Past Appointments</h2>
+            <div class="appointments-list" id="historyList">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading history...</p>
+                </div>
+            </div>
+            <div class="pagination" id="historyPagination" style="display:none;">
+                <button id="historyPrev" disabled><i class="fas fa-chevron-left"></i> Previous</button>
+                <span class="page-info" id="historyPageInfo">Page 1</span>
+                <button id="historyNext"><i class="fas fa-chevron-right"></i> Next</button>
             </div>
         </div>
     </main>
+
+    <!-- Cancel Modal -->
+    <div class="modal-overlay" id="cancelModal">
+        <div class="modal-box">
+            <h3><i class="fas fa-exclamation-triangle"></i> Cancel Appointment</h3>
+            <p>Are you sure you want to cancel this appointment? Please provide a reason below.</p>
+            <textarea id="cancelReason" placeholder="Reason for cancellation (optional)..."></textarea>
+            <div class="modal-actions">
+                <button class="modal-btn secondary" id="cancelModalClose">Go Back</button>
+                <button class="modal-btn primary" id="cancelModalConfirm">
+                    <i class="fas fa-trash"></i> Cancel Appointment
+                </button>
+            </div>
+        </div>
+    </div>
 
     <footer class="simple-footer">
         <div class="footer-content">
@@ -1547,302 +1833,739 @@ a:visited {
             </div>
             <div class="footer-center">
                 <span class="copyright">
-                    © 2026 Built by
-                    <a href="https://abhijitreddy-portfolio.netlify.app/" target="_blank" rel="noopener" class="footer-name">
-                        Abhijit Reddy😊
-                    </a>.
+                    &copy; 2026 Built by
+                    <a href="https://abhijitreddy-portfolio.netlify.app/" target="_blank" rel="noopener" class="footer-name">Abhijit Reddy&#x1F60A;</a>.
                 </span>
             </div>
-
             <div class="footer-right footer-socials">
-                <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" aria-label="LinkedIn">
-                    <i class="fab fa-linkedin"></i>
-                </a>
-                <a href="https://github.com/abhijitreddy-06" target="_blank" aria-label="GitHub">
-                    <i class="fab fa-github"></i>
-                </a>
+                <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                <a href="https://github.com/abhijitreddy-06" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
             </div>
         </div>
     </footer>
+
     <script src="/js/shared.js"></script>
-    <script defer>
-            document.addEventListener('DOMContentLoaded', function () {
-            let currentDate = new Date();
-            let selectedDate = null;
-            let selectedTime = null;
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
 
-            const monthNames = ["January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"
-            ];
+        /* ========================================================
+           STATE
+        ======================================================== */
+        let state = {
+            selectedDoctor: null,
+            selectedDate: null,
+            selectedTime: null,
+            lockToken: null,
+            lockTimer: null,
+            lockExpiry: null,
+            rescheduleAppointmentId: null
+        };
 
-            const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-            const businessHours = {
-                0: { start: 10, end: 16 }, // Sunday: 10 AM - 4 PM
-                1: { start: 8, end: 20 },  // Monday: 8 AM - 8 PM
-                2: { start: 8, end: 20 },  // Tuesday: 8 AM - 8 PM
-                3: { start: 8, end: 20 },  // Wednesday: 8 AM - 8 PM
-                4: { start: 8, end: 20 },  // Thursday: 8 AM - 8 PM
-                5: { start: 8, end: 20 },  // Friday: 8 AM - 8 PM
-                6: { start: 9, end: 17 }   // Saturday: 9 AM - 5 PM
-            };
+        let currentCalendarDate = new Date();
+        let historyPage = 1;
 
-            function generateCalendar() {
-                const calendarGrid = document.getElementById('calendarGrid');
-                const calendarHeader = document.querySelector('.calendar-header h2');
-                const existingDays = Array.from(calendarGrid.children).slice(7);
-                existingDays.forEach(day => day.remove());
-                calendarHeader.innerHTML = `<i class="fas fa-calendar-alt"></i> ${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+        const monthNames = ["January","February","March","April","May","June",
+            "July","August","September","October","November","December"];
 
-                const year = currentDate.getFullYear();
-                const month = currentDate.getMonth();
-                const firstDay = new Date(year, month, 1);
-                const lastDay = new Date(year, month + 1, 0);
-                const totalDays = lastDay.getDate();
-                const firstDayIndex = firstDay.getDay();
-                for (let i = 0; i < firstDayIndex; i++) {
-                    const emptyDay = document.createElement('div');
-                    emptyDay.className = 'calendar-day empty';
-                    calendarGrid.appendChild(emptyDay);
-                }
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
+        /* ========================================================
+           HELPERS
+        ======================================================== */
+        function formatDateForAPI(date) {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
 
-                for (let day = 1; day <= totalDays; day++) {
-                    const date = new Date(year, month, day);
-                    const dayElement = document.createElement('div');
-                    dayElement.className = 'calendar-day';
-                    dayElement.textContent = day;
-                    const dayOfWeek = date.getDay();
-                    if (dayOfWeek === 0 || dayOfWeek === 6) {
-                        dayElement.classList.add('weekend');
-                    }
-                    if (date.getTime() === today.getTime()) {
-                        dayElement.classList.add('today');
-                    }
-                    if (date < today) {
-                        dayElement.classList.add('past');
-                        dayElement.classList.add('disabled');
-                    } else {
-                        dayElement.addEventListener('click', () => selectDate(date));
-                        if (selectedDate &&
-                            date.getDate() === selectedDate.getDate() &&
-                            date.getMonth() === selectedDate.getMonth() &&
-                            date.getFullYear() === selectedDate.getFullYear()) {
-                            dayElement.classList.add('selected');
-                        }
-                    }
-
-                    calendarGrid.appendChild(dayElement);
-                }
-                if (selectedDate && !isDatePast(selectedDate)) {
-                    generateTimeSlots(selectedDate);
-                }
-            }
-
-            function isDatePast(date) {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                return date < today;
-            }
-
-            function generateTimeSlots(date) {
-                const timeSlotsGrid = document.getElementById('timeSlots');
-                timeSlotsGrid.innerHTML = '';
-
-                const dayOfWeek = date.getDay();
-                const hours = businessHours[dayOfWeek];
-
-                if (!hours) return;
-                for (let hour = hours.start; hour < hours.end; hour++) {
-                    for (let minute = 0; minute < 60; minute += 30) {
-                        const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-                        const timeSlot = document.createElement('div');
-                        timeSlot.className = 'time-slot';
-                        timeSlot.textContent = formatTime(hour, minute);
-                        timeSlot.dataset.time = timeString;
-                        const now = new Date();
-                        if (isToday(date)) {
-                            const slotTime = new Date();
-                            slotTime.setHours(hour, minute, 0, 0);
-                            if (slotTime < now) {
-                                timeSlot.classList.add('disabled');
-                            } else {
-                                timeSlot.addEventListener('click', () => selectTime(timeString));
-                            }
-                        } else {
-                            timeSlot.addEventListener('click', () => selectTime(timeString));
-                        }
-                        if (selectedTime === timeString) {
-                            timeSlot.classList.add('selected');
-                        }
-
-                        timeSlotsGrid.appendChild(timeSlot);
-                    }
-                }
-            }
-
-            function formatTime(hour, minute) {
-                const ampm = hour >= 12 ? 'PM' : 'AM';
-                const displayHour = hour % 12 || 12;
-                return `${displayHour}:${minute.toString().padStart(2, '0')} ${ampm}`;
-            }
-
-            function isToday(date) {
-                const today = new Date();
-                return date.getDate() === today.getDate() &&
-                    date.getMonth() === today.getMonth() &&
-                    date.getFullYear() === today.getFullYear();
-            }
-
-            function selectDate(date) {
-                if (isDatePast(date)) return;
-
-                selectedDate = date;
-                selectedTime = null;
-                document.getElementById('selectedDate').value = formatDateForInput(date);
-                document.getElementById('selectedTime').value = '';
-                document.getElementById('displayDate').textContent = formatDate(date);
-                document.getElementById('displayTime').textContent = 'Not selected';
-                generateCalendar();
-                generateTimeSlots(date);
-
-                updateSubmitButton();
-            }
-
-            function selectTime(time) {
-                if (!selectedDate) return;
-
-                selectedTime = time;
-                document.getElementById('selectedTime').value = time;
-                const [hour, minute] = time.split(':').map(Number);
-                document.getElementById('displayTime').textContent = formatTime(hour, minute);
-                document.querySelectorAll('.time-slot').forEach(slot => {
-                    slot.classList.remove('selected');
-                    if (slot.dataset.time === time) {
-                        slot.classList.add('selected');
-                    }
-                });
-
-                updateSubmitButton();
-            }
-
-            function formatDate(date) {
-                return date.toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            }
-
-            function formatDateForInput(date) {
-                return date.toISOString().split('T')[0];
-            }
-            document.getElementById('prevMonth').addEventListener('click', () => {
-                currentDate.setMonth(currentDate.getMonth() - 1);
-                generateCalendar();
+        function formatDateDisplay(date) {
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
             });
+        }
 
-            document.getElementById('nextMonth').addEventListener('click', () => {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-                generateCalendar();
-            });
-            function updateSubmitButton() {
-                const submitBtn = document.getElementById('submitBtn');
-                const doctorSelect = document.getElementById('doctorSelect');
+        function formatTime24to12(t) {
+            const [h, m] = t.split(':').map(Number);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const hr = h % 12 || 12;
+            return `${hr}:${String(m).padStart(2, '0')} ${ampm}`;
+        }
 
-                if (selectedDate && selectedTime && doctorSelect.value) {
-                    submitBtn.disabled = false;
-                } else {
-                    submitBtn.disabled = true;
-                }
+        function isToday(date) {
+            const t = new Date();
+            return date.getDate() === t.getDate() &&
+                   date.getMonth() === t.getMonth() &&
+                   date.getFullYear() === t.getFullYear();
+        }
+
+        function isPast(date) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const d = new Date(date);
+            d.setHours(0, 0, 0, 0);
+            return d < today;
+        }
+
+        async function apiFetch(url, opts = {}) {
+            const defaults = { credentials: 'same-origin' };
+            const res = await fetch(url, { ...defaults, ...opts });
+            return res;
+        }
+
+        /* ========================================================
+           STEP MANAGEMENT
+        ======================================================== */
+        function goToStep(step) {
+            document.getElementById('step1Section').classList.toggle('visible', step === 1);
+            document.getElementById('step2Section').classList.toggle('visible', step === 2);
+            document.getElementById('step3Section').classList.toggle('visible', step === 3);
+
+            // Update indicators
+            for (let i = 1; i <= 3; i++) {
+                const el = document.getElementById('stepIndicator' + i);
+                el.classList.remove('active', 'completed');
+                if (i < step) el.classList.add('completed');
+                else if (i === step) el.classList.add('active');
             }
-            async function loadDoctors() {
-                try {
-                    const res = await fetch("/api/doctors");
-                    const doctors = await res.json();
 
-                    const select = document.getElementById("doctorSelect");
-                    select.innerHTML = '<option value="">Select Doctor</option>';
-
-                    doctors.forEach(doc => {
-                        const opt = document.createElement("option");
-                        opt.value = doc.id;
-                        opt.textContent = `${doc.full_name} (${doc.specialization})`;
-                        select.appendChild(opt);
-                    });
-                    select.addEventListener('change', () => {
-                        updateDoctorDisplay();
-                        updateSubmitButton();
-                    });
-                } catch (err) {
-
-                    const select = document.getElementById("doctorSelect");
-                    select.innerHTML = '<option value="">Failed to load doctors. Please try again.</option>';
-                }
+            for (let i = 1; i <= 2; i++) {
+                const conn = document.getElementById('stepConn' + i);
+                conn.classList.toggle('completed', i < step);
             }
+        }
 
-            function updateDoctorDisplay() {
-                const doctorSelect = document.getElementById('doctorSelect');
-                const selectedOption = doctorSelect.options[doctorSelect.selectedIndex];
-                document.getElementById('displayDoctor').textContent = selectedOption.textContent || 'Not selected';
-            }
-            document.getElementById('appointmentForm').addEventListener('submit', async function (e) {
-                e.preventDefault();
-            
-                if (!selectedDate || !selectedTime) {
-                    Toast.warning('Please select both date and time before booking.');
+        /* ========================================================
+           STEP 1: LOAD DOCTORS
+        ======================================================== */
+        async function loadDoctors() {
+            const grid = document.getElementById('doctorsGrid');
+            grid.innerHTML = '<div class="doctors-loading"><i class="fas fa-spinner fa-spin"></i><p>Loading available doctors...</p></div>';
+
+            try {
+                const res = await apiFetch('/api/doctors/available');
+                if (!res.ok) throw new Error('Failed to load doctors');
+                const doctors = await res.json();
+
+                if (!doctors || doctors.length === 0) {
+                    grid.innerHTML = '<div class="doctors-empty"><i class="fas fa-user-md"></i><p>No doctors available at this time. Please try again later.</p></div>';
                     return;
                 }
 
-                const submitBtn = this.querySelector('.submit-btn');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Booking...';
+                grid.innerHTML = '';
+                doctors.forEach(doc => {
+                    const card = document.createElement('div');
+                    card.className = 'doctor-card';
+                    card.dataset.doctorId = doc.id;
 
-                try {
-                    const formData = new FormData(this);
-                    const response = await fetch('/appointments/book', {
-                        method: 'POST',
-                        headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            doctorId: formData.get('doctorId'),
-                            appointment_date: formData.get('appointment_date'),
-                            appointment_time: formData.get('appointment_time')
-                        })
-                    });
+                    const initials = (doc.full_name || doc.name || 'DR')
+                        .split(' ')
+                        .map(w => w[0])
+                        .join('')
+                        .substring(0, 2)
+                        .toUpperCase();
 
-                    const result = await response.json();
+                    card.innerHTML = `
+                        <div class="doctor-card-header">
+                            <div class="doctor-avatar">${initials}</div>
+                            <div class="doctor-info">
+                                <h3>${escapeHtml(doc.full_name || doc.name || 'Doctor')}</h3>
+                                <span class="specialization">${escapeHtml(doc.specialization || 'General')}</span>
+                            </div>
+                        </div>
+                        <div class="doctor-meta">
+                            ${doc.experience ? `<span><i class="fas fa-briefcase"></i> ${escapeHtml(String(doc.experience))} experience</span>` : ''}
+                            ${doc.hospital ? `<span><i class="fas fa-hospital"></i> ${escapeHtml(doc.hospital)}</span>` : ''}
+                        </div>
+                        <button class="doctor-select-btn"><i class="fas fa-check-circle"></i> Select</button>
+                    `;
 
-                    if (response.ok && result.success) {
-                        Toast.success('Your appointment has been booked!', 'Appointment Confirmed');
-                        setTimeout(() => {
-                            window.location.href = '/user_video_dashboard';
-                        }, 1500);
-                    } else {
-                        Toast.error(result.error || 'Failed to book appointment');
-                        submitBtn.disabled = false;
-                        submitBtn.innerHTML = originalText;
-                    }
-                } catch (error) {
-                    console.error('Booking error:', error);
-                    Toast.error('Unable to book appointment. Please try again.');
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = originalText;
-                }
+                    card.addEventListener('click', () => selectDoctor(doc, card));
+                    grid.appendChild(card);
+                });
+            } catch (err) {
+                console.error('Load doctors error:', err);
+                grid.innerHTML = '<div class="doctors-empty"><i class="fas fa-exclamation-circle"></i><p>Failed to load doctors. Please refresh the page.</p></div>';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function selectDoctor(doc, cardEl) {
+            state.selectedDoctor = doc;
+
+            // Highlight card
+            document.querySelectorAll('.doctor-card').forEach(c => c.classList.remove('selected'));
+            cardEl.classList.add('selected');
+            cardEl.querySelector('.doctor-select-btn').innerHTML = '<i class="fas fa-check"></i> Selected';
+
+            // Update banner
+            document.getElementById('bannerDoctorName').textContent = doc.full_name || doc.name || 'Doctor';
+
+            // Move to step 2
+            setTimeout(() => goToStep(2), 300);
+            generateCalendar();
+        }
+
+        document.getElementById('changeDoctorBtn').addEventListener('click', () => {
+            releaseLockIfNeeded();
+            state.selectedDoctor = null;
+            state.selectedDate = null;
+            state.selectedTime = null;
+            document.querySelectorAll('.doctor-card').forEach(c => {
+                c.classList.remove('selected');
+                c.querySelector('.doctor-select-btn').innerHTML = '<i class="fas fa-check-circle"></i> Select';
             });
-            window.addEventListener('DOMContentLoaded', () => {
-                selectDate(new Date());
-                generateCalendar();
-                loadDoctors();
-            });
-
+            goToStep(1);
         });
-    </script>
 
+        /* ========================================================
+           STEP 2: CALENDAR
+        ======================================================== */
+        function generateCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const label = document.getElementById('calendarMonthLabel');
+
+            // Remove old day cells (keep 7 headers)
+            const existing = Array.from(grid.children).slice(7);
+            existing.forEach(el => el.remove());
+
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            label.textContent = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const totalDays = lastDay.getDate();
+            const firstDayIndex = firstDay.getDay();
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'calendar-day empty';
+                grid.appendChild(empty);
+            }
+
+            for (let day = 1; day <= totalDays; day++) {
+                const date = new Date(year, month, day);
+                const el = document.createElement('div');
+                el.className = 'calendar-day';
+                el.textContent = day;
+
+                const dow = date.getDay();
+                if (dow === 0 || dow === 6) el.classList.add('weekend');
+
+                if (date.getTime() === today.getTime()) el.classList.add('today');
+
+                if (date < today) {
+                    el.classList.add('past');
+                    el.classList.add('disabled');
+                } else {
+                    el.addEventListener('click', () => onDateClick(date));
+
+                    if (state.selectedDate &&
+                        date.getDate() === state.selectedDate.getDate() &&
+                        date.getMonth() === state.selectedDate.getMonth() &&
+                        date.getFullYear() === state.selectedDate.getFullYear()) {
+                        el.classList.add('selected');
+                    }
+                }
+
+                grid.appendChild(el);
+            }
+        }
+
+        document.getElementById('prevMonth').addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            generateCalendar();
+        });
+
+        document.getElementById('nextMonth').addEventListener('click', () => {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            generateCalendar();
+        });
+
+        function onDateClick(date) {
+            if (isPast(date)) return;
+            state.selectedDate = date;
+            state.selectedTime = null;
+            generateCalendar();
+            loadSlots();
+        }
+
+        /* ========================================================
+           STEP 2: LOAD SLOTS
+        ======================================================== */
+        async function loadSlots() {
+            if (!state.selectedDoctor || !state.selectedDate) return;
+
+            const container = document.getElementById('timeSlotsContainer');
+            container.innerHTML = '<div class="slots-loading"><i class="fas fa-spinner fa-spin"></i><p>Loading available slots...</p></div>';
+
+            const doctorId = state.selectedDoctor.id;
+            const dateStr = formatDateForAPI(state.selectedDate);
+
+            try {
+                const res = await apiFetch(`/api/slots?doctorId=${doctorId}&date=${dateStr}`);
+                if (!res.ok) throw new Error('Failed to load slots');
+                const slots = await res.json();
+
+                if (!slots || slots.length === 0) {
+                    container.innerHTML = '<div class="slots-empty"><i class="fas fa-calendar-times"></i><p>No slots available for this date. Please choose another date.</p></div>';
+                    return;
+                }
+
+                const grid = document.createElement('div');
+                grid.className = 'time-slots-grid';
+
+                slots.forEach(slot => {
+                    const btn = document.createElement('div');
+                    btn.className = 'time-slot';
+                    btn.dataset.time = slot.time;
+
+                    const display12 = formatTime24to12(slot.time);
+
+                    if (slot.status === 'booked') {
+                        btn.classList.add('booked');
+                        btn.innerHTML = `${display12}`;
+                        btn.title = 'Already booked';
+                    } else if (slot.status === 'locked') {
+                        btn.classList.add('locked');
+                        btn.innerHTML = `<i class="fas fa-lock" style="font-size:0.7rem;"></i> ${display12}`;
+                        btn.title = 'Locked by another patient';
+                    } else {
+                        // available
+                        btn.innerHTML = display12;
+                        btn.addEventListener('click', () => onSlotClick(slot.time));
+                    }
+
+                    if (state.selectedTime === slot.time && slot.status === 'available') {
+                        btn.classList.add('selected');
+                    }
+
+                    grid.appendChild(btn);
+                });
+
+                container.innerHTML = '';
+                container.appendChild(grid);
+            } catch (err) {
+                console.error('Load slots error:', err);
+                container.innerHTML = '<div class="slots-empty"><i class="fas fa-exclamation-circle"></i><p>Failed to load slots. Please try again.</p></div>';
+            }
+        }
+
+        async function onSlotClick(time) {
+            if (!state.selectedDoctor || !state.selectedDate) return;
+
+            state.selectedTime = time;
+
+            // Highlight slot
+            document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+            const target = document.querySelector(`.time-slot[data-time="${time}"]`);
+            if (target) target.classList.add('selected');
+
+            // Attempt to lock
+            try {
+                const res = await apiFetch('/api/slots/lock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        doctorId: state.selectedDoctor.id,
+                        date: formatDateForAPI(state.selectedDate),
+                        time: time
+                    })
+                });
+
+                if (res.status === 409) {
+                    if (typeof Toast !== 'undefined') {
+                        Toast.warning('This slot is currently locked by another patient. Please choose a different time.');
+                    } else {
+                        alert('Slot is currently locked by another patient.');
+                    }
+                    state.selectedTime = null;
+                    loadSlots();
+                    return;
+                }
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.error || 'Failed to lock slot');
+                }
+
+                const data = await res.json();
+                state.lockToken = data.lockToken || data.token;
+                state.lockExpiry = Date.now() + 5 * 60 * 1000; // 5 minutes
+
+                // Populate summary
+                document.getElementById('summaryDoctor').textContent = state.selectedDoctor.full_name || state.selectedDoctor.name || 'Doctor';
+                document.getElementById('summaryDate').textContent = formatDateDisplay(state.selectedDate);
+                document.getElementById('summaryTime').textContent = formatTime24to12(time);
+
+                // Start timer and go to step 3
+                startLockTimer();
+                goToStep(3);
+            } catch (err) {
+                console.error('Lock error:', err);
+                if (typeof Toast !== 'undefined') {
+                    Toast.error(err.message || 'Failed to reserve slot. Please try again.');
+                }
+                state.selectedTime = null;
+                loadSlots();
+            }
+        }
+
+        /* ========================================================
+           STEP 3: LOCK TIMER
+        ======================================================== */
+        function startLockTimer() {
+            clearInterval(state.lockTimer);
+            const timerEl = document.getElementById('lockTimerDisplay');
+            const timerBox = document.getElementById('lockTimer');
+            const confirmBtn = document.getElementById('confirmBookingBtn');
+
+            state.lockTimer = setInterval(() => {
+                const remaining = Math.max(0, state.lockExpiry - Date.now());
+                const mins = Math.floor(remaining / 60000);
+                const secs = Math.floor((remaining % 60000) / 1000);
+                timerEl.textContent = `${mins}:${String(secs).padStart(2, '0')}`;
+
+                if (remaining <= 60000) {
+                    timerBox.classList.add('expiring');
+                } else {
+                    timerBox.classList.remove('expiring');
+                }
+
+                if (remaining <= 0) {
+                    clearInterval(state.lockTimer);
+                    timerEl.textContent = '0:00';
+                    confirmBtn.disabled = true;
+                    if (typeof Toast !== 'undefined') {
+                        Toast.warning('Your slot reservation has expired. Please select a new time slot.');
+                    }
+                    state.lockToken = null;
+                    setTimeout(() => {
+                        goToStep(2);
+                        loadSlots();
+                    }, 2000);
+                }
+            }, 250);
+
+            confirmBtn.disabled = false;
+        }
+
+        /* ========================================================
+           STEP 3: CONFIRM BOOKING
+        ======================================================== */
+        document.getElementById('confirmBookingBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('confirmBookingBtn');
+            if (btn.disabled) return;
+
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Booking...';
+
+            try {
+                const res = await apiFetch('/appointments/book', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        doctorId: state.selectedDoctor.id,
+                        appointment_date: formatDateForAPI(state.selectedDate),
+                        appointment_time: state.selectedTime,
+                        lockToken: state.lockToken
+                    })
+                });
+
+                const result = await res.json();
+
+                if (res.ok && result.success) {
+                    clearInterval(state.lockTimer);
+                    state.lockToken = null;
+                    if (typeof Toast !== 'undefined') {
+                        Toast.success('Your appointment has been booked!', 'Appointment Confirmed');
+                    }
+                    setTimeout(() => { window.location.href = '/user_video_dashboard'; }, 1500);
+                } else {
+                    if (typeof Toast !== 'undefined') {
+                        Toast.error(result.error || 'Failed to book appointment. Please try again.');
+                    }
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                }
+            } catch (err) {
+                console.error('Booking error:', err);
+                if (typeof Toast !== 'undefined') {
+                    Toast.error('Unable to book appointment. Please try again.');
+                }
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        });
+
+        /* ========================================================
+           CANCEL LOCK / RELEASE
+        ======================================================== */
+        document.getElementById('cancelLockBtn').addEventListener('click', () => {
+            releaseLockIfNeeded();
+            clearInterval(state.lockTimer);
+            state.lockToken = null;
+            state.selectedTime = null;
+            goToStep(2);
+            loadSlots();
+        });
+
+        async function releaseLockIfNeeded() {
+            if (!state.lockToken || !state.selectedDoctor || !state.selectedDate || !state.selectedTime) return;
+            try {
+                await apiFetch('/api/slots/unlock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        doctorId: state.selectedDoctor.id,
+                        date: formatDateForAPI(state.selectedDate),
+                        time: state.selectedTime,
+                        lockToken: state.lockToken
+                    })
+                });
+            } catch (e) {
+                // Best effort
+            }
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (state.lockToken && state.selectedDoctor && state.selectedDate && state.selectedTime) {
+                const formData = new FormData();
+                formData.append('doctorId', state.selectedDoctor.id);
+                formData.append('date', formatDateForAPI(state.selectedDate));
+                formData.append('time', state.selectedTime);
+                formData.append('lockToken', state.lockToken);
+                navigator.sendBeacon('/api/slots/unlock', formData);
+            }
+        });
+
+        /* ========================================================
+           UPCOMING APPOINTMENTS
+        ======================================================== */
+        async function loadUpcoming() {
+            const list = document.getElementById('upcomingList');
+            try {
+                const res = await apiFetch('/api/appointments/upcoming?page=1');
+                if (!res.ok) throw new Error('Failed to load');
+                const data = await res.json();
+                const appointments = data.appointments || data;
+
+                if (!appointments || appointments.length === 0) {
+                    list.innerHTML = '<div class="empty-state"><i class="fas fa-calendar-plus"></i><p>No upcoming appointments. Book one above!</p></div>';
+                    return;
+                }
+
+                list.innerHTML = '';
+                appointments.forEach(appt => {
+                    const d = new Date(appt.appointment_date || appt.date);
+                    const dayNum = d.getDate();
+                    const monthStr = monthNames[d.getMonth()].substring(0, 3).toUpperCase();
+                    const timeStr = appt.appointment_time || appt.time || '--:--';
+                    const doctorName = appt.doctor_name || appt.doctorName || 'Doctor';
+                    const status = (appt.status || 'scheduled').toLowerCase();
+
+                    const item = document.createElement('div');
+                    item.className = 'appointment-item';
+                    item.innerHTML = `
+                        <div class="appt-date-box">
+                            <div class="appt-day">${dayNum}</div>
+                            <div class="appt-month">${monthStr}</div>
+                        </div>
+                        <div class="appt-details">
+                            <div class="appt-time"><i class="fas fa-clock"></i> ${escapeHtml(formatTime24to12(timeStr))}</div>
+                            <div class="appt-doctor"><i class="fas fa-user-md"></i> Dr. ${escapeHtml(doctorName)}</div>
+                        </div>
+                        <span class="status-badge ${status}">${escapeHtml(status)}</span>
+                        ${status === 'scheduled' ? `
+                        <div class="appt-actions">
+                            <button class="appt-btn reschedule-btn" data-id="${appt.id}"><i class="fas fa-redo"></i> Reschedule</button>
+                            <button class="appt-btn cancel-btn" data-id="${appt.id}"><i class="fas fa-times"></i> Cancel</button>
+                        </div>` : ''}
+                    `;
+
+                    list.appendChild(item);
+                });
+
+                // Bind cancel/reschedule
+                list.querySelectorAll('.cancel-btn').forEach(btn => {
+                    btn.addEventListener('click', () => openCancelModal(btn.dataset.id));
+                });
+                list.querySelectorAll('.reschedule-btn').forEach(btn => {
+                    btn.addEventListener('click', () => startReschedule(btn.dataset.id));
+                });
+            } catch (err) {
+                console.error('Load upcoming error:', err);
+                list.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load upcoming appointments.</p></div>';
+            }
+        }
+
+        /* ========================================================
+           CANCEL APPOINTMENT MODAL
+        ======================================================== */
+        let cancelAppointmentId = null;
+
+        function openCancelModal(id) {
+            cancelAppointmentId = id;
+            document.getElementById('cancelReason').value = '';
+            document.getElementById('cancelModal').classList.add('active');
+        }
+
+        document.getElementById('cancelModalClose').addEventListener('click', () => {
+            document.getElementById('cancelModal').classList.remove('active');
+            cancelAppointmentId = null;
+        });
+
+        document.getElementById('cancelModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                document.getElementById('cancelModal').classList.remove('active');
+                cancelAppointmentId = null;
+            }
+        });
+
+        document.getElementById('cancelModalConfirm').addEventListener('click', async () => {
+            if (!cancelAppointmentId) return;
+
+            const btn = document.getElementById('cancelModalConfirm');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
+
+            try {
+                const reason = document.getElementById('cancelReason').value.trim();
+                const res = await apiFetch(`/api/appointments/${cancelAppointmentId}/cancel`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({ reason })
+                });
+
+                const result = await res.json();
+                if (res.ok) {
+                    if (typeof Toast !== 'undefined') Toast.success('Appointment cancelled successfully.');
+                    document.getElementById('cancelModal').classList.remove('active');
+                    cancelAppointmentId = null;
+                    loadUpcoming();
+                    loadHistory();
+                } else {
+                    if (typeof Toast !== 'undefined') Toast.error(result.error || 'Failed to cancel appointment.');
+                }
+            } catch (err) {
+                console.error('Cancel error:', err);
+                if (typeof Toast !== 'undefined') Toast.error('Failed to cancel appointment. Please try again.');
+            }
+
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        });
+
+        /* ========================================================
+           RESCHEDULE
+        ======================================================== */
+        function startReschedule(appointmentId) {
+            state.rescheduleAppointmentId = appointmentId;
+            state.selectedDoctor = null;
+            state.selectedDate = null;
+            state.selectedTime = null;
+            state.lockToken = null;
+            clearInterval(state.lockTimer);
+            goToStep(1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (typeof Toast !== 'undefined') {
+                Toast.info('Select a doctor and time to reschedule your appointment.');
+            }
+        }
+
+        /* ========================================================
+           APPOINTMENT HISTORY
+        ======================================================== */
+        async function loadHistory() {
+            const list = document.getElementById('historyList');
+            const pagination = document.getElementById('historyPagination');
+
+            try {
+                const res = await apiFetch(`/api/appointments/history?page=${historyPage}`);
+                if (!res.ok) throw new Error('Failed to load');
+                const data = await res.json();
+                const appointments = data.appointments || data;
+                const totalPages = data.totalPages || 1;
+
+                if (!appointments || appointments.length === 0) {
+                    list.innerHTML = '<div class="empty-state"><i class="fas fa-history"></i><p>No past appointments.</p></div>';
+                    pagination.style.display = 'none';
+                    return;
+                }
+
+                list.innerHTML = '';
+                appointments.forEach(appt => {
+                    const d = new Date(appt.appointment_date || appt.date);
+                    const dayNum = d.getDate();
+                    const monthStr = monthNames[d.getMonth()].substring(0, 3).toUpperCase();
+                    const timeStr = appt.appointment_time || appt.time || '--:--';
+                    const doctorName = appt.doctor_name || appt.doctorName || 'Doctor';
+                    const status = (appt.status || 'completed').toLowerCase();
+
+                    const item = document.createElement('div');
+                    item.className = 'appointment-item';
+                    item.innerHTML = `
+                        <div class="appt-date-box">
+                            <div class="appt-day">${dayNum}</div>
+                            <div class="appt-month">${monthStr}</div>
+                        </div>
+                        <div class="appt-details">
+                            <div class="appt-time"><i class="fas fa-clock"></i> ${escapeHtml(formatTime24to12(timeStr))}</div>
+                            <div class="appt-doctor"><i class="fas fa-user-md"></i> Dr. ${escapeHtml(doctorName)}</div>
+                        </div>
+                        <span class="status-badge ${status}">${escapeHtml(status)}</span>
+                    `;
+                    list.appendChild(item);
+                });
+
+                // Pagination
+                if (totalPages > 1) {
+                    pagination.style.display = 'flex';
+                    document.getElementById('historyPageInfo').textContent = `Page ${historyPage} of ${totalPages}`;
+                    document.getElementById('historyPrev').disabled = historyPage <= 1;
+                    document.getElementById('historyNext').disabled = historyPage >= totalPages;
+                } else {
+                    pagination.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Load history error:', err);
+                list.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load appointment history.</p></div>';
+                pagination.style.display = 'none';
+            }
+        }
+
+        document.getElementById('historyPrev').addEventListener('click', () => {
+            if (historyPage > 1) {
+                historyPage--;
+                loadHistory();
+            }
+        });
+
+        document.getElementById('historyNext').addEventListener('click', () => {
+            historyPage++;
+            loadHistory();
+        });
+
+        /* ========================================================
+           INIT
+        ======================================================== */
+        goToStep(1);
+        loadDoctors();
+        loadUpcoming();
+        loadHistory();
+    });
+    </script>
+    <script>window.history.replaceState(null, document.title, window.location.href);</script>
 </body>
 
 </html>

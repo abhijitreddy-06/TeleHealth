@@ -1,97 +1,84 @@
-const { body, param, query } = require('express-validator');
+const { ZodError } = require('zod');
+const escapeHtml = require('../utils/escapeHtml');
 
-const authValidation = {
-    userSignup: [
-        body('phone')
-            .notEmpty().withMessage('Phone is required')
-            .isMobilePhone().withMessage('Invalid phone number'),
-        body('password')
-            .notEmpty().withMessage('Password is required')
-            .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-        body('confirmpassword')
-            .custom((value, { req }) => {
-                if (value !== req.body.password) {
-                    throw new Error('Passwords do not match');
-                }
-                return true;
-            })
-    ],
-    userLogin: [
-        body('phone').notEmpty().withMessage('Phone is required'),
-        body('password').notEmpty().withMessage('Password is required')
-    ],
-    doctorSignup: [
-        body('phone')
-            .notEmpty().withMessage('Phone is required')
-            .isMobilePhone().withMessage('Invalid phone number'),
-        body('password')
-            .notEmpty().withMessage('Password is required')
-            .isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-        body('confirmpassword')
-            .custom((value, { req }) => {
-                if (value !== req.body.password) {
-                    throw new Error('Passwords do not match');
-                }
-                return true;
-            })
-    ],
-    doctorLogin: [
-        body('phone').notEmpty().withMessage('Phone is required'),
-        body('password').notEmpty().withMessage('Password is required')
-    ]
-};
+// ── Enums ──
+const ROLES = Object.freeze({ USER: 'user', DOCTOR: 'doctor', ADMIN: 'admin' });
+const VALID_ROLES = Object.values(ROLES);
 
-const appointmentValidation = {
-    bookAppointment: [
-        body('doctorId').notEmpty().withMessage('Doctor ID is required').isInt(),
-        body('appointment_date').notEmpty().withMessage('Date is required').isDate(),
-        body('appointment_time').notEmpty().withMessage('Time is required')
-    ],
-    startAppointment: [
-        param('id').notEmpty().withMessage('Appointment ID is required').isInt()
-    ],
-    completeAppointment: [
-        param('id').notEmpty().withMessage('Appointment ID is required').isInt()
-    ]
-};
+const APPOINTMENT_STATUS = Object.freeze({
+    SCHEDULED: 'scheduled',
+    STARTED: 'started',
+    COMPLETED: 'completed',
+    CANCELLED: 'cancelled'
+});
+const VALID_STATUSES = Object.values(APPOINTMENT_STATUS);
 
-const profileValidation = {
-    userProfile: [
-        body('fullName').notEmpty().withMessage('Full name is required'),
-        body('gender').notEmpty().withMessage('Gender is required'),
-        body('dob').notEmpty().withMessage('Date of birth is required').isDate(),
-        body('weight').notEmpty().withMessage('Weight is required').isFloat({ min: 1 }),
-        body('height').notEmpty().withMessage('Height is required').isFloat({ min: 1 }),
-        body('bloodGroup').notEmpty().withMessage('Blood group is required')
-    ],
-    doctorProfile: [
-        body('fullName').notEmpty().withMessage('Full name is required'),
-        body('specialization').notEmpty().withMessage('Specialization is required'),
-        body('experience').notEmpty().withMessage('Experience is required').isInt({ min: 0 })
-    ]
-};
+const GENDERS = Object.freeze(['male', 'female', 'other']);
+const BLOOD_GROUPS = Object.freeze(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']);
+const RECORD_TYPES = Object.freeze(['general', 'prescription', 'lab_report', 'imaging', 'discharge_summary']);
 
-const vaultValidation = {
-    uploadFile: [
-        body('recordType').optional().isString()
-    ],
-    downloadFile: [
-        param('id').notEmpty().withMessage('File ID is required').isInt()
-    ]
-};
+// ── File validation constants ──
+const ALLOWED_FILE_MIMES = Object.freeze([
+    'image/jpeg',
+    'image/png',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+]);
+const ALLOWED_FILE_EXTENSIONS = Object.freeze(['.jpg', '.jpeg', '.png', '.pdf', '.doc', '.docx']);
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
-const aiValidation = {
-    precheck: [
-        body('text')
-            .notEmpty().withMessage('Symptoms text is required')
-            .isLength({ min: 3 }).withMessage('Symptoms must be at least 3 characters')
-    ]
-};
+// ── Regex ──
+const PHONE_REGEX = /^\+?[1-9]\d{6,14}$/;
+
+// ── Validation middleware factory ──
+function validate(schema, source = 'body') {
+    return (req, res, next) => {
+        const data = source === 'body' ? req.body
+            : source === 'params' ? req.params
+            : source === 'query' ? req.query
+            : req.body;
+
+        const result = schema.safeParse(data);
+
+        if (!result.success) {
+            const message = result.error.issues.map(i => i.message).join(', ');
+            const isApi = req.xhr
+                || (req.get('Accept') || '').includes('application/json')
+                || req.path.startsWith('/api/');
+
+            if (isApi) {
+                return res.status(400).json({
+                    error: 'Validation failed',
+                    details: result.error.issues.map(i => ({
+                        field: i.path.join('.'),
+                        message: i.message
+                    }))
+                });
+            }
+
+            return res.send(
+                `<script>alert('${escapeHtml(message)}');history.back()</script>`
+            );
+        }
+
+        if (!req.validated) req.validated = {};
+        req.validated[source] = result.data;
+        next();
+    };
+}
 
 module.exports = {
-    authValidation,
-    appointmentValidation,
-    profileValidation,
-    vaultValidation,
-    aiValidation
+    validate,
+    ROLES,
+    VALID_ROLES,
+    APPOINTMENT_STATUS,
+    VALID_STATUSES,
+    GENDERS,
+    BLOOD_GROUPS,
+    RECORD_TYPES,
+    ALLOWED_FILE_MIMES,
+    ALLOWED_FILE_EXTENSIONS,
+    MAX_FILE_SIZE,
+    PHONE_REGEX
 };

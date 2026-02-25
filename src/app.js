@@ -1,198 +1,142 @@
 const path = require('path');
 require('dotenv').config();
 
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
-const cors = require("cors");
+const express = require('express');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const cors = require('cors');
+const helmet = require('helmet');
+const compression = require('compression');
 const rateLimit = require('express-rate-limit');
-const { initializeDatabase, testConnection, cleanupExpiredTokens } = require('./config/database');
+const config = require('./config');
 const routes = require('./routes');
+const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
-const server = http.createServer(app);
-const PORT = process.env.PORT || 10000;
-const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 const PROJECT_ROOT = path.join(__dirname, '..');
 
-const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET;
-const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET;
+// --- Security Headers (Helmet) ---
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            scriptSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://cdn.socket.io",
+                "https://cdn.jsdelivr.net"
+            ],
+            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+            fontSrc: ["'self'", "https://fonts.gstatic.com"],
+            imgSrc: ["'self'", "data:", "blob:"],
+            connectSrc: [
+                "'self'",
+                "wss:",
+                "ws:",
+                ...(config.NODE_ENV === 'production' && config.FRONTEND_URL
+                    ? [config.FRONTEND_URL] : ['http://localhost:*'])
+            ],
+            mediaSrc: ["'self'", "blob:"],
+            frameSrc: ["'none'"],
+            objectSrc: ["'none'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+            upgradeInsecureRequests: config.NODE_ENV === 'production' ? [] : null
+        }
+    },
+    hsts: {
+        maxAge: 31536000,
+        includeSubDomains: true,
+        preload: true
+    },
+    xContentTypeOptions: true,
+    xXssProtection: true,
+    frameguard: { action: 'deny' },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' }
+}));
 
-if (!ACCESS_TOKEN_SECRET || !REFRESH_TOKEN_SECRET) {
-    console.error("JWT secrets must be set in environment variables");
-    process.exit(1);
-}
+// --- Gzip Compression ---
+app.use(compression());
 
-const corsOptions = {
-    origin: process.env.NODE_ENV === 'production'
-        ? [process.env.FRONTEND_URL, 'https://telehealth-production.onrender.com']
-        : ['http://localhost:3000', 'http://localhost:8080'],
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie', 'X-Requested-With'],
-    exposedHeaders: ['Set-Cookie']
-};
-app.use(cors(corsOptions));
+// --- CORS ---
+app.use(cors(config.corsOptions));
+
+// --- Rate Limiting ---
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    message: 'Too many authentication attempts, please try again later',
+    standardHeaders: true,
+    legacyHeaders: false
+});
 
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
-    message: 'Too many requests from this IP'
+    message: 'Too many requests from this IP',
+    standardHeaders: true,
+    legacyHeaders: false
 });
-app.use('/api/auth/', apiLimiter);
+
+app.use('/user_signup', authLimiter);
+app.use('/user_login', authLimiter);
+app.use('/doc_signup', authLimiter);
+app.use('/doc_login', authLimiter);
+app.use('/api/refresh-token', authLimiter);
 app.use('/api/appointments/', apiLimiter);
 app.use('/api/ai/', apiLimiter);
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+
+// --- Body Parsing (1MB limit) ---
+app.use(bodyParser.json({ limit: '1mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 
+// --- Soft JWT Decode (non-blocking) ---
 app.use((req, res, next) => {
     if (req.cookies.accessToken) {
         try {
-            const payload = jwt.verify(req.cookies.accessToken, ACCESS_TOKEN_SECRET);
-            req.user = payload;
+            const payload = jwt.verify(req.cookies.accessToken, config.ACCESS_TOKEN_SECRET);
+            req.user = { id: payload.id, role: payload.role };
         } catch (err) {
-            if (process.env.NODE_ENV !== 'production') {
-                console.log('Token verification failed:', err.message);
-            }
+            // Token invalid -- not an error, just not authenticated
         }
     }
     next();
 });
 
+// --- Static Files & View Engine ---
 app.use(express.static(path.join(PROJECT_ROOT, 'public')));
+app.set('view engine', 'ejs');
+app.set('views', path.join(PROJECT_ROOT, 'views'));
+app.set('trust proxy', config.NODE_ENV === 'production' ? 2 : 1);
 
-app.set("view engine", "ejs");
-app.set("views", path.join(PROJECT_ROOT, "views"));
-app.set('trust proxy', 1);
-if (process.env.NODE_ENV === 'production') {
-    app.set('trust proxy', 2); 
-}
-
-app.use(routes);  
-
-const io = new Server(server, {
-    cors: {
-        origin: process.env.NODE_ENV === 'production'
-            ? [process.env.FRONTEND_URL, 'https://telehealth-production.onrender.com']
-            : ['http://localhost:3000', 'http://localhost:8080', 'http://localhost:10000'],
-        credentials: true,
-        methods: ['GET', 'POST'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
-    },
-    transports: ['websocket', 'polling'],
-    allowEIO3: true,
-    pingTimeout: 60000,
-    pingInterval: 25000,
-    connectionStateRecovery: {
-        maxDisconnectionDuration: 2 * 60 * 1000, 
-        skipMiddlewares: true
-    }
-});
-
-io.use(async (socket, next) => {
-    try {
-        let token = socket.handshake.auth.token;
-
-        if (!token) {
-            const cookieHeader = socket.handshake.headers.cookie;
-            if (cookieHeader) {
-                const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
-                    const [key, value] = cookie.trim().split('=');
-                    acc[key] = value;
-                    return acc;
-                }, {});
-                token = cookies.accessToken;
-            }
-        }
-
-        if (!token) {
-            socket.user = null;
-            return next();
-        }
-
-        const payload = jwt.verify(token, ACCESS_TOKEN_SECRET);
-        socket.user = {
-            id: payload.id,
-            role: payload.role,
-            phone: payload.phone
-        };
-        next();
-    } catch (error) {
-        socket.user = null;
-        next();
-    }
-});
-
-require('./sockets/videoSocket')(io);
-
-const { pool } = require('./config/database');
-const { getClient } = require('./config/redis');
-
+// --- Health Check ---
 app.get('/health', async (req, res) => {
-    const checks = {
-        server: true,
-        database: false,
-        redis: false,
-        timestamp: new Date().toISOString()
-    };
+    const checks = { server: true, database: false, redis: false, timestamp: new Date().toISOString() };
 
     try {
-        await pool.query('SELECT 1');
+        await config.pool.query('SELECT 1');
         checks.database = true;
-    } catch (err) {
-        checks.database = false;
-    }
+    } catch (err) { /* noop */ }
 
     try {
-        const redisClient = await getClient();
+        const redisClient = await config.getClient();
         if (redisClient) {
             await redisClient.ping();
             checks.redis = true;
         }
-    } catch (err) {
-        checks.redis = false;
-    }
+    } catch (err) { /* noop */ }
 
     const isHealthy = checks.server && checks.database;
-    res.status(isHealthy ? 200 : 503).json({
-        status: isHealthy ? 'healthy' : 'degraded',
-        checks
-    });
+    res.status(isHealthy ? 200 : 503).json({ status: isHealthy ? 'healthy' : 'degraded', checks });
 });
 
-app.use((req, res) => {
-    console.log(`❌ 404: ${req.url} not found`);
-    res.status(404).sendFile(path.join(PROJECT_ROOT, 'public', 'pages', '404.html'));
-});
+// --- Routes ---
+app.use(routes);
 
-app.use((err, req, res, next) => {
-    console.error('❌ Server Error:', err.stack);
-    res.status(err.status || 500).json({
-        error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message,
-        stack: process.env.NODE_ENV === 'production' ? undefined : err.stack
-    });
-});
+// --- Error Handling ---
+app.use(notFoundHandler);
+app.use(errorHandler);
 
-async function startServer() {
-    try {
-        await testConnection();
-        await initializeDatabase();
-        setInterval(cleanupExpiredTokens, 60 * 60 * 1000);
-
-        server.listen(PORT, HOST, () => {
-            console.log(`✅ Server running on http://${HOST}:${PORT}`);
-            console.log(`✅ Socket.IO ready on ws://${HOST}:${PORT}`);
-        });
-    } catch (error) {
-        console.error('❌ Failed to start server:', error);
-        process.exit(1);
-    }
-}
-
-startServer();
-
-module.exports = { app, server, io };
+module.exports = app;

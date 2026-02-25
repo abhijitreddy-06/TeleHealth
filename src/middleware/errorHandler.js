@@ -1,48 +1,59 @@
-const { validationResult } = require('express-validator');
 const multer = require('multer');
+const { AppError } = require('../utils/AppError');
+const logger = require('../utils/logger');
+const path = require('path');
+
+const PROJECT_ROOT = path.join(__dirname, '..', '..');
 
 function errorHandler(err, req, res, next) {
-    console.error('Error:', err);
+    err.statusCode = err.statusCode || 500;
+    err.isOperational = err.isOperational || false;
 
-    if (err instanceof multer.MulterError) {
-        return res.status(400).json({ error: `File upload error: ${err.message}` });
+    if (err.statusCode >= 500) {
+        logger.error(err.message, { stack: err.stack, url: req.originalUrl, method: req.method });
+    } else {
+        logger.warn(err.message, { statusCode: err.statusCode, url: req.originalUrl, method: req.method });
     }
 
-    if (err.name === 'ValidationError') {
-        return res.status(400).json({ error: err.message });
+    if (err instanceof multer.MulterError) {
+        err.statusCode = 400;
+        err.message = `File upload error: ${err.message}`;
+        err.isOperational = true;
     }
 
     if (err.name === 'JsonWebTokenError') {
-        return res.status(401).json({ error: 'Invalid token' });
+        err.statusCode = 401;
+        err.message = 'Invalid token';
+        err.isOperational = true;
     }
 
     if (err.name === 'TokenExpiredError') {
-        return res.status(401).json({ error: 'Token expired' });
+        err.statusCode = 401;
+        err.message = 'Token expired';
+        err.isOperational = true;
     }
 
-    const statusCode = err.statusCode || 500;
     const message = err.isOperational ? err.message : 'Internal Server Error';
 
-    res.status(statusCode).json({
+    const acceptHeader = req.get('Accept') || '';
+    const isApiRequest = req.xhr || acceptHeader.includes('application/json') || req.path.startsWith('/api/');
+
+    if (isApiRequest) {
+        return res.status(err.statusCode).json({
+            error: message,
+            ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+        });
+    }
+
+    res.status(err.statusCode).json({
         error: message,
         ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
     });
 }
 
 function notFoundHandler(req, res) {
-    res.status(404).json({ error: 'Route not found' });
+    logger.warn(`404: ${req.method} ${req.originalUrl}`);
+    res.status(404).sendFile(path.join(PROJECT_ROOT, 'public', 'pages', '404.html'));
 }
 
-function validateRequest(req, res, next) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array() });
-    }
-    next();
-}
-
-module.exports = {
-    errorHandler,
-    notFoundHandler,
-    validateRequest
-};
+module.exports = { errorHandler, notFoundHandler };

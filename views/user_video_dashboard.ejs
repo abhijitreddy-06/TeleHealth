@@ -996,6 +996,7 @@ a:visited {
         </footer>
 
 <script src="/js/shared.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 
 <script defer>
         document.addEventListener('DOMContentLoaded', function () {
@@ -1137,11 +1138,106 @@ a:visited {
             }
         }
 
-        setInterval(() => {
-            window.location.reload();
-        }, 10000);
+        // --- Real-time Dashboard via Socket.IO /dashboard namespace ---
+        let dashboardSocket = null;
+        let fallbackTimer = null;
+
+        function initDashboardSocket() {
+            try {
+                dashboardSocket = io('/dashboard', {
+                    reconnection: true,
+                    reconnectionAttempts: 5,
+                    reconnectionDelay: 2000,
+                    timeout: 15000
+                });
+
+                dashboardSocket.on('connect', () => {
+                    console.log('Dashboard socket connected:', dashboardSocket.id);
+                    if (fallbackTimer) {
+                        clearTimeout(fallbackTimer);
+                        fallbackTimer = null;
+                    }
+                });
+
+                dashboardSocket.on('appointment-updated', (data) => {
+                    console.log('Appointment updated:', data);
+                    handleAppointmentUpdate(data);
+                });
+
+                dashboardSocket.on('connect_error', (error) => {
+                    console.error('Dashboard socket error:', error);
+                    startFallbackReload();
+                });
+
+                dashboardSocket.on('disconnect', (reason) => {
+                    console.log('Dashboard socket disconnected:', reason);
+                    if (reason !== 'io client disconnect') {
+                        startFallbackReload();
+                    }
+                });
+
+                // Fallback: if socket doesn't connect within 15s, use polling
+                fallbackTimer = setTimeout(() => {
+                    if (!dashboardSocket || !dashboardSocket.connected) {
+                        console.log('Dashboard socket fallback: using polling');
+                        startFallbackReload();
+                    }
+                }, 15000);
+
+            } catch (error) {
+                console.error('Failed to initialize dashboard socket:', error);
+                startFallbackReload();
+            }
+        }
+
+        function handleAppointmentUpdate(data) {
+            const statusText = document.getElementById('statusText');
+            const joinBtn = document.getElementById('joinBtn');
+
+            if (data.status === 'started' && data.roomId) {
+                // Doctor started the call - update UI in-place
+                if (statusText) {
+                    statusText.innerHTML = '<i class="fas fa-check-circle"></i> Doctor has started the call';
+                    statusText.className = 'status ready';
+                }
+
+                // Replace disabled button with active join link
+                if (joinBtn) {
+                    const joinLink = document.createElement('a');
+                    joinLink.href = `/user_video/${data.roomId}`;
+                    joinLink.className = 'btn btn-primary btn-full';
+                    joinLink.style.cssText = 'text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;';
+                    joinLink.innerHTML = '<i class="fas fa-video"></i> Join Video Call';
+                    joinBtn.parentNode.replaceChild(joinLink, joinBtn);
+
+                    // Remove cancel button if present
+                    const cancelBtn = document.getElementById('cancelAppointmentBtn');
+                    if (cancelBtn) cancelBtn.remove();
+                }
+
+                // Show toast notification
+                if (typeof Toast !== 'undefined' && Toast.success) {
+                    Toast.success('Your doctor has started the video call!', 'Call Ready');
+                }
+            } else if (data.status === 'completed') {
+                // Appointment completed - reload to show updated state
+                window.location.reload();
+            }
+        }
+
+        function startFallbackReload() {
+            // Fallback to page reload every 15s if socket fails
+            if (!window._fallbackInterval) {
+                window._fallbackInterval = setInterval(() => {
+                    window.location.reload();
+                }, 15000);
+            }
+        }
+
+        initDashboardSocket();
     });
 </script>
+<script>window.history.replaceState(null, document.title, window.location.href);</script>
 
 
 </body>

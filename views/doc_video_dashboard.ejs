@@ -903,6 +903,7 @@ a:visited {
             <div class="nav-links">
                 <a href="/doc_home"><i class="fas fa-home"></i> Home</a>
                 <a href="/doc_video_dashboard" class="active"><i class="fas fa-video"></i> Video</a>
+                <a href="/doc_schedule"><i class="fas fa-calendar-alt"></i> Schedule</a>
                 <a href="/doc_profile"><i class="fas fa-user-md"></i> Profile</a>
 
                 <button class="theme-toggle" id="themeToggle">
@@ -927,6 +928,7 @@ a:visited {
         </button>
         <a href="/doc_home"><i class="fas fa-home"></i> Home</a>
         <a href="/doc_video_dashboard" class="active"><i class="fas fa-video"></i> Video</a>
+        <a href="/doc_schedule"><i class="fas fa-calendar-alt"></i> Schedule</a>
         <a href="/doc_profile"><i class="fas fa-user-md"></i> Profile</a>
     </div>
 
@@ -1109,11 +1111,72 @@ a:visited {
         </footer>
 
     <script src="/js/shared.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
     <script>
             document.addEventListener('DOMContentLoaded', function () {
-            setInterval(() => {
-                window.location.reload();
-            }, 10000);
+            // --- Real-time Dashboard via Socket.IO /dashboard namespace ---
+            let dashboardSocket = null;
+            let fallbackTimer = null;
+
+            function initDashboardSocket() {
+                try {
+                    dashboardSocket = io('/dashboard', {
+                        reconnection: true,
+                        reconnectionAttempts: 5,
+                        reconnectionDelay: 2000,
+                        timeout: 15000
+                    });
+
+                    dashboardSocket.on('connect', () => {
+                        console.log('Dashboard socket connected:', dashboardSocket.id);
+                        if (fallbackTimer) {
+                            clearTimeout(fallbackTimer);
+                            fallbackTimer = null;
+                        }
+                    });
+
+                    dashboardSocket.on('appointment-updated', (data) => {
+                        console.log('Appointment updated:', data);
+                        // Reload page to reflect new state
+                        window.location.reload();
+                    });
+
+                    dashboardSocket.on('connect_error', (error) => {
+                        console.error('Dashboard socket error:', error);
+                        startFallbackReload();
+                    });
+
+                    dashboardSocket.on('disconnect', (reason) => {
+                        console.log('Dashboard socket disconnected:', reason);
+                        if (reason !== 'io client disconnect') {
+                            startFallbackReload();
+                        }
+                    });
+
+                    // Fallback: if socket doesn't connect within 15s, use polling
+                    fallbackTimer = setTimeout(() => {
+                        if (!dashboardSocket || !dashboardSocket.connected) {
+                            console.log('Dashboard socket fallback: using polling');
+                            startFallbackReload();
+                        }
+                    }, 15000);
+
+                } catch (error) {
+                    console.error('Failed to initialize dashboard socket:', error);
+                    startFallbackReload();
+                }
+            }
+
+            function startFallbackReload() {
+                // Fallback to page reload every 15s if socket fails
+                if (!window._fallbackInterval) {
+                    window._fallbackInterval = setInterval(() => {
+                        window.location.reload();
+                    }, 15000);
+                }
+            }
+
+            initDashboardSocket();
         });
 </script>
     <script>
@@ -1239,6 +1302,7 @@ a:visited {
             }
         });
                 </script>
+<script>window.history.replaceState(null, document.title, window.location.href);</script>
 </body>
 
 </html>

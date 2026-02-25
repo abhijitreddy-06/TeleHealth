@@ -79,13 +79,10 @@ class AuthService {
             [phone]
         );
 
-        if (!result.rows.length) {
-            throw new Error('Account not found');
-        }
-
         const user = result.rows[0];
-        if (!bcrypt.compareSync(password, user.password)) {
-            throw new Error('Incorrect password');
+        const valid = user ? await bcrypt.compare(password, user.password) : false;
+        if (!user || !valid) {
+            throw new Error('Invalid credentials');
         }
 
         return {
@@ -97,7 +94,7 @@ class AuthService {
 
     async generateTokens(user) {
         const accessToken = jwt.sign(
-            { id: user.id, phone: user.phone, role: user.role },
+            { id: user.id, role: user.role },
             this.ACCESS_TOKEN_SECRET,
             { expiresIn: this.ACCESS_TOKEN_EXPIRY }
         );

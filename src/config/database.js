@@ -11,33 +11,6 @@ const pool = new Pool({
     connectionTimeoutMillis: 2000,
 });
 
-async function initializeDatabase() {
-    try {
-        const client = await pool.connect();
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS refresh_tokens (
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL,
-                role VARCHAR(20) NOT NULL,
-                token TEXT NOT NULL UNIQUE,
-                expires_at TIMESTAMP NOT NULL,
-                revoked BOOLEAN DEFAULT FALSE,
-                revoked_at TIMESTAMP,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );
-            
-            CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id, role);
-            CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token ON refresh_tokens(token);
-        `);
-
-        client.release();
-        console.log('✅ Database schema initialized');
-    } catch (error) {
-        console.error('❌ Database initialization failed:', error);
-        throw error;
-    }
-}
-
 async function testConnection() {
     try {
         await pool.query('SELECT 1');
@@ -63,7 +36,6 @@ async function cleanupExpiredTokens() {
 
 module.exports = {
     pool,
-    initializeDatabase,
     testConnection,
     cleanupExpiredTokens
 };

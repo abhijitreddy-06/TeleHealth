@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { pool } = require('../config/database');
+const AiModel = require('../modules/ai/ai.model');
 const { authenticate } = require('../middleware/auth');
 
 router.get("/predict", authenticate, (req, res) => {
@@ -34,15 +34,11 @@ router.post("/api/ai/precheck", authenticate, async (req, res) => {
 
         const data = await response.json();
 
-        await pool.query(
-            `INSERT INTO ai_prechecks (user_id, symptoms, ai_response, severity)
-             VALUES ($1, $2, $3, $4)`,
-            [
-                req.user.id,
-                req.body.text,
-                JSON.stringify(data),
-                data.severity || "unknown"
-            ]
+        await AiModel.insertPrecheck(
+            req.user.id,
+            req.body.text,
+            data,
+            data.severity || "unknown"
         );
 
         return res.json(data);

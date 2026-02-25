@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeleHealth - Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/css/shared.css">
+    <style>
+        :root {
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --secondary: #10b981;
+            --background: #f9fafb;
+            --dark-bg: #1e293b;
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-light: #f1f5f9;
+            --text-medium: #475569;
+            --border: #e2e8f0;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --success: #22c55e;
+            --muted: #94a3b8;
+            --footer-bg: #1e293b;
+
+            --transition: all 0.3s ease;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+        }
+
+        [data-theme="dark"] {
+            --background: #1e293b;
+            --card-bg: #334155;
+            --text-dark: #f1f5f9;
+            --text-light: #0f172a;
+            --text-medium: #cbd5e1;
+            --border: #475569;
+            --footer-bg: #0f172a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Poppins", "Inter", "Roboto", sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-dark);
+            transition: var(--transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.2rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-family: "Poppins", sans-serif;
+            letter-spacing: -0.5px;
+        }
+
+        .logo i {
+            color: var(--secondary);
+            font-size: 1.5rem;
+        }
+
+        .logo-text {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-links a.active {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-links a:hover:not(.active) {
+            color: var(--primary);
+            background-color: rgba(56, 189, 248, 0.1);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            padding: 0.5rem;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover {
+            background-color: rgba(56, 189, 248, 0.1);
+        }
+
+        /* Mobile nav */
+        .mobile-controls {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-menu-btn:hover {
+            background-color: rgba(56, 189, 248, 0.1);
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 280px;
+            height: 100vh;
+            background-color: var(--card-bg);
+            z-index: 1000;
+            padding: 2rem;
+            transition: var(--transition);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .close-menu {
+            align-self: flex-end;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-menu:hover {
+            background-color: rgba(56, 189, 248, 0.1);
+        }
+
+        .mobile-menu a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            color: var(--text-dark);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .mobile-menu a:hover,
+        .mobile-menu a.active {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--primary);
+        }
+
+        /* Main content */
+        main {
+            flex: 1;
+            padding: 3rem 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            color: var(--text-medium);
+            font-size: 1.05rem;
+        }
+
+        /* Stats cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.patients {
+            background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+        }
+
+        .stat-icon.doctors {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .stat-icon.appointments {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+
+        .stat-icon.completed {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+
+        .stat-info h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.2;
+        }
+
+        .stat-info p {
+            color: var(--text-medium);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Tabs */
+        .tabs-container {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .tabs-header {
+            display: flex;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-medium);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-family: "Poppins", sans-serif;
+            position: relative;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+            background-color: rgba(56, 189, 248, 0.05);
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1.2rem;
+            background-color: var(--background);
+            border-radius: 8px;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .filter-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-medium);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-control {
+            padding: 0.6rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+            transition: var(--transition);
+            font-family: "Poppins", sans-serif;
+        }
+
+        .filter-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+        }
+
+        .btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-family: "Poppins", sans-serif;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(56, 189, 248, 0.3);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #d97706;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #059669;
+        }
+
+        /* Tables */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 1rem;
+            background-color: var(--background);
+            font-weight: 600;
+            color: var(--text-dark);
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 0.9rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-dark);
+        }
+
+        .data-table tbody tr:hover {
+            background-color: rgba(56, 189, 248, 0.04);
+        }
+
+        .data-table .empty-row td {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* Status badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .badge-scheduled {
+            background-color: rgba(56, 189, 248, 0.15);
+            color: #0284c7;
+        }
+
+        .badge-started {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #b45309;
+        }
+
+        .badge-completed {
+            background-color: rgba(34, 197, 94, 0.15);
+            color: #15803d;
+        }
+
+        .badge-cancelled {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #b91c1c;
+        }
+
+        [data-theme="dark"] .badge-scheduled {
+            color: #7dd3fc;
+        }
+
+        [data-theme="dark"] .badge-started {
+            color: #fcd34d;
+        }
+
+        [data-theme="dark"] .badge-completed {
+            color: #86efac;
+        }
+
+        [data-theme="dark"] .badge-cancelled {
+            color: #fca5a5;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .pagination button {
+            padding: 0.5rem 1.2rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: "Poppins", sans-serif;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination .page-info {
+            color: var(--text-medium);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background-color: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-medium);
+            font-size: 1.3rem;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-body .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-body .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-body .form-group label i {
+            color: var(--primary);
+        }
+
+        .modal-body .form-control {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background-color: var(--card-bg);
+            color: var(--text-dark);
+            transition: var(--transition);
+            font-family: "Poppins", sans-serif;
+        }
+
+        .modal-body .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
+        }
+
+        .modal-body select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2rem;
+            padding-right: 3rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            padding: 1.2rem 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-medium);
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        /* Schedule display */
+        .schedule-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .schedule-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background-color: var(--background);
+            transition: var(--transition);
+        }
+
+        .schedule-list li:hover {
+            background-color: rgba(56, 189, 248, 0.08);
+        }
+
+        .schedule-day {
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .schedule-day i {
+            color: var(--primary);
+        }
+
+        .schedule-time {
+            color: var(--text-medium);
+            font-size: 0.9rem;
+        }
+
+        .no-schedule {
+            text-align: center;
+            padding: 2rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        /* Simple Footer */
+        .simple-footer {
+            all: unset;
+            display: block;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border);
+            padding: 0.6rem 5%;
+            margin-top: auto;
+        }
+
+        .simple-footer .footer-content {
+            all: unset;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            align-items: center;
+        }
+
+        .simple-footer .footer-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .simple-footer .footer-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .simple-footer .footer-logo i {
+            color: var(--secondary);
+            font-size: 1.2rem;
+        }
+
+        .simple-footer .footer-center {
+            text-align: center;
+        }
+
+        .simple-footer .copyright {
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .simple-footer .footer-name {
+            color: var(--text-dark);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .simple-footer .footer-name:hover {
+            text-decoration: underline;
+        }
+
+        .simple-footer .footer-right {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .simple-footer .footer-socials a {
+            color: var(--text-dark);
+            font-size: 1.4rem;
+            text-decoration: none;
+        }
+
+        .simple-footer .footer-socials a:hover {
+            opacity: 0.7;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .mobile-controls {
+                display: flex;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .mobile-menu {
+                display: flex;
+            }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tabs-header {
+                overflow-x: auto;
+            }
+
+            .tab-btn {
+                font-size: 0.85rem;
+                padding: 0.8rem 1rem;
+                white-space: nowrap;
+            }
+
+            .tab-content {
+                padding: 1.2rem;
+            }
+
+            .filter-bar {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .filter-control {
+                width: 100%;
+            }
+
+            .simple-footer {
+                padding: 0.5rem 5%;
+            }
+
+            .simple-footer .footer-content {
+                display: flex;
+                flex-direction: column;
+                gap: 0.3rem;
+            }
+
+            .simple-footer .footer-center {
+                text-align: center;
+            }
+
+            .simple-footer .footer-right {
+                justify-content: center;
+            }
+
+            .simple-footer .copyright {
+                font-size: 0.8rem;
+            }
+
+            .simple-footer .footer-socials a {
+                font-size: 1.3rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 1.2rem;
+            }
+
+            .navbar {
+                padding: 1rem 5%;
+            }
+
+            main {
+                padding: 2rem 5%;
+            }
+
+            .modal {
+                margin: 0.5rem;
+            }
+
+            .modal-header,
+            .modal-body,
+            .modal-footer {
+                padding-left: 1.2rem;
+                padding-right: 1.2rem;
+            }
+        }
+
+        a,
+        a:hover,
+        a:focus,
+        a:active,
+        a:visited {
+            text-decoration: none !important;
+        }
+    </style>
+    <style>
+        .global-loader {
+            position: fixed;
+            inset: 0;
+            background: transparent;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: all;
+        }
+
+        .global-loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .global-loader .loader-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(6px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .spinner {
+            width: 42px;
+            height: 42px;
+            border: 4px solid #e5e7eb;
+            border-top-color: #2563eb;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        .global-loader p {
+            font-size: 13px;
+            color: #374151;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="global-loader" class="global-loader">
+        <div class="loader-box">
+            <div class="spinner"></div>
+            <p>Loading, please wait...</p>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            const loader = document.getElementById('global-loader');
+            if (!loader) return;
+
+            let loaderTimer = null;
+            let loaderVisible = false;
+            loaderTimer = setTimeout(() => {
+                loader.classList.remove('hidden');
+                loader.style.display = 'flex';
+                loaderVisible = true;
+            }, 300);
+            document.addEventListener('DOMContentLoaded', () => {
+                clearTimeout(loaderTimer);
+                if (loaderVisible) {
+                    loader.classList.add('hidden');
+                    setTimeout(() => {
+                        loader.style.display = 'none';
+                    }, 300);
+                } else {
+                    loader.style.display = 'none';
+                }
+            });
+            document.addEventListener('click', (e) => {
+                const link = e.target.closest('a');
+                if (!link) return;
+
+                if (
+                    link.target === '_blank' ||
+                    link.href.startsWith('mailto:') ||
+                    link.href.startsWith('tel:') ||
+                    link.href.startsWith('#') ||
+                    link.hasAttribute('download')
+                ) return;
+
+                const nextUrl = new URL(link.href, location.href);
+                if (nextUrl.origin !== location.origin) return;
+                loaderTimer = setTimeout(() => {
+                    loader.classList.remove('hidden');
+                    loader.style.display = 'flex';
+                    loaderVisible = true;
+                }, 200);
+
+                e.preventDefault();
+                setTimeout(() => {
+                    location.href = link.href;
+                }, 50);
+            });
+            window.addEventListener('pageshow', (e) => {
+                if (e.persisted) {
+                    loader.classList.add('hidden');
+                    loader.style.display = 'none';
+                }
+            });
+        })();
+    </script>
+
+    <header>
+        <nav class="navbar">
+            <a href="/admin/dashboard" class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span class="logo-text">TeleHealth</span>
+            </a>
+
+            <div class="nav-links">
+                <a href="/admin/dashboard" class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+                <a href="/api/auth/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            </div>
+
+            <div class="mobile-controls">
+                <button class="theme-toggle" id="mobileThemeToggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="close-menu" id="closeMenu">
+            <i class="fas fa-times"></i>
+        </button>
+        <a href="/admin/dashboard" class="active"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="/api/auth/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+
+    <main>
+        <div class="page-header">
+            <h1>Admin Dashboard</h1>
+            <p>Monitor and manage the TeleHealth platform</p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon patients">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3><%= stats.totalPatients %></h3>
+                    <p>Total Patients</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon doctors">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <div class="stat-info">
+                    <h3><%= stats.totalDoctors %></h3>
+                    <p>Total Doctors</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon appointments">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h3><%= stats.activeAppointments %></h3>
+                    <p>Active Appointments</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon completed">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3><%= stats.completedToday %></h3>
+                    <p>Completed Today</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs Section -->
+        <div class="tabs-container">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="appointments">
+                    <i class="fas fa-calendar-alt"></i> Appointments
+                </button>
+                <button class="tab-btn" data-tab="doctors">
+                    <i class="fas fa-user-md"></i> Doctors
+                </button>
+                <button class="tab-btn" data-tab="patients">
+                    <i class="fas fa-users"></i> Patients
+                </button>
+            </div>
+
+            <!-- Appointments Tab -->
+            <div class="tab-content active" id="tab-appointments">
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label for="filterStatus">Status</label>
+                        <select id="filterStatus" class="filter-control">
+                            <option value="">All</option>
+                            <option value="scheduled">Scheduled</option>
+                            <option value="started">Started</option>
+                            <option value="completed">Completed</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterDoctorId">Doctor ID</label>
+                        <input type="text" id="filterDoctorId" class="filter-control" placeholder="e.g. 5">
+                    </div>
+                    <div class="filter-group">
+                        <label for="filterDate">Date</label>
+                        <input type="date" id="filterDate" class="filter-control">
+                    </div>
+                    <div class="filter-group" style="justify-content: flex-end;">
+                        <label>&nbsp;</label>
+                        <button class="btn btn-primary" id="filterBtn">
+                            <i class="fas fa-search"></i> Filter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table class="data-table" id="appointmentsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient</th>
+                                <th>Doctor</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="appointmentsBody">
+                            <tr class="empty-row">
+                                <td colspan="7">Loading appointments...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination" id="appointmentsPagination">
+                    <button id="apptPrevBtn" disabled><i class="fas fa-chevron-left"></i> Previous</button>
+                    <span class="page-info" id="apptPageInfo">Page 1</span>
+                    <button id="apptNextBtn">Next <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Doctors Tab -->
+            <div class="tab-content" id="tab-doctors">
+                <div class="table-wrapper">
+                    <table class="data-table" id="doctorsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Specialization</th>
+                                <th>Experience</th>
+                                <th>Hospital</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="doctorsBody">
+                            <tr class="empty-row">
+                                <td colspan="6">Loading doctors...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination" id="doctorsPagination">
+                    <button id="docPrevBtn" disabled><i class="fas fa-chevron-left"></i> Previous</button>
+                    <span class="page-info" id="docPageInfo">Page 1</span>
+                    <button id="docNextBtn">Next <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Patients Tab -->
+            <div class="tab-content" id="tab-patients">
+                <div class="table-wrapper">
+                    <table class="data-table" id="patientsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Gender</th>
+                                <th>Blood Group</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientsBody">
+                            <tr class="empty-row">
+                                <td colspan="5">Loading patients...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination" id="patientsPagination">
+                    <button id="patPrevBtn" disabled><i class="fas fa-chevron-left"></i> Previous</button>
+                    <span class="page-info" id="patPageInfo">Page 1</span>
+                    <button id="patNextBtn">Next <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Override Status Modal -->
+    <div class="modal-overlay" id="overrideModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-exchange-alt"></i> Override Appointment Status</h3>
+                <button class="modal-close" onclick="closeOverrideModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="overrideInfo" style="margin-bottom: 1.5rem;"></div>
+                <div class="form-group">
+                    <label for="overrideStatus">
+                        <i class="fas fa-tag"></i>
+                        New Status
+                    </label>
+                    <select id="overrideStatus" class="form-control">
+                        <option value="scheduled">Scheduled</option>
+                        <option value="started">Started</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeOverrideModal()">Cancel</button>
+                <button class="btn btn-warning" id="confirmOverrideBtn" onclick="submitOverride()">
+                    <i class="fas fa-check"></i> Confirm Override
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Schedule Modal -->
+    <div class="modal-overlay" id="scheduleModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-calendar-week"></i> Doctor Schedule</h3>
+                <button class="modal-close" onclick="closeScheduleModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="scheduleContent">
+                    <p class="no-schedule">Loading schedule...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeScheduleModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="simple-footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <a href="/admin/dashboard" class="footer-logo">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>TeleHealth</span>
+                </a>
+            </div>
+            <div class="footer-center">
+                <span class="copyright">
+                    &copy; 2026 Built by
+                    <a href="https://abhijitreddy-portfolio.netlify.app/" target="_blank" rel="noopener"
+                        class="footer-name">
+                        Abhijit Reddy
+                    </a>.
+                </span>
+            </div>
+            <div class="footer-right footer-socials">
+                <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="https://github.com/abhijitreddy-06" target="_blank" aria-label="GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/shared.js"></script>
+    <script defer>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // ─── Theme Toggle ───
+            const themeToggle = document.getElementById('themeToggle');
+            const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+            const html = document.documentElement;
+
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (savedTheme) {
+                html.setAttribute('data-theme', savedTheme);
+                updateThemeIcon(savedTheme);
+            }
+
+            function toggleTheme() {
+                const currentTheme = html.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                html.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeIcon(newTheme);
+            }
+
+            function updateThemeIcon(theme) {
+                const icon = theme === 'dark' ? 'fa-sun' : 'fa-moon';
+                if (themeToggle) themeToggle.innerHTML = '<i class="fas ' + icon + '"></i>';
+                if (mobileThemeToggle) mobileThemeToggle.innerHTML = '<i class="fas ' + icon + '"></i>';
+            }
+
+            themeToggle.addEventListener('click', toggleTheme);
+            mobileThemeToggle.addEventListener('click', toggleTheme);
+
+            // ─── Mobile Menu ───
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const closeMenuBtn = document.getElementById('closeMenu');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            mobileMenuBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                mobileMenu.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            });
+
+            closeMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+
+            document.addEventListener('click', (e) => {
+                if (mobileMenu.classList.contains('active') &&
+                    !mobileMenu.contains(e.target) &&
+                    e.target !== mobileMenuBtn) {
+                    mobileMenu.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // ─── Tab Switching ───
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = btn.getAttribute('data-tab');
+
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+
+                    btn.classList.add('active');
+                    document.getElementById('tab-' + target).classList.add('active');
+
+                    // Load data for the selected tab if not yet loaded
+                    if (target === 'appointments' && !appointmentsLoaded) loadAppointments(1);
+                    if (target === 'doctors' && !doctorsLoaded) loadDoctors(1);
+                    if (target === 'patients' && !patientsLoaded) loadPatients(1);
+                });
+            });
+
+            // ─── State ───
+            let currentApptPage = 1;
+            let currentDocPage = 1;
+            let currentPatPage = 1;
+            let appointmentsLoaded = false;
+            let doctorsLoaded = false;
+            let patientsLoaded = false;
+            let currentOverrideId = null;
+
+            // ─── Escape HTML utility ───
+            function escapeHtml(str) {
+                if (!str) return '';
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
+            // ─── Status badge helper ───
+            function statusBadge(status) {
+                const s = (status || '').toLowerCase();
+                return '<span class="badge badge-' + escapeHtml(s) + '">' + escapeHtml(s) + '</span>';
+            }
+
+            // ─── Load Appointments ───
+            async function loadAppointments(page) {
+                currentApptPage = page;
+                const status = document.getElementById('filterStatus').value;
+                const doctorId = document.getElementById('filterDoctorId').value.trim();
+                const date = document.getElementById('filterDate').value;
+
+                let url = '/api/admin/appointments?page=' + page;
+                if (status) url += '&status=' + encodeURIComponent(status);
+                if (doctorId) url += '&doctorId=' + encodeURIComponent(doctorId);
+                if (date) url += '&date=' + encodeURIComponent(date);
+
+                const tbody = document.getElementById('appointmentsBody');
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Loading...</td></tr>';
+
+                try {
+                    const res = await fetch(url, {
+                        credentials: 'same-origin',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        Toast.error(data.error || 'Failed to load appointments');
+                        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Error loading data</td></tr>';
+                        return;
+                    }
+
+                    const appointments = data.appointments || data.data || data || [];
+                    const totalPages = data.totalPages || data.pages || 1;
+
+                    if (!Array.isArray(appointments) || appointments.length === 0) {
+                        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No appointments found</td></tr>';
+                    } else {
+                        tbody.innerHTML = appointments.map(function (a) {
+                            return '<tr>' +
+                                '<td>' + escapeHtml(String(a.id)) + '</td>' +
+                                '<td>' + escapeHtml(a.patient_name || a.patientName || '-') + '</td>' +
+                                '<td>' + escapeHtml(a.doctor_name || a.doctorName || '-') + '</td>' +
+                                '<td>' + escapeHtml(a.appointment_date || a.date || '-') + '</td>' +
+                                '<td>' + escapeHtml(a.appointment_time || a.time || '-') + '</td>' +
+                                '<td>' + statusBadge(a.status) + '</td>' +
+                                '<td><button class="btn btn-warning btn-sm" onclick="showOverrideModal(' + a.id + ', \'' + escapeHtml(a.status || '') + '\', \'' + escapeHtml(a.patient_name || a.patientName || '') + '\', \'' + escapeHtml(a.doctor_name || a.doctorName || '') + '\')"><i class="fas fa-edit"></i> Override</button></td>' +
+                                '</tr>';
+                        }).join('');
+                    }
+
+                    // Update pagination
+                    document.getElementById('apptPageInfo').textContent = 'Page ' + page + ' of ' + totalPages;
+                    document.getElementById('apptPrevBtn').disabled = (page <= 1);
+                    document.getElementById('apptNextBtn').disabled = (page >= totalPages);
+                    appointmentsLoaded = true;
+                } catch (err) {
+                    console.error('Error loading appointments:', err);
+                    Toast.error('Failed to load appointments');
+                    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Error loading data</td></tr>';
+                }
+            }
+
+            // ─── Load Doctors ───
+            async function loadDoctors(page) {
+                currentDocPage = page;
+                const url = '/api/admin/doctors?page=' + page;
+                const tbody = document.getElementById('doctorsBody');
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Loading...</td></tr>';
+
+                try {
+                    const res = await fetch(url, {
+                        credentials: 'same-origin',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        Toast.error(data.error || 'Failed to load doctors');
+                        tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Error loading data</td></tr>';
+                        return;
+                    }
+
+                    const doctors = data.doctors || data.data || data || [];
+                    const totalPages = data.totalPages || data.pages || 1;
+
+                    if (!Array.isArray(doctors) || doctors.length === 0) {
+                        tbody.innerHTML = '<tr class="empty-row"><td colspan="6">No doctors found</td></tr>';
+                    } else {
+                        tbody.innerHTML = doctors.map(function (d) {
+                            return '<tr>' +
+                                '<td>' + escapeHtml(String(d.id)) + '</td>' +
+                                '<td>' + escapeHtml(d.full_name || d.fullName || d.name || '-') + '</td>' +
+                                '<td>' + escapeHtml(d.specialization || '-') + '</td>' +
+                                '<td>' + escapeHtml(d.experience ? d.experience + ' yrs' : '-') + '</td>' +
+                                '<td>' + escapeHtml(d.hospital || d.hospital_name || '-') + '</td>' +
+                                '<td><button class="btn btn-secondary btn-sm" onclick="showScheduleModal(' + d.id + ', \'' + escapeHtml(d.full_name || d.fullName || d.name || '') + '\')"><i class="fas fa-calendar-week"></i> View Schedule</button></td>' +
+                                '</tr>';
+                        }).join('');
+                    }
+
+                    document.getElementById('docPageInfo').textContent = 'Page ' + page + ' of ' + totalPages;
+                    document.getElementById('docPrevBtn').disabled = (page <= 1);
+                    document.getElementById('docNextBtn').disabled = (page >= totalPages);
+                    doctorsLoaded = true;
+                } catch (err) {
+                    console.error('Error loading doctors:', err);
+                    Toast.error('Failed to load doctors');
+                    tbody.innerHTML = '<tr class="empty-row"><td colspan="6">Error loading data</td></tr>';
+                }
+            }
+
+            // ─── Load Patients ───
+            async function loadPatients(page) {
+                currentPatPage = page;
+                const url = '/api/admin/patients?page=' + page;
+                const tbody = document.getElementById('patientsBody');
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Loading...</td></tr>';
+
+                try {
+                    const res = await fetch(url, {
+                        credentials: 'same-origin',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        Toast.error(data.error || 'Failed to load patients');
+                        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Error loading data</td></tr>';
+                        return;
+                    }
+
+                    const patients = data.patients || data.data || data || [];
+                    const totalPages = data.totalPages || data.pages || 1;
+
+                    if (!Array.isArray(patients) || patients.length === 0) {
+                        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No patients found</td></tr>';
+                    } else {
+                        tbody.innerHTML = patients.map(function (p) {
+                            return '<tr>' +
+                                '<td>' + escapeHtml(String(p.id)) + '</td>' +
+                                '<td>' + escapeHtml(p.full_name || p.fullName || p.name || '-') + '</td>' +
+                                '<td>' + escapeHtml(p.phone || '-') + '</td>' +
+                                '<td>' + escapeHtml(p.gender || '-') + '</td>' +
+                                '<td>' + escapeHtml(p.blood_group || p.bloodGroup || '-') + '</td>' +
+                                '</tr>';
+                        }).join('');
+                    }
+
+                    document.getElementById('patPageInfo').textContent = 'Page ' + page + ' of ' + totalPages;
+                    document.getElementById('patPrevBtn').disabled = (page <= 1);
+                    document.getElementById('patNextBtn').disabled = (page >= totalPages);
+                    patientsLoaded = true;
+                } catch (err) {
+                    console.error('Error loading patients:', err);
+                    Toast.error('Failed to load patients');
+                    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Error loading data</td></tr>';
+                }
+            }
+
+            // ─── Override Modal ───
+            window.showOverrideModal = function (appointmentId, currentStatus, patientName, doctorName) {
+                currentOverrideId = appointmentId;
+                const infoHtml =
+                    '<div class="info-row"><span class="info-label">Appointment ID</span><span class="info-value">#' + escapeHtml(String(appointmentId)) + '</span></div>' +
+                    '<div class="info-row"><span class="info-label">Patient</span><span class="info-value">' + escapeHtml(patientName) + '</span></div>' +
+                    '<div class="info-row"><span class="info-label">Doctor</span><span class="info-value">' + escapeHtml(doctorName) + '</span></div>' +
+                    '<div class="info-row"><span class="info-label">Current Status</span><span class="info-value">' + statusBadge(currentStatus) + '</span></div>';
+                document.getElementById('overrideInfo').innerHTML = infoHtml;
+                document.getElementById('overrideStatus').value = currentStatus || 'scheduled';
+                document.getElementById('overrideModal').classList.add('active');
+            };
+
+            window.closeOverrideModal = function () {
+                document.getElementById('overrideModal').classList.remove('active');
+                currentOverrideId = null;
+            };
+
+            window.submitOverride = async function () {
+                if (!currentOverrideId) return;
+
+                const newStatus = document.getElementById('overrideStatus').value;
+                const btn = document.getElementById('confirmOverrideBtn');
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+                try {
+                    const res = await fetch('/api/admin/appointments/' + currentOverrideId + '/override', {
+                        method: 'POST',
+                        credentials: 'same-origin',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok && (data.success !== false)) {
+                        Toast.success('Appointment status updated to "' + newStatus + '"');
+                        closeOverrideModal();
+                        loadAppointments(currentApptPage);
+                    } else {
+                        Toast.error(data.error || data.message || 'Failed to override status');
+                    }
+                } catch (err) {
+                    console.error('Override error:', err);
+                    Toast.error('Failed to update appointment status');
+                }
+
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            };
+
+            // ─── Schedule Modal ───
+            window.showScheduleModal = async function (doctorId, doctorName) {
+                const content = document.getElementById('scheduleContent');
+                content.innerHTML = '<p class="no-schedule">Loading schedule...</p>';
+                document.getElementById('scheduleModal').classList.add('active');
+
+                // Update modal title with doctor name
+                document.querySelector('#scheduleModal .modal-header h3').innerHTML =
+                    '<i class="fas fa-calendar-week"></i> Schedule - ' + escapeHtml(doctorName);
+
+                try {
+                    const res = await fetch('/api/admin/doctors/' + doctorId + '/schedule', {
+                        credentials: 'same-origin',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        content.innerHTML = '<p class="no-schedule">Failed to load schedule</p>';
+                        return;
+                    }
+
+                    const schedule = data.schedule || data.data || data || [];
+                    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+                    if (Array.isArray(schedule) && schedule.length > 0) {
+                        let listHtml = '<ul class="schedule-list">';
+                        schedule.forEach(function (slot) {
+                            const dayName = slot.day_name || slot.dayName || dayNames[slot.day_of_week] || slot.day || 'Unknown';
+                            const startTime = slot.start_time || slot.startTime || '';
+                            const endTime = slot.end_time || slot.endTime || '';
+                            const timeRange = startTime && endTime ? startTime + ' - ' + endTime : 'N/A';
+                            listHtml += '<li>' +
+                                '<span class="schedule-day"><i class="fas fa-clock"></i> ' + escapeHtml(dayName) + '</span>' +
+                                '<span class="schedule-time">' + escapeHtml(timeRange) + '</span>' +
+                                '</li>';
+                        });
+                        listHtml += '</ul>';
+                        content.innerHTML = listHtml;
+                    } else if (typeof schedule === 'object' && !Array.isArray(schedule)) {
+                        // Handle object-format schedule (keyed by day)
+                        let listHtml = '<ul class="schedule-list">';
+                        let hasEntries = false;
+                        dayNames.forEach(function (dayName) {
+                            const dayKey = dayName.toLowerCase();
+                            if (schedule[dayKey] || schedule[dayName]) {
+                                hasEntries = true;
+                                const slot = schedule[dayKey] || schedule[dayName];
+                                const timeRange = typeof slot === 'string' ? slot : (slot.start + ' - ' + slot.end);
+                                listHtml += '<li>' +
+                                    '<span class="schedule-day"><i class="fas fa-clock"></i> ' + escapeHtml(dayName) + '</span>' +
+                                    '<span class="schedule-time">' + escapeHtml(timeRange) + '</span>' +
+                                    '</li>';
+                            }
+                        });
+                        listHtml += '</ul>';
+                        content.innerHTML = hasEntries ? listHtml : '<p class="no-schedule">No schedule available for this doctor</p>';
+                    } else {
+                        content.innerHTML = '<p class="no-schedule">No schedule available for this doctor</p>';
+                    }
+                } catch (err) {
+                    console.error('Schedule error:', err);
+                    content.innerHTML = '<p class="no-schedule">Failed to load schedule</p>';
+                }
+            };
+
+            window.closeScheduleModal = function () {
+                document.getElementById('scheduleModal').classList.remove('active');
+            };
+
+            // ─── Close modals on overlay click ───
+            document.querySelectorAll('.modal-overlay').forEach(function (overlay) {
+                overlay.addEventListener('click', function (e) {
+                    if (e.target === overlay) {
+                        overlay.classList.remove('active');
+                        currentOverrideId = null;
+                    }
+                });
+            });
+
+            // ─── Close modals on Escape ───
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeOverrideModal();
+                    closeScheduleModal();
+                }
+            });
+
+            // ─── Filter Button ───
+            document.getElementById('filterBtn').addEventListener('click', function () {
+                loadAppointments(1);
+            });
+
+            // ─── Pagination Buttons ───
+            document.getElementById('apptPrevBtn').addEventListener('click', function () {
+                if (currentApptPage > 1) loadAppointments(currentApptPage - 1);
+            });
+
+            document.getElementById('apptNextBtn').addEventListener('click', function () {
+                loadAppointments(currentApptPage + 1);
+            });
+
+            document.getElementById('docPrevBtn').addEventListener('click', function () {
+                if (currentDocPage > 1) loadDoctors(currentDocPage - 1);
+            });
+
+            document.getElementById('docNextBtn').addEventListener('click', function () {
+                loadDoctors(currentDocPage + 1);
+            });
+
+            document.getElementById('patPrevBtn').addEventListener('click', function () {
+                if (currentPatPage > 1) loadPatients(currentPatPage - 1);
+            });
+
+            document.getElementById('patNextBtn').addEventListener('click', function () {
+                loadPatients(currentPatPage + 1);
+            });
+
+            // ─── Initial Load ───
+            loadAppointments(1);
+        });
+    </script>
+    <script>window.history.replaceState(null, document.title, window.location.href);</script>
+</body>
+
+</html>
