@@ -7,12 +7,26 @@ function clearAuthCookies(res) {
     res.clearCookie("refreshToken", config.clearCookieOptions);
 }
 
+function isApiRequest(req) {
+    return req.xhr ||
+        (req.headers.accept && req.headers.accept.includes('application/json')) ||
+        req.path.startsWith('/api/') ||
+        req.headers['content-type']?.includes('application/json');
+}
+
+function sendAuthError(req, res, status, message) {
+    if (isApiRequest(req)) {
+        return res.status(status).json({ success: false, error: message });
+    }
+    return res.redirect("/role");
+}
+
 async function authenticate(req, res, next) {
     const accessToken = req.cookies.accessToken;
     const refreshToken = req.cookies.refreshToken;
 
     if (!accessToken && !refreshToken) {
-        return res.redirect("/role");
+        return sendAuthError(req, res, 401, 'Authentication required');
     }
 
     try {
@@ -22,7 +36,7 @@ async function authenticate(req, res, next) {
     } catch (accessTokenError) {
         if (!refreshToken) {
             clearAuthCookies(res);
-            return res.redirect("/role");
+            return sendAuthError(req, res, 401, 'Session expired. Please log in again.');
         }
         await handleRefreshToken(req, res, next, refreshToken);
     }
@@ -40,14 +54,14 @@ async function handleRefreshToken(req, res, next, refreshToken) {
         next();
     } catch (error) {
         clearAuthCookies(res);
-        return res.redirect("/role");
+        return sendAuthError(req, res, 401, 'Session expired. Please log in again.');
     }
 }
 
 function authorize(...allowedRoles) {
     return (req, res, next) => {
         if (!req.user || !allowedRoles.includes(req.user.role)) {
-            return res.redirect("/role");
+            return sendAuthError(req, res, 403, 'Access denied');
         }
         next();
     };

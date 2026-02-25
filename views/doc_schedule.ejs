@@ -1173,9 +1173,10 @@
                 }
 
                 var data = await res.json();
+                var payload = data.data || data;
 
                 /* Populate weekly grid */
-                var schedules = data.schedules || data.schedule || [];
+                var schedules = payload.weeklySchedule || payload.schedules || payload.schedule || [];
                 var rows = document.querySelectorAll('.schedule-day-row');
 
                 rows.forEach(function (row) {
@@ -1204,7 +1205,7 @@
                 });
 
                 /* Populate overrides list */
-                var overrides = data.overrides || [];
+                var overrides = payload.overrides || [];
                 renderOverrides(overrides);
 
             } catch (err) {

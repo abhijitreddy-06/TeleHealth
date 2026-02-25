@@ -2075,9 +2075,7 @@ a:visited {
 
             } catch (error) {
                 console.error('Upload error:', error);
-                closeUploadModal();
-                Toast.success('File uploaded! Refreshing records...');
-                loadRecords();
+                Toast.error(error.message || 'Upload failed. Please try again.');
             } finally {
                 submitBtn.innerHTML = originalText;
                 submitBtn.disabled = false;

@@ -15,7 +15,10 @@ const getClient = async () => {
             url: process.env.REDIS_URL,
             socket: {
                 connectTimeout: 5000,
-                reconnectStrategy: false
+                reconnectStrategy: (retries) => {
+                    if (retries > 10) return false;
+                    return Math.min(retries * 200, 3000);
+                }
             }
         });
 
@@ -24,6 +27,11 @@ const getClient = async () => {
                 console.log('Redis connection error (non-critical):', err.message);
             }
             isConnected = false;
+        });
+
+        redisClient.on('ready', () => {
+            isConnected = true;
+            console.log('✅ Redis reconnected');
         });
     }
 
