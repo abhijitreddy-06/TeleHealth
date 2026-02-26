@@ -830,7 +830,7 @@
                 <div class="profile-item">
                     <label>Date of Birth</label>
                     <div class="value">
-                        <%= profile.dob %>
+                        <%= profile.dob ? new Date(profile.dob).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'Not specified' %>
                     </div>
                 </div>
 

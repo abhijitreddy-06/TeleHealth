@@ -989,7 +989,7 @@ a:visited {
                         <div class="info-item">
                             <span class="info-label">Date:</span>
                             <span class="info-value">
-                                <%= appointment.appointment_date || '—' %>
+                                <%= appointment.appointment_date ? new Date(appointment.appointment_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—' %>
                             </span>
                         </div>
 
@@ -1095,16 +1095,11 @@ a:visited {
                                             <span class="appt-patient-name">
                                                 <%= appt.patient_name %>
                                             </span>
-                                            <% if (appt.symptoms) { %>
-                                            <div style="font-size: 0.8rem; color: var(--text-medium); margin-top: 2px;">
-                                                <i class="fas fa-notes-medical" style="font-size: 0.7rem;"></i> <%= appt.symptoms.length > 60 ? appt.symptoms.substring(0, 60) + '...' : appt.symptoms %>
-                                            </div>
-                                            <% } %>
                                         </div>
                                     </div>
                                     <div class="appt-details">
                                         <span class="appt-date"><i class="fas fa-calendar-day"></i>
-                                            <%= appt.appointment_date %>
+                                            <%= appt.appointment_date ? new Date(appt.appointment_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—' %>
                                         </span>
                                         <span class="appt-time"><i class="fas fa-clock"></i>
                                             <%= appt.appointment_time %>
@@ -1296,11 +1291,10 @@ a:visited {
             }
 
             function startFallbackReload() {
-                // Fallback to page reload every 30s if socket fails
-                if (!window._fallbackInterval) {
-                    window._fallbackInterval = setInterval(() => {
-                        window.location.reload();
-                    }, 30000);
+                // Log instead of reloading — avoids disruptive continuous page refreshes
+                if (!window._fallbackLogged) {
+                    console.log('Dashboard socket fallback: socket disconnected, will reconnect automatically');
+                    window._fallbackLogged = true;
                 }
             }
 

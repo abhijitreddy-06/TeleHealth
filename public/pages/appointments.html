@@ -1494,20 +1494,30 @@
             }
 
             .section-card {
-                padding: 1.5rem;
+                padding: 1.25rem;
+            }
+
+            .calendar-card {
+                padding: 1rem;
             }
 
             .calendar-grid {
-                gap: 0.3rem;
+                gap: 0.25rem;
             }
 
             .calendar-day {
+                aspect-ratio: auto;
                 font-size: 0.85rem;
-                min-height: 38px;
+                min-height: 36px;
             }
 
             .day-header {
                 font-size: 0.8rem;
+                padding: 0.3rem;
+            }
+
+            .date-time-layout {
+                gap: 1.25rem;
             }
 
             .time-slots-grid {
@@ -1537,10 +1547,16 @@
                 padding: 1rem 4%;
             }
 
+            .calendar-card {
+                padding: 0.75rem;
+            }
+
             .calendar-header {
                 flex-direction: column;
                 gap: 0.8rem;
                 align-items: flex-start;
+                margin-bottom: 1rem;
+                padding-bottom: 0.75rem;
             }
 
             .month-nav {
@@ -1549,16 +1565,19 @@
             }
 
             .calendar-grid {
-                min-width: 280px;
+                gap: 0.2rem;
             }
 
             .calendar-day {
+                aspect-ratio: auto;
                 font-size: 0.8rem;
-                min-height: 34px;
+                min-height: 32px;
+                border-radius: 6px;
             }
 
             .day-header {
-                font-size: 0.75rem;
+                font-size: 0.7rem;
+                padding: 0.25rem;
             }
 
             .time-slots-grid {
@@ -1577,17 +1596,13 @@
         }
 
         @media (max-width: 360px) {
-            .calendar-grid {
-                min-width: 260px;
-            }
-
             .calendar-day {
-                min-height: 30px;
+                min-height: 28px;
                 font-size: 0.75rem;
             }
 
             .day-header {
-                font-size: 0.7rem;
+                font-size: 0.65rem;
             }
 
             .time-slots-grid {
