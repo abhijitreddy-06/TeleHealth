@@ -8,7 +8,8 @@ const bookAppointmentSchema = z.object({
         .min(1, 'Date is required'),
     appointment_time: z.string({ required_error: 'Time is required' })
         .min(1, 'Time is required'),
-    lockToken: z.string().uuid().optional()
+    lockToken: z.string().uuid().optional(),
+    symptoms: z.string().max(1000, 'Symptoms must be under 1000 characters').optional().default('')
 });
 
 const appointmentIdParam = z.object({
@@ -25,7 +26,8 @@ const rescheduleSchema = z.object({
     doctorId: z.coerce.number().int().positive('Doctor ID must be positive'),
     appointment_date: z.string().min(1, 'Date is required'),
     appointment_time: z.string().min(1, 'Time is required'),
-    lockToken: z.string().uuid().optional()
+    lockToken: z.string().uuid().optional(),
+    symptoms: z.string().max(1000, 'Symptoms must be under 1000 characters').optional().default('')
 });
 
 const paginationQuery = z.object({

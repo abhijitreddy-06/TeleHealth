@@ -11,13 +11,13 @@ class AppointmentModel {
         return result.rows[0] || null;
     }
 
-    static async create(userId, doctorId, date, time, client) {
+    static async create(userId, doctorId, date, time, client, symptoms) {
         const db = client || pool;
         const result = await db.query(
             `INSERT INTO appointments
-             (user_id, doctor_id, appointment_date, appointment_time, status)
-             VALUES ($1, $2, $3, $4, 'scheduled') RETURNING id`,
-            [userId, doctorId, date, time]
+             (user_id, doctor_id, appointment_date, appointment_time, status, symptoms)
+             VALUES ($1, $2, $3, $4, 'scheduled', $5) RETURNING id`,
+            [userId, doctorId, date, time, symptoms || null]
         );
         return result.rows[0];
     }
@@ -46,7 +46,9 @@ class AppointmentModel {
         const isDoctor = role === 'doctor';
         const query = isDoctor
             ? `SELECT a.id, a.appointment_date, a.appointment_time, a.status, a.room_id,
-                      COALESCE(up.full_name, 'Patient') AS user_name
+                      COALESCE(up.full_name, 'Patient') AS user_name,
+                      up.gender, up.weight_kg, up.height_cm, up.blood_group, up.allergies,
+                      a.symptoms
                FROM appointments a
                LEFT JOIN user_profile up ON up.user_id = a.user_id
                WHERE a.doctor_id = $1 AND a.status IN ('scheduled','started')`
@@ -142,7 +144,9 @@ class AppointmentModel {
     static async findDoctorAllAppointments(doctorId) {
         const result = await pool.query(
             `SELECT a.id, a.appointment_date, a.appointment_time, a.status, a.room_id,
-                    COALESCE(up.full_name, 'Patient') AS patient_name
+                    COALESCE(up.full_name, 'Patient') AS patient_name,
+                    up.gender, up.weight_kg, up.height_cm, up.blood_group, up.allergies,
+                    a.symptoms
              FROM appointments a
              LEFT JOIN user_profile up ON up.user_id = a.user_id
              WHERE a.doctor_id = $1 AND a.status IN ('scheduled', 'started')

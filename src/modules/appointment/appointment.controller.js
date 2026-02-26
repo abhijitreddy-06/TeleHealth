@@ -24,7 +24,7 @@ exports.bookAppointment = async (req, res) => {
         await appointmentService.bookAppointment(
             req.user.id, req.body.doctorId,
             req.body.appointment_date, req.body.appointment_time,
-            req.body.lockToken
+            req.body.lockToken, req.body.symptoms
         );
 
         // Broadcast to doctor's dashboard
@@ -147,7 +147,8 @@ exports.rescheduleAppointment = async (req, res) => {
             req.body.doctorId,
             req.body.appointment_date,
             req.body.appointment_time,
-            req.body.lockToken
+            req.body.lockToken,
+            req.body.symptoms
         );
         res.json(result);
     } catch (err) {

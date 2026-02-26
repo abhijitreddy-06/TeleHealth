@@ -956,6 +956,36 @@ a:visited {
                             </span>
                         </div>
 
+                        <% if (appointment.gender) { %>
+                        <div class="info-item">
+                            <span class="info-label">Gender:</span>
+                            <span class="info-value"><%= appointment.gender %></span>
+                        </div>
+                        <% } %>
+
+                        <% if (appointment.weight_kg || appointment.height_cm) { %>
+                        <div class="info-item">
+                            <span class="info-label">Build:</span>
+                            <span class="info-value">
+                                <%= appointment.weight_kg ? appointment.weight_kg + ' kg' : '' %><%= (appointment.weight_kg && appointment.height_cm) ? ' / ' : '' %><%= appointment.height_cm ? appointment.height_cm + ' cm' : '' %>
+                            </span>
+                        </div>
+                        <% } %>
+
+                        <% if (appointment.blood_group) { %>
+                        <div class="info-item">
+                            <span class="info-label">Blood Group:</span>
+                            <span class="info-value"><%= appointment.blood_group %></span>
+                        </div>
+                        <% } %>
+
+                        <% if (appointment.allergies) { %>
+                        <div class="info-item">
+                            <span class="info-label">Allergies:</span>
+                            <span class="info-value" style="color: var(--error);"><%= appointment.allergies %></span>
+                        </div>
+                        <% } %>
+
                         <div class="info-item">
                             <span class="info-label">Date:</span>
                             <span class="info-value">
@@ -969,6 +999,13 @@ a:visited {
                                 <%= appointment.appointment_time || '—' %>
                             </span>
                         </div>
+
+                        <% if (appointment.symptoms) { %>
+                        <div class="info-item" style="flex-direction: column; align-items: flex-start; gap: 0.3rem;">
+                            <span class="info-label"><i class="fas fa-notes-medical"></i> Symptoms / Reason:</span>
+                            <span class="info-value" style="font-weight: 400; font-size: 0.95rem;"><%= appointment.symptoms %></span>
+                        </div>
+                        <% } %>
                     </div>
 
                     <div class="status-container">
@@ -1054,9 +1091,16 @@ a:visited {
                                 <div class="appointment-list-item <%= appt.status === 'started' ? 'in-progress' : '' %>">
                                     <div class="appt-patient-info">
                                         <i class="fas fa-user-circle"></i>
-                                        <span class="appt-patient-name">
-                                            <%= appt.patient_name %>
-                                        </span>
+                                        <div>
+                                            <span class="appt-patient-name">
+                                                <%= appt.patient_name %>
+                                            </span>
+                                            <% if (appt.symptoms) { %>
+                                            <div style="font-size: 0.8rem; color: var(--text-medium); margin-top: 2px;">
+                                                <i class="fas fa-notes-medical" style="font-size: 0.7rem;"></i> <%= appt.symptoms.length > 60 ? appt.symptoms.substring(0, 60) + '...' : appt.symptoms %>
+                                            </div>
+                                            <% } %>
+                                        </div>
                                     </div>
                                     <div class="appt-details">
                                         <span class="appt-date"><i class="fas fa-calendar-day"></i>
@@ -1304,7 +1348,10 @@ a:visited {
                 if (!apptDate || !apptTime) return;
 
                 const BEFORE_MINUTES = 10;
-                const apptDateTime = new Date(apptDate + 'T' + apptTime);
+                const parsedDate = new Date(apptDate);
+                const [h, m] = apptTime.split(':').map(Number);
+                parsedDate.setHours(h, m, 0, 0);
+                const apptDateTime = parsedDate;
                 const windowStart = new Date(apptDateTime.getTime() - BEFORE_MINUTES * 60 * 1000);
 
                 function update() {

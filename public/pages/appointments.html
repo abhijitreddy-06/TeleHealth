@@ -1810,6 +1810,18 @@
                     </div>
                 </div>
 
+                <div class="symptoms-group" style="margin-top: 1rem;">
+                    <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-dark); font-size: 0.95rem;">
+                        <i class="fas fa-notes-medical"></i> Symptoms / Reason for Visit
+                    </label>
+                    <textarea id="symptomsInput" maxlength="1000" rows="3"
+                        placeholder="Briefly describe your symptoms or reason for this appointment..."
+                        style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.95rem; resize: vertical; background: var(--background); color: var(--text-dark); transition: var(--transition);"></textarea>
+                    <div style="text-align: right; font-size: 0.8rem; color: var(--text-medium); margin-top: 0.3rem;">
+                        <span id="symptomsCharCount">0</span>/1000
+                    </div>
+                </div>
+
                 <div class="confirm-actions">
                     <button class="btn-confirm" id="confirmBookingBtn">
                         <i class="fas fa-calendar-check"></i> Confirm Booking
@@ -2326,7 +2338,8 @@
                         doctorId: state.selectedDoctor.id,
                         appointment_date: formatDateForAPI(state.selectedDate),
                         appointment_time: state.selectedTime,
-                        lockToken: state.lockToken
+                        lockToken: state.lockToken,
+                        symptoms: document.getElementById('symptomsInput').value.trim()
                     })
                 });
 
@@ -2354,6 +2367,13 @@
                 btn.disabled = false;
                 btn.innerHTML = originalHTML;
             }
+        });
+
+        /* ========================================================
+           SYMPTOMS CHARACTER COUNTER
+        ======================================================== */
+        document.getElementById('symptomsInput').addEventListener('input', function() {
+            document.getElementById('symptomsCharCount').textContent = this.value.length;
         });
 
         /* ========================================================
@@ -2556,7 +2576,7 @@
                 let downloadBtn = '';
                 if (status === 'completed' && roomId) {
                     downloadBtn = `
-                        <a href="/api/prescription/download/${escapeHtml(roomId)}" class="appt-btn download-btn" title="Download Prescription">
+                        <a href="/api/prescription/download/${escapeHtml(roomId)}" class="appt-btn download-btn" download title="Download Prescription">
                             <i class="fas fa-file-download"></i> Prescription
                         </a>`;
                 }

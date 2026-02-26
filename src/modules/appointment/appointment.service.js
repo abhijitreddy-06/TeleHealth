@@ -19,7 +19,7 @@ class AppointmentService {
         } catch (err) { /* non-critical */ }
     }
 
-    async bookAppointment(userId, doctorId, date, time, lockToken) {
+    async bookAppointment(userId, doctorId, date, time, lockToken, symptoms) {
         // Enforce 24-hour advance booking
         const appointmentDateTime = new Date(`${date}T${time}`);
         const minBookingTime = new Date(Date.now() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
@@ -61,7 +61,7 @@ class AppointmentService {
             }
 
             // Layer 3: INSERT (partial unique index catches any remaining race)
-            const result = await AppointmentModel.create(userId, doctorId, date, time, client);
+            const result = await AppointmentModel.create(userId, doctorId, date, time, client, symptoms);
 
             await client.query('COMMIT');
 
@@ -180,7 +180,7 @@ class AppointmentService {
         }
     }
 
-    async rescheduleAppointment(appointmentId, userId, newDoctorId, newDate, newTime, lockToken) {
+    async rescheduleAppointment(appointmentId, userId, newDoctorId, newDate, newTime, lockToken, symptoms) {
         // Enforce 24-hour advance booking for the new slot
         const newDateTime = new Date(`${newDate}T${newTime}`);
         const minBookingTime = new Date(Date.now() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
@@ -231,7 +231,7 @@ class AppointmentService {
             await AppointmentModel.updateCancel(appointmentId, 'Rescheduled', 'user', client);
 
             // Create new appointment
-            const result = await AppointmentModel.create(userId, newDoctorId, newDate, newTime, client);
+            const result = await AppointmentModel.create(userId, newDoctorId, newDate, newTime, client, symptoms);
 
             await client.query('COMMIT');
 
