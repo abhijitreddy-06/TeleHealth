@@ -107,6 +107,7 @@ app.use('/doc_login', authLimiter);
 app.use('/api/refresh-token', authLimiter);
 app.use('/api/appointments/', apiLimiter);
 app.use('/api/ai/', apiLimiter);
+app.use('/api/pharmacy/', apiLimiter);
 
 // --- Body Parsing (1MB limit) ---
 app.use(bodyParser.json({ limit: '1mb' }));

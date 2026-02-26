@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeleHealth Pharmacy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --secondary: #10b981;
+            --background: #f9fafb;
+            --dark-bg: #1e293b;
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-light: #f1f5f9;
+            --text-medium: #475569;
+            --border: #e2e8f0;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --transition: all 0.3s ease;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --radius: 12px;
+        }
+        [data-theme="dark"] {
+            --background: #1e293b;
+            --card-bg: #334155;
+            --text-dark: #f1f5f9;
+            --text-light: #0f172a;
+            --text-medium: #cbd5e1;
+            --border: #475569;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; font-family:"Poppins",sans-serif; }
+        body { background-color:var(--background); color:var(--text-dark); transition:var(--transition); min-height:100vh; display:flex; flex-direction:column; line-height:1.6; }
+        a { text-decoration:none!important; color:inherit; }
+
+        /* ── Header ── */
+        header { background-color:var(--card-bg); box-shadow:var(--shadow); position:sticky; top:0; z-index:100; }
+        .navbar { display:flex; justify-content:space-between; align-items:center; padding:1.2rem 5%; max-width:1400px; margin:0 auto; }
+        .logo { font-size:1.8rem; font-weight:700; color:var(--primary); display:flex; align-items:center; gap:0.5rem; }
+        .logo i { color:var(--secondary); font-size:1.5rem; }
+        .logo-text { background:linear-gradient(135deg,var(--primary),var(--secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; font-weight:800; }
+        .nav-links { display:flex; gap:1rem; align-items:center; }
+        .nav-links a { color:var(--text-dark); font-weight:500; transition:var(--transition); padding:0.5rem 0.8rem; border-radius:8px; display:flex; align-items:center; gap:0.5rem; }
+        .nav-links a.active { background-color:rgba(56,189,248,0.1); color:var(--primary); }
+        .nav-links a:hover:not(.active) { color:var(--primary); background-color:rgba(56,189,248,0.1); }
+        .theme-toggle { background:none; border:none; cursor:pointer; color:var(--text-dark); font-size:1.2rem; padding:0.5rem; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; transition:var(--transition); }
+        .theme-toggle:hover { background-color:rgba(56,189,248,0.1); }
+        .cart-badge { position:relative; }
+        .cart-badge .badge { position:absolute; top:-4px; right:-8px; background:var(--error); color:#fff; font-size:0.65rem; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; }
+        .mobile-controls { display:none; align-items:center; gap:0.5rem; }
+        .mobile-menu-btn { display:none; background:none; border:none; color:var(--text-dark); font-size:1.5rem; cursor:pointer; width:40px; height:40px; border-radius:50%; align-items:center; justify-content:center; }
+        .mobile-menu { position:fixed; top:0; right:-100%; width:280px; height:100vh; background-color:var(--card-bg); z-index:1000; padding:2rem; transition:var(--transition); box-shadow:-5px 0 15px rgba(0,0,0,0.1); display:flex; flex-direction:column; gap:1.5rem; }
+        .mobile-menu.active { right:0; }
+        .close-menu { align-self:flex-end; background:none; border:none; color:var(--text-dark); font-size:1.5rem; cursor:pointer; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+        .mobile-menu a { display:flex; align-items:center; gap:1rem; padding:0.8rem 1rem; border-radius:8px; color:var(--text-dark); transition:var(--transition); }
+        .mobile-menu a:hover,.mobile-menu a.active { background-color:rgba(56,189,248,0.1); color:var(--primary); }
+
+        /* ── Main Layout ── */
+        .shop-container { flex:1; max-width:1400px; margin:0 auto; padding:2rem 5%; width:100%; }
+        .shop-header { margin-bottom:2rem; }
+        .shop-header h1 { font-size:2rem; background:linear-gradient(135deg,var(--primary),var(--secondary)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:0.5rem; }
+        .shop-header p { color:var(--text-medium); }
+
+        /* ── Search & Controls ── */
+        .shop-controls { display:flex; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+        .search-box { flex:1; min-width:250px; position:relative; }
+        .search-box input { width:100%; padding:0.8rem 1rem 0.8rem 2.8rem; border:1px solid var(--border); border-radius:8px; background:var(--card-bg); color:var(--text-dark); font-size:0.95rem; transition:var(--transition); }
+        .search-box input:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(56,189,248,0.15); }
+        .search-box i { position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:var(--text-medium); }
+        .sort-select { padding:0.8rem 1rem; border:1px solid var(--border); border-radius:8px; background:var(--card-bg); color:var(--text-dark); font-size:0.95rem; cursor:pointer; }
+
+        /* ── Category Pills ── */
+        .category-pills { display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+        .category-pill { padding:0.5rem 1.2rem; border-radius:20px; border:1px solid var(--border); background:var(--card-bg); color:var(--text-dark); cursor:pointer; font-size:0.85rem; font-weight:500; transition:var(--transition); white-space:nowrap; }
+        .category-pill:hover,.category-pill.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+
+        /* ── Price Filter ── */
+        .price-filter { display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+        .price-filter input { width:100px; padding:0.5rem 0.8rem; border:1px solid var(--border); border-radius:8px; background:var(--card-bg); color:var(--text-dark); font-size:0.85rem; }
+        .price-filter input:focus { outline:none; border-color:var(--primary); }
+        .price-filter .btn-sm { padding:0.5rem 1rem; background:var(--primary); color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:500; transition:var(--transition); }
+        .price-filter .btn-sm:hover { background:var(--primary-hover); }
+        .price-filter .btn-clear { background:transparent; border:1px solid var(--border); color:var(--text-dark); }
+
+        /* ── Product Grid ── */
+        .products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:1.5rem; }
+        .product-card { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; transition:var(--transition); position:relative; }
+        .product-card:hover { transform:translateY(-4px); box-shadow:0 12px 24px rgba(0,0,0,0.1); }
+        .product-card .img-wrap { width:100%; height:200px; overflow:hidden; background:#f1f5f9; position:relative; }
+        .product-card .img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform 0.3s; }
+        .product-card:hover .img-wrap img { transform:scale(1.05); }
+        .product-card .prescription-badge { position:absolute; top:8px; left:8px; background:var(--warning); color:#fff; padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:600; }
+        .product-card .out-of-stock-badge { position:absolute; top:8px; right:8px; background:var(--error); color:#fff; padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:600; }
+        .product-card .wishlist-btn { position:absolute; top:8px; right:8px; background:rgba(255,255,255,0.9); border:none; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:var(--transition); color:var(--text-medium); }
+        .product-card .wishlist-btn:hover,.product-card .wishlist-btn.active { color:var(--error); }
+        .product-card .card-body { padding:1rem; }
+        .product-card .category-label { font-size:0.75rem; color:var(--primary); font-weight:500; text-transform:uppercase; letter-spacing:0.5px; }
+        .product-card .product-name { font-size:0.95rem; font-weight:600; margin:0.3rem 0; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+        .product-card .rating { display:flex; align-items:center; gap:0.3rem; margin:0.3rem 0; }
+        .product-card .rating .stars { color:var(--warning); font-size:0.8rem; }
+        .product-card .rating span { font-size:0.75rem; color:var(--text-medium); }
+        .product-card .price-row { display:flex; align-items:center; gap:0.5rem; margin:0.5rem 0; }
+        .product-card .price { font-size:1.1rem; font-weight:700; color:var(--secondary); }
+        .product-card .compare-price { font-size:0.85rem; color:var(--text-medium); text-decoration:line-through; }
+        .product-card .card-actions { display:flex; gap:0.5rem; margin-top:0.8rem; }
+        .product-card .btn-cart { flex:1; padding:0.6rem; background:var(--primary); color:#fff; border:none; border-radius:8px; cursor:pointer; font-size:0.85rem; font-weight:600; transition:var(--transition); display:flex; align-items:center; justify-content:center; gap:0.4rem; }
+        .product-card .btn-cart:hover { background:var(--primary-hover); }
+        .product-card .btn-cart:disabled { background:var(--border); cursor:not-allowed; color:var(--text-medium); }
+
+        /* ── Pagination ── */
+        .pagination { display:flex; justify-content:center; align-items:center; gap:0.5rem; margin-top:2rem; }
+        .pagination button { padding:0.5rem 1rem; border:1px solid var(--border); border-radius:8px; background:var(--card-bg); color:var(--text-dark); cursor:pointer; transition:var(--transition); font-weight:500; }
+        .pagination button.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+        .pagination button:hover:not(.active):not(:disabled) { border-color:var(--primary); color:var(--primary); }
+        .pagination button:disabled { opacity:0.5; cursor:not-allowed; }
+
+        /* ── Loading & Empty ── */
+        .loading { text-align:center; padding:4rem 0; color:var(--text-medium); }
+        .loading .spinner { border:3px solid var(--border); border-top:3px solid var(--primary); border-radius:50%; width:40px; height:40px; animation:spin 0.8s linear infinite; margin:0 auto 1rem; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .empty-state { text-align:center; padding:4rem 0; color:var(--text-medium); }
+        .empty-state i { font-size:3rem; margin-bottom:1rem; color:var(--border); }
+
+        /* ── Toast ── */
+        .toast-container { position:fixed; top:80px; right:20px; z-index:9999; }
+        .toast { background:var(--card-bg); border-radius:8px; padding:1rem 1.5rem; box-shadow:0 8px 24px rgba(0,0,0,0.15); display:flex; align-items:center; gap:0.8rem; margin-bottom:0.5rem; animation:slideIn 0.3s ease; max-width:360px; border-left:4px solid var(--success); }
+        .toast.error { border-left-color:var(--error); }
+        .toast .toast-msg { font-size:0.9rem; font-weight:500; }
+        @keyframes slideIn { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+
+        /* ── Footer ── */
+        .simple-footer { all:unset; display:block; background-color:var(--card-bg); border-top:1px solid var(--border); padding:0.6rem 5%; margin-top:auto; }
+        .simple-footer .footer-content { all:unset; max-width:1400px; margin:0 auto; display:grid; grid-template-columns:auto 1fr auto; align-items:center; }
+        .simple-footer .footer-left { display:flex; align-items:center; }
+        .simple-footer .footer-logo { display:flex; align-items:center; gap:0.5rem; color:var(--primary); font-weight:600; }
+        .simple-footer .footer-logo i { color:var(--secondary); font-size:1.2rem; }
+        .simple-footer .footer-center { text-align:center; }
+        .simple-footer .copyright { color:var(--text-dark); font-size:0.9rem; white-space:nowrap; }
+        .simple-footer .footer-name { color:var(--text-dark); font-weight:600; }
+        .simple-footer .footer-right { display:flex; gap:1rem; justify-content:flex-end; }
+        .simple-footer .footer-socials a { color:var(--text-dark); font-size:1.4rem; }
+
+        @media (max-width:768px) {
+            .nav-links { display:none; }
+            .mobile-controls { display:flex; }
+            .mobile-menu-btn { display:flex; }
+            .shop-controls { flex-direction:column; }
+            .products-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1rem; }
+            .product-card .img-wrap { height:150px; }
+            .simple-footer .footer-content { display:flex; flex-direction:column; gap:0.3rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="/user_home" class="logo">
+                <i class="fas fa-heartbeat"></i>
+                <span class="logo-text">TeleHealth</span>
+            </a>
+            <div class="nav-links">
+                <a href="/user_home"><i class="fas fa-home"></i> Home</a>
+                <a href="/predict"><i class="fas fa-robot"></i> AI Pre Advice</a>
+                <a href="/user_video_dashboard"><i class="fas fa-video"></i> Video</a>
+                <a href="/pharmacy" class="active"><i class="fas fa-pills"></i> Pharmacy</a>
+                <a href="/appointments"><i class="fas fa-user-md"></i> Appointments</a>
+                <a href="/records"><i class="fas fa-folder"></i> My Records</a>
+                <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
+                <% if (user) { %>
+                <a href="/pharmacy/wishlist"><i class="fas fa-heart"></i></a>
+                <a href="/pharmacy/cart" class="cart-badge"><i class="fas fa-shopping-cart"></i><% if (cartCount > 0) { %><span class="badge" id="cartBadge"><%= cartCount %></span><% } %></a>
+                <% } %>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </div>
+            <div class="mobile-controls">
+                <% if (user) { %>
+                <a href="/pharmacy/cart" class="cart-badge" style="color:var(--text-dark)"><i class="fas fa-shopping-cart"></i><% if (cartCount > 0) { %><span class="badge" id="cartBadgeMobile"><%= cartCount %></span><% } %></a>
+                <% } %>
+                <button class="theme-toggle" id="mobileThemeToggle"><i class="fas fa-moon"></i></button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="close-menu" id="closeMenu"><i class="fas fa-times"></i></button>
+        <a href="/user_home"><i class="fas fa-home"></i> Home</a>
+        <a href="/predict"><i class="fas fa-robot"></i> AI Pre Advice</a>
+        <a href="/user_video_dashboard"><i class="fas fa-video"></i> Video</a>
+        <a href="/pharmacy" class="active"><i class="fas fa-pills"></i> Pharmacy</a>
+        <a href="/appointments"><i class="fas fa-user-md"></i> Appointments</a>
+        <a href="/records"><i class="fas fa-folder"></i> My Records</a>
+        <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
+        <% if (user) { %>
+        <a href="/pharmacy/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+        <a href="/pharmacy/orders"><i class="fas fa-box"></i> My Orders</a>
+        <% } %>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <main class="shop-container">
+        <div class="shop-header">
+            <h1><i class="fas fa-capsules"></i> TeleHealth Pharmacy</h1>
+            <p>Browse our wide range of medicines, health products, and medical devices</p>
+        </div>
+
+        <div class="shop-controls">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search medicines, health products...">
+            </div>
+            <select class="sort-select" id="sortSelect">
+                <option value="default">Sort: Default</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
+                <option value="rating">Top Rated</option>
+                <option value="newest">Newest First</option>
+            </select>
+        </div>
+
+        <div class="category-pills" id="categoryPills">
+            <button class="category-pill active" data-id="">All</button>
+            <% categories.forEach(cat => { %>
+                <button class="category-pill" data-id="<%= cat.id %>"><%= cat.name %></button>
+            <% }); %>
+        </div>
+
+        <div class="price-filter">
+            <span style="font-size:0.85rem;font-weight:500;">Price:</span>
+            <input type="number" id="priceMin" placeholder="Min" min="0">
+            <span>-</span>
+            <input type="number" id="priceMax" placeholder="Max" min="0">
+            <button class="btn-sm" id="applyPrice">Apply</button>
+            <button class="btn-sm btn-clear" id="clearPrice">Clear</button>
+        </div>
+
+        <div id="productsArea">
+            <div class="loading"><div class="spinner"></div>Loading products...</div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
+    </main>
+
+    <footer class="simple-footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <a href="/user_home" class="footer-logo"><i class="fas fa-heartbeat"></i><span>TeleHealth</span></a>
+            </div>
+            <div class="footer-center">
+                <span class="copyright">&copy; 2026 Built by <a href="https://abhijitreddy-portfolio.netlify.app/" target="_blank" rel="noopener" class="footer-name">Abhijit Reddy</a>.</span>
+            </div>
+            <div class="footer-right footer-socials">
+                <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank"><i class="fab fa-linkedin"></i></a>
+                <a href="https://github.com/abhijitreddy-06" target="_blank"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // ── Theme Toggle ──
+        const themeToggle = document.getElementById('themeToggle');
+        const mobileThemeToggle = document.getElementById('mobileThemeToggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
+        html.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        function toggleTheme() {
+            const t = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', t);
+            localStorage.setItem('theme', t);
+            updateThemeIcon(t);
+        }
+        function updateThemeIcon(t) {
+            const icon = t === 'dark' ? 'fa-sun' : 'fa-moon';
+            themeToggle.innerHTML = '<i class="fas ' + icon + '"></i>';
+            mobileThemeToggle.innerHTML = '<i class="fas ' + icon + '"></i>';
+        }
+        themeToggle.addEventListener('click', toggleTheme);
+        mobileThemeToggle.addEventListener('click', toggleTheme);
+
+        // ── Mobile Menu ──
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeMenuBtn = document.getElementById('closeMenu');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenuBtn.addEventListener('click', e => { e.stopPropagation(); mobileMenu.classList.add('active'); document.body.style.overflow='hidden'; });
+        closeMenuBtn.addEventListener('click', () => { mobileMenu.classList.remove('active'); document.body.style.overflow=''; });
+        document.addEventListener('click', e => { if(mobileMenu.classList.contains('active')&&!mobileMenu.contains(e.target)&&e.target!==mobileMenuBtn){mobileMenu.classList.remove('active');document.body.style.overflow='';} });
+
+        // ── State ──
+        let currentPage = 1;
+        let currentCategory = '';
+        let currentSearch = '';
+        let currentSort = 'default';
+        let currentPriceMin = '';
+        let currentPriceMax = '';
+        const isLoggedIn = <%= user ? 'true' : 'false' %>;
+
+        // ── Fetch Products ──
+        async function loadProducts() {
+            const area = document.getElementById('productsArea');
+            area.innerHTML = '<div class="loading"><div class="spinner"></div>Loading products...</div>';
+
+            const params = new URLSearchParams();
+            params.set('page', currentPage);
+            params.set('limit', '12');
+            if (currentCategory) params.set('category_id', currentCategory);
+            if (currentSearch) params.set('search', currentSearch);
+            if (currentSort !== 'default') params.set('sort', currentSort);
+            if (currentPriceMin) params.set('price_min', currentPriceMin);
+            if (currentPriceMax) params.set('price_max', currentPriceMax);
+
+            try {
+                const res = await fetch('/api/pharmacy/products?' + params.toString());
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Failed');
+
+                if (data.products.length === 0) {
+                    area.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><h3>No products found</h3><p>Try changing your filters or search term</p></div>';
+                    document.getElementById('pagination').innerHTML = '';
+                    return;
+                }
+
+                area.innerHTML = '<div class="products-grid">' + data.products.map(p => renderProductCard(p)).join('') + '</div>';
+                renderPagination(data.pagination);
+            } catch(err) {
+                area.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Failed to load products</h3><p>' + err.message + '</p></div>';
+            }
+        }
+
+        function renderProductCard(p) {
+            const stars = renderStars(p.avg_rating);
+            const inStock = p.stock_quantity > 0;
+            return '<div class="product-card">' +
+                '<a href="/pharmacy/product/' + p.slug + '">' +
+                '<div class="img-wrap">' +
+                    '<img src="' + (p.image_url || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400') + '" alt="' + escapeHtml(p.name) + '" loading="lazy" onerror="this.src=\'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400\'">' +
+                    (p.prescription_required ? '<span class="prescription-badge"><i class="fas fa-prescription"></i> Rx</span>' : '') +
+                    (!inStock ? '<span class="out-of-stock-badge">Out of Stock</span>' : '') +
+                '</div></a>' +
+                '<div class="card-body">' +
+                    '<span class="category-label">' + escapeHtml(p.category_name) + '</span>' +
+                    '<a href="/pharmacy/product/' + p.slug + '"><h3 class="product-name">' + escapeHtml(p.name) + '</h3></a>' +
+                    '<div class="rating">' + stars + '<span>(' + p.review_count + ')</span></div>' +
+                    '<div class="price-row">' +
+                        '<span class="price">Rs.' + parseFloat(p.price).toFixed(0) + '</span>' +
+                        (p.compare_at_price ? '<span class="compare-price">Rs.' + parseFloat(p.compare_at_price).toFixed(0) + '</span>' : '') +
+                    '</div>' +
+                    '<div class="card-actions">' +
+                        '<button class="btn-cart" onclick="addToCart(' + p.id + ', event)" ' + (!inStock ? 'disabled' : '') + '>' +
+                            '<i class="fas fa-cart-plus"></i> ' + (inStock ? 'Add to Cart' : 'Out of Stock') +
+                        '</button>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function renderStars(rating) {
+            let s = '<span class="stars">';
+            const r = Math.round(parseFloat(rating) * 2) / 2;
+            for (let i = 1; i <= 5; i++) {
+                if (i <= Math.floor(r)) s += '<i class="fas fa-star"></i>';
+                else if (i - 0.5 <= r) s += '<i class="fas fa-star-half-alt"></i>';
+                else s += '<i class="far fa-star"></i>';
+            }
+            return s + '</span>';
+        }
+
+        function renderPagination(pg) {
+            const div = document.getElementById('pagination');
+            if (pg.totalPages <= 1) { div.innerHTML = ''; return; }
+            let html = '<button ' + (pg.page <= 1 ? 'disabled' : '') + ' onclick="goPage(' + (pg.page-1) + ')"><i class="fas fa-chevron-left"></i></button>';
+            const start = Math.max(1, pg.page-2);
+            const end = Math.min(pg.totalPages, pg.page+2);
+            for (let i = start; i <= end; i++) {
+                html += '<button class="' + (i===pg.page?'active':'') + '" onclick="goPage(' + i + ')">' + i + '</button>';
+            }
+            html += '<button ' + (pg.page >= pg.totalPages ? 'disabled' : '') + ' onclick="goPage(' + (pg.page+1) + ')"><i class="fas fa-chevron-right"></i></button>';
+            div.innerHTML = html;
+        }
+
+        // ── Category Pills ──
+        document.querySelectorAll('.category-pill').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.category-pill').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentCategory = btn.dataset.id;
+                currentPage = 1;
+                loadProducts();
+            });
+        });
+
+        // ── Search ──
+        let searchTimer;
+        document.getElementById('searchInput').addEventListener('input', e => {
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                currentSearch = e.target.value.trim();
+                currentPage = 1;
+                loadProducts();
+            }, 400);
+        });
+
+        // ── Sort ──
+        document.getElementById('sortSelect').addEventListener('change', e => {
+            currentSort = e.target.value;
+            currentPage = 1;
+            loadProducts();
+        });
+
+        // ── Price Filter ──
+        document.getElementById('applyPrice').addEventListener('click', () => {
+            currentPriceMin = document.getElementById('priceMin').value;
+            currentPriceMax = document.getElementById('priceMax').value;
+            currentPage = 1;
+            loadProducts();
+        });
+        document.getElementById('clearPrice').addEventListener('click', () => {
+            document.getElementById('priceMin').value = '';
+            document.getElementById('priceMax').value = '';
+            currentPriceMin = '';
+            currentPriceMax = '';
+            currentPage = 1;
+            loadProducts();
+        });
+
+        // ── Global functions ──
+        window.goPage = function(p) { currentPage = p; loadProducts(); window.scrollTo({top:0,behavior:'smooth'}); };
+
+        window.addToCart = async function(productId, event) {
+            if (!isLoggedIn) { window.location.href = '/user_login'; return; }
+            const btn = event.currentTarget;
+            const orig = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                const res = await fetch('/api/pharmacy/cart/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ productId, quantity: 1 })
+                });
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error || 'Failed');
+                showToast('Added to cart!');
+                updateCartBadge(data.cartCount);
+            } catch(err) {
+                showToast(err.message, true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            }
+        };
+
+        function updateCartBadge(count) {
+            ['cartBadge','cartBadgeMobile'].forEach(id => {
+                let el = document.getElementById(id);
+                if (count > 0) {
+                    if (!el) {
+                        const parent = id === 'cartBadge'
+                            ? document.querySelector('.nav-links .cart-badge')
+                            : document.querySelector('.mobile-controls .cart-badge');
+                        if (parent) {
+                            el = document.createElement('span');
+                            el.className = 'badge';
+                            el.id = id;
+                            parent.appendChild(el);
+                        }
+                    }
+                    if (el) el.textContent = count;
+                } else if (el) {
+                    el.remove();
+                }
+            });
+        }
+
+        function showToast(msg, isError) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast' + (isError ? ' error' : '');
+            toast.innerHTML = '<i class="fas ' + (isError ? 'fa-exclamation-circle' : 'fa-check-circle') + '" style="color:' + (isError ? 'var(--error)' : 'var(--success)') + ';font-size:1.2rem"></i><span class="toast-msg">' + escapeHtml(msg) + '</span>';
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        // ── Initial Load ──
+        loadProducts();
+    });
+    </script>
+    <script>window.history.replaceState(null, document.title, window.location.href);</script>
+</body>
+</html>

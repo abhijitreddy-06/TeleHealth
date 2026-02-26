@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeleHealth - My Orders</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root{--primary:#38bdf8;--primary-hover:#0ea5e9;--secondary:#10b981;--background:#f9fafb;--card-bg:#fff;--text-dark:#0f172a;--text-medium:#475569;--border:#e2e8f0;--error:#ef4444;--warning:#f59e0b;--success:#10b981;--transition:all .3s ease;--shadow:0 4px 6px -1px rgba(0,0,0,.1);--radius:12px}
+        [data-theme="dark"]{--background:#1e293b;--card-bg:#334155;--text-dark:#f1f5f9;--text-medium:#cbd5e1;--border:#475569}
+        *{margin:0;padding:0;box-sizing:border-box;font-family:"Poppins",sans-serif}
+        body{background:var(--background);color:var(--text-dark);min-height:100vh;display:flex;flex-direction:column;line-height:1.6}
+        a{text-decoration:none!important;color:inherit}
+        header{background:var(--card-bg);box-shadow:var(--shadow);position:sticky;top:0;z-index:100}
+        .navbar{display:flex;justify-content:space-between;align-items:center;padding:1.2rem 5%;max-width:1400px;margin:0 auto}
+        .logo{font-size:1.8rem;font-weight:700;color:var(--primary);display:flex;align-items:center;gap:.5rem}
+        .logo i{color:var(--secondary)}.logo-text{background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
+        .nav-links{display:flex;gap:1rem;align-items:center}
+        .nav-links a{color:var(--text-dark);font-weight:500;padding:.5rem .8rem;border-radius:8px;display:flex;align-items:center;gap:.5rem;transition:var(--transition)}
+        .nav-links a:hover,.nav-links a.active{color:var(--primary);background:rgba(56,189,248,.1)}
+        .theme-toggle{background:none;border:none;cursor:pointer;color:var(--text-dark);font-size:1.2rem;padding:.5rem;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center}
+        .mobile-controls{display:none;align-items:center;gap:.5rem}
+        .mobile-menu-btn{display:none;background:none;border:none;color:var(--text-dark);font-size:1.5rem;cursor:pointer;width:40px;height:40px;border-radius:50%}
+        .mobile-menu{position:fixed;top:0;right:-100%;width:280px;height:100vh;background:var(--card-bg);z-index:1000;padding:2rem;transition:var(--transition);box-shadow:-5px 0 15px rgba(0,0,0,.1);display:flex;flex-direction:column;gap:1.5rem}
+        .mobile-menu.active{right:0}
+        .close-menu{align-self:flex-end;background:none;border:none;color:var(--text-dark);font-size:1.5rem;cursor:pointer;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+        .mobile-menu a{display:flex;align-items:center;gap:1rem;padding:.8rem 1rem;border-radius:8px;color:var(--text-dark);transition:var(--transition)}
+        .mobile-menu a:hover{color:var(--primary);background:rgba(56,189,248,.1)}
+
+        .orders-container{flex:1;max-width:1000px;margin:0 auto;padding:2rem 5%;width:100%}
+        .orders-header h1{font-size:2rem;background:linear-gradient(135deg,var(--primary),var(--secondary));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:1.5rem}
+        .order-card{background:var(--card-bg);border-radius:var(--radius);box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1rem;transition:var(--transition)}
+        .order-card:hover{box-shadow:0 8px 16px rgba(0,0,0,.1)}
+        .order-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;flex-wrap:wrap;gap:.5rem}
+        .order-number{font-weight:700;color:var(--primary);font-size:1rem}
+        .order-date{font-size:.85rem;color:var(--text-medium)}
+        .order-status{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:600;text-transform:uppercase}
+        .status-pending{background:rgba(245,158,11,.1);color:var(--warning)}
+        .status-confirmed,.status-processing{background:rgba(56,189,248,.1);color:var(--primary)}
+        .status-shipped{background:rgba(99,102,241,.1);color:#6366f1}
+        .status-delivered{background:rgba(16,185,129,.1);color:var(--success)}
+        .status-cancelled{background:rgba(239,68,68,.1);color:var(--error)}
+        .order-details{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+        .order-meta{font-size:.85rem;color:var(--text-medium)}
+        .order-total{font-size:1.1rem;font-weight:700;color:var(--secondary)}
+        .order-link{display:inline-flex;align-items:center;gap:.3rem;color:var(--primary);font-size:.85rem;font-weight:500;margin-top:.5rem}
+        .order-link:hover{text-decoration:underline!important}
+        .empty-state{text-align:center;padding:4rem 0;color:var(--text-medium)}
+        .empty-state i{font-size:3rem;color:var(--border);margin-bottom:1rem}
+        .empty-state a{display:inline-block;margin-top:1rem;padding:.8rem 2rem;background:var(--primary);color:#fff;border-radius:8px;font-weight:600}
+        .pagination{display:flex;justify-content:center;gap:.5rem;margin-top:1.5rem}
+        .pagination a{padding:.5rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--card-bg);color:var(--text-dark);transition:var(--transition);font-weight:500}
+        .pagination a:hover{border-color:var(--primary);color:var(--primary)}
+
+        .simple-footer{all:unset;display:block;background:var(--card-bg);border-top:1px solid var(--border);padding:.6rem 5%;margin-top:auto}
+        .simple-footer .footer-content{all:unset;max-width:1400px;margin:0 auto;display:grid;grid-template-columns:auto 1fr auto;align-items:center}
+        .simple-footer .footer-left{display:flex;align-items:center}
+        .simple-footer .footer-logo{display:flex;align-items:center;gap:.5rem;color:var(--primary);font-weight:600}
+        .simple-footer .footer-logo i{color:var(--secondary);font-size:1.2rem}
+        .simple-footer .footer-center{text-align:center}
+        .simple-footer .copyright{color:var(--text-dark);font-size:.9rem}
+        .simple-footer .footer-name{color:var(--text-dark);font-weight:600}
+        .simple-footer .footer-right{display:flex;gap:1rem;justify-content:flex-end}
+        .simple-footer .footer-socials a{color:var(--text-dark);font-size:1.4rem}
+        @media(max-width:768px){.nav-links{display:none}.mobile-controls{display:flex}.mobile-menu-btn{display:flex}.simple-footer .footer-content{display:flex;flex-direction:column;gap:.3rem}}
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a href="/user_home" class="logo"><i class="fas fa-heartbeat"></i><span class="logo-text">TeleHealth</span></a>
+            <div class="nav-links">
+                <a href="/pharmacy"><i class="fas fa-pills"></i> Pharmacy</a>
+                <a href="/pharmacy/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
+                <a href="/pharmacy/orders" class="active"><i class="fas fa-box"></i> Orders</a>
+                <a href="/pharmacy/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+                <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+            </div>
+            <div class="mobile-controls">
+                <button class="theme-toggle" id="mobileThemeToggle"><i class="fas fa-moon"></i></button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
+            </div>
+        </nav>
+    </header>
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="close-menu" id="closeMenu"><i class="fas fa-times"></i></button>
+        <a href="/pharmacy"><i class="fas fa-pills"></i> Pharmacy</a>
+        <a href="/pharmacy/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="/pharmacy/orders" class="active"><i class="fas fa-box"></i> Orders</a>
+        <a href="/pharmacy/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+        <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
+    </div>
+
+    <main class="orders-container">
+        <div class="orders-header">
+            <h1><i class="fas fa-box"></i> My Orders</h1>
+        </div>
+
+        <% if (orders.length === 0) { %>
+        <div class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <h2>No orders yet</h2>
+            <p>Start shopping from our pharmacy!</p>
+            <a href="/pharmacy">Browse Pharmacy</a>
+        </div>
+        <% } else { %>
+            <% orders.forEach(order => { %>
+            <div class="order-card">
+                <div class="order-top">
+                    <span class="order-number">#<%= order.order_number %></span>
+                    <span class="order-date"><%= new Date(order.created_at).toLocaleDateString('en-IN', {year:'numeric',month:'short',day:'numeric'}) %></span>
+                    <span class="order-status status-<%= order.status %>"><%= order.status %></span>
+                </div>
+                <div class="order-details">
+                    <span class="order-meta"><%= order.item_count %> item<%= parseInt(order.item_count) !== 1 ? 's' : '' %></span>
+                    <span class="order-total">Rs.<%= parseFloat(order.total_amount).toFixed(0) %></span>
+                </div>
+                <a href="/pharmacy/orders/<%= order.id %>" class="order-link"><i class="fas fa-eye"></i> View Details</a>
+            </div>
+            <% }); %>
+
+            <% if (orders.length >= 10) { %>
+            <div class="pagination">
+                <% if (page > 1) { %><a href="/pharmacy/orders?page=<%= page-1 %>"><i class="fas fa-chevron-left"></i> Previous</a><% } %>
+                <a href="/pharmacy/orders?page=<%= page+1 %>">Next <i class="fas fa-chevron-right"></i></a>
+            </div>
+            <% } %>
+        <% } %>
+    </main>
+
+    <footer class="simple-footer">
+        <div class="footer-content">
+            <div class="footer-left"><a href="/user_home" class="footer-logo"><i class="fas fa-heartbeat"></i><span>TeleHealth</span></a></div>
+            <div class="footer-center"><span class="copyright">&copy; 2026 Built by <a href="https://abhijitreddy-portfolio.netlify.app/" target="_blank" class="footer-name">Abhijit Reddy</a>.</span></div>
+            <div class="footer-right footer-socials">
+                <a href="https://www.linkedin.com/in/abhijitreddy75" target="_blank"><i class="fab fa-linkedin"></i></a>
+                <a href="https://github.com/abhijitreddy-06" target="_blank"><i class="fab fa-github"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const html=document.documentElement;const saved=localStorage.getItem('theme')||(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');html.setAttribute('data-theme',saved);
+        const tt=document.getElementById('themeToggle'),mtt=document.getElementById('mobileThemeToggle');
+        function ui(t){const i=t==='dark'?'fa-sun':'fa-moon';tt.innerHTML='<i class="fas '+i+'"></i>';mtt.innerHTML='<i class="fas '+i+'"></i>';}ui(saved);
+        function tog(){const t=html.getAttribute('data-theme')==='dark'?'light':'dark';html.setAttribute('data-theme',t);localStorage.setItem('theme',t);ui(t);}
+        tt.addEventListener('click',tog);mtt.addEventListener('click',tog);
+        const mm=document.getElementById('mobileMenu');
+        document.getElementById('mobileMenuBtn').addEventListener('click',e=>{e.stopPropagation();mm.classList.add('active');document.body.style.overflow='hidden';});
+        document.getElementById('closeMenu').addEventListener('click',()=>{mm.classList.remove('active');document.body.style.overflow='';});
+    });
+    </script>
+    <script>window.history.replaceState(null, document.title, window.location.href);</script>
+</body>
+</html>
