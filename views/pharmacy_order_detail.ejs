@@ -106,6 +106,15 @@
                 <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
             <div class="mobile-controls">
+                <div class="profile-dropdown">
+                    <button class="profile-btn" id="mobileProfileBtn"><i class="fas fa-user-circle"></i></button>
+                    <div class="dropdown-menu" id="mobileProfileDropdown">
+                        <a href="/user_profile"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="/pharmacy/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+                        <a href="/pharmacy/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a href="/pharmacy/orders"><i class="fas fa-box"></i> My Orders</a>
+                    </div>
+                </div>
                 <button class="theme-toggle" id="mobileThemeToggle"><i class="fas fa-moon"></i></button>
                 <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
             </div>
@@ -198,13 +207,20 @@
         document.getElementById('mobileMenuBtn').addEventListener('click',e=>{e.stopPropagation();mm.classList.add('active');document.body.style.overflow='hidden';});
         document.getElementById('closeMenu').addEventListener('click',()=>{mm.classList.remove('active');document.body.style.overflow='';});
 
-        // Profile Dropdown
-        const profileBtn = document.getElementById('profileBtn');
-        const profileDropdown = document.getElementById('profileDropdown');
-        if (profileBtn) {
-            profileBtn.addEventListener('click', function(e) { e.stopPropagation(); profileDropdown.classList.toggle('active'); });
-            document.addEventListener('click', function(e) { if (!profileDropdown.contains(e.target) && e.target !== profileBtn) profileDropdown.classList.remove('active'); });
-        }
+        // Profile Dropdown (Desktop + Mobile)
+        document.querySelectorAll('.profile-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var dd = btn.nextElementSibling;
+                document.querySelectorAll('.dropdown-menu').forEach(function(m) { if (m !== dd) m.classList.remove('active'); });
+                dd.classList.toggle('active');
+            });
+        });
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.profile-dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(function(m) { m.classList.remove('active'); });
+            }
+        });
     });
     </script>
     <script>window.history.replaceState(null, document.title, window.location.href);</script>

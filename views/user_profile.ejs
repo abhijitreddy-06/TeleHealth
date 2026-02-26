@@ -190,7 +190,15 @@
             background-color: rgba(56, 189, 248, 0.1);
         }
 
-        
+        .profile-dropdown { position:relative; }
+        .profile-btn { background:none; border:none; cursor:pointer; color:var(--text-dark); font-size:1.3rem; padding:0.5rem; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; transition:var(--transition); }
+        .profile-btn:hover { background-color:rgba(56,189,248,0.1); color:var(--primary); }
+        .dropdown-menu { position:absolute; top:calc(100% + 4px); right:0; background:var(--card-bg); border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.15); min-width:180px; padding:0.5rem 0; display:none; z-index:200; border:1px solid var(--border); }
+        .dropdown-menu.active { display:block; }
+        .dropdown-menu a { display:flex; align-items:center; gap:0.8rem; padding:0.7rem 1.2rem; font-size:0.9rem; color:var(--text-dark); transition:var(--transition); border-radius:0; }
+        .dropdown-menu a:hover { background-color:rgba(56,189,248,0.1); color:var(--primary); }
+
+
         .mobile-controls {
             display: none;
             align-items: center;
@@ -670,35 +678,47 @@
                 <a href="/pharmacy"><i class="fas fa-pills"></i> Pharmacy</a>
                 <a href="/appointments"><i class="fas fa-user-md"></i> Appointments</a>
                 <a href="/records"><i class="fas fa-folder"></i> My Records</a>
-                <a href="/user_profile" class="active"><i class="fas fa-user-circle"></i> Profile</a>
-                <button class="theme-toggle" id="themeToggle">
-                    <i class="fas fa-moon"></i>
-                </button>
+                <div class="profile-dropdown">
+                    <button class="profile-btn" id="profileBtn"><i class="fas fa-user-circle"></i></button>
+                    <div class="dropdown-menu" id="profileDropdown">
+                        <a href="/user_profile"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="/pharmacy/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+                        <a href="/pharmacy/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a href="/pharmacy/orders"><i class="fas fa-box"></i> My Orders</a>
+                    </div>
+                </div>
+                <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
 
             <div class="mobile-controls">
-                <button class="theme-toggle" id="mobileThemeToggle">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <i class="fas fa-bars"></i>
-                </button>
+                <div class="profile-dropdown">
+                    <button class="profile-btn" id="mobileProfileBtn"><i class="fas fa-user-circle"></i></button>
+                    <div class="dropdown-menu" id="mobileProfileDropdown">
+                        <a href="/user_profile"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="/pharmacy/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+                        <a href="/pharmacy/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a href="/pharmacy/orders"><i class="fas fa-box"></i> My Orders</a>
+                    </div>
+                </div>
+                <button class="theme-toggle" id="mobileThemeToggle"><i class="fas fa-moon"></i></button>
+                <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
             </div>
         </nav>
     </header>
 
 
     <div class="mobile-menu" id="mobileMenu">
-        <button class="close-menu" id="closeMenu">
-            <i class="fas fa-times"></i>
-        </button>
+        <button class="close-menu" id="closeMenu"><i class="fas fa-times"></i></button>
         <a href="/user_home"><i class="fas fa-home"></i> Home</a>
         <a href="/predict"><i class="fas fa-robot"></i> AI Pre Advice</a>
         <a href="/user_video_dashboard"><i class="fas fa-video"></i> Video</a>
         <a href="/pharmacy"><i class="fas fa-pills"></i> Pharmacy</a>
         <a href="/appointments"><i class="fas fa-user-md"></i> Appointments</a>
         <a href="/records"><i class="fas fa-folder"></i> My Records</a>
-        <a href="/user_profile" class="active"><i class="fas fa-user-circle"></i> Profile</a>
+        <a href="/user_profile"><i class="fas fa-user"></i> My Profile</a>
+        <a href="/pharmacy/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+        <a href="/pharmacy/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="/pharmacy/orders"><i class="fas fa-box"></i> My Orders</a>
     </div>
 
     <section class="profile-section">
@@ -857,6 +877,21 @@
                     e.target !== mobileMenuBtn) {
                     mobileMenu.classList.remove('active');
                     document.body.style.overflow = '';
+                }
+            });
+
+            // Profile Dropdown (Desktop + Mobile)
+            document.querySelectorAll('.profile-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    var dd = btn.nextElementSibling;
+                    document.querySelectorAll('.dropdown-menu').forEach(function(m) { if (m !== dd) m.classList.remove('active'); });
+                    dd.classList.toggle('active');
+                });
+            });
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.profile-dropdown')) {
+                    document.querySelectorAll('.dropdown-menu').forEach(function(m) { m.classList.remove('active'); });
                 }
             });
         });

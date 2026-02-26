@@ -97,7 +97,7 @@
 
         /* ── Product Grid ── */
         .products-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:1.5rem; }
-        .product-card { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; transition:var(--transition); position:relative; }
+        .product-card { background:var(--card-bg); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; transition:var(--transition); position:relative; cursor:pointer; }
         .product-card:hover { transform:translateY(-4px); box-shadow:0 12px 24px rgba(0,0,0,0.1); }
         .product-card .img-wrap { width:100%; height:200px; overflow:hidden; background:#f1f5f9; position:relative; }
         .product-card .img-wrap img { width:100%; height:100%; object-fit:cover; transition:transform 0.3s; }
@@ -164,6 +164,9 @@
             .shop-controls { flex-direction:column; }
             .products-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:1rem; }
             .product-card .img-wrap { height:150px; }
+            .product-card .card-actions { flex-direction:column-reverse; }
+            .product-card .btn-cart { width:100%; }
+            .product-card .btn-wish-sm { width:100%; height:auto; padding:0.5rem; border-radius:8px; }
             .simple-footer .footer-content { display:flex; flex-direction:column; gap:0.3rem; }
         }
     </style>
@@ -194,9 +197,15 @@
                 <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
             <div class="mobile-controls">
-                <% if (user) { %>
-                <a href="/pharmacy/cart" class="cart-badge" style="color:var(--text-dark)"><i class="fas fa-shopping-cart"></i><% if (cartCount > 0) { %><span class="badge" id="cartBadgeMobile"><%= cartCount %></span><% } %></a>
-                <% } %>
+                <div class="profile-dropdown">
+                    <button class="profile-btn" id="mobileProfileBtn"><i class="fas fa-user-circle"></i></button>
+                    <div class="dropdown-menu" id="mobileProfileDropdown">
+                        <a href="/user_profile"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="/pharmacy/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+                        <a href="/pharmacy/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a href="/pharmacy/orders"><i class="fas fa-box"></i> My Orders</a>
+                    </div>
+                </div>
                 <button class="theme-toggle" id="mobileThemeToggle"><i class="fas fa-moon"></i></button>
                 <button class="mobile-menu-btn" id="mobileMenuBtn"><i class="fas fa-bars"></i></button>
             </div>
@@ -309,20 +318,27 @@
         closeMenuBtn.addEventListener('click', () => { mobileMenu.classList.remove('active'); document.body.style.overflow=''; });
         document.addEventListener('click', e => { if(mobileMenu.classList.contains('active')&&!mobileMenu.contains(e.target)&&e.target!==mobileMenuBtn){mobileMenu.classList.remove('active');document.body.style.overflow='';} });
 
-        // ── Profile Dropdown ──
-        const profileBtn = document.getElementById('profileBtn');
-        const profileDropdown = document.getElementById('profileDropdown');
-        if (profileBtn) {
-            profileBtn.addEventListener('click', function(e) {
+        // ── Profile Dropdown (Desktop + Mobile) ──
+        document.querySelectorAll('.profile-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
                 e.stopPropagation();
-                profileDropdown.classList.toggle('active');
+                var dd = btn.nextElementSibling;
+                document.querySelectorAll('.dropdown-menu').forEach(function(m) { if (m !== dd) m.classList.remove('active'); });
+                dd.classList.toggle('active');
             });
-            document.addEventListener('click', function(e) {
-                if (!profileDropdown.contains(e.target) && e.target !== profileBtn) {
-                    profileDropdown.classList.remove('active');
-                }
-            });
-        }
+        });
+        document.addEventListener('click', function(e) {
+            document.querySelectorAll('.dropdown-menu').forEach(function(m) { m.classList.remove('active'); });
+        });
+
+        // ── Product Card Clickable ──
+        document.addEventListener('click', function(e) {
+            var card = e.target.closest('.product-card');
+            if (!card) return;
+            if (e.target.closest('.btn-cart') || e.target.closest('.btn-wish-sm')) return;
+            var href = card.getAttribute('data-href');
+            if (href) window.location.href = href;
+        });
 
         // ── State ──
         let currentPage = 1;
@@ -368,7 +384,7 @@
         function renderProductCard(p) {
             const stars = renderStars(p.avg_rating);
             const inStock = p.stock_quantity > 0;
-            return '<div class="product-card">' +
+            return '<div class="product-card" data-href="/pharmacy/product/' + p.slug + '">' +
                 '<a href="/pharmacy/product/' + p.slug + '">' +
                 '<div class="img-wrap">' +
                     '<img src="' + (p.image_url || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400') + '" alt="' + escapeHtml(p.name) + '" loading="lazy" onerror="this.src=\'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400\'">' +
@@ -516,25 +532,22 @@
         };
 
         function updateCartBadge(count) {
-            ['cartBadge','cartBadgeMobile'].forEach(id => {
-                let el = document.getElementById(id);
-                if (count > 0) {
-                    if (!el) {
-                        const parent = id === 'cartBadge'
-                            ? document.querySelector('.dropdown-menu a[href="/pharmacy/cart"]')
-                            : document.querySelector('.mobile-controls .cart-badge');
-                        if (parent) {
-                            el = document.createElement('span');
-                            el.className = 'badge';
-                            el.id = id;
-                            parent.appendChild(el);
-                        }
+            var el = document.getElementById('cartBadge');
+            if (count > 0) {
+                if (!el) {
+                    var parent = document.querySelector('.dropdown-menu a[href="/pharmacy/cart"]');
+                    if (parent) {
+                        el = document.createElement('span');
+                        el.className = 'badge';
+                        el.id = 'cartBadge';
+                        el.style.cssText = 'position:static;display:inline-flex;margin-left:auto';
+                        parent.appendChild(el);
                     }
-                    if (el) el.textContent = count;
-                } else if (el) {
-                    el.remove();
                 }
-            });
+                if (el) el.textContent = count;
+            } else if (el) {
+                el.remove();
+            }
         }
 
         function showToast(msg, isError) {
