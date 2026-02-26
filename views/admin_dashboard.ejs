@@ -573,6 +573,45 @@
             color: #fca5a5;
         }
 
+        /* Pharmacy order badges */
+        .badge-pending { background-color: rgba(148,163,184,0.15); color: #64748b; }
+        .badge-confirmed { background-color: rgba(56,189,248,0.15); color: #0284c7; }
+        .badge-processing { background-color: rgba(245,158,11,0.15); color: #b45309; }
+        .badge-shipped { background-color: rgba(139,92,246,0.15); color: #7c3aed; }
+        .badge-delivered { background-color: rgba(34,197,94,0.15); color: #15803d; }
+        .badge-returned { background-color: rgba(239,68,68,0.15); color: #b91c1c; }
+        [data-theme="dark"] .badge-pending { color: #cbd5e1; }
+        [data-theme="dark"] .badge-confirmed { color: #7dd3fc; }
+        [data-theme="dark"] .badge-processing { color: #fcd34d; }
+        [data-theme="dark"] .badge-shipped { color: #c4b5fd; }
+        [data-theme="dark"] .badge-delivered { color: #86efac; }
+        [data-theme="dark"] .badge-returned { color: #fca5a5; }
+
+        /* Product/stock styles */
+        .stock-low { color: var(--error); font-weight: 600; }
+        .stock-ok { color: var(--success); font-weight: 600; }
+        .badge-active { background-color: rgba(34,197,94,0.15); color: #15803d; }
+        .badge-inactive { background-color: rgba(148,163,184,0.15); color: #64748b; }
+        [data-theme="dark"] .badge-active { color: #86efac; }
+        [data-theme="dark"] .badge-inactive { color: #cbd5e1; }
+
+        .stat-icon.orders { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .stat-icon.revenue { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+        .stat-icon.low-stock { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+        .tab-badge { background: var(--error); color: white; font-size: 0.7rem; padding: 0.1rem 0.45rem; border-radius: 10px; margin-left: 0.3rem; font-weight: 700; }
+
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        @media (max-width: 576px) { .form-row { grid-template-columns: 1fr; } }
+
+        .btn-danger { background-color: var(--error); color: white; }
+        .btn-danger:hover { background-color: #dc2626; }
+
+        .search-bar { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+        .search-bar input, .search-bar select { padding: 0.6rem 1rem; border: 2px solid var(--border); border-radius: 8px; font-size: 0.9rem; background-color: var(--card-bg); color: var(--text-dark); font-family: "Poppins", sans-serif; transition: var(--transition); }
+        .search-bar input:focus, .search-bar select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(56,189,248,0.1); }
+        .search-bar .spacer { flex: 1; }
+
         /* Pagination */
         .pagination {
             display: flex;
@@ -1069,6 +1108,36 @@
                     <p>Completed Today</p>
                 </div>
             </div>
+
+            <div class="stat-card">
+                <div class="stat-icon orders">
+                    <i class="fas fa-shopping-bag"></i>
+                </div>
+                <div class="stat-info">
+                    <h3><%= stats.totalOrders %></h3>
+                    <p>Pharmacy Orders</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon revenue">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="stat-info">
+                    <h3><%= stats.totalRevenue ? '₹' + Number(stats.totalRevenue).toLocaleString('en-IN') : '₹0' %></h3>
+                    <p>Total Revenue</p>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon low-stock">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3><%= stats.lowStockCount %></h3>
+                    <p>Low Stock Alerts</p>
+                </div>
+            </div>
         </div>
 
         <!-- Tabs Section -->
@@ -1082,6 +1151,18 @@
                 </button>
                 <button class="tab-btn" data-tab="patients">
                     <i class="fas fa-users"></i> Patients
+                </button>
+                <button class="tab-btn" data-tab="products">
+                    <i class="fas fa-pills"></i> Products
+                </button>
+                <button class="tab-btn" data-tab="categories">
+                    <i class="fas fa-tags"></i> Categories
+                </button>
+                <button class="tab-btn" data-tab="orders">
+                    <i class="fas fa-shopping-bag"></i> Orders
+                </button>
+                <button class="tab-btn" data-tab="inventory">
+                    <i class="fas fa-boxes"></i> Inventory<% if (stats.lowStockCount > 0) { %><span class="tab-badge"><%= stats.lowStockCount %></span><% } %>
                 </button>
             </div>
 
@@ -1198,6 +1279,142 @@
                     <button id="patNextBtn">Next <i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
+
+            <!-- Products Tab -->
+            <div class="tab-content" id="tab-products">
+                <div class="search-bar">
+                    <input type="text" id="productSearch" placeholder="Search products..." style="flex:1; min-width:180px;">
+                    <select id="productCategoryFilter">
+                        <option value="">All Categories</option>
+                    </select>
+                    <button class="btn btn-primary btn-sm" onclick="loadProducts(1)"><i class="fas fa-search"></i> Search</button>
+                    <span class="spacer"></span>
+                    <button class="btn btn-secondary btn-sm" onclick="openProductModal()"><i class="fas fa-plus"></i> Add Product</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="productsTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>SKU</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsBody">
+                            <tr class="empty-row"><td colspan="8">Click the Products tab to load data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="productsPagination">
+                    <button id="prodPrevBtn" disabled><i class="fas fa-chevron-left"></i> Previous</button>
+                    <span class="page-info" id="prodPageInfo">Page 1</span>
+                    <button id="prodNextBtn">Next <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Categories Tab -->
+            <div class="tab-content" id="tab-categories">
+                <div class="search-bar">
+                    <span class="spacer"></span>
+                    <button class="btn btn-secondary btn-sm" onclick="openCategoryModal()"><i class="fas fa-plus"></i> Add Category</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="categoriesTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Slug</th>
+                                <th>Description</th>
+                                <th>Products</th>
+                                <th>Sort Order</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoriesBody">
+                            <tr class="empty-row"><td colspan="8">Click the Categories tab to load data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Orders Tab -->
+            <div class="tab-content" id="tab-orders">
+                <div class="search-bar">
+                    <select id="orderStatusFilter">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="returned">Returned</option>
+                    </select>
+                    <button class="btn btn-primary btn-sm" onclick="loadOrders(1)"><i class="fas fa-search"></i> Filter</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="ordersTable">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersBody">
+                            <tr class="empty-row"><td colspan="7">Click the Orders tab to load data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="ordersPagination">
+                    <button id="orderPrevBtn" disabled><i class="fas fa-chevron-left"></i> Previous</button>
+                    <span class="page-info" id="orderPageInfo">Page 1</span>
+                    <button id="orderNextBtn">Next <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+
+            <!-- Inventory Tab -->
+            <div class="tab-content" id="tab-inventory">
+                <div class="search-bar">
+                    <button class="btn btn-danger btn-sm" onclick="loadLowStock()"><i class="fas fa-exclamation-triangle"></i> Show Low Stock Only</button>
+                    <button class="btn btn-primary btn-sm" onclick="loadProducts(1, true)"><i class="fas fa-list"></i> Show All</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="inventoryTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Product</th>
+                                <th>SKU</th>
+                                <th>Stock Qty</th>
+                                <th>Low Threshold</th>
+                                <th>Last Restocked</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryBody">
+                            <tr class="empty-row"><td colspan="8">Click the Inventory tab to load data</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination" id="inventoryPagination">
+                    <button id="invPrevBtn" disabled><i class="fas fa-chevron-left"></i> Previous</button>
+                    <span class="page-info" id="invPageInfo">Page 1</span>
+                    <button id="invNextBtn">Next <i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -1250,6 +1467,188 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeScheduleModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal (Add/Edit) -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal" style="max-width:640px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-pills"></i> <span id="productModalTitle">Add Product</span></h3>
+                <button class="modal-close" onclick="closeProductModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="productEditId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Name *</label>
+                        <input type="text" id="prodName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-layer-group"></i> Category *</label>
+                        <select id="prodCategoryId" class="form-control"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-rupee-sign"></i> Price *</label>
+                        <input type="number" step="0.01" id="prodPrice" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-rupee-sign"></i> Compare At Price</label>
+                        <input type="number" step="0.01" id="prodComparePrice" class="form-control">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-barcode"></i> SKU *</label>
+                        <input type="text" id="prodSku" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-industry"></i> Manufacturer</label>
+                        <input type="text" id="prodManufacturer" class="form-control">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-align-left"></i> Description</label>
+                    <textarea id="prodDescription" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-align-left"></i> Short Description</label>
+                    <input type="text" id="prodShortDesc" class="form-control" maxlength="500">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-image"></i> Image URL</label>
+                        <input type="text" id="prodImageUrl" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-capsules"></i> Dosage Form</label>
+                        <input type="text" id="prodDosageForm" class="form-control" placeholder="e.g. Tablet, Syrup">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-bolt"></i> Strength</label>
+                        <input type="text" id="prodStrength" class="form-control" placeholder="e.g. 500mg">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-box"></i> Pack Size</label>
+                        <input type="text" id="prodPackSize" class="form-control" placeholder="e.g. 10 tablets">
+                    </div>
+                </div>
+                <div class="form-row" id="prodStockRow">
+                    <div class="form-group">
+                        <label><i class="fas fa-cubes"></i> Stock Quantity</label>
+                        <input type="number" id="prodStockQty" class="form-control" value="0" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-exclamation-triangle"></i> Low Stock Threshold</label>
+                        <input type="number" id="prodLowThreshold" class="form-control" value="10" min="0">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label style="cursor:pointer;">
+                        <input type="checkbox" id="prodPrescription" style="margin-right:0.5rem;">
+                        Prescription Required
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeProductModal()">Cancel</button>
+                <button class="btn btn-primary" id="saveProductBtn" onclick="saveProduct()"><i class="fas fa-save"></i> Save Product</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Modal (Add/Edit) -->
+    <div class="modal-overlay" id="categoryModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-tags"></i> <span id="categoryModalTitle">Add Category</span></h3>
+                <button class="modal-close" onclick="closeCategoryModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="categoryEditId">
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Name *</label>
+                    <input type="text" id="catName" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-align-left"></i> Description</label>
+                    <textarea id="catDescription" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-image"></i> Image URL</label>
+                    <input type="text" id="catImageUrl" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-sort"></i> Sort Order</label>
+                    <input type="number" id="catSortOrder" class="form-control" value="0" min="0">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeCategoryModal()">Cancel</button>
+                <button class="btn btn-primary" id="saveCategoryBtn" onclick="saveCategory()"><i class="fas fa-save"></i> Save Category</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Status Modal -->
+    <div class="modal-overlay" id="orderStatusModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-shipping-fast"></i> Update Order Status</h3>
+                <button class="modal-close" onclick="closeOrderStatusModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="orderEditId">
+                <div id="orderStatusInfo" style="margin-bottom:1.5rem;"></div>
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> New Status</label>
+                    <select id="newOrderStatus" class="form-control">
+                        <option value="pending">Pending</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="returned">Returned</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeOrderStatusModal()">Cancel</button>
+                <button class="btn btn-warning" id="confirmOrderStatusBtn" onclick="submitOrderStatus()"><i class="fas fa-check"></i> Update Status</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stock Update Modal -->
+    <div class="modal-overlay" id="stockModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3><i class="fas fa-cubes"></i> Update Stock</h3>
+                <button class="modal-close" onclick="closeStockModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="stockProductId">
+                <div id="stockInfo" style="margin-bottom:1.5rem;"></div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label><i class="fas fa-cubes"></i> Stock Quantity *</label>
+                        <input type="number" id="stockQty" class="form-control" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-exclamation-triangle"></i> Low Threshold</label>
+                        <input type="number" id="stockThreshold" class="form-control" min="0">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeStockModal()">Cancel</button>
+                <button class="btn btn-primary" id="saveStockBtn" onclick="saveStock()"><i class="fas fa-save"></i> Update Stock</button>
             </div>
         </div>
     </div>
@@ -1329,6 +1728,10 @@
                     if (target === 'appointments' && !appointmentsLoaded) loadAppointments(1);
                     if (target === 'doctors' && !doctorsLoaded) loadDoctors(1);
                     if (target === 'patients' && !patientsLoaded) loadPatients(1);
+                    if (target === 'products' && !productsLoaded) { loadCategoriesForFilter(); loadProducts(1); }
+                    if (target === 'categories' && !categoriesLoaded) loadCategories();
+                    if (target === 'orders' && !ordersLoaded) loadOrders(1);
+                    if (target === 'inventory' && !inventoryLoaded) loadProducts(1, true);
                 });
             });
 
@@ -1336,10 +1739,18 @@
             let currentApptPage = 1;
             let currentDocPage = 1;
             let currentPatPage = 1;
+            let currentProdPage = 1;
+            let currentOrderPage = 1;
+            let currentInvPage = 1;
             let appointmentsLoaded = false;
             let doctorsLoaded = false;
             let patientsLoaded = false;
+            let productsLoaded = false;
+            let categoriesLoaded = false;
+            let ordersLoaded = false;
+            let inventoryLoaded = false;
             let currentOverrideId = null;
+            let categoriesCache = [];
 
             // ─── Escape HTML utility ───
             function escapeHtml(str) {
@@ -1652,6 +2063,10 @@
                 if (e.key === 'Escape') {
                     closeOverrideModal();
                     closeScheduleModal();
+                    closeProductModal();
+                    closeCategoryModal();
+                    closeOrderStatusModal();
+                    closeStockModal();
                 }
             });
 
@@ -1684,6 +2099,594 @@
             document.getElementById('patNextBtn').addEventListener('click', function () {
                 loadPatients(currentPatPage + 1);
             });
+
+            document.getElementById('prodPrevBtn').addEventListener('click', function () {
+                if (currentProdPage > 1) loadProducts(currentProdPage - 1);
+            });
+            document.getElementById('prodNextBtn').addEventListener('click', function () {
+                loadProducts(currentProdPage + 1);
+            });
+            document.getElementById('orderPrevBtn').addEventListener('click', function () {
+                if (currentOrderPage > 1) loadOrders(currentOrderPage - 1);
+            });
+            document.getElementById('orderNextBtn').addEventListener('click', function () {
+                loadOrders(currentOrderPage + 1);
+            });
+            document.getElementById('invPrevBtn').addEventListener('click', function () {
+                if (currentInvPage > 1) loadProducts(currentInvPage - 1, true);
+            });
+            document.getElementById('invNextBtn').addEventListener('click', function () {
+                loadProducts(currentInvPage + 1, true);
+            });
+
+            // ════════════════════════════════════════════
+            // PHARMACY – Products
+            // ════════════════════════════════════════════
+
+            async function loadCategoriesForFilter() {
+                try {
+                    const res = await fetch('/api/admin/pharmacy/categories', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                    const data = await res.json();
+                    categoriesCache = data.data || data || [];
+                    const sel = document.getElementById('productCategoryFilter');
+                    const prodSel = document.getElementById('prodCategoryId');
+                    sel.innerHTML = '<option value="">All Categories</option>';
+                    prodSel.innerHTML = '';
+                    categoriesCache.forEach(function (c) {
+                        sel.innerHTML += '<option value="' + c.id + '">' + escapeHtml(c.name) + '</option>';
+                        prodSel.innerHTML += '<option value="' + c.id + '">' + escapeHtml(c.name) + '</option>';
+                    });
+                } catch (e) { console.error('Load categories filter:', e); }
+            }
+
+            async function loadProducts(page, forInventory) {
+                if (forInventory) {
+                    currentInvPage = page;
+                } else {
+                    currentProdPage = page;
+                }
+                const search = document.getElementById('productSearch') ? document.getElementById('productSearch').value.trim() : '';
+                const categoryId = document.getElementById('productCategoryFilter') ? document.getElementById('productCategoryFilter').value : '';
+
+                let url = '/api/admin/pharmacy/products?page=' + page;
+                if (search) url += '&search=' + encodeURIComponent(search);
+                if (categoryId) url += '&categoryId=' + encodeURIComponent(categoryId);
+
+                const tbody = forInventory ? document.getElementById('inventoryBody') : document.getElementById('productsBody');
+                const cols = forInventory ? 8 : 8;
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols + '">Loading...</td></tr>';
+
+                try {
+                    const res = await fetch(url, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                    const json = await res.json();
+                    if (!res.ok) { Toast.error(json.error || 'Failed to load products'); return; }
+
+                    const result = json.data || json;
+                    const products = result.products || result || [];
+                    const total = result.total || 0;
+                    const totalPages = Math.max(1, Math.ceil(total / 20));
+
+                    if (!Array.isArray(products) || products.length === 0) {
+                        tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols + '">No products found</td></tr>';
+                    } else if (forInventory) {
+                        tbody.innerHTML = products.map(function (p) {
+                            var qty = p.stock_quantity != null ? p.stock_quantity : '-';
+                            var thresh = p.low_stock_threshold != null ? p.low_stock_threshold : '-';
+                            var isLow = (p.stock_quantity != null && p.low_stock_threshold != null && p.stock_quantity <= p.low_stock_threshold);
+                            var stockClass = isLow ? 'stock-low' : 'stock-ok';
+                            return '<tr>' +
+                                '<td>' + escapeHtml(String(p.id)) + '</td>' +
+                                '<td>' + escapeHtml(p.name || '-') + '</td>' +
+                                '<td>' + escapeHtml(p.sku || '-') + '</td>' +
+                                '<td class="' + stockClass + '">' + qty + '</td>' +
+                                '<td>' + thresh + '</td>' +
+                                '<td>' + (p.last_restocked ? escapeHtml(new Date(p.last_restocked).toLocaleDateString()) : '-') + '</td>' +
+                                '<td>' + (isLow ? '<span class="badge badge-cancelled">Low</span>' : '<span class="badge badge-completed">OK</span>') + '</td>' +
+                                '<td><button class="btn btn-primary btn-sm" onclick="openStockModal(' + p.id + ', \'' + escapeHtml(p.name || '') + '\', ' + (p.stock_quantity || 0) + ', ' + (p.low_stock_threshold || 10) + ')"><i class="fas fa-edit"></i> Update</button></td>' +
+                                '</tr>';
+                        }).join('');
+                        inventoryLoaded = true;
+                    } else {
+                        tbody.innerHTML = products.map(function (p) {
+                            return '<tr>' +
+                                '<td>' + escapeHtml(String(p.id)) + '</td>' +
+                                '<td>' + escapeHtml(p.name || '-') + '</td>' +
+                                '<td>' + escapeHtml(p.category_name || '-') + '</td>' +
+                                '<td>₹' + escapeHtml(String(p.price || 0)) + '</td>' +
+                                '<td>' + escapeHtml(p.sku || '-') + '</td>' +
+                                '<td>' + (p.stock_quantity != null ? p.stock_quantity : '-') + '</td>' +
+                                '<td>' + (p.is_active !== false ? '<span class="badge badge-active">Active</span>' : '<span class="badge badge-inactive">Inactive</span>') + '</td>' +
+                                '<td>' +
+                                    '<button class="btn btn-primary btn-sm" onclick="openEditProduct(' + p.id + ')" style="margin-right:0.3rem;"><i class="fas fa-edit"></i></button>' +
+                                    '<button class="btn btn-danger btn-sm" onclick="deleteProduct(' + p.id + ', \'' + escapeHtml(p.name || '') + '\')"><i class="fas fa-trash"></i></button>' +
+                                '</td>' +
+                                '</tr>';
+                        }).join('');
+                        productsLoaded = true;
+                    }
+
+                    // Update pagination
+                    if (forInventory) {
+                        document.getElementById('invPageInfo').textContent = 'Page ' + page + ' of ' + totalPages;
+                        document.getElementById('invPrevBtn').disabled = (page <= 1);
+                        document.getElementById('invNextBtn').disabled = (page >= totalPages);
+                    } else {
+                        document.getElementById('prodPageInfo').textContent = 'Page ' + page + ' of ' + totalPages;
+                        document.getElementById('prodPrevBtn').disabled = (page <= 1);
+                        document.getElementById('prodNextBtn').disabled = (page >= totalPages);
+                    }
+                } catch (err) {
+                    console.error('Load products error:', err);
+                    Toast.error('Failed to load products');
+                    tbody.innerHTML = '<tr class="empty-row"><td colspan="' + cols + '">Error loading data</td></tr>';
+                }
+            }
+
+            window.openProductModal = function (editData) {
+                document.getElementById('productEditId').value = '';
+                document.getElementById('productModalTitle').textContent = 'Add Product';
+                document.getElementById('prodName').value = '';
+                document.getElementById('prodPrice').value = '';
+                document.getElementById('prodComparePrice').value = '';
+                document.getElementById('prodSku').value = '';
+                document.getElementById('prodManufacturer').value = '';
+                document.getElementById('prodDescription').value = '';
+                document.getElementById('prodShortDesc').value = '';
+                document.getElementById('prodImageUrl').value = '';
+                document.getElementById('prodDosageForm').value = '';
+                document.getElementById('prodStrength').value = '';
+                document.getElementById('prodPackSize').value = '';
+                document.getElementById('prodStockQty').value = '0';
+                document.getElementById('prodLowThreshold').value = '10';
+                document.getElementById('prodPrescription').checked = false;
+                document.getElementById('prodStockRow').style.display = '';
+
+                if (editData) {
+                    document.getElementById('productEditId').value = editData.id;
+                    document.getElementById('productModalTitle').textContent = 'Edit Product';
+                    document.getElementById('prodName').value = editData.name || '';
+                    if (editData.category_id) document.getElementById('prodCategoryId').value = editData.category_id;
+                    document.getElementById('prodPrice').value = editData.price || '';
+                    document.getElementById('prodComparePrice').value = editData.compare_at_price || '';
+                    document.getElementById('prodSku').value = editData.sku || '';
+                    document.getElementById('prodManufacturer').value = editData.manufacturer || '';
+                    document.getElementById('prodDescription').value = editData.description || '';
+                    document.getElementById('prodShortDesc').value = editData.short_description || '';
+                    document.getElementById('prodImageUrl').value = editData.image_url || '';
+                    document.getElementById('prodDosageForm').value = editData.dosage_form || '';
+                    document.getElementById('prodStrength').value = editData.strength || '';
+                    document.getElementById('prodPackSize').value = editData.pack_size || '';
+                    document.getElementById('prodPrescription').checked = editData.prescription_required || false;
+                    document.getElementById('prodStockRow').style.display = 'none';
+                }
+                document.getElementById('productModal').classList.add('active');
+            };
+
+            window.openEditProduct = async function (id) {
+                try {
+                    await loadCategoriesForFilter();
+                    const res = await fetch('/api/admin/pharmacy/products?page=1&search=', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                    const json = await res.json();
+                    const result = json.data || json;
+                    const products = result.products || result || [];
+                    const product = products.find(function(p) { return p.id === id; });
+                    if (product) {
+                        openProductModal(product);
+                    } else {
+                        Toast.error('Product not found');
+                    }
+                } catch (e) {
+                    console.error('Load product for edit:', e);
+                    Toast.error('Failed to load product');
+                }
+            };
+
+            window.closeProductModal = function () {
+                document.getElementById('productModal').classList.remove('active');
+            };
+
+            window.saveProduct = async function () {
+                var editId = document.getElementById('productEditId').value;
+                var isEdit = !!editId;
+                var body = {
+                    name: document.getElementById('prodName').value.trim(),
+                    categoryId: parseInt(document.getElementById('prodCategoryId').value),
+                    price: parseFloat(document.getElementById('prodPrice').value),
+                    sku: document.getElementById('prodSku').value.trim(),
+                    description: document.getElementById('prodDescription').value.trim(),
+                    shortDescription: document.getElementById('prodShortDesc').value.trim(),
+                    imageUrl: document.getElementById('prodImageUrl').value.trim(),
+                    manufacturer: document.getElementById('prodManufacturer').value.trim(),
+                    dosageForm: document.getElementById('prodDosageForm').value.trim(),
+                    strength: document.getElementById('prodStrength').value.trim(),
+                    packSize: document.getElementById('prodPackSize').value.trim(),
+                    prescriptionRequired: document.getElementById('prodPrescription').checked
+                };
+
+                var cmp = document.getElementById('prodComparePrice').value;
+                if (cmp) body.compareAtPrice = parseFloat(cmp);
+
+                if (!isEdit) {
+                    body.stockQuantity = parseInt(document.getElementById('prodStockQty').value) || 0;
+                    body.lowStockThreshold = parseInt(document.getElementById('prodLowThreshold').value) || 10;
+                }
+
+                if (!body.name || !body.sku || !body.price) {
+                    Toast.error('Name, SKU and Price are required');
+                    return;
+                }
+
+                var btn = document.getElementById('saveProductBtn');
+                var orig = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+                try {
+                    var url = isEdit ? '/api/admin/pharmacy/products/' + editId : '/api/admin/pharmacy/products';
+                    var method = isEdit ? 'PUT' : 'POST';
+                    var res = await fetch(url, {
+                        method: method,
+                        credentials: 'same-origin',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    var data = await res.json();
+                    if (res.ok && data.success !== false) {
+                        Toast.success(isEdit ? 'Product updated' : 'Product created');
+                        closeProductModal();
+                        loadProducts(currentProdPage);
+                    } else {
+                        Toast.error(data.error || 'Failed to save product');
+                    }
+                } catch (e) {
+                    console.error('Save product error:', e);
+                    Toast.error('Failed to save product');
+                }
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            };
+
+            window.deleteProduct = async function (id, name) {
+                if (!confirm('Deactivate product "' + name + '"?')) return;
+                try {
+                    var res = await fetch('/api/admin/pharmacy/products/' + id, {
+                        method: 'DELETE',
+                        credentials: 'same-origin',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    var data = await res.json();
+                    if (res.ok && data.success !== false) {
+                        Toast.success('Product deactivated');
+                        loadProducts(currentProdPage);
+                    } else {
+                        Toast.error(data.error || 'Failed to deactivate product');
+                    }
+                } catch (e) {
+                    console.error('Delete product error:', e);
+                    Toast.error('Failed to deactivate product');
+                }
+            };
+
+            // ════════════════════════════════════════════
+            // PHARMACY – Categories
+            // ════════════════════════════════════════════
+
+            async function loadCategories() {
+                var tbody = document.getElementById('categoriesBody');
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Loading...</td></tr>';
+
+                try {
+                    var res = await fetch('/api/admin/pharmacy/categories', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                    var json = await res.json();
+                    if (!res.ok) { Toast.error(json.error || 'Failed to load categories'); return; }
+
+                    var categories = json.data || json || [];
+                    categoriesCache = categories;
+
+                    if (!Array.isArray(categories) || categories.length === 0) {
+                        tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No categories found</td></tr>';
+                    } else {
+                        tbody.innerHTML = categories.map(function (c) {
+                            return '<tr>' +
+                                '<td>' + escapeHtml(String(c.id)) + '</td>' +
+                                '<td>' + escapeHtml(c.name || '-') + '</td>' +
+                                '<td>' + escapeHtml(c.slug || '-') + '</td>' +
+                                '<td>' + escapeHtml((c.description || '-').substring(0, 60)) + '</td>' +
+                                '<td>' + (c.product_count || 0) + '</td>' +
+                                '<td>' + (c.sort_order || 0) + '</td>' +
+                                '<td>' + (c.is_active !== false ? '<span class="badge badge-active">Active</span>' : '<span class="badge badge-inactive">Inactive</span>') + '</td>' +
+                                '<td>' +
+                                    '<button class="btn btn-primary btn-sm" onclick=\'openCategoryModal(' + JSON.stringify({id:c.id,name:c.name||'',description:c.description||'',image_url:c.image_url||'',sort_order:c.sort_order||0}) + ')\' style="margin-right:0.3rem;"><i class="fas fa-edit"></i></button>' +
+                                    '<button class="btn btn-danger btn-sm" onclick="deleteCategory(' + c.id + ', \'' + escapeHtml(c.name || '') + '\')"><i class="fas fa-trash"></i></button>' +
+                                '</td>' +
+                                '</tr>';
+                        }).join('');
+                    }
+                    categoriesLoaded = true;
+                } catch (e) {
+                    console.error('Load categories error:', e);
+                    Toast.error('Failed to load categories');
+                    tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Error loading data</td></tr>';
+                }
+            }
+
+            window.openCategoryModal = function (editData) {
+                document.getElementById('categoryEditId').value = '';
+                document.getElementById('categoryModalTitle').textContent = 'Add Category';
+                document.getElementById('catName').value = '';
+                document.getElementById('catDescription').value = '';
+                document.getElementById('catImageUrl').value = '';
+                document.getElementById('catSortOrder').value = '0';
+
+                if (editData && editData.id) {
+                    document.getElementById('categoryEditId').value = editData.id;
+                    document.getElementById('categoryModalTitle').textContent = 'Edit Category';
+                    document.getElementById('catName').value = editData.name || '';
+                    document.getElementById('catDescription').value = editData.description || '';
+                    document.getElementById('catImageUrl').value = editData.image_url || '';
+                    document.getElementById('catSortOrder').value = editData.sort_order || 0;
+                }
+                document.getElementById('categoryModal').classList.add('active');
+            };
+
+            window.closeCategoryModal = function () {
+                document.getElementById('categoryModal').classList.remove('active');
+            };
+
+            window.saveCategory = async function () {
+                var editId = document.getElementById('categoryEditId').value;
+                var isEdit = !!editId;
+                var body = {
+                    name: document.getElementById('catName').value.trim(),
+                    description: document.getElementById('catDescription').value.trim(),
+                    imageUrl: document.getElementById('catImageUrl').value.trim(),
+                    sortOrder: parseInt(document.getElementById('catSortOrder').value) || 0
+                };
+
+                if (!body.name) { Toast.error('Category name is required'); return; }
+
+                var btn = document.getElementById('saveCategoryBtn');
+                var orig = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+                try {
+                    var url = isEdit ? '/api/admin/pharmacy/categories/' + editId : '/api/admin/pharmacy/categories';
+                    var method = isEdit ? 'PUT' : 'POST';
+                    var res = await fetch(url, {
+                        method: method,
+                        credentials: 'same-origin',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    var data = await res.json();
+                    if (res.ok && data.success !== false) {
+                        Toast.success(isEdit ? 'Category updated' : 'Category created');
+                        closeCategoryModal();
+                        loadCategories();
+                        loadCategoriesForFilter();
+                    } else {
+                        Toast.error(data.error || 'Failed to save category');
+                    }
+                } catch (e) {
+                    console.error('Save category error:', e);
+                    Toast.error('Failed to save category');
+                }
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            };
+
+            window.deleteCategory = async function (id, name) {
+                if (!confirm('Deactivate category "' + name + '"?')) return;
+                try {
+                    var res = await fetch('/api/admin/pharmacy/categories/' + id, {
+                        method: 'DELETE',
+                        credentials: 'same-origin',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    var data = await res.json();
+                    if (res.ok && data.success !== false) {
+                        Toast.success('Category deactivated');
+                        loadCategories();
+                    } else {
+                        Toast.error(data.error || 'Failed to deactivate category');
+                    }
+                } catch (e) {
+                    console.error('Delete category error:', e);
+                    Toast.error('Failed to deactivate category');
+                }
+            };
+
+            // ════════════════════════════════════════════
+            // PHARMACY – Orders
+            // ════════════════════════════════════════════
+
+            async function loadOrders(page) {
+                currentOrderPage = page;
+                var status = document.getElementById('orderStatusFilter') ? document.getElementById('orderStatusFilter').value : '';
+                var url = '/api/admin/pharmacy/orders?page=' + page;
+                if (status) url += '&status=' + encodeURIComponent(status);
+
+                var tbody = document.getElementById('ordersBody');
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Loading...</td></tr>';
+
+                try {
+                    var res = await fetch(url, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                    var json = await res.json();
+                    if (!res.ok) { Toast.error(json.error || 'Failed to load orders'); return; }
+
+                    var result = json.data || json;
+                    var orders = result.orders || result || [];
+                    var total = result.total || 0;
+                    var totalPages = Math.max(1, Math.ceil(total / 20));
+
+                    if (!Array.isArray(orders) || orders.length === 0) {
+                        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No orders found</td></tr>';
+                    } else {
+                        tbody.innerHTML = orders.map(function (o) {
+                            return '<tr>' +
+                                '<td>#' + escapeHtml(String(o.id)) + '</td>' +
+                                '<td>' + escapeHtml(o.customer_name || '-') + '</td>' +
+                                '<td>' + (o.item_count || '-') + '</td>' +
+                                '<td>₹' + escapeHtml(String(o.total_amount || 0)) + '</td>' +
+                                '<td>' + statusBadge(o.status) + '</td>' +
+                                '<td>' + (o.created_at ? escapeHtml(new Date(o.created_at).toLocaleDateString()) : '-') + '</td>' +
+                                '<td><button class="btn btn-warning btn-sm" onclick="openOrderStatusModal(' + o.id + ', \'' + escapeHtml(o.status || '') + '\', \'' + escapeHtml(o.customer_name || '') + '\', \'₹' + escapeHtml(String(o.total_amount || 0)) + '\')"><i class="fas fa-edit"></i> Status</button></td>' +
+                                '</tr>';
+                        }).join('');
+                    }
+
+                    document.getElementById('orderPageInfo').textContent = 'Page ' + page + ' of ' + totalPages;
+                    document.getElementById('orderPrevBtn').disabled = (page <= 1);
+                    document.getElementById('orderNextBtn').disabled = (page >= totalPages);
+                    ordersLoaded = true;
+                } catch (e) {
+                    console.error('Load orders error:', e);
+                    Toast.error('Failed to load orders');
+                    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">Error loading data</td></tr>';
+                }
+            }
+
+            window.openOrderStatusModal = function (id, currentStatus, customer, total) {
+                document.getElementById('orderEditId').value = id;
+                document.getElementById('orderStatusInfo').innerHTML =
+                    '<div class="info-row"><span class="info-label">Order</span><span class="info-value">#' + escapeHtml(String(id)) + '</span></div>' +
+                    '<div class="info-row"><span class="info-label">Customer</span><span class="info-value">' + escapeHtml(customer) + '</span></div>' +
+                    '<div class="info-row"><span class="info-label">Total</span><span class="info-value">' + escapeHtml(total) + '</span></div>' +
+                    '<div class="info-row"><span class="info-label">Current Status</span><span class="info-value">' + statusBadge(currentStatus) + '</span></div>';
+                document.getElementById('newOrderStatus').value = currentStatus || 'pending';
+                document.getElementById('orderStatusModal').classList.add('active');
+            };
+
+            window.closeOrderStatusModal = function () {
+                document.getElementById('orderStatusModal').classList.remove('active');
+            };
+
+            window.submitOrderStatus = async function () {
+                var id = document.getElementById('orderEditId').value;
+                if (!id) return;
+                var newStatus = document.getElementById('newOrderStatus').value;
+                var btn = document.getElementById('confirmOrderStatusBtn');
+                var orig = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+                try {
+                    var res = await fetch('/api/admin/pharmacy/orders/' + id + '/status', {
+                        method: 'PUT',
+                        credentials: 'same-origin',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+                    var data = await res.json();
+                    if (res.ok && data.success !== false) {
+                        Toast.success('Order status updated to "' + newStatus + '"');
+                        closeOrderStatusModal();
+                        loadOrders(currentOrderPage);
+                    } else {
+                        Toast.error(data.error || 'Failed to update order status');
+                    }
+                } catch (e) {
+                    console.error('Update order status error:', e);
+                    Toast.error('Failed to update order status');
+                }
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            };
+
+            // ════════════════════════════════════════════
+            // PHARMACY – Inventory / Stock
+            // ════════════════════════════════════════════
+
+            window.loadLowStock = async function () {
+                var tbody = document.getElementById('inventoryBody');
+                tbody.innerHTML = '<tr class="empty-row"><td colspan="8">Loading low stock items...</td></tr>';
+
+                try {
+                    var res = await fetch('/api/admin/pharmacy/low-stock', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } });
+                    var json = await res.json();
+                    if (!res.ok) { Toast.error(json.error || 'Failed to load'); return; }
+
+                    var products = json.data || json || [];
+                    if (!Array.isArray(products) || products.length === 0) {
+                        tbody.innerHTML = '<tr class="empty-row"><td colspan="8">No low stock items</td></tr>';
+                    } else {
+                        tbody.innerHTML = products.map(function (p) {
+                            return '<tr>' +
+                                '<td>' + escapeHtml(String(p.id)) + '</td>' +
+                                '<td>' + escapeHtml(p.name || '-') + '</td>' +
+                                '<td>' + escapeHtml(p.sku || '-') + '</td>' +
+                                '<td class="stock-low">' + (p.stock_quantity != null ? p.stock_quantity : '-') + '</td>' +
+                                '<td>' + (p.low_stock_threshold != null ? p.low_stock_threshold : '-') + '</td>' +
+                                '<td>' + (p.last_restocked ? escapeHtml(new Date(p.last_restocked).toLocaleDateString()) : '-') + '</td>' +
+                                '<td><span class="badge badge-cancelled">Low</span></td>' +
+                                '<td><button class="btn btn-primary btn-sm" onclick="openStockModal(' + p.id + ', \'' + escapeHtml(p.name || '') + '\', ' + (p.stock_quantity || 0) + ', ' + (p.low_stock_threshold || 10) + ')"><i class="fas fa-edit"></i> Update</button></td>' +
+                                '</tr>';
+                        }).join('');
+                    }
+                    document.getElementById('inventoryPagination').style.display = 'none';
+                } catch (e) {
+                    console.error('Load low stock error:', e);
+                    Toast.error('Failed to load low stock items');
+                }
+            };
+
+            window.openStockModal = function (productId, productName, currentQty, currentThreshold) {
+                document.getElementById('stockProductId').value = productId;
+                document.getElementById('stockInfo').innerHTML =
+                    '<div class="info-row"><span class="info-label">Product</span><span class="info-value">' + escapeHtml(productName) + '</span></div>' +
+                    '<div class="info-row"><span class="info-label">Current Stock</span><span class="info-value">' + currentQty + '</span></div>';
+                document.getElementById('stockQty').value = currentQty;
+                document.getElementById('stockThreshold').value = currentThreshold;
+                document.getElementById('stockModal').classList.add('active');
+            };
+
+            window.closeStockModal = function () {
+                document.getElementById('stockModal').classList.remove('active');
+            };
+
+            window.saveStock = async function () {
+                var productId = document.getElementById('stockProductId').value;
+                if (!productId) return;
+                var body = {
+                    stockQuantity: parseInt(document.getElementById('stockQty').value) || 0
+                };
+                var thresh = document.getElementById('stockThreshold').value;
+                if (thresh !== '') body.lowStockThreshold = parseInt(thresh);
+
+                var btn = document.getElementById('saveStockBtn');
+                var orig = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+
+                try {
+                    var res = await fetch('/api/admin/pharmacy/products/' + productId + '/stock', {
+                        method: 'PUT',
+                        credentials: 'same-origin',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    var data = await res.json();
+                    if (res.ok && data.success !== false) {
+                        Toast.success('Stock updated');
+                        closeStockModal();
+                        // Reload inventory tab if visible
+                        if (document.getElementById('tab-inventory').classList.contains('active')) {
+                            loadProducts(currentInvPage, true);
+                        }
+                        if (document.getElementById('tab-products').classList.contains('active')) {
+                            loadProducts(currentProdPage);
+                        }
+                    } else {
+                        Toast.error(data.error || 'Failed to update stock');
+                    }
+                } catch (e) {
+                    console.error('Update stock error:', e);
+                    Toast.error('Failed to update stock');
+                }
+                btn.disabled = false;
+                btn.innerHTML = orig;
+            };
 
             // ─── Initial Load ───
             loadAppointments(1);

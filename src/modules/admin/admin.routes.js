@@ -8,7 +8,18 @@ const {
     listFiltersSchema,
     overrideStatusSchema,
     doctorIdParam,
-    appointmentIdParam
+    appointmentIdParam,
+    createProductSchema,
+    updateProductSchema,
+    updateStockSchema,
+    createCategorySchema,
+    updateCategorySchema,
+    updateOrderStatusSchema,
+    pharmacyProductFiltersSchema,
+    pharmacyOrderFiltersSchema,
+    productIdParam,
+    categoryIdParam,
+    orderIdParam
 } = require('./admin.schema');
 
 // Public admin routes
@@ -23,5 +34,29 @@ router.get('/api/admin/patients', authenticate, authorize('admin'), adminControl
 router.get('/api/admin/appointments', authenticate, authorize('admin'), validate(listFiltersSchema, 'query'), adminController.listAppointments);
 router.post('/api/admin/appointments/:id/override', authenticate, authorize('admin'), validate(appointmentIdParam, 'params'), validate(overrideStatusSchema), adminController.overrideAppointment);
 router.get('/api/admin/doctors/:id/schedule', authenticate, authorize('admin'), validate(doctorIdParam, 'params'), adminController.viewDoctorSchedule);
+
+// ════════════════════════════════════════════
+// PHARMACY – Products
+// ════════════════════════════════════════════
+router.get('/api/admin/pharmacy/products', authenticate, authorize('admin'), validate(pharmacyProductFiltersSchema, 'query'), adminController.listProducts);
+router.post('/api/admin/pharmacy/products', authenticate, authorize('admin'), validate(createProductSchema), adminController.createProduct);
+router.put('/api/admin/pharmacy/products/:id', authenticate, authorize('admin'), validate(productIdParam, 'params'), validate(updateProductSchema), adminController.updateProduct);
+router.delete('/api/admin/pharmacy/products/:id', authenticate, authorize('admin'), validate(productIdParam, 'params'), adminController.deleteProduct);
+router.put('/api/admin/pharmacy/products/:id/stock', authenticate, authorize('admin'), validate(productIdParam, 'params'), validate(updateStockSchema), adminController.updateStock);
+router.get('/api/admin/pharmacy/low-stock', authenticate, authorize('admin'), adminController.getLowStockProducts);
+
+// ════════════════════════════════════════════
+// PHARMACY – Categories
+// ════════════════════════════════════════════
+router.get('/api/admin/pharmacy/categories', authenticate, authorize('admin'), adminController.listCategories);
+router.post('/api/admin/pharmacy/categories', authenticate, authorize('admin'), validate(createCategorySchema), adminController.createCategory);
+router.put('/api/admin/pharmacy/categories/:id', authenticate, authorize('admin'), validate(categoryIdParam, 'params'), validate(updateCategorySchema), adminController.updateCategory);
+router.delete('/api/admin/pharmacy/categories/:id', authenticate, authorize('admin'), validate(categoryIdParam, 'params'), adminController.deleteCategory);
+
+// ════════════════════════════════════════════
+// PHARMACY – Orders
+// ════════════════════════════════════════════
+router.get('/api/admin/pharmacy/orders', authenticate, authorize('admin'), validate(pharmacyOrderFiltersSchema, 'query'), adminController.listOrders);
+router.put('/api/admin/pharmacy/orders/:id/status', authenticate, authorize('admin'), validate(orderIdParam, 'params'), validate(updateOrderStatusSchema), adminController.updateOrderStatus);
 
 module.exports = router;

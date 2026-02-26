@@ -80,6 +80,86 @@ class AdminService {
     async viewDoctorSchedule(doctorId) {
         return await AdminModel.getDoctorSchedule(doctorId);
     }
+
+    // ════════════════════════════════════════════
+    // PHARMACY – Products
+    // ════════════════════════════════════════════
+
+    async listProducts(filters = {}, page = 1) {
+        const offset = (page - 1) * PAGE_SIZE;
+        return await AdminModel.getAllProducts(filters, PAGE_SIZE, offset);
+    }
+
+    async getProduct(id) {
+        const product = await AdminModel.getProductById(id);
+        if (!product) throw new AppError('Product not found', 404);
+        return product;
+    }
+
+    async createProduct(data) {
+        return await AdminModel.createProduct(data);
+    }
+
+    async updateProduct(id, data) {
+        const product = await AdminModel.updateProduct(id, data);
+        if (!product) throw new AppError('Product not found', 404);
+        return product;
+    }
+
+    async deleteProduct(id) {
+        const product = await AdminModel.deleteProduct(id);
+        if (!product) throw new AppError('Product not found', 404);
+        return product;
+    }
+
+    async updateStock(productId, stockQuantity, lowStockThreshold) {
+        const inventory = await AdminModel.updateStock(productId, stockQuantity, lowStockThreshold);
+        if (!inventory) throw new AppError('Product inventory not found', 404);
+        return inventory;
+    }
+
+    async getLowStockProducts() {
+        return await AdminModel.getLowStockProducts();
+    }
+
+    // ════════════════════════════════════════════
+    // PHARMACY – Categories
+    // ════════════════════════════════════════════
+
+    async listCategories() {
+        return await AdminModel.getAllCategoriesAdmin();
+    }
+
+    async createCategory(data) {
+        return await AdminModel.createCategory(data);
+    }
+
+    async updateCategory(id, data) {
+        const category = await AdminModel.updateCategory(id, data);
+        if (!category) throw new AppError('Category not found', 404);
+        return category;
+    }
+
+    async deleteCategory(id) {
+        const category = await AdminModel.deleteCategory(id);
+        if (!category) throw new AppError('Category not found', 404);
+        return category;
+    }
+
+    // ════════════════════════════════════════════
+    // PHARMACY – Orders
+    // ════════════════════════════════════════════
+
+    async listOrders(filters = {}, page = 1) {
+        const offset = (page - 1) * PAGE_SIZE;
+        return await AdminModel.getAllOrders(filters, PAGE_SIZE, offset);
+    }
+
+    async updateOrderStatus(id, status) {
+        const order = await AdminModel.updateOrderStatus(id, status);
+        if (!order) throw new AppError('Order not found', 404);
+        return order;
+    }
 }
 
 module.exports = new AdminService();
