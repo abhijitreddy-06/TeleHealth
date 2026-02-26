@@ -287,6 +287,13 @@ function formatTime(timeString) {
 document.addEventListener('DOMContentLoaded', function () {
     initTheme();
     initMobileMenu();
+
+    // Show toast from sessionStorage (set by server-side redirects)
+    const toastError = sessionStorage.getItem('toastError');
+    if (toastError) {
+        sessionStorage.removeItem('toastError');
+        Toast.error(toastError);
+    }
 });
 
 // Export for module usage if needed

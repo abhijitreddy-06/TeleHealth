@@ -19,8 +19,8 @@ class AuthService {
     }
 
     async register(phone, password, role) {
-        const existing = await AuthModel.findByPhone(phone, role);
-        if (existing) throw new AppError('Account already exists', 409);
+        const phoneInUse = await AuthModel.findByPhoneAnyRole(phone);
+        if (phoneInUse) throw new AppError('An account with this phone number already exists', 409);
 
         const hash = await bcrypt.hash(password, 10);
         return AuthModel.createUser(phone, hash, role);

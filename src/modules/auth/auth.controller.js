@@ -27,7 +27,7 @@ exports.userSignup = async (req, res, next) => {
         res.setHeader('Cache-Control', 'no-cache, no-store');
         res.redirect('/user_profile');
     } catch (err) {
-        res.send(`<script>alert('${escapeHtml(err.message)}');location='/user_signup'</script>`);
+        res.send(`<script>sessionStorage.setItem('toastError','${escapeHtml(err.message)}');location='/user_signup';</script>`);
     }
 };
 
@@ -41,7 +41,7 @@ exports.userLogin = async (req, res, next) => {
         setTokenCookies(res, tokens);
         res.redirect('/user_home');
     } catch (err) {
-        res.send(`<script>alert('${escapeHtml(err.message)}');location='/user_login'</script>`);
+        res.send(`<script>sessionStorage.setItem('toastError','${escapeHtml(err.message)}');location='/user_login';</script>`);
     }
 };
 
@@ -59,7 +59,7 @@ exports.docSignup = async (req, res, next) => {
         res.setHeader('Cache-Control', 'no-cache, no-store');
         res.redirect('/doc_profile');
     } catch (err) {
-        res.send(`<script>alert('${escapeHtml(err.message)}');location='/doc_signup'</script>`);
+        res.send(`<script>sessionStorage.setItem('toastError','${escapeHtml(err.message)}');location='/doc_signup';</script>`);
     }
 };
 
@@ -73,7 +73,7 @@ exports.docLogin = async (req, res, next) => {
         setTokenCookies(res, tokens);
         res.redirect('/doc_home');
     } catch (err) {
-        res.send(`<script>alert('${escapeHtml(err.message)}');location='/doc_login'</script>`);
+        res.send(`<script>sessionStorage.setItem('toastError','${escapeHtml(err.message)}');location='/doc_login';</script>`);
     }
 };
 

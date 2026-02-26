@@ -31,7 +31,7 @@ router.post("/user_signup", async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.send(`<script>alert('${escapeHtml(err.message)}');location='/user_signup'</script>`);
+        res.send(`<script>sessionStorage.setItem('toastError','${escapeHtml(err.message)}');location='/user_signup';</script>`);
     }
 });
 
@@ -49,7 +49,7 @@ router.post("/user_login", async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.send(`<script>alert('${escapeHtml(err.message)}');location='/user_login'</script>`);
+        res.send(`<script>sessionStorage.setItem('toastError','${escapeHtml(err.message)}');location='/user_login';</script>`);
     }
 });
 
@@ -70,7 +70,7 @@ router.post("/doc_signup", async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.send(`<script>alert('${escapeHtml(err.message)}');location='/doc_signup'</script>`);
+        res.send(`<script>sessionStorage.setItem('toastError','${escapeHtml(err.message)}');location='/doc_signup';</script>`);
     }
 });
 
@@ -88,7 +88,7 @@ router.post("/doc_login", async (req, res) => {
 
     } catch (err) {
         console.error(err);
-        res.send(`<script>alert('${escapeHtml(err.message)}');location='/doc_login'</script>`);
+        res.send(`<script>sessionStorage.setItem('toastError','${escapeHtml(err.message)}');location='/doc_login';</script>`);
     }
 });
 

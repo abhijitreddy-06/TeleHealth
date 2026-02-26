@@ -8,6 +8,13 @@ class AuthModel {
         return result.rows[0] || null;
     }
 
+    static async findByPhoneAnyRole(phone) {
+        const result = await pool.query(
+            `SELECT id, phone, role FROM users WHERE phone=$1`, [phone]
+        );
+        return result.rows[0] || null;
+    }
+
     static async createUser(phone, hashedPassword, role) {
         const result = await pool.query(
             `INSERT INTO users (phone, password, role) VALUES ($1, $2, $3) RETURNING id, phone`,

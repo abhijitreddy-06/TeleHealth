@@ -48,7 +48,7 @@ class AuthService {
         );
 
         if (exists.rows.length) {
-            throw new Error('Account already exists');
+            throw new Error('An account with this phone number already exists');
         }
 
         const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
