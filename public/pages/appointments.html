@@ -1068,6 +1068,43 @@
             color: white;
         }
 
+        .appt-btn.download-btn {
+            background-color: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            border: 1px solid var(--success);
+            text-decoration: none;
+        }
+
+        .appt-btn.download-btn:hover {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .view-all-container {
+            text-align: center;
+            padding: 1rem 0 0.5rem;
+        }
+
+        .view-all-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid var(--primary);
+            background-color: rgba(56, 189, 248, 0.08);
+            color: var(--primary);
+        }
+
+        .view-all-btn:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
         .empty-state {
             text-align: center;
             padding: 3rem 1rem;
@@ -1699,6 +1736,10 @@
         <!-- Step 2: Select Date & Time -->
         <div class="section-card step-section" id="step2Section">
             <h2><i class="fas fa-calendar-alt"></i> Select Date & Time</h2>
+            <p style="color: var(--text-medium); font-size: 0.9rem; margin-bottom: 1rem;">
+                <i class="fas fa-info-circle" style="color: var(--primary);"></i>
+                Appointments must be booked at least 24 hours in advance.
+            </p>
 
             <div class="selected-doctor-banner" id="selectedDoctorBanner">
                 <i class="fas fa-user-md"></i>
@@ -1800,6 +1841,11 @@
                     <p>Loading history...</p>
                 </div>
             </div>
+            <div class="view-all-container" id="viewAllContainer" style="display:none;">
+                <button class="view-all-btn" id="viewAllBtn">
+                    <i class="fas fa-list"></i> View All Past Appointments
+                </button>
+            </div>
             <div class="pagination" id="historyPagination" style="display:none;">
                 <button id="historyPrev" disabled><i class="fas fa-chevron-left"></i> Previous</button>
                 <span class="page-info" id="historyPageInfo">Page 1</span>
@@ -1898,11 +1944,12 @@
         }
 
         function isPast(date) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date();
+            tomorrow.setHours(0, 0, 0, 0);
+            tomorrow.setDate(tomorrow.getDate() + 1);
             const d = new Date(date);
             d.setHours(0, 0, 0, 0);
-            return d < today;
+            return d < tomorrow; // Today and before are unbookable (24h rule)
         }
 
         async function apiFetch(url, opts = {}) {
@@ -2062,7 +2109,7 @@
 
                 if (date.getTime() === today.getTime()) el.classList.add('today');
 
-                if (date < today) {
+                if (date <= today) {
                     el.classList.add('past');
                     el.classList.add('disabled');
                 } else {
@@ -2489,9 +2536,53 @@
         /* ========================================================
            APPOINTMENT HISTORY
         ======================================================== */
+        let historyExpanded = false;
+        const HISTORY_PREVIEW_COUNT = 3;
+
+        function renderHistoryItems(appointments, container) {
+            container.innerHTML = '';
+            appointments.forEach(appt => {
+                const d = new Date(appt.appointment_date || appt.date);
+                const dayNum = d.getDate();
+                const monthStr = monthNames[d.getMonth()].substring(0, 3).toUpperCase();
+                const timeStr = appt.appointment_time || appt.time || '--:--';
+                const doctorName = appt.doctor_name || appt.other_name || appt.doctorName || 'Doctor';
+                const status = (appt.status || 'completed').toLowerCase();
+                const roomId = appt.room_id;
+
+                const item = document.createElement('div');
+                item.className = 'appointment-item';
+
+                let downloadBtn = '';
+                if (status === 'completed' && roomId) {
+                    downloadBtn = `
+                        <a href="/api/prescription/download/${escapeHtml(roomId)}" class="appt-btn download-btn" title="Download Prescription">
+                            <i class="fas fa-file-download"></i> Prescription
+                        </a>`;
+                }
+
+                item.innerHTML = `
+                    <div class="appt-date-box">
+                        <div class="appt-day">${dayNum}</div>
+                        <div class="appt-month">${monthStr}</div>
+                    </div>
+                    <div class="appt-details">
+                        <div class="appt-time"><i class="fas fa-clock"></i> ${escapeHtml(formatTime24to12(timeStr))}</div>
+                        <div class="appt-doctor"><i class="fas fa-user-md"></i> Dr. ${escapeHtml(doctorName)}</div>
+                    </div>
+                    <div class="appt-actions">
+                        <span class="status-badge ${status}">${escapeHtml(status)}</span>
+                        ${downloadBtn}
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
         async function loadHistory() {
             const list = document.getElementById('historyList');
             const pagination = document.getElementById('historyPagination');
+            const viewAllContainer = document.getElementById('viewAllContainer');
 
             try {
                 const res = await apiFetch(`/api/appointments/history?page=${historyPage}`);
@@ -2503,49 +2594,46 @@
                 if (!appointments || appointments.length === 0) {
                     list.innerHTML = '<div class="empty-state"><i class="fas fa-history"></i><p>No past appointments.</p></div>';
                     pagination.style.display = 'none';
+                    viewAllContainer.style.display = 'none';
                     return;
                 }
 
-                list.innerHTML = '';
-                appointments.forEach(appt => {
-                    const d = new Date(appt.appointment_date || appt.date);
-                    const dayNum = d.getDate();
-                    const monthStr = monthNames[d.getMonth()].substring(0, 3).toUpperCase();
-                    const timeStr = appt.appointment_time || appt.time || '--:--';
-                    const doctorName = appt.doctor_name || appt.doctorName || 'Doctor';
-                    const status = (appt.status || 'completed').toLowerCase();
-
-                    const item = document.createElement('div');
-                    item.className = 'appointment-item';
-                    item.innerHTML = `
-                        <div class="appt-date-box">
-                            <div class="appt-day">${dayNum}</div>
-                            <div class="appt-month">${monthStr}</div>
-                        </div>
-                        <div class="appt-details">
-                            <div class="appt-time"><i class="fas fa-clock"></i> ${escapeHtml(formatTime24to12(timeStr))}</div>
-                            <div class="appt-doctor"><i class="fas fa-user-md"></i> Dr. ${escapeHtml(doctorName)}</div>
-                        </div>
-                        <span class="status-badge ${status}">${escapeHtml(status)}</span>
-                    `;
-                    list.appendChild(item);
-                });
-
-                // Pagination
-                if (totalPages > 1) {
-                    pagination.style.display = 'flex';
-                    document.getElementById('historyPageInfo').textContent = `Page ${historyPage} of ${totalPages}`;
-                    document.getElementById('historyPrev').disabled = historyPage <= 1;
-                    document.getElementById('historyNext').disabled = historyPage >= totalPages;
-                } else {
+                if (!historyExpanded) {
+                    // Preview mode: show only first 3
+                    const preview = appointments.slice(0, HISTORY_PREVIEW_COUNT);
+                    renderHistoryItems(preview, list);
                     pagination.style.display = 'none';
+
+                    // Show "View All" if there are more than 3 total
+                    const hasMore = appointments.length > HISTORY_PREVIEW_COUNT || totalPages > 1;
+                    viewAllContainer.style.display = hasMore ? 'block' : 'none';
+                } else {
+                    // Expanded mode: show all items with pagination
+                    renderHistoryItems(appointments, list);
+                    viewAllContainer.style.display = 'none';
+
+                    if (totalPages > 1) {
+                        pagination.style.display = 'flex';
+                        document.getElementById('historyPageInfo').textContent = `Page ${historyPage} of ${totalPages}`;
+                        document.getElementById('historyPrev').disabled = historyPage <= 1;
+                        document.getElementById('historyNext').disabled = historyPage >= totalPages;
+                    } else {
+                        pagination.style.display = 'none';
+                    }
                 }
             } catch (err) {
                 console.error('Load history error:', err);
                 list.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Failed to load appointment history.</p></div>';
                 pagination.style.display = 'none';
+                viewAllContainer.style.display = 'none';
             }
         }
+
+        document.getElementById('viewAllBtn').addEventListener('click', () => {
+            historyExpanded = true;
+            historyPage = 1;
+            loadHistory();
+        });
 
         document.getElementById('historyPrev').addEventListener('click', () => {
             if (historyPage > 1) {

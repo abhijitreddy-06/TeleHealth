@@ -1219,6 +1219,25 @@ a:visited {
                 if (typeof Toast !== 'undefined' && Toast.success) {
                     Toast.success('Your doctor has started the video call!', 'Call Ready');
                 }
+            } else if (data.status === 'cancelled') {
+                // Appointment cancelled by doctor - update UI
+                if (statusText) {
+                    statusText.innerHTML = '<i class="fas fa-times-circle"></i> Appointment has been cancelled by the doctor';
+                    statusText.className = 'status cancelled';
+                    statusText.style.color = 'var(--error)';
+                }
+
+                // Remove join and cancel buttons
+                if (joinBtn) joinBtn.remove();
+                const cancelBtn = document.getElementById('cancelAppointmentBtn');
+                if (cancelBtn) cancelBtn.remove();
+
+                if (typeof Toast !== 'undefined' && Toast.error) {
+                    Toast.error('Your appointment has been cancelled by the doctor.', 'Cancelled');
+                }
+
+                // Reload after brief delay to show updated state
+                setTimeout(() => window.location.reload(), 3000);
             } else if (data.status === 'completed') {
                 // Appointment completed - reload to show updated state
                 window.location.reload();

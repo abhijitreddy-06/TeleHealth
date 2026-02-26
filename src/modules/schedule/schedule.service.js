@@ -6,6 +6,7 @@ const { AppError } = require('../../utils/AppError');
 
 const SLOT_DURATION_MINUTES = 30;
 const LOCK_TTL_SECONDS = 300;
+const ADVANCE_BOOKING_HOURS = 24;
 
 class ScheduleService {
     /**
@@ -132,16 +133,16 @@ class ScheduleService {
         // 5. Get locked slots from Redis
         const lockedSet = await this._getLockedSlots(doctorId, date);
 
-        // 6. Filter past slots if date is today
+        // 6. Filter slots that are within the 24-hour advance booking window
         const now = new Date();
-        const todayStr = now.toISOString().split('T')[0];
-        const currentTime = now.toTimeString().substring(0, 5);
+        const minBookableTime = new Date(now.getTime() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
 
         // 7. Build result with status
         const result = [];
         for (const time of allSlots) {
-            if (date === todayStr && time <= currentTime) {
-                continue; // Skip past slots
+            const slotDateTime = new Date(`${date}T${time}`);
+            if (slotDateTime <= minBookableTime) {
+                continue; // Skip slots within 24-hour window
             }
 
             let status = 'available';

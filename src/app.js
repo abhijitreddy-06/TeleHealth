@@ -47,7 +47,8 @@ app.use(helmet({
                 "'self'",
                 "data:",
                 "blob:",
-                "https://*.supabase.co"
+                "https://*.supabase.co",
+                "https://images.unsplash.com"
             ],
             connectSrc: [
                 "'self'",
@@ -57,7 +58,7 @@ app.use(helmet({
                     ? [config.FRONTEND_URL] : ['http://localhost:*'])
             ],
             mediaSrc: ["'self'", "blob:"],
-            frameSrc: ["'none'"],
+            frameSrc: ["'self'", "https://www.google.com"],
             objectSrc: ["'none'"],
             baseUri: ["'self'"],
             formAction: ["'self'"],

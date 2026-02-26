@@ -989,9 +989,14 @@ a:visited {
                         </p>
 
                         <% if (appointment.status==='scheduled' ) { %>
-                            <button class="btn btn-primary" onclick="startCall('<%= appointment.id %>')">
+                            <button class="btn btn-primary" id="startCallBtn"
+                                data-appointment-id="<%= appointment.id %>"
+                                data-appt-date="<%= appointment.appointment_date %>"
+                                data-appt-time="<%= appointment.appointment_time %>"
+                                onclick="startCall('<%= appointment.id %>')" disabled>
                                 <i class="fas fa-video"></i> Start Call
                             </button>
+                            <p id="startCallTimer" style="font-size: 0.85rem; color: var(--text-medium); margin-top: 0.5rem; text-align: center;"></p>
                             <button class="btn btn-outline" style="margin-top: 0.75rem; border-color: var(--error); color: var(--error);"
                                 onclick="showCancelModal('<%= appointment.id %>')">
                                 <i class="fas fa-times-circle"></i> Cancel
@@ -1137,8 +1142,7 @@ a:visited {
 
                     dashboardSocket.on('appointment-updated', (data) => {
                         console.log('Appointment updated:', data);
-                        // Reload page to reflect new state
-                        window.location.reload();
+                        handleDashboardUpdate(data);
                     });
 
                     dashboardSocket.on('connect_error', (error) => {
@@ -1167,12 +1171,92 @@ a:visited {
                 }
             }
 
+            function handleDashboardUpdate(data) {
+                if (data.status === 'booked') {
+                    // New appointment booked - add to appointments list
+                    const scrollList = document.querySelector('.appointments-scroll-list');
+                    const noApptMsg = document.querySelector('.no-appointments-message');
+                    if (noApptMsg) noApptMsg.remove();
+
+                    if (scrollList) {
+                        const item = document.createElement('div');
+                        item.className = 'appointment-list-item';
+                        item.innerHTML = `
+                            <div class="appt-patient-info">
+                                <i class="fas fa-user-circle"></i>
+                                <span class="appt-patient-name">New Patient</span>
+                            </div>
+                            <div class="appt-details">
+                                <span class="appt-date"><i class="fas fa-calendar-day"></i> ${data.appointmentDate || ''}</span>
+                                <span class="appt-time"><i class="fas fa-clock"></i> ${data.appointmentTime || ''}</span>
+                            </div>
+                            <div class="appt-status">
+                                <span class="status-badge scheduled"><i class="fas fa-hourglass-half"></i> Scheduled</span>
+                            </div>
+                        `;
+                        scrollList.appendChild(item);
+                    }
+
+                    if (typeof Toast !== 'undefined' && Toast.success) {
+                        Toast.success('A new appointment has been booked!', 'New Appointment');
+                    }
+
+                    // Reload to get full patient details and update upcoming card
+                    setTimeout(() => window.location.reload(), 2000);
+
+                } else if (data.status === 'started' && data.roomId) {
+                    // Update the upcoming card to show "Join Call" instead of "Start Call"
+                    const statusContainer = document.querySelector('.status-container');
+                    if (statusContainer) {
+                        const statusP = statusContainer.querySelector('.status');
+                        if (statusP) {
+                            statusP.innerHTML = '<i class="fas fa-video"></i> Call is in progress';
+                        }
+                        const startBtn = document.getElementById('startCallBtn');
+                        const timerEl = document.getElementById('startCallTimer');
+                        if (startBtn) {
+                            const joinBtn = document.createElement('button');
+                            joinBtn.className = 'btn btn-success join-call-btn';
+                            joinBtn.setAttribute('data-room-id', data.roomId);
+                            joinBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Join Call';
+                            joinBtn.onclick = () => { window.location.href = '/doc_video/' + data.roomId; };
+                            startBtn.parentNode.replaceChild(joinBtn, startBtn);
+                            if (timerEl) timerEl.remove();
+                        }
+                    }
+
+                    // Update appointment list item status badge
+                    const listItems = document.querySelectorAll('.appointment-list-item');
+                    listItems.forEach(item => {
+                        const badge = item.querySelector('.status-badge');
+                        if (badge && badge.classList.contains('scheduled')) {
+                            badge.className = 'status-badge active';
+                            badge.innerHTML = '<i class="fas fa-video"></i> In Progress';
+                            item.classList.add('in-progress');
+                        }
+                    });
+
+                } else if (data.status === 'cancelled') {
+                    if (typeof Toast !== 'undefined' && Toast.info) {
+                        Toast.info('An appointment has been cancelled.', 'Cancelled');
+                    }
+                    // Reload to refresh the full list
+                    setTimeout(() => window.location.reload(), 1500);
+
+                } else if (data.status === 'completed') {
+                    if (typeof Toast !== 'undefined' && Toast.success) {
+                        Toast.success('Appointment completed.', 'Completed');
+                    }
+                    setTimeout(() => window.location.reload(), 1500);
+                }
+            }
+
             function startFallbackReload() {
-                // Fallback to page reload every 15s if socket fails
+                // Fallback to page reload every 30s if socket fails
                 if (!window._fallbackInterval) {
                     window._fallbackInterval = setInterval(() => {
                         window.location.reload();
-                    }, 15000);
+                    }, 30000);
                 }
             }
 
@@ -1208,6 +1292,42 @@ a:visited {
                 if (!roomId) return;
                 window.location.href = `/doc_video/${roomId}`;
             }
+
+            // --- Start Call Time Window Check ---
+            (function checkStartCallWindow() {
+                const btn = document.getElementById('startCallBtn');
+                const timerEl = document.getElementById('startCallTimer');
+                if (!btn || !timerEl) return;
+
+                const apptDate = btn.getAttribute('data-appt-date');
+                const apptTime = btn.getAttribute('data-appt-time');
+                if (!apptDate || !apptTime) return;
+
+                const BEFORE_MINUTES = 10;
+                const apptDateTime = new Date(apptDate + 'T' + apptTime);
+                const windowStart = new Date(apptDateTime.getTime() - BEFORE_MINUTES * 60 * 1000);
+
+                function update() {
+                    const now = new Date();
+                    if (now >= windowStart) {
+                        btn.disabled = false;
+                        timerEl.innerHTML = '<i class="fas fa-check-circle" style="color: var(--success);"></i> Ready to start';
+                    } else {
+                        btn.disabled = true;
+                        const diff = windowStart - now;
+                        const hours = Math.floor(diff / (1000 * 60 * 60));
+                        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+                        if (hours > 0) {
+                            timerEl.innerHTML = `<i class="fas fa-clock" style="color: var(--warning);"></i> Call can start in ${hours}h ${mins}m`;
+                        } else {
+                            timerEl.innerHTML = `<i class="fas fa-clock" style="color: var(--warning);"></i> Call can start in ${mins}m ${secs}s`;
+                        }
+                    }
+                }
+                update();
+                setInterval(update, 1000);
+            })();
 
         // Cancel Appointment Modal for Doctors
             function showCancelModal(appointmentId) {

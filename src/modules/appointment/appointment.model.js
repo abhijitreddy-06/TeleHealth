@@ -103,8 +103,8 @@ class AppointmentModel {
     static async findForCancel(appointmentId, userId, role, client) {
         const db = client || pool;
         const query = role === 'doctor'
-            ? `SELECT id, status, appointment_date, appointment_time FROM appointments WHERE id = $1 AND doctor_id = $2`
-            : `SELECT id, status, appointment_date, appointment_time FROM appointments WHERE id = $1 AND user_id = $2`;
+            ? `SELECT id, user_id, doctor_id, status, appointment_date, appointment_time FROM appointments WHERE id = $1 AND doctor_id = $2`
+            : `SELECT id, user_id, doctor_id, status, appointment_date, appointment_time FROM appointments WHERE id = $1 AND user_id = $2`;
         const result = await db.query(query, [appointmentId, userId]);
         return result.rows[0] || null;
     }
@@ -217,18 +217,27 @@ class AppointmentModel {
             ? "COALESCE(up.full_name, 'Patient') AS other_name"
             : "COALESCE(dp.full_name, 'Doctor') AS other_name, COALESCE(dp.specialization, 'General') AS specialization";
 
-        const result = await pool.query(
-            `SELECT a.id, a.appointment_date, a.appointment_time, a.status, a.room_id,
-                    a.cancellation_reason, a.cancelled_by, a.cancelled_at, a.completed_at,
-                    ${nameSelect}
-             FROM appointments a
-             ${joinClause}
-             WHERE ${whereField} = $1 AND a.status IN ('completed', 'cancelled')
-             ORDER BY COALESCE(a.completed_at, a.cancelled_at) DESC
-             LIMIT $2 OFFSET $3`,
-            [userId, limit, offset]
-        );
-        return result.rows;
+        const [dataResult, countResult] = await Promise.all([
+            pool.query(
+                `SELECT a.id, a.appointment_date, a.appointment_time, a.status, a.room_id,
+                        a.cancellation_reason, a.cancelled_by, a.cancelled_at, a.completed_at,
+                        ${nameSelect}
+                 FROM appointments a
+                 ${joinClause}
+                 WHERE ${whereField} = $1 AND a.status IN ('completed', 'cancelled')
+                 ORDER BY COALESCE(a.completed_at, a.cancelled_at) DESC
+                 LIMIT $2 OFFSET $3`,
+                [userId, limit, offset]
+            ),
+            pool.query(
+                `SELECT COUNT(*)::int AS total
+                 FROM appointments a
+                 WHERE ${whereField} = $1 AND a.status IN ('completed', 'cancelled')`,
+                [userId]
+            )
+        ]);
+
+        return { rows: dataResult.rows, total: countResult.rows[0].total };
     }
 }
 

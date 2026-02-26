@@ -1,6 +1,23 @@
 const appointmentService = require('./appointment.service');
 const catchAsync = require('../../utils/catchAsync');
 const escapeHtml = require('../../utils/escapeHtml');
+const logger = require('../../utils/logger');
+
+function broadcastDashboard(req, event, data) {
+    const io = req.app.get('io');
+    if (!io) return;
+    try {
+        const dashNsp = io.of('/dashboard');
+        if (data.doctorId) {
+            dashNsp.to(`dashboard:doctor:${data.doctorId}`).emit(event, data);
+        }
+        if (data.userId) {
+            dashNsp.to(`dashboard:user:${data.userId}`).emit(event, data);
+        }
+    } catch (err) {
+        logger.warn('Failed to broadcast dashboard event:', err.message);
+    }
+}
 
 exports.bookAppointment = async (req, res) => {
     try {
@@ -9,6 +26,16 @@ exports.bookAppointment = async (req, res) => {
             req.body.appointment_date, req.body.appointment_time,
             req.body.lockToken
         );
+
+        // Broadcast to doctor's dashboard
+        broadcastDashboard(req, 'appointment-updated', {
+            status: 'booked',
+            doctorId: req.body.doctorId,
+            userId: req.user.id,
+            appointmentDate: req.body.appointment_date,
+            appointmentTime: req.body.appointment_time,
+            timestamp: new Date().toISOString()
+        });
 
         const acceptHeader = req.get('Accept') || '';
         const isAjax = req.xhr || acceptHeader.includes('application/json');
@@ -81,7 +108,18 @@ exports.cancelAppointment = async (req, res) => {
         const result = await appointmentService.cancelAppointment(
             req.params.id, req.user.id, req.user.role, reason
         );
-        res.json(result);
+
+        // Broadcast cancellation to both dashboards
+        broadcastDashboard(req, 'appointment-updated', {
+            appointmentId: req.params.id,
+            status: 'cancelled',
+            cancelledBy: req.user.role,
+            doctorId: result.doctorId,
+            userId: result.userId,
+            timestamp: new Date().toISOString()
+        });
+
+        res.json({ success: true, message: result.message });
     } catch (err) {
         console.error('Cancel appointment error:', err);
 

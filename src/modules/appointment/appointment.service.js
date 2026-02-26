@@ -5,6 +5,7 @@ const scheduleService = require('../schedule/schedule.service');
 const { AppError } = require('../../utils/AppError');
 
 const CANCEL_CUTOFF_HOURS = 2;
+const ADVANCE_BOOKING_HOURS = 24;
 const PAGE_SIZE = 10;
 
 class AppointmentService {
@@ -19,6 +20,13 @@ class AppointmentService {
     }
 
     async bookAppointment(userId, doctorId, date, time, lockToken) {
+        // Enforce 24-hour advance booking
+        const appointmentDateTime = new Date(`${date}T${time}`);
+        const minBookingTime = new Date(Date.now() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
+        if (appointmentDateTime <= minBookingTime) {
+            throw new AppError('Appointments must be booked at least 24 hours in advance.', 400);
+        }
+
         // Layer 1: Verify Redis lock ownership (if lockToken provided)
         if (lockToken) {
             const lockValid = await scheduleService.verifyLock(doctorId, date, time, lockToken);
@@ -158,7 +166,12 @@ class AppointmentService {
             await client.query('COMMIT');
             await this._invalidateDoctorsCache();
 
-            return { success: true, message: 'Appointment cancelled successfully' };
+            return {
+                success: true,
+                message: 'Appointment cancelled successfully',
+                userId: appointment.user_id,
+                doctorId: appointment.doctor_id
+            };
         } catch (error) {
             await client.query('ROLLBACK');
             throw error;
@@ -168,6 +181,13 @@ class AppointmentService {
     }
 
     async rescheduleAppointment(appointmentId, userId, newDoctorId, newDate, newTime, lockToken) {
+        // Enforce 24-hour advance booking for the new slot
+        const newDateTime = new Date(`${newDate}T${newTime}`);
+        const minBookingTime = new Date(Date.now() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
+        if (newDateTime <= minBookingTime) {
+            throw new AppError('Appointments must be booked at least 24 hours in advance.', 400);
+        }
+
         // Verify lock for the new slot
         if (lockToken) {
             const lockValid = await scheduleService.verifyLock(newDoctorId, newDate, newTime, lockToken);
@@ -253,7 +273,8 @@ class AppointmentService {
     async getAppointmentHistory(userId, role, page = 1) {
         const limit = PAGE_SIZE;
         const offset = (page - 1) * limit;
-        return AppointmentModel.findHistory(userId, role, limit, offset);
+        const { rows, total } = await AppointmentModel.findHistory(userId, role, limit, offset);
+        return { appointments: rows, totalPages: Math.ceil(total / limit) || 1 };
     }
 }
 

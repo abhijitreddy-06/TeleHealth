@@ -4,6 +4,19 @@ const { TIME_WINDOW } = require('../../config/socket');
 
 class VideoService {
     async startVideoCall(appointmentId, doctorId) {
+        // Validate time window before allowing call start
+        const withinWindow = await VideoModel.isWithinTimeWindow(
+            appointmentId,
+            TIME_WINDOW.BEFORE_MINUTES,
+            TIME_WINDOW.AFTER_MINUTES
+        );
+        if (!withinWindow) {
+            throw new AppError(
+                `Cannot start call outside the appointment time window (${TIME_WINDOW.BEFORE_MINUTES} min before to ${TIME_WINDOW.AFTER_MINUTES} min after)`,
+                400
+            );
+        }
+
         const result = await VideoModel.startCall(appointmentId, doctorId);
         if (!result) throw new AppError('Failed to start video call', 400);
         return result.room_id;
