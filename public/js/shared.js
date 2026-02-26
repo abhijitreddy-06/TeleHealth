@@ -176,6 +176,60 @@ function hideLoader() {
 }
 
 // ============================================
+// Global Page Loader
+// Shows a loader ONLY when page load takes > 1 second
+// Prevents flashing on fast loads / navigations
+// ============================================
+(function initGlobalPageLoader() {
+    // Skip if already managed by an inline loader on this page
+    if (document.getElementById('global-loader')) return;
+
+    var loader = document.createElement('div');
+    loader.id = 'global-loader';
+    loader.className = 'global-loader';
+    loader.innerHTML = '<div class="loader-box"><div class="gl-spinner"></div><p>Loading, please wait...</p></div>';
+    document.body.appendChild(loader);
+
+    var showTimer = null;
+    var wasShown = false;
+
+    // Only show loader if page hasn't finished loading after 1 second
+    showTimer = setTimeout(function () {
+        loader.classList.add('visible');
+        wasShown = true;
+    }, 1000);
+
+    function hidePageLoader() {
+        clearTimeout(showTimer);
+        if (wasShown) {
+            loader.classList.add('hiding');
+            setTimeout(function () {
+                loader.classList.remove('visible', 'hiding');
+                loader.style.display = 'none';
+            }, 250);
+        } else {
+            loader.style.display = 'none';
+        }
+    }
+
+    // Hide when page is interactive
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        hidePageLoader();
+    } else {
+        document.addEventListener('DOMContentLoaded', hidePageLoader);
+    }
+
+    // Handle browser back/forward cache
+    window.addEventListener('pageshow', function (e) {
+        if (e.persisted) {
+            clearTimeout(showTimer);
+            loader.classList.remove('visible', 'hiding');
+            loader.style.display = 'none';
+        }
+    });
+})();
+
+// ============================================
 // API Helper with Toast Integration
 // ============================================
 async function apiRequest(url, options = {}) {

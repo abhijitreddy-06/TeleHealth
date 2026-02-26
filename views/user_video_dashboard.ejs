@@ -882,7 +882,7 @@ a:visited {
                     <div class="info-item">
                         <span class="info-label">Date:</span>
                         <span class="info-value" id="apptDate">
-                            <%= appointment.appointment_date %>
+                            <%= appointment.appointment_date ? new Date(appointment.appointment_date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—' %>
                         </span>
                     </div>
 

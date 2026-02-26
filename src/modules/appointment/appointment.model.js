@@ -68,13 +68,13 @@ class AppointmentModel {
 
     static async findAvailableDoctors() {
         const result = await pool.query(
-            `SELECT d.docid AS id, p.full_name, p.specialization,
+            `SELECT d.id, p.full_name, p.specialization,
                     p.experience_years, p.qualification, p.hospital_name
-             FROM doc_login d
-             JOIN doc_profile p ON p.doc_id = d.docid
-             WHERE NOT EXISTS (
+             FROM users d
+             JOIN doc_profile p ON p.doc_id = d.id
+             WHERE d.role = 'doctor' AND NOT EXISTS (
                  SELECT 1 FROM appointments a
-                 WHERE a.doctor_id = d.docid
+                 WHERE a.doctor_id = d.id
                  AND a.status IN ('started', 'scheduled')
                  AND a.appointment_date >= CURRENT_DATE
              )

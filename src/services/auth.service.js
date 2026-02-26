@@ -36,19 +36,14 @@ class AuthService {
     }
 
     _getTableConfig(role) {
-        const config = {
-            user: { table: 'login', idField: 'id' },
-            doctor: { table: 'doc_login', idField: 'docid' }
-        };
-        return config[role];
+        return { table: 'users', idField: 'id' };
     }
 
     async registerUser(phone, password, role = 'user') {
         this._validateRole(role);
-        const { table, idField } = this._getTableConfig(role);
 
         const exists = await pool.query(
-            `SELECT ${idField} FROM ${table} WHERE phone=$1`,
+            `SELECT id FROM users WHERE phone=$1`,
             [phone]
         );
 
@@ -59,12 +54,12 @@ class AuthService {
         const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(10));
 
         const result = await pool.query(
-            `INSERT INTO ${table} (phone, password) VALUES ($1, $2) RETURNING ${idField}`,
-            [phone, hash]
+            `INSERT INTO users (phone, password, role) VALUES ($1, $2, $3) RETURNING id`,
+            [phone, hash, role]
         );
 
         return {
-            id: result.rows[0][idField],
+            id: result.rows[0].id,
             phone,
             role
         };
@@ -72,11 +67,10 @@ class AuthService {
 
     async authenticateUser(phone, password, role = 'user') {
         this._validateRole(role);
-        const { table, idField } = this._getTableConfig(role);
 
         const result = await pool.query(
-            `SELECT * FROM ${table} WHERE phone=$1`,
-            [phone]
+            `SELECT * FROM users WHERE phone=$1 AND role=$2`,
+            [phone, role]
         );
 
         const user = result.rows[0];
@@ -86,7 +80,7 @@ class AuthService {
         }
 
         return {
-            id: user[idField],
+            id: user.id,
             phone: user.phone,
             role
         };
@@ -138,9 +132,8 @@ class AuthService {
             }
 
             const userQuery = await pool.query(
-                `SELECT phone FROM ${refreshPayload.role === 'user' ? 'login' : 'doc_login'} 
-                 WHERE ${refreshPayload.role === 'user' ? 'id' : 'docid'} = $1`,
-                [refreshPayload.id]
+                `SELECT phone FROM users WHERE id = $1 AND role = $2`,
+                [refreshPayload.id, refreshPayload.role]
             );
 
             if (userQuery.rows.length === 0) {

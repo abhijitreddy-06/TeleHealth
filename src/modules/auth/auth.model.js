@@ -1,34 +1,25 @@
 const { pool } = require('../../config/database');
 
 class AuthModel {
-    static _getTableConfig(role) {
-        return {
-            user: { table: 'login', idField: 'id' },
-            doctor: { table: 'doc_login', idField: 'docid' },
-            admin: { table: 'admin_login', idField: 'id' }
-        }[role];
-    }
-
     static async findByPhone(phone, role) {
-        const { table } = this._getTableConfig(role);
-        const result = await pool.query(`SELECT * FROM ${table} WHERE phone=$1`, [phone]);
+        const result = await pool.query(
+            `SELECT * FROM users WHERE phone=$1 AND role=$2`, [phone, role]
+        );
         return result.rows[0] || null;
     }
 
     static async createUser(phone, hashedPassword, role) {
-        const { table, idField } = this._getTableConfig(role);
         const result = await pool.query(
-            `INSERT INTO ${table} (phone, password) VALUES ($1, $2) RETURNING ${idField}, phone`,
-            [phone, hashedPassword]
+            `INSERT INTO users (phone, password, role) VALUES ($1, $2, $3) RETURNING id, phone`,
+            [phone, hashedPassword, role]
         );
         const row = result.rows[0];
-        return { id: row[idField], phone: row.phone, role };
+        return { id: row.id, phone: row.phone, role };
     }
 
     static async findUserById(id, role) {
-        const { table, idField } = this._getTableConfig(role);
         const result = await pool.query(
-            `SELECT phone FROM ${table} WHERE ${idField} = $1`, [id]
+            `SELECT phone FROM users WHERE id = $1 AND role = $2`, [id, role]
         );
         return result.rows[0] || null;
     }

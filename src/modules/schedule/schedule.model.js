@@ -84,11 +84,12 @@ class ScheduleModel {
 
     static async getDoctorsWithSchedules() {
         const result = await pool.query(
-            `SELECT DISTINCT d.docid AS id, p.full_name, p.specialization,
+            `SELECT DISTINCT d.id, p.full_name, p.specialization,
                     p.experience_years, p.qualification, p.hospital_name
-             FROM doc_login d
-             JOIN doc_profile p ON p.doc_id = d.docid
-             JOIN doctor_schedules ds ON ds.doctor_id = d.docid AND ds.is_active = TRUE
+             FROM users d
+             JOIN doc_profile p ON p.doc_id = d.id
+             JOIN doctor_schedules ds ON ds.doctor_id = d.id AND ds.is_active = TRUE
+             WHERE d.role = 'doctor'
              ORDER BY p.full_name`
         );
         return result.rows;

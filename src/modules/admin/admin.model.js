@@ -7,8 +7,8 @@ class AdminModel {
     static async findByPhone(phone) {
         const result = await pool.query(
             `SELECT id, phone, password, created_at
-             FROM admin_login
-             WHERE phone = $1`,
+             FROM users
+             WHERE phone = $1 AND role = 'admin'`,
             [phone]
         );
         return result.rows[0] || null;
@@ -19,8 +19,8 @@ class AdminModel {
      */
     static async createAdmin(phone, hashedPassword) {
         const result = await pool.query(
-            `INSERT INTO admin_login (phone, password)
-             VALUES ($1, $2)
+            `INSERT INTO users (phone, password, role)
+             VALUES ($1, $2, 'admin')
              RETURNING id, phone`,
             [phone, hashedPassword]
         );
@@ -32,12 +32,13 @@ class AdminModel {
      */
     static async getAllDoctors(limit = 20, offset = 0) {
         const result = await pool.query(
-            `SELECT dl.docid, dl.phone, dl.created_at,
+            `SELECT u.id, u.phone, u.created_at,
                     dp.full_name, dp.specialization, dp.experience_years,
                     dp.qualification, dp.hospital_name
-             FROM doc_login dl
-             LEFT JOIN doc_profile dp ON dl.docid = dp.doc_id
-             ORDER BY dl.created_at DESC
+             FROM users u
+             LEFT JOIN doc_profile dp ON u.id = dp.doc_id
+             WHERE u.role = 'doctor'
+             ORDER BY u.created_at DESC
              LIMIT $1 OFFSET $2`,
             [limit, offset]
         );
@@ -49,12 +50,13 @@ class AdminModel {
      */
     static async getAllPatients(limit = 20, offset = 0) {
         const result = await pool.query(
-            `SELECT l.id, l.phone, l.created_at,
+            `SELECT u.id, u.phone, u.created_at,
                     up.full_name, up.gender, up.date_of_birth,
                     up.blood_group
-             FROM login l
-             LEFT JOIN user_profile up ON l.id = up.user_id
-             ORDER BY l.created_at DESC
+             FROM users u
+             LEFT JOIN user_profile up ON u.id = up.user_id
+             WHERE u.role = 'user'
+             ORDER BY u.created_at DESC
              LIMIT $1 OFFSET $2`,
             [limit, offset]
         );
@@ -110,8 +112,8 @@ class AdminModel {
      */
     static async getSystemStats() {
         const [patients, doctors, appointments, active, completedToday] = await Promise.all([
-            pool.query('SELECT COUNT(*) AS count FROM login'),
-            pool.query('SELECT COUNT(*) AS count FROM doc_login'),
+            pool.query("SELECT COUNT(*) AS count FROM users WHERE role = 'user'"),
+            pool.query("SELECT COUNT(*) AS count FROM users WHERE role = 'doctor'"),
             pool.query('SELECT COUNT(*) AS count FROM appointments'),
             pool.query(
                 `SELECT COUNT(*) AS count FROM appointments

@@ -29,11 +29,10 @@ class AuthService {
     async authenticate(phone, password, role) {
         const user = await AuthModel.findByPhone(phone, role);
 
-        const idField = role === 'doctor' ? 'docid' : 'id';
         const valid = user ? await bcrypt.compare(password, user.password) : false;
         if (!user || !valid) throw new AuthError('Invalid credentials');
 
-        return { id: user[idField], phone: user.phone, role };
+        return { id: user.id, phone: user.phone, role };
     }
 
     async generateTokens(user) {
