@@ -21,6 +21,13 @@
         .nav-links a{color:var(--text-dark);font-weight:500;padding:.5rem .8rem;border-radius:8px;display:flex;align-items:center;gap:.5rem;transition:var(--transition)}
         .nav-links a:hover{color:var(--primary);background:rgba(56,189,248,.1)}
         .theme-toggle{background:none;border:none;cursor:pointer;color:var(--text-dark);font-size:1.2rem;padding:.5rem;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center}
+        .profile-dropdown{position:relative}
+        .profile-btn{background:none;border:none;cursor:pointer;color:var(--text-dark);font-size:1.3rem;padding:.5rem;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;transition:var(--transition)}
+        .profile-btn:hover{background:rgba(56,189,248,.1);color:var(--primary)}
+        .dropdown-menu{position:absolute;top:calc(100% + 4px);right:0;background:var(--card-bg);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.15);min-width:180px;padding:.5rem 0;display:none;z-index:200;border:1px solid var(--border)}
+        .dropdown-menu.active{display:block}
+        .dropdown-menu a{display:flex;align-items:center;gap:.8rem;padding:.7rem 1.2rem;font-size:.9rem;color:var(--text-dark);transition:var(--transition);border-radius:0}
+        .dropdown-menu a:hover{background:rgba(56,189,248,.1);color:var(--primary)}
         .mobile-controls{display:none;align-items:center;gap:.5rem}
         .mobile-menu-btn{display:none;background:none;border:none;color:var(--text-dark);font-size:1.5rem;cursor:pointer;width:40px;height:40px;border-radius:50%}
         .mobile-menu{position:fixed;top:0;right:-100%;width:280px;height:100vh;background:var(--card-bg);z-index:1000;padding:2rem;transition:var(--transition);box-shadow:-5px 0 15px rgba(0,0,0,.1);display:flex;flex-direction:column;gap:1.5rem}
@@ -81,9 +88,21 @@
         <nav class="navbar">
             <a href="/user_home" class="logo"><i class="fas fa-heartbeat"></i><span class="logo-text">TeleHealth</span></a>
             <div class="nav-links">
-                <a href="/pharmacy"><i class="fas fa-pills"></i> Pharmacy</a>
-                <a href="/pharmacy/orders"><i class="fas fa-box"></i> Orders</a>
-                <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
+                <a href="/user_home"><i class="fas fa-home"></i> Home</a>
+                <a href="/predict"><i class="fas fa-robot"></i> AI Pre Advice</a>
+                <a href="/user_video_dashboard"><i class="fas fa-video"></i> Video</a>
+                <a href="/pharmacy" class="active"><i class="fas fa-pills"></i> Pharmacy</a>
+                <a href="/appointments"><i class="fas fa-user-md"></i> Appointments</a>
+                <a href="/records"><i class="fas fa-folder"></i> My Records</a>
+                <div class="profile-dropdown">
+                    <button class="profile-btn" id="profileBtn"><i class="fas fa-user-circle"></i></button>
+                    <div class="dropdown-menu" id="profileDropdown">
+                        <a href="/user_profile"><i class="fas fa-user"></i> My Profile</a>
+                        <a href="/pharmacy/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+                        <a href="/pharmacy/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
+                        <a href="/pharmacy/orders"><i class="fas fa-box"></i> My Orders</a>
+                    </div>
+                </div>
                 <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
             </div>
             <div class="mobile-controls">
@@ -94,9 +113,16 @@
     </header>
     <div class="mobile-menu" id="mobileMenu">
         <button class="close-menu" id="closeMenu"><i class="fas fa-times"></i></button>
-        <a href="/pharmacy"><i class="fas fa-pills"></i> Pharmacy</a>
-        <a href="/pharmacy/orders"><i class="fas fa-box"></i> Orders</a>
-        <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
+        <a href="/user_home"><i class="fas fa-home"></i> Home</a>
+        <a href="/predict"><i class="fas fa-robot"></i> AI Pre Advice</a>
+        <a href="/user_video_dashboard"><i class="fas fa-video"></i> Video</a>
+        <a href="/pharmacy" class="active"><i class="fas fa-pills"></i> Pharmacy</a>
+        <a href="/appointments"><i class="fas fa-user-md"></i> Appointments</a>
+        <a href="/records"><i class="fas fa-folder"></i> My Records</a>
+        <a href="/user_profile"><i class="fas fa-user"></i> My Profile</a>
+        <a href="/pharmacy/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
+        <a href="/pharmacy/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
+        <a href="/pharmacy/orders"><i class="fas fa-box"></i> My Orders</a>
     </div>
 
     <main class="detail-container">
@@ -171,6 +197,14 @@
         const mm=document.getElementById('mobileMenu');
         document.getElementById('mobileMenuBtn').addEventListener('click',e=>{e.stopPropagation();mm.classList.add('active');document.body.style.overflow='hidden';});
         document.getElementById('closeMenu').addEventListener('click',()=>{mm.classList.remove('active');document.body.style.overflow='';});
+
+        // Profile Dropdown
+        const profileBtn = document.getElementById('profileBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+        if (profileBtn) {
+            profileBtn.addEventListener('click', function(e) { e.stopPropagation(); profileDropdown.classList.toggle('active'); });
+            document.addEventListener('click', function(e) { if (!profileDropdown.contains(e.target) && e.target !== profileBtn) profileDropdown.classList.remove('active'); });
+        }
     });
     </script>
     <script>window.history.replaceState(null, document.title, window.location.href);</script>
