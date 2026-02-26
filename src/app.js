@@ -16,6 +16,9 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 const app = express();
 const PROJECT_ROOT = path.join(__dirname, '..');
 
+// --- Trust Proxy (MUST be before rate limiter) ---
+app.set('trust proxy', config.NODE_ENV === 'production' ? 2 : 1);
+
 // --- Security Headers (Helmet) ---
 app.use(helmet({
     contentSecurityPolicy: {
@@ -25,11 +28,27 @@ app.use(helmet({
                 "'self'",
                 "'unsafe-inline'",
                 "https://cdn.socket.io",
-                "https://cdn.jsdelivr.net"
+                "https://cdn.jsdelivr.net",
+                "https://cdnjs.cloudflare.com"
             ],
-            styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
-            fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
-            imgSrc: ["'self'", "data:", "blob:"],
+            scriptSrcAttr: ["'unsafe-inline'"],
+            styleSrc: [
+                "'self'",
+                "'unsafe-inline'",
+                "https://fonts.googleapis.com",
+                "https://cdnjs.cloudflare.com"
+            ],
+            fontSrc: [
+                "'self'",
+                "https://fonts.gstatic.com",
+                "https://cdnjs.cloudflare.com"
+            ],
+            imgSrc: [
+                "'self'",
+                "data:",
+                "blob:",
+                "https://*.supabase.co"
+            ],
             connectSrc: [
                 "'self'",
                 "wss:",
@@ -45,6 +64,7 @@ app.use(helmet({
             upgradeInsecureRequests: config.NODE_ENV === 'production' ? [] : null
         }
     },
+    crossOriginEmbedderPolicy: false,
     hsts: {
         maxAge: 31536000,
         includeSubDomains: true,
@@ -109,7 +129,6 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(PROJECT_ROOT, 'public')));
 app.set('view engine', 'ejs');
 app.set('views', path.join(PROJECT_ROOT, 'views'));
-app.set('trust proxy', config.NODE_ENV === 'production' ? 2 : 1);
 
 // --- Health Check ---
 app.get('/health', async (req, res) => {

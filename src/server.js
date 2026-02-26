@@ -27,7 +27,17 @@ const io = new Server(server, {
 (async () => {
     try {
         if (process.env.REDIS_URL) {
-            const pubClient = createClient({ url: process.env.REDIS_URL });
+            const adapterOpts = {
+                url: process.env.REDIS_URL,
+                socket: {
+                    connectTimeout: 5000,
+                    reconnectStrategy: (retries) => {
+                        if (retries > 5) return false;
+                        return Math.min(retries * 200, 3000);
+                    }
+                }
+            };
+            const pubClient = createClient(adapterOpts);
             const subClient = pubClient.duplicate();
             pubClient.on('error', (err) => logger.warn('Redis adapter pub error:', err.message));
             subClient.on('error', (err) => logger.warn('Redis adapter sub error:', err.message));
@@ -106,33 +116,45 @@ async function gracefulShutdown(signal) {
 
     logger.info(`${signal} received. Starting graceful shutdown...`);
 
-    server.close(async () => {
-        logger.info('HTTP server closed');
-
-        try {
-            io.close();
-            logger.info('Socket.IO closed');
-
-            await config.pool.end();
-            logger.info('Database pool closed');
-
-            const redisClient = await config.getClient();
-            if (redisClient) {
-                await redisClient.quit();
-                logger.info('Redis connection closed');
-            }
-        } catch (err) {
-            logger.error('Error during shutdown:', err);
-        }
-
-        process.exit(0);
-    });
-
     // Force shutdown after 10 seconds
-    setTimeout(() => {
+    const forceExitTimer = setTimeout(() => {
         logger.error('Forced shutdown after timeout');
         process.exit(1);
     }, 10000);
+    forceExitTimer.unref();
+
+    // 1. Stop pool monitor
+    config.stopPoolMonitor();
+
+    // 2. Close Socket.IO
+    io.close();
+    logger.info('Socket.IO closed');
+
+    // 3. Stop accepting new HTTP requests
+    server.close(() => {
+        logger.info('HTTP server closed');
+    });
+
+    // 4. Close database pool
+    try {
+        await config.pool.end();
+        logger.info('Database pool closed');
+    } catch (err) {
+        logger.error('Error closing database pool:', err.message);
+    }
+
+    // 5. Close Redis
+    try {
+        const redisClient = await config.getClient();
+        if (redisClient) {
+            await redisClient.quit();
+            logger.info('Redis connection closed');
+        }
+    } catch (err) {
+        logger.error('Error closing Redis:', err.message);
+    }
+
+    process.exit(0);
 }
 
 process.on('SIGINT', () => gracefulShutdown('SIGINT'));
@@ -144,7 +166,8 @@ process.on('unhandledRejection', (reason) => {
 
 process.on('uncaughtException', (error) => {
     logger.error('Uncaught Exception:', error);
-    gracefulShutdown('uncaughtException');
+    // Don't shutdown on non-fatal exceptions - let the process recover
+    // Only exit on truly fatal errors (out of memory, etc.)
 });
 
 startServer();

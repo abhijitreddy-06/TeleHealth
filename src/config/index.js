@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { pool, testConnection, cleanupExpiredTokens } = require('./database');
+const { pool, testConnection, cleanupExpiredTokens, stopPoolMonitor, getPoolHealth } = require('./database');
 const { getClient } = require('./redis');
 const supabaseService = require('./supabase');
 const { upload, createCleanupMiddleware } = require('./upload');
@@ -65,7 +65,7 @@ module.exports = {
     ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY,
     accessTokenCookieOptions, refreshTokenCookieOptions, clearCookieOptions,
     // Database
-    pool, testConnection, cleanupExpiredTokens,
+    pool, testConnection, cleanupExpiredTokens, stopPoolMonitor, getPoolHealth,
     // Redis
     getClient,
     // Supabase

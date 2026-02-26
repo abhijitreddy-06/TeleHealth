@@ -6,10 +6,42 @@ require('dotenv').config();
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    max: 20,
+    max: 3,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10000,
+    application_name: 'TeleHealth',
 });
+
+// Handle transient pool errors (self-recovering)
+const TRANSIENT_ERRORS = ['ECONNRESET', 'ETIMEDOUT', 'EPIPE', 'ECONNREFUSED', '57P01', '57P03'];
+pool.on('error', (err) => {
+    if (TRANSIENT_ERRORS.includes(err.code)) return;
+    console.error('Unexpected database pool error:', err.message);
+});
+
+// Pool monitor - keeps event loop aware of the pool
+let poolMonitorInterval = null;
+function startPoolMonitor() {
+    poolMonitorInterval = setInterval(() => {}, 30000);
+    poolMonitorInterval.unref();
+}
+function stopPoolMonitor() {
+    if (poolMonitorInterval) {
+        clearInterval(poolMonitorInterval);
+        poolMonitorInterval = null;
+    }
+}
+startPoolMonitor();
+
+function getPoolHealth() {
+    return {
+        totalCount: pool.totalCount,
+        idleCount: pool.idleCount,
+        waitingCount: pool.waitingCount,
+    };
+}
 
 async function testConnection(retries = 5, delay = 3000) {
     for (let attempt = 1; attempt <= retries; attempt++) {
@@ -45,5 +77,7 @@ async function cleanupExpiredTokens() {
 module.exports = {
     pool,
     testConnection,
-    cleanupExpiredTokens
+    cleanupExpiredTokens,
+    stopPoolMonitor,
+    getPoolHealth
 };
