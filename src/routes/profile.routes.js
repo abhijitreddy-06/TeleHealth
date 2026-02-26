@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const authService = require('../services/auth.service');
 const { authenticate, authorize } = require('../middleware/auth');
+const { validate } = require('../middleware/validation');
+const { userProfileSchema, doctorProfileSchema } = require('../modules/profile/profile.schema');
 
 router.get("/user_profile", authenticate, authorize("user"), async (req, res) => {
     try {
@@ -29,7 +31,7 @@ router.get("/user_profile", authenticate, authorize("user"), async (req, res) =>
     }
 });
 
-router.post("/user_profile", authenticate, authorize("user"), async (req, res) => {
+router.post("/user_profile", authenticate, authorize("user"), validate(userProfileSchema), async (req, res) => {
     try {
         const {
             fullName,
@@ -40,16 +42,7 @@ router.post("/user_profile", authenticate, authorize("user"), async (req, res) =
             height,
             bloodGroup,
             allergies
-        } = req.body;
-
-        if (!fullName || !gender || !dob || !weight || !height || !bloodGroup) {
-            return res.send(`
-                <script>
-                    alert("Please fill all required fields");
-                    history.back();
-                </script>
-            `);
-        }
+        } = req.validated.body;
 
         await authService.createUserProfile(req.user.id, {
             fullName,
@@ -93,7 +86,7 @@ router.get("/doc_profile", authenticate, authorize("doctor"), async (req, res) =
     }
 });
 
-router.post("/doc_profile", authenticate, authorize("doctor"), async (req, res) => {
+router.post("/doc_profile", authenticate, authorize("doctor"), validate(doctorProfileSchema), async (req, res) => {
     try {
         const {
             fullName,
@@ -102,16 +95,7 @@ router.post("/doc_profile", authenticate, authorize("doctor"), async (req, res) 
             qualification,
             hospital,
             bio
-        } = req.body;
-
-        if (!fullName || !specialization || !experience) {
-            return res.send(`
-                <script>
-                    alert("Please fill all required fields");
-                    history.back();
-                </script>
-            `);
-        }
+        } = req.validated.body;
 
         await authService.createDoctorProfile(req.user.id, {
             fullName,
@@ -155,7 +139,7 @@ router.get("/user_profile/edit", authenticate, authorize("user"), async (req, re
     }
 });
 
-router.post("/user_profile/edit", authenticate, authorize("user"), async (req, res) => {
+router.post("/user_profile/edit", authenticate, authorize("user"), validate(userProfileSchema), async (req, res) => {
     try {
         const {
             fullName,
@@ -166,16 +150,7 @@ router.post("/user_profile/edit", authenticate, authorize("user"), async (req, r
             height,
             bloodGroup,
             allergies
-        } = req.body;
-
-        if (!fullName || !gender || !dob || !weight || !height || !bloodGroup) {
-            return res.send(`
-                <script>
-                    alert("Please fill all required fields");
-                    history.back();
-                </script>
-            `);
-        }
+        } = req.validated.body;
 
         await authService.createUserProfile(req.user.id, {
             fullName,
@@ -219,7 +194,7 @@ router.get("/doc_profile/edit", authenticate, authorize("doctor"), async (req, r
     }
 });
 
-router.post("/doc_profile/edit", authenticate, authorize("doctor"), async (req, res) => {
+router.post("/doc_profile/edit", authenticate, authorize("doctor"), validate(doctorProfileSchema), async (req, res) => {
     try {
         const {
             fullName,
@@ -228,16 +203,7 @@ router.post("/doc_profile/edit", authenticate, authorize("doctor"), async (req, 
             qualification,
             hospital,
             bio
-        } = req.body;
-
-        if (!fullName || !specialization || !experience) {
-            return res.send(`
-                <script>
-                    alert("Please fill all required fields");
-                    history.back();
-                </script>
-            `);
-        }
+        } = req.validated.body;
 
         await authService.createDoctorProfile(req.user.id, {
             fullName,

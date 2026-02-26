@@ -430,6 +430,29 @@
             color: var(--primary);
         }
 
+        .field-hint {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--text-medium);
+            margin-top: 0.35rem;
+            opacity: 0.85;
+        }
+
+        .field-error {
+            display: none;
+            font-size: 0.8rem;
+            color: var(--error);
+            margin-top: 0.35rem;
+        }
+
+        .form-control.invalid {
+            border-color: var(--error);
+        }
+
+        .form-control.invalid:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
         .form-control {
             width: 100%;
             padding: 0.85rem;
@@ -1084,7 +1107,8 @@ a:visited {
                     <div class="form-group">
                         <label for="fullName"><i class="fas fa-signature"></i> Full Name</label>
                         <input type="text" id="fullName" name="fullName" class="form-control"
-                            placeholder="Enter your full name" required>
+                            placeholder="Enter your full name" required minlength="2" maxlength="100">
+                        <small class="field-hint">2 to 100 characters</small>
                     </div>
 
                     <div class="form-group">
@@ -1112,6 +1136,7 @@ a:visited {
                     <div class="form-group">
                         <label for="dob"><i class="fas fa-birthday-cake"></i> Date of Birth</label>
                         <input type="date" id="dob" name="dob" class="form-control" required>
+                        <small class="field-hint">Must be at least 18 years old</small>
                     </div>
 
                     <div class="form-actions">
@@ -1126,31 +1151,33 @@ a:visited {
                         <div class="form-group">
                             <label for="weight"><i class="fas fa-weight"></i> Weight (kg)</label>
                             <input type="number" id="weight" name="weight" class="form-control"
-                                placeholder="Enter weight in kilograms" min="0" step="0.1" required>
+                                placeholder="Enter weight in kilograms" min="2" max="500" step="0.1" required>
                             <div class="range-container" style="margin-top: 10px;">
-                                <input type="range" id="weightRange" min="0" max="200" step="1" value="70"
+                                <input type="range" id="weightRange" min="2" max="200" step="1" value="70"
                                     style="width: 100%;">
                                 <div
                                     style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-medium);">
-                                    <span>0 kg</span>
+                                    <span>2 kg</span>
                                     <span>200 kg</span>
                                 </div>
                             </div>
+                            <small class="field-hint">Between 2 and 500 kg</small>
                         </div>
 
                         <div class="form-group">
                             <label for="height"><i class="fas fa-ruler-vertical"></i> Height (cm)</label>
                             <input type="number" id="height" name="height" class="form-control"
-                                placeholder="Enter height in centimeters" min="0" step="1" required>
+                                placeholder="Enter height in centimeters" min="30" max="300" step="1" required>
                             <div class="range-container" style="margin-top: 10px;">
-                                <input type="range" id="heightRange" min="0" max="250" step="1" value="170"
+                                <input type="range" id="heightRange" min="30" max="250" step="1" value="170"
                                     style="width: 100%;">
                                 <div
                                     style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-medium);">
-                                    <span>0 cm</span>
+                                    <span>30 cm</span>
                                     <span>250 cm</span>
                                 </div>
                             </div>
+                            <small class="field-hint">Between 30 and 300 cm</small>
                         </div>
                     </div>
 
@@ -1183,7 +1210,8 @@ a:visited {
                     <div class="form-group">
                         <label for="allergies"><i class="fas fa-allergies"></i> Allergies</label>
                         <input type="text" id="allergies" name="allergies" class="form-control"
-                            placeholder="List any allergies you have (separated by commas)">
+                            placeholder="List any allergies you have (separated by commas)" maxlength="500">
+                        <small class="field-hint">Optional. Max 500 characters, comma separated</small>
                     </div>
 
                     <div class="form-actions">
@@ -1322,6 +1350,25 @@ a:visited {
         if (initiallySelected) {
             genderInput.value = initiallySelected.dataset.gender;
         }
+
+        // Toast helper (inline fallback if shared.js Toast not loaded)
+        function showToast(msg, type) {
+            if (typeof Toast !== 'undefined' && Toast.show) {
+                Toast[type === 'error' ? 'error' : 'warning'](msg);
+            } else {
+                alert(msg);
+            }
+        }
+
+        // -- DOB: set max to 18 years ago, set min to 120 years ago --
+        const today = new Date();
+        const minAge = 18;
+        const maxAge = 120;
+        const maxDob = new Date(today.getFullYear() - minAge, today.getMonth(), today.getDate());
+        const minDob = new Date(today.getFullYear() - maxAge, today.getMonth(), today.getDate());
+        dobInput.setAttribute('max', maxDob.toISOString().split('T')[0]);
+        dobInput.setAttribute('min', minDob.toISOString().split('T')[0]);
+
         genderOptions.forEach(option => {
             option.addEventListener('click', function () {
                 genderOptions.forEach(opt => opt.classList.remove('selected'));
@@ -1336,29 +1383,51 @@ a:visited {
                 genderInput.value = selected;
             });
         });
+        // -- Validation helpers --
+        function validateName() {
+            const val = document.getElementById('fullName').value.trim();
+            if (!val) { showToast('Please enter your name', 'error'); return false; }
+            if (val.length < 2) { showToast('Name must be at least 2 characters', 'error'); return false; }
+            if (val.length > 100) { showToast('Name must be under 100 characters', 'error'); return false; }
+            return true;
+        }
+
+        function validateDob() {
+            const val = dobInput.value;
+            if (!val) { showToast('Please enter your date of birth', 'error'); return false; }
+            const dob = new Date(val);
+            if (isNaN(dob.getTime())) { showToast('Invalid date of birth', 'error'); return false; }
+            if (dob > new Date()) { showToast('Date of birth cannot be in the future', 'error'); return false; }
+            if (dob > maxDob) { showToast('You must be at least 18 years old', 'error'); return false; }
+            if (dob < minDob) { showToast('Please enter a valid date of birth', 'error'); return false; }
+            return true;
+        }
+
+        function validateWeight() {
+            const val = parseFloat(weightInput.value);
+            if (!weightInput.value.trim()) { showToast('Please enter your weight', 'error'); return false; }
+            if (isNaN(val) || val < 2 || val > 500) { showToast('Weight must be between 2 and 500 kg', 'error'); return false; }
+            return true;
+        }
+
+        function validateHeight() {
+            const val = parseFloat(heightInput.value);
+            if (!heightInput.value.trim()) { showToast('Please enter your height', 'error'); return false; }
+            if (isNaN(val) || val < 30 || val > 300) { showToast('Height must be between 30 and 300 cm', 'error'); return false; }
+            return true;
+        }
+
         nextBtn1.addEventListener('click', function () {
-            if (document.getElementById('fullName').value.trim() === '') {
-                alert('Please enter your name');
-                return;
-            }
-            if (dobInput.value.trim() === '') {
-                alert('Please enter your date of birth');
-                return;
-            }
+            if (!validateName()) return;
+            if (!validateDob()) return;
             step1.style.display = 'none';
             step2.style.display = 'block';
             updateProgress(2);
         });
 
         nextBtn2.addEventListener('click', function () {
-            if (weightInput.value.trim() === '') {
-                alert('Please enter your weight');
-                return;
-            }
-            if (heightInput.value.trim() === '') {
-                alert('Please enter your height');
-                return;
-            }
+            if (!validateWeight()) return;
+            if (!validateHeight()) return;
             step2.style.display = 'none';
             step3.style.display = 'block';
             updateProgress(3);
@@ -1378,7 +1447,7 @@ a:visited {
         profileForm.addEventListener('submit', function (e) {
             if (document.getElementById('bloodGroup').value === '') {
                 e.preventDefault();
-                alert('Please select your blood group');
+                showToast('Please select your blood group', 'error');
                 return;
             }
             let finalGender = genderInput.value;
@@ -1386,13 +1455,18 @@ a:visited {
                 const cg = customGenderInput.value.trim();
                 if (!cg) {
                     e.preventDefault();
-                    alert('Please specify your gender');
+                    showToast('Please specify your gender', 'error');
                     return;
                 }
                 finalGender = cg;
             }
             genderInput.value = finalGender;
 
+            // Re-validate all before submit
+            if (!validateName()) { e.preventDefault(); return; }
+            if (!validateDob()) { e.preventDefault(); return; }
+            if (!validateWeight()) { e.preventDefault(); return; }
+            if (!validateHeight()) { e.preventDefault(); return; }
         });
         function updateProgress(step) {
             const stepIcons = document.querySelectorAll('.step-icon');
@@ -1418,17 +1492,26 @@ a:visited {
             weightInput.value = this.value;
         });
         weightInput.addEventListener('input', function () {
-            weightRange.value = this.value;
+            let val = parseFloat(this.value);
+            if (!isNaN(val)) {
+                if (val > 500) this.value = val = 500;
+                if (val >= 2 && val <= 200) weightRange.value = val;
+            }
         });
         heightRange.addEventListener('input', function () {
             heightInput.value = this.value;
         });
         heightInput.addEventListener('input', function () {
-            heightRange.value = this.value;
+            let val = parseFloat(this.value);
+            if (!isNaN(val)) {
+                if (val > 300) this.value = val = 300;
+                if (val >= 30 && val <= 250) heightRange.value = val;
+            }
         });
         weightInput.value = weightRange.value = 70;
         heightInput.value = heightRange.value = 170;
-        const today = new Date();
+
+        // Default DOB: 30 years ago
         const defaultDob = new Date(today.getFullYear() - 30, today.getMonth(), today.getDate());
         dobInput.value = defaultDob.toISOString().split('T')[0];
 

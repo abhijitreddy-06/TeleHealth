@@ -14,7 +14,7 @@ const APPOINTMENT_STATUS = Object.freeze({
 const VALID_STATUSES = Object.values(APPOINTMENT_STATUS);
 
 const GENDERS = Object.freeze(['male', 'female', 'other']);
-const BLOOD_GROUPS = Object.freeze(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']);
+const BLOOD_GROUPS = Object.freeze(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'unknown']);
 const RECORD_TYPES = Object.freeze(['general', 'prescription', 'lab_report', 'imaging', 'discharge_summary']);
 
 // ── File validation constants ──

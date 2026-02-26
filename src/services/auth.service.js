@@ -74,8 +74,20 @@ class AuthService {
         );
 
         const user = result.rows[0];
-        const valid = user ? await bcrypt.compare(password, user.password) : false;
-        if (!user || !valid) {
+
+        if (!user) {
+            const anyRole = await pool.query(
+                `SELECT role FROM users WHERE phone=$1`, [phone]
+            );
+            if (anyRole.rows.length) {
+                const existingRole = anyRole.rows[0].role === 'user' ? 'patient' : anyRole.rows[0].role;
+                throw new Error(`This phone number is registered as a ${existingRole} account`);
+            }
+            throw new Error('Invalid credentials');
+        }
+
+        const valid = await bcrypt.compare(password, user.password);
+        if (!valid) {
             throw new Error('Invalid credentials');
         }
 

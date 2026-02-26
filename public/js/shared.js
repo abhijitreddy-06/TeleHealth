@@ -3,6 +3,14 @@
    ============================================ */
 
 // ============================================
+// Immediate Theme Application (prevents flash)
+// ============================================
+(function() {
+    var saved = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+})();
+
+// ============================================
 // Toast Notification System
 // ============================================
 const Toast = {

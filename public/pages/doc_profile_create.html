@@ -429,7 +429,15 @@
         .form-group label i {
             color: var(--primary);
         }
-    
+
+        .field-hint {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--text-medium);
+            margin-top: 0.35rem;
+            opacity: 0.85;
+        }
+
         .form-control {
             width: 100%;
             padding: 0.85rem;
@@ -1077,7 +1085,8 @@ a:visited {
                     <div class="form-group">
                         <label for="fullName"><i class="fas fa-signature"></i> Full Name</label>
                         <input type="text" id="fullName" name="fullName" class="form-control"
-                            placeholder="Enter your full name" required>
+                            placeholder="Enter your full name" required minlength="2" maxlength="100">
+                        <small class="field-hint">2 to 100 characters</small>
                     </div>
 
                     <div class="form-actions">
@@ -1091,19 +1100,22 @@ a:visited {
                     <div class="form-group">
                         <label for="specialization"><i class="fas fa-user-md"></i> Specialization</label>
                         <input type="text" id="specialization" name="specialization" class="form-control"
-                            placeholder="e.g., Cardiologist, Pediatrician" required>
+                            placeholder="e.g., Cardiologist, Pediatrician" required minlength="2" maxlength="100">
+                        <small class="field-hint">2 to 100 characters</small>
                     </div>
 
                     <div class="form-group">
                         <label for="experience"><i class="fas fa-briefcase"></i> Experience (Years)</label>
                         <input type="number" id="experience" name="experience" class="form-control"
-                            placeholder="Years of experience" min="0" required>
+                            placeholder="Years of experience" min="0" max="70" required>
+                        <small class="field-hint">Between 0 and 70 years</small>
                     </div>
 
                     <div class="form-group">
                         <label for="qualification"><i class="fas fa-graduation-cap"></i> Qualification</label>
                         <input type="text" id="qualification" name="qualification" class="form-control"
-                            placeholder="e.g., MBBS, MD, MS">
+                            placeholder="e.g., MBBS, MD, MS" maxlength="200">
+                        <small class="field-hint">Optional. Max 200 characters</small>
                     </div>
 
                     <div class="form-actions">
@@ -1118,13 +1130,15 @@ a:visited {
                     <div class="form-group">
                         <label for="hospital"><i class="fas fa-hospital"></i> Hospital / Clinic Name</label>
                         <input type="text" id="hospital" name="hospital" class="form-control"
-                            placeholder="Where you practice">
+                            placeholder="Where you practice" maxlength="200">
+                        <small class="field-hint">Optional. Max 200 characters</small>
                     </div>
 
                     <div class="form-group">
                         <label for="bio"><i class="fas fa-notes-medical"></i> Bio</label>
                         <textarea id="bio" name="bio" rows="4" class="form-control"
-                            placeholder="Tell patients about your expertise and approach"></textarea>
+                            placeholder="Tell patients about your expertise and approach" maxlength="1000"></textarea>
+                        <small class="field-hint">Optional. Max 1000 characters</small>
                     </div>
 
                     <div class="form-actions">
@@ -1218,24 +1232,32 @@ const prevBtn2 = document.getElementById("prevBtn2");
 const fullNameInput = document.getElementById("fullName");
 const specializationInput = document.getElementById("specialization");
 const experienceInput = document.getElementById("experience");
-nextBtn1.addEventListener("click", () => {
-    if (!fullNameInput.value.trim()) {
-        alert("Please enter your full name");
-        return;
+
+// Toast helper
+function showToast(msg, type) {
+    if (typeof Toast !== 'undefined' && Toast.show) {
+        Toast[type === 'error' ? 'error' : 'warning'](msg);
+    } else {
+        alert(msg);
     }
+}
+
+nextBtn1.addEventListener("click", () => {
+    const name = fullNameInput.value.trim();
+    if (!name) { showToast("Please enter your full name", "error"); return; }
+    if (name.length < 2) { showToast("Name must be at least 2 characters", "error"); return; }
+    if (name.length > 100) { showToast("Name must be under 100 characters", "error"); return; }
     step1.style.display = "none";
     step2.style.display = "block";
     updateProgress(2);
 });
 nextBtn2.addEventListener("click", () => {
-    if (!specializationInput.value.trim()) {
-        alert("Please enter specialization");
-        return;
-    }
-    if (!experienceInput.value.trim()) {
-        alert("Please enter experience");
-        return;
-    }
+    const spec = specializationInput.value.trim();
+    if (!spec) { showToast("Please enter specialization", "error"); return; }
+    if (spec.length < 2) { showToast("Specialization must be at least 2 characters", "error"); return; }
+    const exp = parseFloat(experienceInput.value);
+    if (!experienceInput.value.trim()) { showToast("Please enter experience", "error"); return; }
+    if (isNaN(exp) || exp < 0 || exp > 70) { showToast("Experience must be between 0 and 70 years", "error"); return; }
     step2.style.display = "none";
     step3.style.display = "block";
     updateProgress(3);

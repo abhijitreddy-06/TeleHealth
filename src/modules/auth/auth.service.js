@@ -29,8 +29,17 @@ class AuthService {
     async authenticate(phone, password, role) {
         const user = await AuthModel.findByPhone(phone, role);
 
-        const valid = user ? await bcrypt.compare(password, user.password) : false;
-        if (!user || !valid) throw new AuthError('Invalid credentials');
+        if (!user) {
+            const otherRole = await AuthModel.findByPhoneAnyRole(phone);
+            if (otherRole) {
+                const roleLabel = otherRole.role === 'user' ? 'patient' : otherRole.role;
+                throw new AuthError(`This phone number is registered as a ${roleLabel} account`);
+            }
+            throw new AuthError('Invalid credentials');
+        }
+
+        const valid = await bcrypt.compare(password, user.password);
+        if (!valid) throw new AuthError('Invalid credentials');
 
         return { id: user.id, phone: user.phone, role };
     }

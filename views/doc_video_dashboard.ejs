@@ -335,6 +335,9 @@
         .info-value {
             color: var(--text-dark);
             font-weight: 600;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            min-width: 0;
         }
 
         .status-container {
@@ -982,7 +985,7 @@ a:visited {
                         <% if (appointment.allergies) { %>
                         <div class="info-item">
                             <span class="info-label">Allergies:</span>
-                            <span class="info-value" style="color: var(--error);"><%= appointment.allergies %></span>
+                            <span class="info-value" style="color: var(--error); word-break: break-word; overflow-wrap: break-word;"><%= appointment.allergies %></span>
                         </div>
                         <% } %>
 
