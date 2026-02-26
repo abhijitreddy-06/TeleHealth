@@ -290,11 +290,35 @@ function formatTime(timeString) {
 }
 
 // ============================================
+// Profile Dropdown
+// ============================================
+function initProfileDropdown() {
+    document.querySelectorAll('.profile-btn').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            var dd = btn.nextElementSibling;
+            document.querySelectorAll('.dropdown-menu').forEach(function(m) {
+                if (m !== dd) m.classList.remove('active');
+            });
+            dd.classList.toggle('active');
+        });
+    });
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.profile-dropdown')) {
+            document.querySelectorAll('.dropdown-menu').forEach(function(m) {
+                m.classList.remove('active');
+            });
+        }
+    });
+}
+
+// ============================================
 // Initialize on DOM Ready
 // ============================================
 document.addEventListener('DOMContentLoaded', function () {
     initTheme();
     initMobileMenu();
+    initProfileDropdown();
 
     // Show toast from sessionStorage (set by server-side redirects)
     const toastError = sessionStorage.getItem('toastError');
