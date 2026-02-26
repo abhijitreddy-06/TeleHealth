@@ -113,7 +113,7 @@
 
         .nav-links {
             display: flex;
-            gap: 2rem;
+            gap: 1rem;
             align-items: center;
         }
 
@@ -324,23 +324,23 @@
         }
 
         .profile-item {
-            margin-bottom: 1.5rem;
+            margin-bottom: 0;
         }
 
         .profile-item label {
             display: block;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-medium);
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.3rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .profile-item .value {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 500;
             color: var(--text-dark);
-            padding: 0.8rem 1rem;
+            padding: 0.6rem 0.8rem;
             background-color: rgba(56, 189, 248, 0.05);
             border-radius: 8px;
             border-left: 3px solid var(--primary);
@@ -664,12 +664,13 @@
             </a>
 
             <div class="nav-links">
-                <a href="/user_home" class="active"><i class="fas fa-home"></i> Home</a>
-                <a href="/predict"><i class="fas fa-robot"></i>AI Pre Advice</a>
-                <a href="/user_video_dashboard"><i class="fas fa-video"></i>video</a>
-                <a href="/appointments"><i class="fas fa-user-md"></i>Appointments</a>
+                <a href="/user_home"><i class="fas fa-home"></i> Home</a>
+                <a href="/predict"><i class="fas fa-robot"></i> AI Pre Advice</a>
+                <a href="/user_video_dashboard"><i class="fas fa-video"></i> Video</a>
+                <a href="/pharmacy"><i class="fas fa-pills"></i> Pharmacy</a>
+                <a href="/appointments"><i class="fas fa-user-md"></i> Appointments</a>
                 <a href="/records"><i class="fas fa-folder"></i> My Records</a>
-                <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
+                <a href="/user_profile" class="active"><i class="fas fa-user-circle"></i> Profile</a>
                 <button class="theme-toggle" id="themeToggle">
                     <i class="fas fa-moon"></i>
                 </button>
@@ -691,12 +692,13 @@
         <button class="close-menu" id="closeMenu">
             <i class="fas fa-times"></i>
         </button>
-        <a href="/user_home" class="active"><i class="fas fa-home"></i> Home</a>
-        <a href="/predict"><i class="fas fa-robot"></i>AI Pre Advice</a>
-        <a href="/user_video_dashboard"><i class="fas fa-video"></i>video</a>
-        <a href="/appointments"><i class="fas fa-user-md"></i>Appointments</a>
+        <a href="/user_home"><i class="fas fa-home"></i> Home</a>
+        <a href="/predict"><i class="fas fa-robot"></i> AI Pre Advice</a>
+        <a href="/user_video_dashboard"><i class="fas fa-video"></i> Video</a>
+        <a href="/pharmacy"><i class="fas fa-pills"></i> Pharmacy</a>
+        <a href="/appointments"><i class="fas fa-user-md"></i> Appointments</a>
         <a href="/records"><i class="fas fa-folder"></i> My Records</a>
-        <a href="/user_profile"><i class="fas fa-user-circle"></i> Profile</a>
+        <a href="/user_profile" class="active"><i class="fas fa-user-circle"></i> Profile</a>
     </div>
 
     <section class="profile-section">
