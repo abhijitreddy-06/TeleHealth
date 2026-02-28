@@ -181,12 +181,12 @@ class AppointmentService {
     }
 
     async rescheduleAppointment(appointmentId, userId, newDoctorId, newDate, newTime, lockToken, symptoms) {
-        // Enforce 24-hour advance booking for the new slot
-        const newDateTime = new Date(`${newDate}T${newTime}`);
-        const minBookingTime = new Date(Date.now() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
-        if (newDateTime <= minBookingTime) {
-            throw new AppError('Appointments must be booked at least 24 hours in advance.', 400);
-        }
+        // Enforce 24-hour advance booking for the new slot (DISABLED - patients can book anytime)
+        // const newDateTime = new Date(`${newDate}T${newTime}`);
+        // const minBookingTime = new Date(Date.now() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
+        // if (newDateTime <= minBookingTime) {
+        //     throw new AppError('Appointments must be booked at least 24 hours in advance.', 400);
+        // }
 
         // Verify lock for the new slot
         if (lockToken) {

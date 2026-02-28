@@ -133,17 +133,17 @@ class ScheduleService {
         // 5. Get locked slots from Redis
         const lockedSet = await this._getLockedSlots(doctorId, date);
 
-        // 6. Filter slots that are within the 24-hour advance booking window
-        const now = new Date();
-        const minBookableTime = new Date(now.getTime() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
+        // 6. Filter slots that are within the 24-hour advance booking window (DISABLED - patients can book anytime)
+        // const now = new Date();
+        // const minBookableTime = new Date(now.getTime() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
 
         // 7. Build result with status
         const result = [];
         for (const time of allSlots) {
-            const slotDateTime = new Date(`${date}T${time}`);
-            if (slotDateTime <= minBookableTime) {
-                continue; // Skip slots within 24-hour window
-            }
+            // const slotDateTime = new Date(`${date}T${time}`);
+            // if (slotDateTime <= minBookableTime) {
+            //     continue; // Skip slots within 24-hour window
+            // }
 
             let status = 'available';
             if (bookedSet.has(time)) {
