@@ -939,6 +939,7 @@
                         <a href="/pharmacy/wishlist"><i class="fas fa-heart"></i> Wishlist</a>
                         <a href="/pharmacy/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
                         <a href="/pharmacy/orders"><i class="fas fa-box"></i> My Orders</a>
+                        <a href="/logout" style="color: var(--error);"><i class="fas fa-sign-out-alt"></i> Log Out</a>
                     </div>
                 </div>
                 <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
@@ -1364,8 +1365,8 @@
                     updateStatus('Call connected', 'connected');
                     reconnectAttempts = 0;
                 } else if (state === 'disconnected') {
-                    updateStatus('Connection unstable', 'warning');
-                    showToast('Connection unstable', 'warning');
+                    // Transient state - wait before showing warning
+                    console.log('ICE disconnected (transient, may recover)');
                 } else if (state === 'failed') {
                     updateStatus('Connection failed, attempting ICE restart...', 'disconnected');
                     showToast('Connection lost. Reconnecting...', 'error');
@@ -1509,6 +1510,23 @@
                 }
 
                 socket.emit('user-ready-ack', { roomId: ROOM_ID });
+
+                // Fallback: if doctor's offer doesn't arrive within 2s, patient creates an offer
+                setTimeout(async () => {
+                    if (peerConnection && !remoteVideo.srcObject && peerConnection.signalingState === 'stable') {
+                        console.log('Doctor offer not received, patient creating offer as fallback...');
+                        try {
+                            const offer = await peerConnection.createOffer({
+                                offerToReceiveAudio: true,
+                                offerToReceiveVideo: true
+                            });
+                            await peerConnection.setLocalDescription(offer);
+                            socket.emit('signal', { roomId: ROOM_ID, offer: offer });
+                        } catch (err) {
+                            console.error('Fallback offer failed:', err);
+                        }
+                    }
+                }, 2000);
             });
 
             socket.on('signal', async (data) => {
@@ -1628,7 +1646,10 @@
 
             socket.on('error', (error) => {
                 console.error('Socket error:', error);
-                showToast('Connection error: ' + error.message, 'error');
+                // Don't show error toast if the call is already ending/ended
+                if (!callEnded) {
+                    showToast('Connection error: ' + error.message, 'error');
+                }
             });
         }
 

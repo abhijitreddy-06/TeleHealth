@@ -1462,10 +1462,10 @@ html, body {
 
             if (state === 'connected' || state === 'completed') {
                 updateStatus('Call connected', 'connected');
-                reconnectAttempts = 0; // Reset reconnect attempts on successful connection
+                reconnectAttempts = 0;
             } else if (state === 'disconnected') {
-                updateStatus('Connection unstable', 'warning');
-                showToast('Connection unstable', 'warning');
+                // Transient state - wait before showing warning
+                console.log('ICE disconnected (transient, may recover)');
             } else if (state === 'failed') {
                 updateStatus('Connection failed, attempting ICE restart...', 'error');
                 // ICE restart instead of full reconnection
@@ -1636,12 +1636,13 @@ html, body {
                 createPeerConnection();
             }
 
-            setTimeout(async () => {
-                if (peerConnection && peerConnection.signalingState === 'stable' && !remoteVideo.srcObject) {
-                    console.log('Sending offer to patient...');
-                    await createOffer();
-                }
-            }, 500);
+            // Doctor always creates the offer when patient is ready
+            try {
+                console.log('Sending offer to patient...');
+                await createOffer();
+            } catch (err) {
+                console.error('Failed to create offer on user-ready:', err);
+            }
         });
 
         socket.on('user-ready-ack', async () => {
@@ -1650,12 +1651,15 @@ html, body {
                 createPeerConnection();
             }
 
-            setTimeout(async () => {
-                if (peerConnection && peerConnection.signalingState === 'stable' && !remoteVideo.srcObject) {
+            // Send offer if we don't have a remote connection yet
+            if (peerConnection && !remoteVideo.srcObject) {
+                try {
                     console.log('Sending offer after ack...');
                     await createOffer();
+                } catch (err) {
+                    console.error('Failed to create offer on ack:', err);
                 }
-            }, 300);
+            }
         });
 
         socket.on('signal', async (data) => {
@@ -1723,22 +1727,23 @@ html, body {
 
         socket.on('call-ended-confirmed', (data) => {
             console.log('Call end confirmed:', data);
-            showToast('Call ended successfully', 'success');
-            setTimeout(() => {
-                window.location.href = "/doc_video_dashboard";
-            }, 2000);
         });
 
         socket.on('error', (error) => {
             console.error('Socket error:', error);
-            showToast('Connection error: ' + error.message, 'error');
+            // Don't show error toast if the call is already ending/ended
+            if (!callEnded) {
+                showToast('Connection error: ' + error.message, 'error');
+            }
         });
 
         socket.on('connect_error', (error) => {
             console.error('Socket connection error:', error);
-            updateStatus('Connection error', 'error');
-            if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-                attemptReconnect();
+            if (!callEnded) {
+                updateStatus('Connection error', 'error');
+                if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                    attemptReconnect();
+                }
             }
         });
 

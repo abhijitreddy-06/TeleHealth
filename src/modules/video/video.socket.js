@@ -201,15 +201,19 @@ module.exports = function (io) {
                 // Save prescription + complete appointment (existing transaction)
                 await VideoModel.endCallWithPrescription(roomId, appointmentId, notes);
 
-                // Save call metadata
-                await VideoModel.saveCallMetadata(roomId, {
-                    duration,
-                    disconnectReason: 'doctor_ended',
-                    startedAt: callStartedAt,
-                    endedAt: callEndedAt
-                });
+                // Save call metadata (non-critical)
+                try {
+                    await VideoModel.saveCallMetadata(roomId, {
+                        duration,
+                        disconnectReason: 'doctor_ended',
+                        startedAt: callStartedAt,
+                        endedAt: callEndedAt
+                    });
+                } catch (err) {
+                    logger.warn('Failed to save call metadata:', err.message);
+                }
 
-                // Update call session
+                // Update call session (non-critical)
                 try {
                     await VideoModel.updateCallSession(roomId, {
                         state: 'completed',
@@ -222,7 +226,7 @@ module.exports = function (io) {
                     logger.warn('Failed to update call session:', err.message);
                 }
 
-                // State machine -> completed
+                // State machine -> completed (non-critical)
                 try {
                     await callStateMachine.setState(roomId, 'completed', {
                         callEndedAt: callEndedAt.toISOString(),
@@ -253,10 +257,14 @@ module.exports = function (io) {
                     duration
                 });
 
-                // Broadcast to dashboards
-                const appointment = await VideoModel.getAppointmentForRoom(roomId);
-                if (appointment) {
-                    broadcastDashboardUpdate(io, { ...appointment, status: 'completed' });
+                // Broadcast to dashboards (non-critical)
+                try {
+                    const appointment = await VideoModel.getAppointmentForRoom(roomId);
+                    if (appointment) {
+                        broadcastDashboardUpdate(io, { ...appointment, status: 'completed' });
+                    }
+                } catch (err) {
+                    logger.warn('Failed to broadcast dashboard update:', err.message);
                 }
 
                 // Cleanup Redis state
@@ -270,7 +278,11 @@ module.exports = function (io) {
 
             } catch (error) {
                 logger.error('Error ending call:', error);
-                socket.emit('error', { message: 'Failed to end call properly' });
+                // Still confirm to doctor so the UI can proceed
+                socket.emit('call-ended-confirmed', {
+                    message: 'Call ended with warnings',
+                    duration: 0
+                });
             }
         });
 
