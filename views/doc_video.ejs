@@ -547,7 +547,7 @@
 
         
         .mobile-close-notes {
-            display: none;
+            display: flex;
             background: none;
             border: none;
             color: var(--text-dark);
@@ -1762,16 +1762,6 @@ html, body {
 
         try {
             const notes = notesText.value.trim();
-            if (notes) {
-                await fetch("/api/notes/save", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ roomId: ROOM_ID, notes })
-                });
-            }
-            await fetch(`/appointments/${APPOINTMENT_ID}/complete`, {
-                method: "POST"
-            });
 
             if (socket && socket.connected) {
                 await new Promise((resolve) => {
@@ -1791,6 +1781,18 @@ html, body {
                         appointmentId: APPOINTMENT_ID,
                         notes: notes
                     });
+                });
+            } else {
+                // Fallback: socket not connected, use REST APIs
+                if (notes) {
+                    await fetch("/api/notes/save", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ roomId: ROOM_ID, notes })
+                    });
+                }
+                await fetch(`/appointments/${APPOINTMENT_ID}/complete`, {
+                    method: "POST"
                 });
             }
 
