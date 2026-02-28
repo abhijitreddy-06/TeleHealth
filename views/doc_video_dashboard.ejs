@@ -1215,36 +1215,70 @@ a:visited {
 
             function handleDashboardUpdate(data) {
                 if (data.status === 'booked') {
-                    // New appointment booked - add to appointments list
+                    // New appointment booked - add to appointments list in real-time
                     const scrollList = document.querySelector('.appointments-scroll-list');
                     const noApptMsg = document.querySelector('.no-appointments-message');
                     if (noApptMsg) noApptMsg.remove();
 
-                    if (scrollList) {
+                    // Create the scroll list if it doesn't exist yet
+                    if (!scrollList) {
+                        const container = document.querySelector('.appointments-list-container');
+                        if (container) {
+                            const newList = document.createElement('div');
+                            newList.className = 'appointments-scroll-list';
+                            container.innerHTML = '';
+                            container.appendChild(newList);
+                        }
+                    }
+
+                    const list = document.querySelector('.appointments-scroll-list');
+                    if (list) {
+                        const patientName = data.patientName || 'New Patient';
+                        const dateStr = data.appointmentDate ? new Date(data.appointmentDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+                        const timeStr = data.appointmentTime || '';
+
                         const item = document.createElement('div');
                         item.className = 'appointment-list-item';
                         item.innerHTML = `
                             <div class="appt-patient-info">
                                 <i class="fas fa-user-circle"></i>
-                                <span class="appt-patient-name">New Patient</span>
+                                <div>
+                                    <span class="appt-patient-name">${patientName}</span>
+                                </div>
                             </div>
                             <div class="appt-details">
-                                <span class="appt-date"><i class="fas fa-calendar-day"></i> ${data.appointmentDate || ''}</span>
-                                <span class="appt-time"><i class="fas fa-clock"></i> ${data.appointmentTime || ''}</span>
+                                <span class="appt-date"><i class="fas fa-calendar-day"></i> ${dateStr}</span>
+                                <span class="appt-time"><i class="fas fa-clock"></i> ${timeStr}</span>
                             </div>
                             <div class="appt-status">
                                 <span class="status-badge scheduled"><i class="fas fa-hourglass-half"></i> Scheduled</span>
                             </div>
                         `;
-                        scrollList.appendChild(item);
+                        list.appendChild(item);
+                    }
+
+                    // Update the "upcoming appointment" card if there's no active one
+                    const noApptStatus = document.querySelector('.status.completed');
+                    if (noApptStatus && noApptStatus.textContent.includes('No upcoming appointments')) {
+                        const patientName = data.patientName || 'New Patient';
+                        const dateStr = data.appointmentDate ? new Date(data.appointmentDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+                        const timeStr = data.appointmentTime || '';
+
+                        const infoGroup = document.querySelector('.info-group');
+                        if (infoGroup) {
+                            const values = infoGroup.querySelectorAll('.info-value');
+                            if (values[0]) values[0].textContent = patientName;
+                            if (values[1]) values[1].textContent = dateStr;
+                            if (values[2]) values[2].textContent = timeStr;
+                        }
+                        noApptStatus.innerHTML = '<i class="fas fa-clock"></i> Upcoming';
+                        noApptStatus.classList.remove('completed');
+                        noApptStatus.classList.add('scheduled');
                     }
 
                     if (typeof Toast !== 'undefined' && Toast.success) {
                         Toast.success('A new appointment has been booked!', 'New Appointment');
                     }
-
-                    // Reload to get full patient details and update upcoming card
-                    setTimeout(() => window.location.reload(), 2000);
 
                 } else if (data.status === 'started' && data.roomId) {
                     // Update the upcoming card to show "Join Call" instead of "Start Call"
@@ -1282,14 +1316,33 @@ a:visited {
                     if (typeof Toast !== 'undefined' && Toast.info) {
                         Toast.info('An appointment has been cancelled.', 'Cancelled');
                     }
-                    // Reload to refresh the full list
-                    setTimeout(() => window.location.reload(), 1500);
+                    // Remove the cancelled appointment from the list
+                    if (data.appointmentId) {
+                        const listItems = document.querySelectorAll('.appointment-list-item');
+                        listItems.forEach(item => {
+                            const badge = item.querySelector('.status-badge');
+                            if (badge) {
+                                item.style.opacity = '0.5';
+                                badge.className = 'status-badge cancelled';
+                                badge.innerHTML = '<i class="fas fa-times-circle"></i> Cancelled';
+                            }
+                        });
+                    }
 
                 } else if (data.status === 'completed') {
                     if (typeof Toast !== 'undefined' && Toast.success) {
                         Toast.success('Appointment completed.', 'Completed');
                     }
-                    setTimeout(() => window.location.reload(), 1500);
+                    // Update the list item to show completed
+                    const listItems = document.querySelectorAll('.appointment-list-item.in-progress');
+                    listItems.forEach(item => {
+                        const badge = item.querySelector('.status-badge');
+                        if (badge) {
+                            badge.className = 'status-badge completed';
+                            badge.innerHTML = '<i class="fas fa-check-circle"></i> Completed';
+                            item.classList.remove('in-progress');
+                        }
+                    });
                 }
             }
 

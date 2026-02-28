@@ -1334,16 +1334,23 @@
             }
             peerConnection.ontrack = (event) => {
                 console.log('Received remote track:', event.track.kind);
-                if (!remoteVideo.srcObject) {
-                    remoteVideo.srcObject = event.streams[0];
+                if (event.streams && event.streams[0]) {
+                    if (remoteVideo.srcObject !== event.streams[0]) {
+                        remoteVideo.srcObject = event.streams[0];
+                    }
+                } else {
+                    // Fallback: create a new MediaStream if streams array is empty
+                    if (!remoteVideo.srcObject) {
+                        remoteVideo.srcObject = new MediaStream();
+                    }
+                    remoteVideo.srcObject.addTrack(event.track);
+                }
+                remoteVideo.play().catch(e => console.log('Remote video play error:', e));
+                if (!callStartTime) {
                     updateStatus('Call connected', 'connected');
                     startTimer();
                     startNetworkQualityMonitoring();
                     showToast('Connected to doctor', 'success');
-                    remoteVideo.onloadedmetadata = () => {
-                        console.log('Remote video metadata loaded');
-                        remoteVideo.play().catch(e => console.log('Remote video play error:', e));
-                    };
                 }
             };
             peerConnection.onicecandidate = (event) => {

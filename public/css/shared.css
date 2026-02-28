@@ -57,7 +57,6 @@
 body {
   background-color: var(--background);
   color: var(--text-dark);
-  transition: var(--transition);
   min-height: 100vh;
   display: flex;
   flex-direction: column;

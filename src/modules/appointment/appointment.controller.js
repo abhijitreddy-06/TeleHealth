@@ -32,6 +32,7 @@ exports.bookAppointment = async (req, res) => {
             status: 'booked',
             doctorId: req.body.doctorId,
             userId: req.user.id,
+            patientName: req.user.name || req.user.username || 'Patient',
             appointmentDate: req.body.appointment_date,
             appointmentTime: req.body.appointment_time,
             timestamp: new Date().toISOString()
