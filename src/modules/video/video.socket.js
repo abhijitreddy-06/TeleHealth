@@ -68,14 +68,14 @@ module.exports = function (io) {
                     return socket.emit('error', { message: 'You are not authorized to access this room' });
                 }
 
-                // 3. Time window validation
-                const withinWindow = await VideoModel.isWithinTimeWindow(
-                    appointment.id, TIME_WINDOW.BEFORE_MINUTES, TIME_WINDOW.AFTER_MINUTES
-                );
-                if (!withinWindow) {
-                    logger.warn(`Time window violation: user ${userId} for appointment ${appointment.id}`);
-                    return socket.emit('error', { message: 'Video call is not available outside the appointment time window' });
-                }
+                // 3. Time window validation (DISABLED - calls can be started anytime)
+                // const withinWindow = await VideoModel.isWithinTimeWindow(
+                //     appointment.id, TIME_WINDOW.BEFORE_MINUTES, TIME_WINDOW.AFTER_MINUTES
+                // );
+                // if (!withinWindow) {
+                //     logger.warn(`Time window violation: user ${userId} for appointment ${appointment.id}`);
+                //     return socket.emit('error', { message: 'Video call is not available outside the appointment time window' });
+                // }
 
                 // 4. Store metadata on socket
                 socket.roomId = roomId;

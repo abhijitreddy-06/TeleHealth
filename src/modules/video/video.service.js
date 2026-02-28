@@ -85,17 +85,18 @@ class VideoService {
         return appointment;
     }
 
-    async validateTimeWindow(appointmentId) {
-        const withinWindow = await VideoModel.isWithinTimeWindow(
-            appointmentId,
-            TIME_WINDOW.BEFORE_MINUTES,
-            TIME_WINDOW.AFTER_MINUTES
-        );
-        if (!withinWindow) {
-            throw new AppError('Video call is not available outside the appointment time window', 403);
-        }
-        return true;
-    }
+    // validateTimeWindow (DISABLED - calls can be started anytime)
+    // async validateTimeWindow(appointmentId) {
+    //     const withinWindow = await VideoModel.isWithinTimeWindow(
+    //         appointmentId,
+    //         TIME_WINDOW.BEFORE_MINUTES,
+    //         TIME_WINDOW.AFTER_MINUTES
+    //     );
+    //     if (!withinWindow) {
+    //         throw new AppError('Video call is not available outside the appointment time window', 403);
+    //     }
+    //     return true;
+    // }
 
     async saveCallMetadata(roomId, metadata) {
         return VideoModel.saveCallMetadata(roomId, metadata);
