@@ -1679,7 +1679,7 @@
             <h2><i class="fas fa-calendar-alt"></i> Select Date & Time</h2>
             <p style="color: var(--text-medium); font-size: 0.9rem; margin-bottom: 1rem;">
                 <i class="fas fa-info-circle" style="color: var(--primary);"></i>
-                Appointments must be booked at least 24 hours in advance.
+                Select a date and available time slot to book your appointment.
             </p>
 
             <div class="selected-doctor-banner" id="selectedDoctorBanner">
@@ -1897,12 +1897,11 @@
         }
 
         function isPast(date) {
-            const tomorrow = new Date();
-            tomorrow.setHours(0, 0, 0, 0);
-            tomorrow.setDate(tomorrow.getDate() + 1);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
             const d = new Date(date);
             d.setHours(0, 0, 0, 0);
-            return d < tomorrow; // Today and before are unbookable (24h rule)
+            return d < today; // Only past dates are unbookable, today is allowed
         }
 
         async function apiFetch(url, opts = {}) {
@@ -2062,7 +2061,7 @@
 
                 if (date.getTime() === today.getTime()) el.classList.add('today');
 
-                if (date <= today) {
+                if (date < today) {
                     el.classList.add('past');
                     el.classList.add('disabled');
                 } else {
