@@ -21,11 +21,11 @@ class AppointmentService {
 
     async bookAppointment(userId, doctorId, date, time, lockToken, symptoms) {
         // Enforce 24-hour advance booking
-        // const appointmentDateTime = new Date(`${date}T${time}`);
-        // const minBookingTime = new Date(Date.now() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
-        // if (appointmentDateTime <= minBookingTime) {
-        //     throw new AppError('Appointments must be booked at least 24 hours in advance.', 400);
-        // }
+        const appointmentDateTime = new Date(`${date}T${time}`);
+        const minBookingTime = new Date(Date.now() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
+        if (appointmentDateTime <= minBookingTime) {
+            throw new AppError('Appointments must be booked at least 24 hours in advance.', 400);
+        }
 
         // Layer 1: Verify Redis lock ownership (if lockToken provided)
         if (lockToken) {
@@ -181,12 +181,12 @@ class AppointmentService {
     }
 
     async rescheduleAppointment(appointmentId, userId, newDoctorId, newDate, newTime, lockToken, symptoms) {
-        // Enforce 24-hour advance booking for the new slot (DISABLED - patients can book anytime)
-        // const newDateTime = new Date(`${newDate}T${newTime}`);
-        // const minBookingTime = new Date(Date.now() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
-        // if (newDateTime <= minBookingTime) {
-        //     throw new AppError('Appointments must be booked at least 24 hours in advance.', 400);
-        // }
+        // Enforce 24-hour advance booking for the new slot
+        const newDateTime = new Date(`${newDate}T${newTime}`);
+        const minBookingTime = new Date(Date.now() + ADVANCE_BOOKING_HOURS * 60 * 60 * 1000);
+        if (newDateTime <= minBookingTime) {
+            throw new AppError('Appointments must be booked at least 24 hours in advance.', 400);
+        }
 
         // Verify lock for the new slot
         if (lockToken) {
