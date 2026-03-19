@@ -13,7 +13,6 @@ const {
 } = require('./schedule.schema');
 
 // Doctor schedule management
-router.get('/doc_schedule', authenticate, authorize('doctor'), scheduleController.renderDoctorSchedulePage);
 router.get('/api/schedule/my', authenticate, authorize('doctor'), scheduleController.getDoctorSchedule);
 router.put('/api/schedule/my', authenticate, authorize('doctor'), validate(updateScheduleSchema), scheduleController.updateDoctorSchedule);
 router.post('/api/schedule/override', authenticate, authorize('doctor'), validate(addOverrideSchema), scheduleController.addOverride);

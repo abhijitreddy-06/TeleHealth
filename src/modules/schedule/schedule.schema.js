@@ -14,14 +14,8 @@ const updateScheduleSchema = z.object({
 
 const addOverrideSchema = z.object({
     date: z.string().min(1, 'Date is required'),
-    type: z.enum(['unavailable', 'custom']),
-    startTime: z.string().regex(timeRegex).optional(),
-    endTime: z.string().regex(timeRegex).optional(),
-    reason: z.string().max(255).optional()
-}).refine(data => {
-    if (data.type === 'custom') return data.startTime && data.endTime;
-    return true;
-}, { message: 'Custom overrides require start and end times' });
+    reason: z.string().trim().min(1, 'Reason is required').max(255, 'Reason must be at most 255 characters')
+});
 
 const deleteOverrideParam = z.object({
     id: z.coerce.number().int().positive()

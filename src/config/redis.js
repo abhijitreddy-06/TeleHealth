@@ -3,13 +3,11 @@ require('dotenv').config();
 
 let redisClient = null;
 let isConnected = false;
-let connectionAttempted = false;
+let lastConnectAttemptAt = 0;
+
+const RETRY_GAP_MS = 10000;
 
 const getClient = async () => {
-    if (connectionAttempted && !isConnected) {
-        return null;
-    }
-
     if (!redisClient) {
         redisClient = createClient({
             url: process.env.REDIS_URL,
@@ -33,12 +31,23 @@ const getClient = async () => {
             isConnected = true;
             console.log('✅ Redis reconnected');
         });
+
+        redisClient.on('end', () => {
+            isConnected = false;
+        });
     }
 
-    if (!isConnected && !connectionAttempted) {
-        connectionAttempted = true;
+    if (!isConnected) {
+        const now = Date.now();
+        if (now - lastConnectAttemptAt < RETRY_GAP_MS) {
+            return null;
+        }
+        lastConnectAttemptAt = now;
+
         try {
-            await redisClient.connect();
+            if (!redisClient.isOpen) {
+                await redisClient.connect();
+            }
             isConnected = true;
             console.log('✅ Redis connected');
         } catch (err) {

@@ -6,6 +6,7 @@ const { AppError } = require('../../utils/AppError');
 
 const CANCEL_CUTOFF_HOURS = 2;
 const ADVANCE_BOOKING_HOURS = 24;
+const START_EARLY_WINDOW_MINUTES = 10;
 const PAGE_SIZE = 10;
 
 class AppointmentService {
@@ -89,8 +90,41 @@ class AppointmentService {
     }
 
     async startAppointment(appointmentId, doctorId) {
+        const target = await AppointmentModel.findByIdForDoctor(appointmentId, doctorId);
+        if (!target) {
+            throw new AppError('Appointment not found', 404);
+        }
+
+        if (target.status === 'started') {
+            throw new AppError('Appointment is already started', 400);
+        }
+
+        if (target.status !== 'scheduled') {
+            throw new AppError('Only scheduled appointments can be started', 400);
+        }
+
+        const inProgress = await AppointmentModel.findStartedForDoctor(doctorId);
+        if (inProgress && Number(inProgress.id) !== Number(appointmentId)) {
+            throw new AppError('Another appointment is already in progress. Complete it first.', 400);
+        }
+
+        const earliest = await AppointmentModel.findEarliestScheduledForDoctor(doctorId);
+        if (earliest && Number(earliest.id) !== Number(appointmentId)) {
+            throw new AppError('Start appointments in chronological order. Start the earliest one first.', 400);
+        }
+
+        const datePart = String(target.appointment_date || '').slice(0, 10);
+        const timePart = String(target.appointment_time || '').slice(0, 8);
+        const scheduledMs = new Date(`${datePart}T${timePart}`).getTime();
+        if (Number.isFinite(scheduledMs)) {
+            const earliestAllowedMs = scheduledMs - START_EARLY_WINDOW_MINUTES * 60 * 1000;
+            if (Date.now() < earliestAllowedMs) {
+                throw new AppError(`You can start this call only within ${START_EARLY_WINDOW_MINUTES} minutes of the scheduled time.`, 400);
+            }
+        }
+
         const result = await AppointmentModel.startAppointment(appointmentId, doctorId);
-        if (!result) throw new AppError('Appointment not found or already started', 400);
+        if (!result) throw new AppError('Unable to start appointment. Please refresh and try again.', 409);
         return result;
     }
 
@@ -264,14 +298,12 @@ class AppointmentService {
         return AppointmentModel.findDoctorAllAppointments(doctorId);
     }
 
-    async getUpcomingAppointments(userId, role, page = 1) {
-        const limit = PAGE_SIZE;
+    async getUpcomingAppointments(userId, role, page = 1, limit = PAGE_SIZE) {
         const offset = (page - 1) * limit;
         return AppointmentModel.findUpcoming(userId, role, limit, offset);
     }
 
-    async getAppointmentHistory(userId, role, page = 1) {
-        const limit = PAGE_SIZE;
+    async getAppointmentHistory(userId, role, page = 1, limit = PAGE_SIZE) {
         const offset = (page - 1) * limit;
         const { rows, total } = await AppointmentModel.findHistory(userId, role, limit, offset);
         return { appointments: rows, totalPages: Math.ceil(total / limit) || 1 };

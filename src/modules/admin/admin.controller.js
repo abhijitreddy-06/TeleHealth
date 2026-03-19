@@ -2,10 +2,6 @@ const catchAsync = require('../../utils/catchAsync');
 const adminService = require('./admin.service');
 const { accessTokenCookieOptions, refreshTokenCookieOptions } = require('../../config');
 
-const renderLogin = catchAsync(async (req, res) => {
-    res.render('admin_login');
-});
-
 const login = catchAsync(async (req, res) => {
     const { phone, password } = req.validated.body;
     const result = await adminService.login(phone, password);
@@ -22,10 +18,6 @@ const login = catchAsync(async (req, res) => {
     });
 });
 
-const renderDashboard = catchAsync(async (req, res) => {
-    const stats = await adminService.getDashboardStats();
-    res.render('admin_dashboard', { stats });
-});
 
 const getDashboardStats = catchAsync(async (req, res) => {
     const stats = await adminService.getDashboardStats();
@@ -156,9 +148,7 @@ const updateOrderStatus = catchAsync(async (req, res) => {
 });
 
 module.exports = {
-    renderLogin,
     login,
-    renderDashboard,
     getDashboardStats,
     listDoctors,
     listPatients,

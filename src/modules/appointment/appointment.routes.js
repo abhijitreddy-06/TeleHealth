@@ -6,8 +6,9 @@ const { bookAppointmentSchema, appointmentIdParam, cancelAppointmentSchema, resc
 const { validate } = require('../../middleware/validation');
 
 router.post('/appointments/book', authenticate, authorize('user'), validate(bookAppointmentSchema), appointmentController.bookAppointment);
-router.get('/api/appointments/user', authenticate, authorize('user'), appointmentController.getUserAppointments);
+router.get('/api/appointments/patient', authenticate, authorize('user'), appointmentController.getUserAppointments);
 router.get('/api/appointments/doctor', authenticate, authorize('doctor'), appointmentController.getDoctorAppointments);
+router.get('/api/appointments/doctor/all', authenticate, authorize('doctor'), appointmentController.getDoctorAllAppointments);
 router.get('/api/doctors', authenticate, authorize('user'), appointmentController.getAvailableDoctors);
 router.post('/appointments/:id/complete', authenticate, authorize('doctor'), validate(appointmentIdParam, 'params'), appointmentController.completeAppointment);
 router.get('/api/appointments/:id/status', authenticate, validate(appointmentIdParam, 'params'), appointmentController.getAppointmentStatus);

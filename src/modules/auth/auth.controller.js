@@ -1,16 +1,17 @@
 const authService = require('./auth.service');
 const config = require('../../config');
 const catchAsync = require('../../utils/catchAsync');
-const escapeHtml = require('../../utils/escapeHtml');
 
 function setTokenCookies(res, tokens) {
-    res.cookie('accessToken', tokens.accessToken, config.accessTokenCookieOptions);
-    res.cookie('refreshToken', tokens.refreshToken, config.refreshTokenCookieOptions);
+    const req = res.req;
+    res.cookie('accessToken', tokens.accessToken, config.getAccessTokenCookieOptions(req));
+    res.cookie('refreshToken', tokens.refreshToken, config.getRefreshTokenCookieOptions(req));
 }
 
 function clearAuthCookies(res) {
-    res.clearCookie('accessToken', config.clearCookieOptions);
-    res.clearCookie('refreshToken', config.clearCookieOptions);
+    const req = res.req;
+    res.clearCookie('accessToken', config.getClearCookieOptions(req));
+    res.clearCookie('refreshToken', config.getClearCookieOptions(req));
 }
 
 exports.userSignup = async (req, res, next) => {
@@ -22,12 +23,19 @@ exports.userSignup = async (req, res, next) => {
 
         const user = await authService.register(phone, password, 'user');
         const tokens = await authService.generateTokens(user);
+        const authState = await authService.getPostAuthState(user.id, user.role);
 
         setTokenCookies(res, tokens);
         res.setHeader('Cache-Control', 'no-cache, no-store');
-        res.redirect('/user_profile');
+
+        return res.json({
+            success: true,
+            message: 'Account created successfully',
+            ...authState,
+            redirect: authState.profileCreatePath
+        });
     } catch (err) {
-        res.send(`<script>sessionStorage.setItem('toastError','${escapeHtml(err.message)}');location='/user_signup';</script>`);
+        return res.status(400).json({ error: err.message });
     }
 };
 
@@ -37,11 +45,13 @@ exports.userLogin = async (req, res, next) => {
     try {
         const user = await authService.authenticate(phone, password, 'user');
         const tokens = await authService.generateTokens(user);
+        const authState = await authService.getPostAuthState(user.id, user.role);
 
         setTokenCookies(res, tokens);
-        res.redirect('/user_home');
+
+        return res.json({ success: true, role: authState.role, ...authState });
     } catch (err) {
-        res.send(`<script>sessionStorage.setItem('toastError','${escapeHtml(err.message)}');location='/user_login';</script>`);
+        return res.status(401).json({ error: err.message });
     }
 };
 
@@ -54,12 +64,19 @@ exports.docSignup = async (req, res, next) => {
 
         const doctor = await authService.register(phone, password, 'doctor');
         const tokens = await authService.generateTokens(doctor);
+        const authState = await authService.getPostAuthState(doctor.id, doctor.role);
 
         setTokenCookies(res, tokens);
         res.setHeader('Cache-Control', 'no-cache, no-store');
-        res.redirect('/doc_profile');
+
+        return res.json({
+            success: true,
+            message: 'Account created successfully',
+            ...authState,
+            redirect: authState.profileCreatePath
+        });
     } catch (err) {
-        res.send(`<script>sessionStorage.setItem('toastError','${escapeHtml(err.message)}');location='/doc_signup';</script>`);
+        return res.status(400).json({ error: err.message });
     }
 };
 
@@ -69,11 +86,13 @@ exports.docLogin = async (req, res, next) => {
     try {
         const doctor = await authService.authenticate(phone, password, 'doctor');
         const tokens = await authService.generateTokens(doctor);
+        const authState = await authService.getPostAuthState(doctor.id, doctor.role);
 
         setTokenCookies(res, tokens);
-        res.redirect('/doc_home');
+
+        return res.json({ success: true, role: authState.role, ...authState });
     } catch (err) {
-        res.send(`<script>sessionStorage.setItem('toastError','${escapeHtml(err.message)}');location='/doc_login';</script>`);
+        return res.status(401).json({ error: err.message });
     }
 };
 
@@ -95,7 +114,7 @@ exports.logout = catchAsync(async (req, res) => {
     }
 
     clearAuthCookies(res);
-    res.redirect('/role');
+    res.json({ success: true, message: 'Logged out successfully' });
 });
 
 exports.refreshToken = catchAsync(async (req, res) => {
@@ -111,4 +130,51 @@ exports.refreshToken = catchAsync(async (req, res) => {
 
     setTokenCookies(res, tokens);
     res.json({ success: true });
+});
+
+exports.getSession = catchAsync(async (req, res) => {
+    const accessToken = req.cookies.accessToken;
+    const refreshToken = req.cookies.refreshToken;
+
+    res.setHeader('Cache-Control', 'no-store');
+
+    if (!accessToken && !refreshToken) {
+        return res.json({ authenticated: false });
+    }
+
+    let user = null;
+
+    if (accessToken) {
+        try {
+            const payload = await authService.verifyAccessToken(accessToken);
+            user = { id: payload.id, role: payload.role };
+        } catch (err) {
+            user = null;
+        }
+    }
+
+    if (!user && refreshToken) {
+        try {
+            user = await authService.verifyRefreshToken(refreshToken);
+            await authService.revokeRefreshToken(refreshToken);
+            const tokens = await authService.generateTokens(user);
+            setTokenCookies(res, tokens);
+        } catch (err) {
+            clearAuthCookies(res);
+            return res.json({ authenticated: false });
+        }
+    }
+
+    if (!user) {
+        clearAuthCookies(res);
+        return res.json({ authenticated: false });
+    }
+
+    const authState = await authService.getPostAuthState(user.id, user.role);
+
+    return res.json({
+        authenticated: true,
+        userId: user.id,
+        ...authState
+    });
 });

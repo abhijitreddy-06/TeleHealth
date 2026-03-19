@@ -1,6 +1,5 @@
 const vaultService = require('./vault.service');
 const catchAsync = require('../../utils/catchAsync');
-const escapeHtml = require('../../utils/escapeHtml');
 
 exports.upload = async (req, res) => {
     try {
@@ -10,25 +9,10 @@ exports.upload = async (req, res) => {
             req.user.id, req.file, req.body.recordType || 'general'
         );
 
-        const acceptHeader = req.get('Accept') || '';
-        const isAjax = req.xhr || acceptHeader.includes('application/json');
-
-        if (isAjax) {
-            return res.json({ success: true, fileId: result.id, message: 'File uploaded successfully!' });
-        }
-
-        res.send(`<script>alert("File uploaded successfully!");window.location.href="/records";</script>`);
+        return res.json({ success: true, fileId: result.id, message: 'File uploaded successfully!' });
     } catch (err) {
         console.error(err);
-
-        const acceptHeader = req.get('Accept') || '';
-        const isAjax = req.xhr || acceptHeader.includes('application/json');
-
-        if (isAjax) {
-            return res.status(400).json({ success: false, error: err.message });
-        }
-
-        res.send(`<script>alert("Upload failed: ${escapeHtml(err.message)}");window.history.back();</script>`);
+        return res.status(400).json({ success: false, error: err.message });
     }
 };
 
@@ -40,13 +24,21 @@ exports.listFiles = catchAsync(async (req, res) => {
 exports.accessFile = async (req, res) => {
     try {
         const file = await vaultService.checkFileAccess(req.params.id, req.user.id, req.user.role);
-        res.setHeader('Content-Disposition', `attachment; filename="${file.file_name}"`);
-        res.redirect(file.file_path);
+        res.json({
+            success: true,
+            file: {
+                id: file.id,
+                fileName: file.file_name,
+                fileType: file.file_type,
+                fileSize: file.file_size,
+                url: file.file_path
+            }
+        });
     } catch (err) {
         console.error(err);
-        if (err.message.includes('not found')) return res.status(404).send('File not found');
-        if (err.message.includes('Access denied')) return res.status(403).send('Access denied');
-        res.status(500).send('Download failed');
+        if (err.message.includes('not found')) return res.status(404).json({ success: false, error: 'File not found' });
+        if (err.message.includes('Access denied')) return res.status(403).json({ success: false, error: 'Access denied' });
+        res.status(500).json({ success: false, error: 'Download failed' });
     }
 };
 

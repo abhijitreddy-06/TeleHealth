@@ -4,111 +4,119 @@ const catchAsync = require('../../utils/catchAsync');
 exports.getUserProfile = catchAsync(async (req, res) => {
     const profile = await profileService.getUserProfile(req.user.id);
 
-    if (!profile) return res.redirect('/user_profile_create');
+    if (!profile) {
+        return res.json({ profile: null, redirect: '/patient/profile/create' });
+    }
 
-    res.render('user_profile', {
-        profile: {
-            fullName: profile.full_name,
-            gender: profile.gender,
-            customGender: profile.custom_gender,
-            dob: profile.date_of_birth,
-            weight: profile.weight_kg,
-            height: profile.height_cm,
-            bloodGroup: profile.blood_group,
-            allergies: profile.allergies
-        }
-    });
+    const profileData = {
+        fullName: profile.full_name,
+        gender: profile.gender,
+        customGender: profile.custom_gender,
+        dob: profile.date_of_birth,
+        weight: profile.weight_kg,
+        height: profile.height_cm,
+        bloodGroup: profile.blood_group,
+        allergies: profile.allergies
+    };
+
+    return res.json({ profile: profileData });
 });
 
 exports.createUserProfile = catchAsync(async (req, res) => {
-    const { fullName, gender, customGender, dob, weight, height, bloodGroup, allergies } = req.body;
+    const { fullName, gender, customGender, dob, weight, height, bloodGroup, allergies } = req.validated?.body || req.body;
 
     await profileService.createOrUpdateUserProfile(req.user.id, {
         fullName, gender, customGender, dob, weight, height, bloodGroup, allergies
     });
 
-    res.redirect('/user_home');
+    return res.json({ success: true, message: 'Profile created', redirect: '/patient/home' });
 });
 
 exports.getDoctorProfile = catchAsync(async (req, res) => {
     const profile = await profileService.getDoctorProfile(req.user.id);
 
-    if (!profile) return res.redirect('/doc_profile_create');
+    if (!profile) {
+        return res.json({ profile: null, redirect: '/doctor/profile/create' });
+    }
 
-    res.render('doc_profile', {
-        profile: {
-            fullName: profile.full_name,
-            specialization: profile.specialization,
-            experience: profile.experience_years,
-            qualification: profile.qualification,
-            hospital: profile.hospital_name,
-            bio: profile.bio
-        }
-    });
+    const profileData = {
+        fullName: profile.full_name,
+        specialization: profile.specialization,
+        experience: profile.experience_years,
+        qualification: profile.qualification,
+        hospital: profile.hospital_name,
+        bio: profile.bio
+    };
+
+    return res.json({ profile: profileData });
 });
 
 exports.createDoctorProfile = catchAsync(async (req, res) => {
-    const { fullName, specialization, experience, qualification, hospital, bio } = req.body;
+    const { fullName, specialization, experience, qualification, hospital, bio } = req.validated?.body || req.body;
 
     await profileService.createOrUpdateDoctorProfile(req.user.id, {
         fullName, specialization, experience, qualification, hospital, bio
     });
 
-    res.redirect('/doc_home');
+    return res.json({ success: true, message: 'Profile created', redirect: '/doctor/home' });
 });
 
 exports.editUserProfileForm = catchAsync(async (req, res) => {
     const profile = await profileService.getUserProfile(req.user.id);
 
-    if (!profile) return res.redirect('/user_profile_create');
+    if (!profile) {
+        return res.json({ profile: null, redirect: '/patient/profile/create' });
+    }
 
-    res.render('user_profile_edit', {
-        profile: {
-            fullName: profile.full_name,
-            gender: profile.gender,
-            customGender: profile.custom_gender,
-            dob: profile.date_of_birth,
-            weight: profile.weight_kg,
-            height: profile.height_cm,
-            bloodGroup: profile.blood_group,
-            allergies: profile.allergies
-        }
-    });
+    const profileData = {
+        fullName: profile.full_name,
+        gender: profile.gender,
+        customGender: profile.custom_gender,
+        dob: profile.date_of_birth,
+        weight: profile.weight_kg,
+        height: profile.height_cm,
+        bloodGroup: profile.blood_group,
+        allergies: profile.allergies
+    };
+
+    return res.json({ profile: profileData });
 });
 
 exports.updateUserProfile = catchAsync(async (req, res) => {
-    const { fullName, gender, customGender, dob, weight, height, bloodGroup, allergies } = req.body;
+    const { fullName, gender, customGender, dob, weight, height, bloodGroup, allergies } = req.validated?.body || req.body;
 
     await profileService.createOrUpdateUserProfile(req.user.id, {
         fullName, gender, customGender, dob, weight, height, bloodGroup, allergies
     });
 
-    res.redirect('/user_profile');
+    return res.json({ success: true, message: 'Profile updated', redirect: '/patient/profile' });
 });
 
 exports.editDoctorProfileForm = catchAsync(async (req, res) => {
     const profile = await profileService.getDoctorProfile(req.user.id);
 
-    if (!profile) return res.redirect('/doc_profile_create');
+    if (!profile) {
+        return res.json({ profile: null, redirect: '/doctor/profile/create' });
+    }
 
-    res.render('doc_profile_edit', {
-        profile: {
-            fullName: profile.full_name,
-            specialization: profile.specialization,
-            experience: profile.experience_years,
-            qualification: profile.qualification,
-            hospital: profile.hospital_name,
-            bio: profile.bio
-        }
-    });
+    const profileData = {
+        fullName: profile.full_name,
+        specialization: profile.specialization,
+        experience: profile.experience_years,
+        qualification: profile.qualification,
+        hospital: profile.hospital_name,
+        bio: profile.bio
+    };
+
+    return res.json({ profile: profileData });
 });
 
 exports.updateDoctorProfile = catchAsync(async (req, res) => {
-    const { fullName, specialization, experience, qualification, hospital, bio } = req.body;
+    const { fullName, specialization, experience, qualification, hospital, bio } = req.validated?.body || req.body;
 
     await profileService.createOrUpdateDoctorProfile(req.user.id, {
         fullName, specialization, experience, qualification, hospital, bio
     });
 
-    res.redirect('/doc_profile');
+    return res.json({ success: true, message: 'Profile updated', redirect: '/doctor/profile' });
 });

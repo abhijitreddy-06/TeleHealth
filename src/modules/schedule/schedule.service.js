@@ -10,19 +10,19 @@ const ADVANCE_BOOKING_HOURS = 24;
 
 class ScheduleService {
     /**
-     * Get a doctor's weekly schedule and upcoming overrides (next 30 days).
+     * Get a doctor's weekly schedule and upcoming overrides.
      */
     async getDoctorSchedule(doctorId) {
         const weeklySchedule = await ScheduleModel.getWeeklySchedule(doctorId);
 
         const today = new Date();
-        const thirtyDaysOut = new Date();
-        thirtyDaysOut.setDate(today.getDate() + 30);
+        const twoYearsOut = new Date();
+        twoYearsOut.setDate(today.getDate() + 730);
 
         const overrides = await ScheduleModel.getOverrides(
             doctorId,
             today.toISOString().split('T')[0],
-            thirtyDaysOut.toISOString().split('T')[0]
+            twoYearsOut.toISOString().split('T')[0]
         );
 
         return { weeklySchedule, overrides };
@@ -58,8 +58,8 @@ class ScheduleService {
      */
     async addOverride(doctorId, data) {
         return await ScheduleModel.createOverride(
-            doctorId, data.date, data.type,
-            data.startTime || null, data.endTime || null, data.reason || null
+            doctorId, data.date, 'unavailable',
+            null, null, data.reason
         );
     }
 
@@ -224,7 +224,9 @@ class ScheduleService {
 
         try {
             const client = await getClient();
-            if (!client) return false;
+            // If Redis is unavailable, allow booking to proceed and rely on
+            // PostgreSQL transactional conflict checks as the source of truth.
+            if (!client) return true;
 
             const raw = await client.get(key);
             if (!raw) return false;
@@ -233,7 +235,8 @@ class ScheduleService {
             return data.lockToken === lockToken;
         } catch (err) {
             console.error('Redis verifyLock error (non-critical):', err.message);
-            return false;
+            // Degrade gracefully when Redis check fails.
+            return true;
         }
     }
 

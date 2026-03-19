@@ -1,6 +1,3 @@
-const { ZodError } = require('zod');
-const escapeHtml = require('../utils/escapeHtml');
-
 // ── Enums ──
 const ROLES = Object.freeze({ USER: 'user', DOCTOR: 'doctor', ADMIN: 'admin' });
 const VALID_ROLES = Object.values(ROLES);
@@ -42,24 +39,14 @@ function validate(schema, source = 'body') {
         const result = schema.safeParse(data);
 
         if (!result.success) {
-            const message = result.error.issues.map(i => i.message).join(', ');
-            const isApi = req.xhr
-                || (req.get('Accept') || '').includes('application/json')
-                || req.path.startsWith('/api/');
-
-            if (isApi) {
-                return res.status(400).json({
-                    error: 'Validation failed',
-                    details: result.error.issues.map(i => ({
-                        field: i.path.join('.'),
-                        message: i.message
-                    }))
-                });
-            }
-
-            return res.send(
-                `<script>alert('${escapeHtml(message)}');history.back()</script>`
-            );
+            return res.status(400).json({
+                message: 'Validation failed',
+                error: 'Validation failed',
+                details: result.error.issues.map(i => ({
+                    field: i.path.join('.'),
+                    message: i.message
+                }))
+            });
         }
 
         if (!req.validated) req.validated = {};

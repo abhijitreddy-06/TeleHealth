@@ -31,6 +31,22 @@ class AuthModel {
         return result.rows[0] || null;
     }
 
+    static async hasUserProfile(userId) {
+        const result = await pool.query(
+            `SELECT 1 FROM user_profile WHERE user_id = $1 LIMIT 1`,
+            [userId]
+        );
+        return result.rows.length > 0;
+    }
+
+    static async hasDoctorProfile(userId) {
+        const result = await pool.query(
+            `SELECT 1 FROM doc_profile WHERE doc_id = $1 LIMIT 1`,
+            [userId]
+        );
+        return result.rows.length > 0;
+    }
+
     static async storeRefreshToken(userId, role, token, expiresAt) {
         await pool.query(
             `INSERT INTO refresh_tokens (user_id, role, token, expires_at) VALUES ($1, $2, $3, $4)`,

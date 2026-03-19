@@ -3,17 +3,13 @@ const router = express.Router();
 const AiModel = require('../modules/ai/ai.model');
 const { authenticate } = require('../middleware/auth');
 
-router.get("/predict", authenticate, (req, res) => {
-    res.render("predict");
-});
-
 router.post("/api/ai/precheck", authenticate, async (req, res) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 60000);
 
     try {
         if (!req.body?.text || req.body.text.trim().length < 3) {
-            return res.status(400).json({ error: "Symptoms required" });
+            return res.status(400).json({ message: "Symptoms required", error: "Symptoms required" });
         }
 
         const response = await fetch(
@@ -41,13 +37,18 @@ router.post("/api/ai/precheck", authenticate, async (req, res) => {
             data.severity || "unknown"
         );
 
-        return res.json(data);
+        return res.json({
+            message: 'AI precheck completed',
+            ...data
+        });
 
     } catch (err) {
         clearTimeout(timeout);
         console.error("AI service error:", err);
 
-        return res.json({
+        return res.status(503).json({
+            message: 'AI service temporarily unavailable',
+            error: 'AI service temporarily unavailable',
             input: req.body?.text || "",
             severity: "unknown",
             recommendation: "AI service temporarily unavailable. Please try again later.",

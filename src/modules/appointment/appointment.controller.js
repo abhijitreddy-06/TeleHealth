@@ -1,6 +1,5 @@
 const appointmentService = require('./appointment.service');
 const catchAsync = require('../../utils/catchAsync');
-const escapeHtml = require('../../utils/escapeHtml');
 const logger = require('../../utils/logger');
 
 function broadcastDashboard(req, event, data) {
@@ -38,36 +37,18 @@ exports.bookAppointment = async (req, res) => {
             timestamp: new Date().toISOString()
         });
 
-        const acceptHeader = req.get('Accept') || '';
-        const isAjax = req.xhr || acceptHeader.includes('application/json');
-
-        if (isAjax) {
-            return res.json({ success: true, message: 'Appointment booked successfully!' });
-        }
-
-        res.redirect('/user_video_dashboard');
+        return res.json({ success: true, message: 'Appointment booked successfully!' });
     } catch (err) {
         console.error('Appointment booking error:', err.message);
 
-        const acceptHeader = req.get('Accept') || '';
-        const isAjax = req.xhr || acceptHeader.includes('application/json');
         const statusCode = err.statusCode || 500;
-
-        if (isAjax) {
-            return res.status(statusCode).json({ success: false, error: err.message });
-        }
-
-        if (err.message.includes('already have an active appointment')) {
-            return res.send(`<script>alert("${escapeHtml(err.message)}");window.location.href="/appointments";</script>`);
-        }
-
-        res.status(500).send(`<script>alert("Error booking appointment. Please try again.");window.location.href="/appointments";</script>`);
+        return res.status(statusCode).json({ success: false, error: err.message });
     }
 };
 
 exports.getUserAppointments = catchAsync(async (req, res) => {
     const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'user');
-    res.json(appointment ? [appointment] : []);
+    res.json({ appointment: appointment || null });
 });
 
 exports.startAppointment = catchAsync(async (req, res) => {
@@ -77,7 +58,12 @@ exports.startAppointment = catchAsync(async (req, res) => {
 
 exports.getDoctorAppointments = catchAsync(async (req, res) => {
     const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'doctor');
-    res.json(appointment ? [appointment] : []);
+    res.json({ appointment: appointment || null });
+});
+
+exports.getDoctorAllAppointments = catchAsync(async (req, res) => {
+    const appointments = await appointmentService.getDoctorAllAppointments(req.user.id);
+    res.json({ appointments });
 });
 
 exports.getAvailableDoctors = catchAsync(async (req, res) => {
@@ -87,7 +73,12 @@ exports.getAvailableDoctors = catchAsync(async (req, res) => {
 
 exports.completeAppointment = catchAsync(async (req, res) => {
     await appointmentService.completeAppointment(req.params.id, req.user.id);
-    res.sendStatus(200);
+    res.json({
+        success: true,
+        data: null,
+        error: null,
+        message: 'Appointment marked as completed'
+    });
 });
 
 exports.getAppointmentStatus = catchAsync(async (req, res) => {
@@ -100,7 +91,14 @@ exports.getRecentPrescription = catchAsync(async (req, res) => {
     if (!appointment) {
         return res.status(404).json({ error: 'No recent completed appointment found' });
     }
-    res.json({ roomId: appointment.room_id, appointmentId: appointment.id });
+    res.json({
+        appointment: {
+            id: appointment.id,
+            room_id: appointment.room_id
+        },
+        roomId: appointment.room_id,
+        appointmentId: appointment.id
+    });
 });
 
 exports.cancelAppointment = async (req, res) => {
@@ -160,13 +158,13 @@ exports.rescheduleAppointment = async (req, res) => {
 };
 
 exports.getUpcomingAppointments = catchAsync(async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const appointments = await appointmentService.getUpcomingAppointments(req.user.id, req.user.role, page);
-    res.json(appointments);
+    const { page, limit } = req.validated?.query || { page: 1, limit: 10 };
+    const appointments = await appointmentService.getUpcomingAppointments(req.user.id, req.user.role, page, limit);
+    res.json({ appointments });
 });
 
 exports.getAppointmentHistory = catchAsync(async (req, res) => {
-    const page = parseInt(req.query.page) || 1;
-    const appointments = await appointmentService.getAppointmentHistory(req.user.id, req.user.role, page);
+    const { page, limit } = req.validated?.query || { page: 1, limit: 10 };
+    const appointments = await appointmentService.getAppointmentHistory(req.user.id, req.user.role, page, limit);
     res.json(appointments);
 });

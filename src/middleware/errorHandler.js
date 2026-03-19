@@ -1,9 +1,6 @@
 const multer = require('multer');
 const { AppError } = require('../utils/AppError');
 const logger = require('../utils/logger');
-const path = require('path');
-
-const PROJECT_ROOT = path.join(__dirname, '..', '..');
 
 function errorHandler(err, req, res, next) {
     err.statusCode = err.statusCode || 500;
@@ -40,12 +37,14 @@ function errorHandler(err, req, res, next) {
 
     if (isApiRequest) {
         return res.status(err.statusCode).json({
+            message,
             error: message,
             ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
         });
     }
 
     res.status(err.statusCode).json({
+        message,
         error: message,
         ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
     });
@@ -53,7 +52,7 @@ function errorHandler(err, req, res, next) {
 
 function notFoundHandler(req, res) {
     logger.warn(`404: ${req.method} ${req.originalUrl}`);
-    res.status(404).sendFile(path.join(PROJECT_ROOT, 'public', 'pages', '404.html'));
+    res.status(404).json({ message: 'Route not found', error: 'Route not found' });
 }
 
 module.exports = { errorHandler, notFoundHandler };

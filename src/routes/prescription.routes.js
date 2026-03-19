@@ -24,20 +24,17 @@ router.get("/api/prescription/download/:roomId", authenticate, async (req, res) 
         console.error(err);
 
         if (err.message.includes('not found')) {
-            return res.status(404).send(`
-                <h2>Prescription Not Found</h2>
-                <p>${err.message}</p>
-                <p>Room ID: ${req.params.roomId}</p>
-                <a href="/user_video_dashboard">Return to Dashboard</a>
-            `);
+            return res.status(404).json({
+                message: err.message,
+                error: err.message,
+                roomId: req.params.roomId
+            });
         }
 
-        res.status(500).send(`
-            <h2>Error Generating Prescription</h2>
-            <p>We encountered an error while generating your prescription.</p>
-            <p><strong>Error:</strong> ${err.message}</p>
-            <a href="/user_video_dashboard">Return to Dashboard</a>
-        `);
+        res.status(500).json({
+            message: err.message || 'Error generating prescription',
+            error: err.message || 'Error generating prescription'
+        });
     }
 });
 

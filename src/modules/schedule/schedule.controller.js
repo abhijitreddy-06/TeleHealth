@@ -1,10 +1,6 @@
 const catchAsync = require('../../utils/catchAsync');
 const scheduleService = require('./schedule.service');
 
-const renderDoctorSchedulePage = catchAsync(async (req, res) => {
-    res.render('doc_schedule');
-});
-
 const getDoctorSchedule = catchAsync(async (req, res) => {
     const doctorId = req.user.id;
     const schedule = await scheduleService.getDoctorSchedule(doctorId);
@@ -56,7 +52,6 @@ const unlockSlot = catchAsync(async (req, res) => {
 });
 
 module.exports = {
-    renderDoctorSchedulePage,
     getDoctorSchedule,
     updateDoctorSchedule,
     addOverride,

@@ -33,6 +33,44 @@ class AppointmentModel {
         return result.rows[0] || null;
     }
 
+    static async findByIdForDoctor(appointmentId, doctorId, client) {
+        const db = client || pool;
+        const result = await db.query(
+            `SELECT id, appointment_date, appointment_time, status, room_id
+             FROM appointments
+             WHERE id = $1 AND doctor_id = $2
+             LIMIT 1`,
+            [appointmentId, doctorId]
+        );
+        return result.rows[0] || null;
+    }
+
+    static async findStartedForDoctor(doctorId, client) {
+        const db = client || pool;
+        const result = await db.query(
+            `SELECT id
+             FROM appointments
+             WHERE doctor_id = $1 AND status = 'started'
+             ORDER BY appointment_date ASC, appointment_time ASC
+             LIMIT 1`,
+            [doctorId]
+        );
+        return result.rows[0] || null;
+    }
+
+    static async findEarliestScheduledForDoctor(doctorId, client) {
+        const db = client || pool;
+        const result = await db.query(
+            `SELECT id, appointment_date, appointment_time
+             FROM appointments
+             WHERE doctor_id = $1 AND status = 'scheduled'
+             ORDER BY appointment_date ASC, appointment_time ASC
+             LIMIT 1`,
+            [doctorId]
+        );
+        return result.rows[0] || null;
+    }
+
     static async completeAppointment(appointmentId, doctorId) {
         const result = await pool.query(
             `UPDATE appointments SET status = 'completed', completed_at = NOW()
@@ -144,7 +182,7 @@ class AppointmentModel {
     static async findDoctorAllAppointments(doctorId) {
         const result = await pool.query(
             `SELECT a.id, a.appointment_date, a.appointment_time, a.status, a.room_id,
-                    COALESCE(up.full_name, 'Patient') AS patient_name,
+                    COALESCE(up.full_name, 'Patient') AS user_name,
                     up.gender, up.weight_kg, up.height_cm, up.blood_group, up.allergies,
                     a.symptoms
              FROM appointments a
@@ -194,8 +232,8 @@ class AppointmentModel {
             ? 'LEFT JOIN user_profile up ON up.user_id = a.user_id'
             : 'LEFT JOIN doc_profile dp ON dp.doc_id = a.doctor_id';
         const nameSelect = isDoctor
-            ? "COALESCE(up.full_name, 'Patient') AS other_name"
-            : "COALESCE(dp.full_name, 'Doctor') AS other_name, COALESCE(dp.specialization, 'General') AS specialization";
+            ? "COALESCE(up.full_name, 'Patient') AS patient_name"
+            : "COALESCE(dp.full_name, 'Doctor') AS doctor_name, COALESCE(dp.specialization, 'General') AS specialization";
 
         const result = await pool.query(
             `SELECT a.id, a.appointment_date, a.appointment_time, a.status, a.room_id, ${nameSelect}
@@ -218,8 +256,8 @@ class AppointmentModel {
             ? 'LEFT JOIN user_profile up ON up.user_id = a.user_id'
             : 'LEFT JOIN doc_profile dp ON dp.doc_id = a.doctor_id';
         const nameSelect = isDoctor
-            ? "COALESCE(up.full_name, 'Patient') AS other_name"
-            : "COALESCE(dp.full_name, 'Doctor') AS other_name, COALESCE(dp.specialization, 'General') AS specialization";
+            ? "COALESCE(up.full_name, 'Patient') AS patient_name"
+            : "COALESCE(dp.full_name, 'Doctor') AS doctor_name, COALESCE(dp.specialization, 'General') AS specialization";
 
         const [dataResult, countResult] = await Promise.all([
             pool.query(

@@ -11,15 +11,6 @@ const {
     toggleWishlistSchema
 } = require('./pharmacy.schema');
 
-// ── Page Routes (EJS) ──
-router.get('/pharmacy',                      ctrl.renderShop);
-router.get('/pharmacy/product/:slug',        ctrl.renderProduct);
-router.get('/pharmacy/cart',    authenticate, authorize('user'), ctrl.renderCart);
-router.get('/pharmacy/checkout',authenticate, authorize('user'), ctrl.renderCheckout);
-router.get('/pharmacy/orders',  authenticate, authorize('user'), ctrl.renderOrders);
-router.get('/pharmacy/orders/:id', authenticate, authorize('user'), ctrl.renderOrderDetail);
-router.get('/pharmacy/wishlist',authenticate, authorize('user'), ctrl.renderWishlist);
-
 // ── API: Public ──
 router.get('/api/pharmacy/categories',       ctrl.apiGetCategories);
 router.get('/api/pharmacy/products',         ctrl.apiListProducts);

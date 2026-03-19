@@ -6,15 +6,19 @@ const { roomIdParam, appointmentIdParam, saveNotesSchema } = require('./video.sc
 const { validate } = require('../../middleware/validation');
 
 // Video room entry
-router.get('/user_video/:roomId', authenticate, authorize('user'), validate(roomIdParam, 'params'), videoController.userVideoRoom);
-router.get('/doc_video/:roomId', authenticate, authorize('doctor'), validate(roomIdParam, 'params'), videoController.docVideoRoom);
+router.get('/patient/video/:roomId', authenticate, authorize('user'), validate(roomIdParam, 'params'), videoController.userVideoRoom);
+router.get('/doctor/video/:roomId', authenticate, authorize('doctor'), validate(roomIdParam, 'params'), videoController.docVideoRoom);
 
 // Dashboards
-router.get('/doc_video_dashboard', authenticate, authorize('doctor'), videoController.docDashboard);
-router.get('/user_video_dashboard', authenticate, authorize('user'), videoController.userDashboard);
+router.get('/doctor/video/dashboard', authenticate, authorize('doctor'), videoController.docDashboard);
+router.get('/patient/video/dashboard', authenticate, authorize('user'), videoController.userDashboard);
 
 // Start/Join calls
 router.post('/appointments/:appointmentId/start', authenticate, authorize('doctor'), validate(appointmentIdParam, 'params'), videoController.startCall);
+router.post('/doctor/start-call/:appointmentId', authenticate, authorize('doctor'), validate(appointmentIdParam, 'params'), videoController.docStartCall);
+router.get('/patient/join-call/:appointmentId', authenticate, authorize('user'), validate(appointmentIdParam, 'params'), videoController.userJoinCall);
+
+// Backward-compatible legacy aliases
 router.post('/doc/start-call/:appointmentId', authenticate, authorize('doctor'), validate(appointmentIdParam, 'params'), videoController.docStartCall);
 router.get('/user/join-call/:appointmentId', authenticate, authorize('user'), validate(appointmentIdParam, 'params'), videoController.userJoinCall);
 

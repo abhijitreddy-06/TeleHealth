@@ -1,4 +1,3 @@
-const path = require('path');
 require('dotenv').config();
 
 const express = require('express');
@@ -14,7 +13,68 @@ const routes = require('./routes');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
-const PROJECT_ROOT = path.join(__dirname, '..');
+
+// --- JSON Contract Normalizer ---
+app.use((req, res, next) => {
+    const originalJson = res.json.bind(res);
+
+    res.json = (payload) => {
+        const statusCode = res.statusCode || 200;
+        const isSuccessStatus = statusCode >= 200 && statusCode < 400;
+
+        const isObjectPayload = payload !== null && typeof payload === 'object' && !Array.isArray(payload);
+        const hasContract = isObjectPayload
+            && Object.prototype.hasOwnProperty.call(payload, 'success')
+            && Object.prototype.hasOwnProperty.call(payload, 'data')
+            && Object.prototype.hasOwnProperty.call(payload, 'error')
+            && Object.prototype.hasOwnProperty.call(payload, 'message');
+
+        if (hasContract) {
+            return originalJson(payload);
+        }
+
+        if (isObjectPayload && payload.__rawJson === true) {
+            const { __rawJson, ...raw } = payload;
+            return originalJson(raw);
+        }
+
+        const fallbackMessage = isSuccessStatus ? null : 'Request failed';
+        const derivedMessage = isObjectPayload && typeof payload.message === 'string'
+            ? payload.message
+            : fallbackMessage;
+        const derivedError = isSuccessStatus
+            ? null
+            : (isObjectPayload && typeof payload.error === 'string' ? payload.error : fallbackMessage);
+
+        if (Array.isArray(payload)) {
+            return originalJson({
+                success: isSuccessStatus,
+                data: isSuccessStatus ? payload : null,
+                error: derivedError,
+                message: derivedMessage
+            });
+        }
+
+        if (isObjectPayload) {
+            return originalJson({
+                success: isSuccessStatus,
+                data: isSuccessStatus ? payload : null,
+                error: derivedError,
+                message: derivedMessage,
+                ...payload
+            });
+        }
+
+        return originalJson({
+            success: isSuccessStatus,
+            data: isSuccessStatus ? payload : null,
+            error: derivedError,
+            message: derivedMessage
+        });
+    };
+
+    next();
+});
 
 // --- Trust Proxy (MUST be before rate limiter) ---
 app.set('trust proxy', config.NODE_ENV === 'production' ? 2 : 1);
@@ -87,24 +147,34 @@ app.use(cors(config.corsOptions));
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 20,
-    message: 'Too many authentication attempts, please try again later',
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    handler: (req, res) => {
+        res.status(429).json({
+            message: 'Too many authentication attempts, please try again later',
+            error: 'Too many authentication attempts, please try again later'
+        });
+    }
 });
 
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 100,
-    message: 'Too many requests from this IP',
     standardHeaders: true,
-    legacyHeaders: false
+    legacyHeaders: false,
+    handler: (req, res) => {
+        res.status(429).json({
+            message: 'Too many requests from this IP',
+            error: 'Too many requests from this IP'
+        });
+    }
 });
 
-app.use('/user_signup', authLimiter);
-app.use('/user_login', authLimiter);
-app.use('/doc_signup', authLimiter);
-app.use('/doc_login', authLimiter);
-app.use('/api/refresh-token', authLimiter);
+app.use('/api/auth/patient/signup', authLimiter);
+app.use('/api/auth/patient/login', authLimiter);
+app.use('/api/auth/doctor/signup', authLimiter);
+app.use('/api/auth/doctor/login', authLimiter);
+app.use('/api/auth/refresh-token', authLimiter);
 app.use('/api/appointments/', apiLimiter);
 app.use('/api/ai/', apiLimiter);
 app.use('/api/pharmacy/', apiLimiter);
@@ -127,11 +197,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// --- Static Files & View Engine ---
-app.use(express.static(path.join(PROJECT_ROOT, 'public')));
-app.set('view engine', 'ejs');
-app.set('views', path.join(PROJECT_ROOT, 'views'));
-
 // --- Health Check ---
 app.get('/health', async (req, res) => {
     const checks = { server: true, database: false, redis: false, timestamp: new Date().toISOString() };
@@ -150,7 +215,11 @@ app.get('/health', async (req, res) => {
     } catch (err) { /* noop */ }
 
     const isHealthy = checks.server && checks.database;
-    res.status(isHealthy ? 200 : 503).json({ status: isHealthy ? 'healthy' : 'degraded', checks });
+    res.status(isHealthy ? 200 : 503).json({
+        message: isHealthy ? 'Service healthy' : 'Service degraded',
+        status: isHealthy ? 'healthy' : 'degraded',
+        checks
+    });
 });
 
 // --- Routes ---

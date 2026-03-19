@@ -11,13 +11,10 @@ const scheduleRoutes = require('../modules/schedule/schedule.routes');
 const adminRoutes = require('../modules/admin/admin.routes');
 const pharmacyRoutes = require('../modules/pharmacy/pharmacy.routes');
 
-// Remaining legacy routes
+// Additional API routes
 const aiRoutes = require('./ai.routes');
 const prescriptionRoutes = require('./prescription.routes');
-const publicRoutes = require('./public.routes');
-const protectedRoutes = require('./protected.routes');
 
-router.use('/', publicRoutes);
 router.use('/', authRoutes);
 router.use('/', profileRoutes);
 router.use('/', aiRoutes);
@@ -28,6 +25,5 @@ router.use('/', pharmacyRoutes);
 router.use('/', vaultRoutes);
 router.use('/', prescriptionRoutes);
 router.use('/', videoRoutes);
-router.use('/', protectedRoutes);
 
 module.exports = router;

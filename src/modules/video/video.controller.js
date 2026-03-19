@@ -2,14 +2,13 @@ const videoService = require('./video.service');
 const VideoModel = require('./video.model');
 const appointmentService = require('../appointment/appointment.service');
 const catchAsync = require('../../utils/catchAsync');
-const escapeHtml = require('../../utils/escapeHtml');
 const logger = require('../../utils/logger');
 
 exports.userVideoRoom = catchAsync(async (req, res) => {
     const appointment = await videoService.validateVideoRoom(req.params.roomId, req.user.id);
     const participants = await videoService.getRoomParticipants(req.params.roomId);
 
-    res.render('user_video', {
+    res.json({
         roomId: req.params.roomId,
         appointmentId: appointment.id,
         userId: req.user.id,
@@ -23,7 +22,7 @@ exports.docVideoRoom = catchAsync(async (req, res) => {
     const appointment = await videoService.validateVideoRoom(req.params.roomId, req.user.id);
     const participants = await videoService.getRoomParticipants(req.params.roomId);
 
-    res.render('doc_video', {
+    res.json({
         roomId: req.params.roomId,
         appointment: {
             id: appointment.id,
@@ -40,14 +39,14 @@ exports.docDashboard = async (req, res) => {
         const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'doctor');
         const allAppointments = await appointmentService.getDoctorAllAppointments(req.user.id);
 
-        res.render('doc_video_dashboard', {
+        res.json({
             appointment: appointment,
             hasAppointment: !!appointment,
             allAppointments: allAppointments
         });
     } catch (err) {
         logger.error('Doc dashboard error:', err);
-        res.status(500).send(`<html><body><h1>Internal Server Error</h1><p>${escapeHtml(err.message)}</p><a href="/doc_home">Go back to home</a></body></html>`);
+        res.status(500).json({ success: false, error: err.message || 'Internal Server Error' });
     }
 };
 
@@ -88,13 +87,13 @@ exports.userDashboard = async (req, res) => {
     try {
         const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'user');
 
-        res.render('user_video_dashboard', {
+        res.json({
             appointment: appointment,
             hasAppointment: !!appointment
         });
     } catch (err) {
         logger.error('User dashboard error:', err);
-        res.status(500).send(`<html><body><h1>Internal Server Error</h1><p>${escapeHtml(err.message)}</p><a href="/user_home">Go back to home</a></body></html>`);
+        res.status(500).json({ success: false, error: err.message || 'Internal Server Error' });
     }
 };
 
@@ -121,17 +120,22 @@ exports.docStartCall = catchAsync(async (req, res) => {
         }
     }
 
-    res.redirect(`/doc_video/${roomId}`);
+    res.json({ success: true, roomId, redirect: `/doctor/video/${roomId}` });
 });
 
 exports.userJoinCall = catchAsync(async (req, res) => {
     const roomId = await videoService.joinVideoCall(req.params.appointmentId, req.user.id);
-    res.redirect(`/user_video/${roomId}`);
+    res.json({ success: true, roomId, redirect: `/patient/video/${roomId}` });
 });
 
 exports.saveNotes = catchAsync(async (req, res) => {
     const { roomId, notes } = req.body;
 
     await videoService.saveCallNotes(roomId, req.user.id, notes);
-    res.sendStatus(200);
+    res.json({
+        success: true,
+        data: null,
+        error: null,
+        message: 'Notes saved successfully'
+    });
 });

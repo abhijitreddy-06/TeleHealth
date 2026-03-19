@@ -6,6 +6,16 @@ const AuthModel = require('./auth.model');
 const { AppError, AuthError, ValidationError } = require('../../utils/AppError');
 
 class AuthService {
+    _getRolePaths(role) {
+        const isDoctor = role === 'doctor';
+        return {
+            frontendRole: isDoctor ? 'doctor' : 'patient',
+            homePath: isDoctor ? '/doctor/home' : '/patient/home',
+            profileCreatePath: isDoctor ? '/doctor/profile/create' : '/patient/profile/create',
+            authPath: isDoctor ? '/auth/doctor' : '/auth/patient'
+        };
+    }
+
     validatePassword(password) {
         if (!password || password.length < 6) {
             throw new ValidationError('Password must be at least 6 characters');
@@ -93,6 +103,27 @@ class AuthService {
 
     async revokeAllUserTokens(userId, role) {
         await AuthModel.revokeAllUserTokens(userId, role);
+    }
+
+    async hasCompletedProfile(userId, role) {
+        return role === 'doctor'
+            ? AuthModel.hasDoctorProfile(userId)
+            : AuthModel.hasUserProfile(userId);
+    }
+
+    async getPostAuthState(userId, role) {
+        const paths = this._getRolePaths(role);
+        const profileComplete = await this.hasCompletedProfile(userId, role);
+
+        return {
+            role: paths.frontendRole,
+            backendRole: role,
+            profileComplete,
+            homePath: paths.homePath,
+            profileCreatePath: paths.profileCreatePath,
+            authPath: paths.authPath,
+            redirect: profileComplete ? paths.homePath : paths.profileCreatePath
+        };
     }
 
     async blacklistAccessToken(token) {

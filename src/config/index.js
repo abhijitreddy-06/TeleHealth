@@ -24,28 +24,50 @@ const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRE_MINUTES
 const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRE_DAYS
     ? `${process.env.REFRESH_TOKEN_EXPIRE_DAYS}d` : '7d';
 
-const accessTokenCookieOptions = {
-    httpOnly: true,
-    secure: NODE_ENV === 'production',
-    sameSite: NODE_ENV === 'production' ? 'None' : 'Lax',
-    path: '/',
-    maxAge: 15 * 60 * 1000
-};
+function isLocalHost(host = '') {
+    return /(^|:)(localhost|127\.0\.0\.1)(:|$)/i.test(host);
+}
 
-const refreshTokenCookieOptions = {
-    httpOnly: true,
-    secure: NODE_ENV === 'production',
-    sameSite: NODE_ENV === 'production' ? 'None' : 'Lax',
-    path: '/',
-    maxAge: 7 * 24 * 60 * 60 * 1000
-};
+function shouldUseSecureCookies(req) {
+    const host = req?.get?.('host') || '';
+    const forwardedProto = req?.get?.('x-forwarded-proto');
+    const isHttps = req?.secure || forwardedProto === 'https';
 
-const clearCookieOptions = {
-    httpOnly: true,
-    secure: NODE_ENV === 'production',
-    sameSite: NODE_ENV === 'production' ? 'None' : 'Lax',
-    path: '/'
-};
+    if (isLocalHost(host)) return false;
+    if (NODE_ENV !== 'production') return false;
+
+    return Boolean(isHttps || (FRONTEND_URL && FRONTEND_URL.startsWith('https://')));
+}
+
+function buildCookieOptions(req, maxAge) {
+    const secure = shouldUseSecureCookies(req);
+
+    return {
+        httpOnly: true,
+        secure,
+        sameSite: secure ? 'None' : 'Lax',
+        path: '/',
+        ...(typeof maxAge === 'number' ? { maxAge } : {}),
+    };
+}
+
+const accessTokenCookieOptions = buildCookieOptions(null, 15 * 60 * 1000);
+
+const refreshTokenCookieOptions = buildCookieOptions(null, 7 * 24 * 60 * 60 * 1000);
+
+const clearCookieOptions = buildCookieOptions(null);
+
+function getAccessTokenCookieOptions(req) {
+    return buildCookieOptions(req, 15 * 60 * 1000);
+}
+
+function getRefreshTokenCookieOptions(req) {
+    return buildCookieOptions(req, 7 * 24 * 60 * 60 * 1000);
+}
+
+function getClearCookieOptions(req) {
+    return buildCookieOptions(req);
+}
 
 const corsOptions = {
     origin: NODE_ENV === 'production'
@@ -64,6 +86,7 @@ module.exports = {
     ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET,
     ACCESS_TOKEN_EXPIRY, REFRESH_TOKEN_EXPIRY,
     accessTokenCookieOptions, refreshTokenCookieOptions, clearCookieOptions,
+    getAccessTokenCookieOptions, getRefreshTokenCookieOptions, getClearCookieOptions,
     // Database
     pool, testConnection, cleanupExpiredTokens, stopPoolMonitor, getPoolHealth,
     // Redis
