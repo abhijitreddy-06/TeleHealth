@@ -31,6 +31,7 @@ exports.userSignup = async (req, res, next) => {
         return res.json({
             success: true,
             message: 'Account created successfully',
+            accessToken: tokens.accessToken,
             ...authState,
             redirect: authState.profileCreatePath
         });
@@ -49,7 +50,7 @@ exports.userLogin = async (req, res, next) => {
 
         setTokenCookies(res, tokens);
 
-        return res.json({ success: true, role: authState.role, ...authState });
+        return res.json({ success: true, role: authState.role, accessToken: tokens.accessToken, ...authState });
     } catch (err) {
         return res.status(401).json({ error: err.message });
     }
@@ -72,6 +73,7 @@ exports.docSignup = async (req, res, next) => {
         return res.json({
             success: true,
             message: 'Account created successfully',
+            accessToken: tokens.accessToken,
             ...authState,
             redirect: authState.profileCreatePath
         });
@@ -90,7 +92,7 @@ exports.docLogin = async (req, res, next) => {
 
         setTokenCookies(res, tokens);
 
-        return res.json({ success: true, role: authState.role, ...authState });
+        return res.json({ success: true, role: authState.role, accessToken: tokens.accessToken, ...authState });
     } catch (err) {
         return res.status(401).json({ error: err.message });
     }
@@ -135,6 +137,7 @@ exports.refreshToken = catchAsync(async (req, res) => {
 exports.getSession = catchAsync(async (req, res) => {
     const accessToken = req.cookies.accessToken;
     const refreshToken = req.cookies.refreshToken;
+    let resolvedAccessToken = accessToken || null;
 
     res.setHeader('Cache-Control', 'no-store');
 
@@ -159,6 +162,7 @@ exports.getSession = catchAsync(async (req, res) => {
             await authService.revokeRefreshToken(refreshToken);
             const tokens = await authService.generateTokens(user);
             setTokenCookies(res, tokens);
+            resolvedAccessToken = tokens.accessToken;
         } catch (err) {
             clearAuthCookies(res);
             return res.json({ authenticated: false });
@@ -175,6 +179,7 @@ exports.getSession = catchAsync(async (req, res) => {
     return res.json({
         authenticated: true,
         userId: user.id,
+        accessToken: resolvedAccessToken,
         ...authState
     });
 });
