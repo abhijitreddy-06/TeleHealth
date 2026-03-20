@@ -54,6 +54,9 @@ const io = new Server(server, {
 function socketAuthMiddleware(socket, next) {
     try {
         let token = socket.handshake.auth.token;
+        const origin = socket.handshake.headers.origin || 'unknown-origin';
+        const hasAuthToken = Boolean(socket.handshake.auth?.token);
+        const hasCookieHeader = Boolean(socket.handshake.headers.cookie);
 
         if (!token) {
             const cookieHeader = socket.handshake.headers.cookie;
@@ -68,6 +71,14 @@ function socketAuthMiddleware(socket, next) {
         }
 
         if (!token) {
+            logger.warn('Socket auth rejected: missing token', {
+                socketId: socket.id,
+                origin,
+                hasAuthToken,
+                hasCookieHeader,
+                transport: socket.conn?.transport?.name,
+                address: socket.handshake.address
+            });
             return next(new Error('Authentication required'));
         }
 
@@ -76,8 +87,25 @@ function socketAuthMiddleware(socket, next) {
             id: payload.id,
             role: payload.role
         };
+        logger.info('Socket auth accepted', {
+            socketId: socket.id,
+            origin,
+            userId: payload.id,
+            role: payload.role,
+            transport: socket.conn?.transport?.name
+        });
         next();
     } catch (error) {
+        logger.warn('Socket auth rejected: invalid token', {
+            socketId: socket.id,
+            origin: socket.handshake.headers.origin || 'unknown-origin',
+            hasAuthToken: Boolean(socket.handshake.auth?.token),
+            hasCookieHeader: Boolean(socket.handshake.headers.cookie),
+            errorName: error?.name,
+            errorMessage: error?.message,
+            transport: socket.conn?.transport?.name,
+            address: socket.handshake.address
+        });
         return next(new Error('Invalid or expired token'));
     }
 }

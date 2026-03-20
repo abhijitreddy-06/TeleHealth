@@ -60,6 +60,12 @@ module.exports = function (io) {
                 // 1. Use server-side role from JWT (not client-sent)
                 const role = user.role;
                 const userId = user.id;
+                logger.info('Join-room requested', {
+                    socketId: socket.id,
+                    userId,
+                    role,
+                    roomId
+                });
 
                 // 2. Appointment-based access control: verify user is assigned
                 const appointment = await VideoModel.validateUserForRoom(roomId, userId, role);
