@@ -125,6 +125,19 @@ telehealth/
 - **Pharmacy**: Products, cart, orders, reviews, wishlist
 - **Admin**: Dashboard, user management, pharmacy management
 
+### API Versioning & Compatibility
+- Primary API surface is available under `/api/v1/*`.
+- Legacy routes under `/api/*`, `/appointments/*`, `/vault/*`, `/patient/*`, and `/doctor/*` remain active for backward compatibility.
+- Route aliasing is handled in backend middleware in `src/app.js`.
+
+### Response Contract
+- Standard JSON contract for API responses:
+  - `success`
+  - `message`
+  - `data`
+- Controllers are standardized through `src/utils/sendResponse.js`.
+- Binary/file download endpoints intentionally return streamed/buffered content and are exceptions to JSON contract.
+
 For complete API documentation, see [COMPREHENSIVE_PROJECT_DOCUMENTATION.txt](./COMPREHENSIVE_PROJECT_DOCUMENTATION.txt).
 
 ## 🔐 Security Features
@@ -196,6 +209,17 @@ Set all required env vars in production:
 - `REFRESH_TOKEN_SECRET` - Refresh token secret
 - `SUPABASE_URL`, `SUPABASE_KEY` - Cloud storage
 - `EMAILJS_*` - Email service credentials
+- `NEXT_SERVER_API_URL` - Required for frontend production build (must be HTTPS)
+
+### Render + Vercel Deployment Notes
+- Backend (Render): run `npm start` from repository root.
+- Frontend (Vercel): set project root to `telehealth-frontend`.
+- Vercel required env:
+  - `NEXT_SERVER_API_URL=https://<your-render-backend-domain>`
+- Optional frontend env:
+  - `NEXT_PUBLIC_API_URL=https://<your-render-backend-domain>`
+  - `NEXT_PUBLIC_SOCKET_URL=https://<your-render-backend-domain>`
+- Backend CORS must allow your Vercel domain and send credentials.
 
 ### PM2 Process Management
 ```bash

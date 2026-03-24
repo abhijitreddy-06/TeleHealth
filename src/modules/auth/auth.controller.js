@@ -1,6 +1,7 @@
 const authService = require('./auth.service');
 const config = require('../../config');
 const catchAsync = require('../../utils/catchAsync');
+const sendResponse = require('../../utils/sendResponse');
 
 function setTokenCookies(res, tokens) {
     const req = res.req;
@@ -14,89 +15,44 @@ function clearAuthCookies(res) {
     res.clearCookie('refreshToken', config.getClearCookieOptions(req));
 }
 
-exports.userSignup = async (req, res, next) => {
+exports.userSignup = catchAsync(async (req, res) => {
     const { phone, password, confirmpassword } = req.body;
+    const { tokens, session } = await authService.signup(phone, password, confirmpassword, 'user');
 
-    try {
-        authService.validatePassword(password);
-        authService.validatePasswordMatch(password, confirmpassword);
+    setTokenCookies(res, tokens);
+    res.setHeader('Cache-Control', 'no-cache, no-store');
 
-        const user = await authService.register(phone, password, 'user');
-        const tokens = await authService.generateTokens(user);
-        const authState = await authService.getPostAuthState(user.id, user.role);
+    return sendResponse(res, 201, 'Account created successfully', session);
+});
 
-        setTokenCookies(res, tokens);
-        res.setHeader('Cache-Control', 'no-cache, no-store');
-
-        return res.json({
-            success: true,
-            message: 'Account created successfully',
-            accessToken: tokens.accessToken,
-            ...authState,
-            redirect: authState.profileCreatePath
-        });
-    } catch (err) {
-        return res.status(400).json({ error: err.message });
-    }
-};
-
-exports.userLogin = async (req, res, next) => {
+exports.userLogin = catchAsync(async (req, res) => {
     const { phone, password } = req.body;
 
-    try {
-        const user = await authService.authenticate(phone, password, 'user');
-        const tokens = await authService.generateTokens(user);
-        const authState = await authService.getPostAuthState(user.id, user.role);
+    const { tokens, session } = await authService.login(phone, password, 'user');
+    setTokenCookies(res, tokens);
 
-        setTokenCookies(res, tokens);
+    return sendResponse(res, 200, 'Login successful', session);
+});
 
-        return res.json({ success: true, role: authState.role, accessToken: tokens.accessToken, ...authState });
-    } catch (err) {
-        return res.status(401).json({ error: err.message });
-    }
-};
-
-exports.docSignup = async (req, res, next) => {
+exports.docSignup = catchAsync(async (req, res) => {
     const { phone, password, confirmpassword } = req.body;
 
-    try {
-        authService.validatePassword(password);
-        authService.validatePasswordMatch(password, confirmpassword);
+    const { tokens, session } = await authService.signup(phone, password, confirmpassword, 'doctor');
 
-        const doctor = await authService.register(phone, password, 'doctor');
-        const tokens = await authService.generateTokens(doctor);
-        const authState = await authService.getPostAuthState(doctor.id, doctor.role);
+    setTokenCookies(res, tokens);
+    res.setHeader('Cache-Control', 'no-cache, no-store');
 
-        setTokenCookies(res, tokens);
-        res.setHeader('Cache-Control', 'no-cache, no-store');
+    return sendResponse(res, 201, 'Account created successfully', session);
+});
 
-        return res.json({
-            success: true,
-            message: 'Account created successfully',
-            accessToken: tokens.accessToken,
-            ...authState,
-            redirect: authState.profileCreatePath
-        });
-    } catch (err) {
-        return res.status(400).json({ error: err.message });
-    }
-};
-
-exports.docLogin = async (req, res, next) => {
+exports.docLogin = catchAsync(async (req, res) => {
     const { phone, password } = req.body;
 
-    try {
-        const doctor = await authService.authenticate(phone, password, 'doctor');
-        const tokens = await authService.generateTokens(doctor);
-        const authState = await authService.getPostAuthState(doctor.id, doctor.role);
+    const { tokens, session } = await authService.login(phone, password, 'doctor');
+    setTokenCookies(res, tokens);
 
-        setTokenCookies(res, tokens);
-
-        return res.json({ success: true, role: authState.role, accessToken: tokens.accessToken, ...authState });
-    } catch (err) {
-        return res.status(401).json({ error: err.message });
-    }
-};
+    return sendResponse(res, 200, 'Login successful', session);
+});
 
 exports.logout = catchAsync(async (req, res) => {
     const accessToken = req.cookies.accessToken;
@@ -116,70 +72,45 @@ exports.logout = catchAsync(async (req, res) => {
     }
 
     clearAuthCookies(res);
-    res.json({ success: true, message: 'Logged out successfully' });
+    return sendResponse(res, 200, 'Logged out successfully', null);
 });
 
 exports.refreshToken = catchAsync(async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
-        return res.status(401).json({ error: 'Refresh token required' });
+        return sendResponse(res, 401, 'Refresh token required', null);
     }
 
-    const user = await authService.verifyRefreshToken(refreshToken);
-    await authService.revokeRefreshToken(refreshToken);
-    const tokens = await authService.generateTokens(user);
+    const { tokens, session } = await authService.refreshSession(refreshToken);
 
     setTokenCookies(res, tokens);
-    res.json({ success: true });
+
+    return sendResponse(res, 200, 'Token refreshed successfully', session);
 });
 
 exports.getSession = catchAsync(async (req, res) => {
     const accessToken = req.cookies.accessToken;
     const refreshToken = req.cookies.refreshToken;
-    let resolvedAccessToken = accessToken || null;
 
     res.setHeader('Cache-Control', 'no-store');
 
-    if (!accessToken && !refreshToken) {
-        return res.json({ authenticated: false });
-    }
+    const resolved = await authService.resolveSession(accessToken, refreshToken);
 
-    let user = null;
-
-    if (accessToken) {
-        try {
-            const payload = await authService.verifyAccessToken(accessToken);
-            user = { id: payload.id, role: payload.role };
-        } catch (err) {
-            user = null;
-        }
-    }
-
-    if (!user && refreshToken) {
-        try {
-            user = await authService.verifyRefreshToken(refreshToken);
-            await authService.revokeRefreshToken(refreshToken);
-            const tokens = await authService.generateTokens(user);
-            setTokenCookies(res, tokens);
-            resolvedAccessToken = tokens.accessToken;
-        } catch (err) {
-            clearAuthCookies(res);
-            return res.json({ authenticated: false });
-        }
-    }
-
-    if (!user) {
+    if (resolved.clearCookies) {
         clearAuthCookies(res);
-        return res.json({ authenticated: false });
     }
 
-    const authState = await authService.getPostAuthState(user.id, user.role);
+    if (resolved.tokens) {
+        setTokenCookies(res, resolved.tokens);
+    }
 
-    return res.json({
+    if (!resolved.authenticated) {
+        return sendResponse(res, 200, 'No active session', { authenticated: false });
+    }
+
+    return sendResponse(res, 200, 'Session active', {
         authenticated: true,
-        userId: user.id,
-        accessToken: resolvedAccessToken,
-        ...authState
+        user: resolved.session
     });
 });

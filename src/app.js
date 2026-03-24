@@ -8,8 +8,12 @@ const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const { randomUUID } = require('crypto');
+const swaggerUi = require('swagger-ui-express');
 const config = require('./config');
 const routes = require('./routes');
+const swaggerSpec = require('./config/swagger');
+const { requestLogger, errorLogger } = require('./middleware/requestLogger');
 const { errorHandler, notFoundHandler } = require('./middleware/errorHandler');
 
 const app = express();
@@ -32,7 +36,6 @@ app.use((req, res, next) => {
         const hasContract = isObjectPayload
             && Object.prototype.hasOwnProperty.call(payload, 'success')
             && Object.prototype.hasOwnProperty.call(payload, 'data')
-            && Object.prototype.hasOwnProperty.call(payload, 'error')
             && Object.prototype.hasOwnProperty.call(payload, 'message');
 
         if (hasContract) {
@@ -48,15 +51,11 @@ app.use((req, res, next) => {
         const derivedMessage = isObjectPayload && typeof payload.message === 'string'
             ? payload.message
             : fallbackMessage;
-        const derivedError = isSuccessStatus
-            ? null
-            : (isObjectPayload && typeof payload.error === 'string' ? payload.error : fallbackMessage);
 
         if (Array.isArray(payload)) {
             return originalJson({
                 success: isSuccessStatus,
                 data: isSuccessStatus ? payload : null,
-                error: derivedError,
                 message: derivedMessage
             });
         }
@@ -65,20 +64,27 @@ app.use((req, res, next) => {
             return originalJson({
                 success: isSuccessStatus,
                 data: isSuccessStatus ? payload : null,
-                error: derivedError,
-                message: derivedMessage,
-                ...payload
+                message: derivedMessage
             });
         }
 
         return originalJson({
             success: isSuccessStatus,
             data: isSuccessStatus ? payload : null,
-            error: derivedError,
             message: derivedMessage
         });
     };
 
+    next();
+});
+
+// --- Request Correlation ID ---
+app.use((req, res, next) => {
+    const incomingRequestId = req.headers['x-request-id'];
+    req.id = typeof incomingRequestId === 'string' && incomingRequestId.trim()
+        ? incomingRequestId
+        : randomUUID();
+    res.setHeader('x-request-id', req.id);
     next();
 });
 
@@ -145,6 +151,9 @@ app.use(compression());
 // --- CORS ---
 app.use(cors(config.corsOptions));
 
+// --- Structured Request Logging ---
+app.use(requestLogger);
+
 // --- Rate Limiting ---
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -153,8 +162,7 @@ const authLimiter = rateLimit({
     legacyHeaders: false,
     handler: (req, res) => {
         res.status(429).json({
-            message: 'Too many authentication attempts, please try again later',
-            error: 'Too many authentication attempts, please try again later'
+            message: 'Too many authentication attempts, please try again later'
         });
     }
 });
@@ -166,8 +174,7 @@ const apiLimiter = rateLimit({
     legacyHeaders: false,
     handler: (req, res) => {
         res.status(429).json({
-            message: 'Too many requests from this IP',
-            error: 'Too many requests from this IP'
+            message: 'Too many requests from this IP'
         });
     }
 });
@@ -177,9 +184,110 @@ app.use('/api/auth/patient/login', authLimiter);
 app.use('/api/auth/doctor/signup', authLimiter);
 app.use('/api/auth/doctor/login', authLimiter);
 app.use('/api/auth/refresh-token', authLimiter);
+app.use('/api/v1/auth/patient/signup', authLimiter);
+app.use('/api/v1/auth/patient/login', authLimiter);
+app.use('/api/v1/auth/doctor/signup', authLimiter);
+app.use('/api/v1/auth/doctor/login', authLimiter);
+app.use('/api/v1/auth/refresh-token', authLimiter);
 app.use('/api/appointments/', apiLimiter);
 app.use('/api/ai/', apiLimiter);
 app.use('/api/pharmacy/', apiLimiter);
+app.use('/api/v1/ai/', apiLimiter);
+
+// --- /api/v1 Module Aliases (backward-compatible) ---
+app.use((req, res, next) => {
+    const originalPath = req.path;
+
+    if (!originalPath.startsWith('/api/v1/')) {
+        return next();
+    }
+
+    const withQuery = (nextPath) => `${nextPath}${req.url.slice(originalPath.length)}`;
+
+    if (originalPath.startsWith('/api/v1/appointments/')) {
+        const suffix = originalPath.slice('/api/v1/appointments'.length);
+
+        if (suffix.startsWith('/book') || /^\/\d+\/complete$/.test(suffix)) {
+            req.url = withQuery(`/appointments${suffix}`);
+            return next();
+        }
+
+        if (suffix === '/doctors') {
+            req.url = withQuery('/api/doctors');
+            return next();
+        }
+
+        req.url = withQuery(`/api/appointments${suffix}`);
+        return next();
+    }
+
+    if (originalPath.startsWith('/api/v1/pharmacy/')) {
+        const suffix = originalPath.slice('/api/v1/pharmacy'.length);
+        req.url = withQuery(`/api/pharmacy${suffix}`);
+        return next();
+    }
+
+    if (originalPath.startsWith('/api/v1/admin/')) {
+        const suffix = originalPath.slice('/api/v1/admin'.length);
+        req.url = withQuery(`/api/admin${suffix}`);
+        return next();
+    }
+
+    if (originalPath.startsWith('/api/v1/schedule/')) {
+        const suffix = originalPath.slice('/api/v1/schedule'.length);
+
+        if (suffix.startsWith('/slots/')) {
+            req.url = withQuery(`/api${suffix}`);
+            return next();
+        }
+
+        if (suffix === '/doctors/available') {
+            req.url = withQuery('/api/doctors/available');
+            return next();
+        }
+
+        req.url = withQuery(`/api/schedule${suffix}`);
+        return next();
+    }
+
+    if (originalPath.startsWith('/api/v1/vault/')) {
+        const suffix = originalPath.slice('/api/v1/vault'.length);
+
+        if (suffix.startsWith('/upload') || suffix.startsWith('/file/')) {
+            req.url = withQuery(`/vault${suffix}`);
+            return next();
+        }
+
+        req.url = withQuery(`/api/vault${suffix}`);
+        return next();
+    }
+
+    if (originalPath.startsWith('/api/v1/profile/')) {
+        const suffix = originalPath.slice('/api/v1/profile'.length);
+        req.url = withQuery(suffix);
+        return next();
+    }
+
+    if (originalPath.startsWith('/api/v1/video/')) {
+        const suffix = originalPath.slice('/api/v1/video'.length);
+        req.url = withQuery(suffix);
+        return next();
+    }
+
+    if (originalPath.startsWith('/api/v1/notes/')) {
+        const suffix = originalPath.slice('/api/v1/notes'.length);
+        req.url = withQuery(`/api/notes${suffix}`);
+        return next();
+    }
+
+    if (originalPath.startsWith('/api/v1/prescription/')) {
+        const suffix = originalPath.slice('/api/v1/prescription'.length);
+        req.url = withQuery(`/api/prescription${suffix}`);
+        return next();
+    }
+
+    return next();
+});
 
 // --- Body Parsing (1MB limit) ---
 app.use(bodyParser.json({ limit: '1mb' }));
@@ -224,10 +332,17 @@ app.get('/health', async (req, res) => {
     });
 });
 
+// --- API Documentation ---
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    explorer: true,
+    customSiteTitle: 'TeleHealth API Docs'
+}));
+
 // --- Routes ---
 app.use(routes);
 
 // --- Error Handling ---
+app.use(errorLogger);
 app.use(notFoundHandler);
 app.use(errorHandler);
 

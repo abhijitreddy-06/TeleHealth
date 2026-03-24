@@ -1,5 +1,6 @@
 const config = require('../config');
 const authService = require('../modules/auth/auth.service');
+const sendResponse = require('../utils/sendResponse');
 
 function clearAuthCookies(res) {
     const req = res.req;
@@ -8,7 +9,7 @@ function clearAuthCookies(res) {
 }
 
 function sendAuthError(req, res, status, message) {
-    return res.status(status).json({ success: false, message, error: message });
+    return sendResponse(res, status, message, null);
 }
 
 async function authenticate(req, res, next) {

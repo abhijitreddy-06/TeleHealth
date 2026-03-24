@@ -1,6 +1,7 @@
 const catchAsync = require('../../utils/catchAsync');
 const adminService = require('./admin.service');
 const { accessTokenCookieOptions, refreshTokenCookieOptions } = require('../../config');
+const sendResponse = require('../../utils/sendResponse');
 
 const login = catchAsync(async (req, res) => {
     const { phone, password } = req.validated.body;
@@ -9,31 +10,28 @@ const login = catchAsync(async (req, res) => {
     res.cookie('accessToken', result.accessToken, accessTokenCookieOptions);
     res.cookie('refreshToken', result.refreshToken, refreshTokenCookieOptions);
 
-    res.json({
-        success: true,
-        data: {
-            admin: result.admin,
-            accessToken: result.accessToken
-        }
+    return sendResponse(res, 200, 'Admin login successful', {
+        admin: result.admin,
+        accessToken: result.accessToken
     });
 });
 
 
 const getDashboardStats = catchAsync(async (req, res) => {
     const stats = await adminService.getDashboardStats();
-    res.json({ success: true, data: stats });
+    return sendResponse(res, 200, 'Dashboard stats fetched successfully', stats);
 });
 
 const listDoctors = catchAsync(async (req, res) => {
     const page = req.validated?.query?.page || 1;
     const doctors = await adminService.listDoctors(page);
-    res.json({ success: true, data: doctors });
+    return sendResponse(res, 200, 'Doctors fetched successfully', doctors);
 });
 
 const listPatients = catchAsync(async (req, res) => {
     const page = req.validated?.query?.page || 1;
     const patients = await adminService.listPatients(page);
-    res.json({ success: true, data: patients });
+    return sendResponse(res, 200, 'Patients fetched successfully', patients);
 });
 
 const listAppointments = catchAsync(async (req, res) => {
@@ -44,20 +42,20 @@ const listAppointments = catchAsync(async (req, res) => {
     if (date) filters.date = date;
 
     const appointments = await adminService.listAppointments(filters, page || 1);
-    res.json({ success: true, data: appointments });
+    return sendResponse(res, 200, 'Appointments fetched successfully', appointments);
 });
 
 const overrideAppointment = catchAsync(async (req, res) => {
     const appointmentId = Number(req.params.id);
     const { status } = req.validated.body;
     const appointment = await adminService.overrideAppointment(appointmentId, status);
-    res.json({ success: true, data: appointment });
+    return sendResponse(res, 200, 'Appointment status updated successfully', appointment);
 });
 
 const viewDoctorSchedule = catchAsync(async (req, res) => {
     const doctorId = Number(req.params.id);
     const schedule = await adminService.viewDoctorSchedule(doctorId);
-    res.json({ success: true, data: schedule });
+    return sendResponse(res, 200, 'Doctor schedule fetched successfully', schedule);
 });
 
 // ════════════════════════════════════════════
@@ -70,36 +68,36 @@ const listProducts = catchAsync(async (req, res) => {
     if (search) filters.search = search;
     if (categoryId) filters.categoryId = categoryId;
     const data = await adminService.listProducts(filters, page || 1);
-    res.json({ success: true, data });
+    return sendResponse(res, 200, 'Products fetched successfully', data);
 });
 
 const createProduct = catchAsync(async (req, res) => {
     const product = await adminService.createProduct(req.validated.body);
-    res.status(201).json({ success: true, data: product });
+    return sendResponse(res, 201, 'Product created successfully', product);
 });
 
 const updateProduct = catchAsync(async (req, res) => {
     const id = Number(req.params.id);
     const product = await adminService.updateProduct(id, req.validated.body);
-    res.json({ success: true, data: product });
+    return sendResponse(res, 200, 'Product updated successfully', product);
 });
 
 const deleteProduct = catchAsync(async (req, res) => {
     const id = Number(req.params.id);
     await adminService.deleteProduct(id);
-    res.json({ success: true, message: 'Product deactivated' });
+    return sendResponse(res, 200, 'Product deactivated', null);
 });
 
 const updateStock = catchAsync(async (req, res) => {
     const id = Number(req.params.id);
     const { stockQuantity, lowStockThreshold } = req.validated.body;
     const inventory = await adminService.updateStock(id, stockQuantity, lowStockThreshold);
-    res.json({ success: true, data: inventory });
+    return sendResponse(res, 200, 'Stock updated successfully', inventory);
 });
 
 const getLowStockProducts = catchAsync(async (req, res) => {
     const data = await adminService.getLowStockProducts();
-    res.json({ success: true, data });
+    return sendResponse(res, 200, 'Low stock products fetched successfully', data);
 });
 
 // ════════════════════════════════════════════
@@ -108,24 +106,24 @@ const getLowStockProducts = catchAsync(async (req, res) => {
 
 const listCategories = catchAsync(async (req, res) => {
     const data = await adminService.listCategories();
-    res.json({ success: true, data });
+    return sendResponse(res, 200, 'Categories fetched successfully', data);
 });
 
 const createCategory = catchAsync(async (req, res) => {
     const category = await adminService.createCategory(req.validated.body);
-    res.status(201).json({ success: true, data: category });
+    return sendResponse(res, 201, 'Category created successfully', category);
 });
 
 const updateCategory = catchAsync(async (req, res) => {
     const id = Number(req.params.id);
     const category = await adminService.updateCategory(id, req.validated.body);
-    res.json({ success: true, data: category });
+    return sendResponse(res, 200, 'Category updated successfully', category);
 });
 
 const deleteCategory = catchAsync(async (req, res) => {
     const id = Number(req.params.id);
     await adminService.deleteCategory(id);
-    res.json({ success: true, message: 'Category deactivated' });
+    return sendResponse(res, 200, 'Category deactivated', null);
 });
 
 // ════════════════════════════════════════════
@@ -137,14 +135,14 @@ const listOrders = catchAsync(async (req, res) => {
     const filters = {};
     if (status) filters.status = status;
     const data = await adminService.listOrders(filters, page || 1);
-    res.json({ success: true, data });
+    return sendResponse(res, 200, 'Orders fetched successfully', data);
 });
 
 const updateOrderStatus = catchAsync(async (req, res) => {
     const id = Number(req.params.id);
     const { status } = req.validated.body;
     const order = await adminService.updateOrderStatus(id, status);
-    res.json({ success: true, data: order });
+    return sendResponse(res, 200, 'Order status updated successfully', order);
 });
 
 module.exports = {

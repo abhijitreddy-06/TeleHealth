@@ -3,12 +3,13 @@ const VideoModel = require('./video.model');
 const appointmentService = require('../appointment/appointment.service');
 const catchAsync = require('../../utils/catchAsync');
 const logger = require('../../utils/logger');
+const sendResponse = require('../../utils/sendResponse');
 
 exports.userVideoRoom = catchAsync(async (req, res) => {
     const appointment = await videoService.validateVideoRoom(req.params.roomId, req.user.id);
     const participants = await videoService.getRoomParticipants(req.params.roomId);
 
-    res.json({
+    return sendResponse(res, 200, 'Video room loaded', {
         roomId: req.params.roomId,
         appointmentId: appointment.id,
         userId: req.user.id,
@@ -22,7 +23,7 @@ exports.docVideoRoom = catchAsync(async (req, res) => {
     const appointment = await videoService.validateVideoRoom(req.params.roomId, req.user.id);
     const participants = await videoService.getRoomParticipants(req.params.roomId);
 
-    res.json({
+    return sendResponse(res, 200, 'Video room loaded', {
         roomId: req.params.roomId,
         appointment: {
             id: appointment.id,
@@ -34,21 +35,16 @@ exports.docVideoRoom = catchAsync(async (req, res) => {
     });
 });
 
-exports.docDashboard = async (req, res) => {
-    try {
-        const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'doctor');
-        const allAppointments = await appointmentService.getDoctorAllAppointments(req.user.id);
+exports.docDashboard = catchAsync(async (req, res) => {
+    const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'doctor');
+    const allAppointments = await appointmentService.getDoctorAllAppointments(req.user.id);
 
-        res.json({
-            appointment: appointment,
-            hasAppointment: !!appointment,
-            allAppointments: allAppointments
-        });
-    } catch (err) {
-        logger.error('Doc dashboard error:', err);
-        res.status(500).json({ success: false, error: err.message || 'Internal Server Error' });
-    }
-};
+    return sendResponse(res, 200, 'Doctor dashboard loaded', {
+        appointment,
+        hasAppointment: !!appointment,
+        allAppointments
+    });
+});
 
 exports.startCall = catchAsync(async (req, res) => {
     const roomId = await videoService.startVideoCall(req.params.appointmentId, req.user.id);
@@ -80,22 +76,17 @@ exports.startCall = catchAsync(async (req, res) => {
         }
     }
 
-    res.json({ success: true, roomId: roomId });
+    return sendResponse(res, 200, 'Call started', { roomId });
 });
 
-exports.userDashboard = async (req, res) => {
-    try {
-        const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'user');
+exports.userDashboard = catchAsync(async (req, res) => {
+    const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'user');
 
-        res.json({
-            appointment: appointment,
-            hasAppointment: !!appointment
-        });
-    } catch (err) {
-        logger.error('User dashboard error:', err);
-        res.status(500).json({ success: false, error: err.message || 'Internal Server Error' });
-    }
-};
+    return sendResponse(res, 200, 'Patient dashboard loaded', {
+        appointment,
+        hasAppointment: !!appointment
+    });
+});
 
 exports.docStartCall = catchAsync(async (req, res) => {
     const roomId = await videoService.startVideoCall(req.params.appointmentId, req.user.id);
@@ -120,22 +111,17 @@ exports.docStartCall = catchAsync(async (req, res) => {
         }
     }
 
-    res.json({ success: true, roomId, redirect: `/doctor/video/${roomId}` });
+    return sendResponse(res, 200, 'Call started', { roomId, userRole: 'doctor' });
 });
 
 exports.userJoinCall = catchAsync(async (req, res) => {
     const roomId = await videoService.joinVideoCall(req.params.appointmentId, req.user.id);
-    res.json({ success: true, roomId, redirect: `/patient/video/${roomId}` });
+    return sendResponse(res, 200, 'Call joined', { roomId, userRole: 'patient' });
 });
 
 exports.saveNotes = catchAsync(async (req, res) => {
     const { roomId, notes } = req.body;
 
     await videoService.saveCallNotes(roomId, req.user.id, notes);
-    res.json({
-        success: true,
-        data: null,
-        error: null,
-        message: 'Notes saved successfully'
-    });
+    return sendResponse(res, 200, 'Notes saved successfully', null);
 });

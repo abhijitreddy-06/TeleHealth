@@ -40,12 +40,14 @@ function validate(schema, source = 'body') {
 
         if (!result.success) {
             return res.status(400).json({
+                success: false,
                 message: 'Validation failed',
-                error: 'Validation failed',
-                details: result.error.issues.map(i => ({
-                    field: i.path.join('.'),
-                    message: i.message
-                }))
+                data: {
+                    details: result.error.issues.map(i => ({
+                        field: i.path.join('.'),
+                        message: i.message
+                    }))
+                }
             });
         }
 

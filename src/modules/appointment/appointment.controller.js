@@ -1,6 +1,7 @@
 const appointmentService = require('./appointment.service');
 const catchAsync = require('../../utils/catchAsync');
 const logger = require('../../utils/logger');
+const sendResponse = require('../../utils/sendResponse');
 
 function broadcastDashboard(req, event, data) {
     const io = req.app.get('io');
@@ -37,61 +38,56 @@ exports.bookAppointment = async (req, res) => {
             timestamp: new Date().toISOString()
         });
 
-        return res.json({ success: true, message: 'Appointment booked successfully!' });
+        return sendResponse(res, 200, 'Appointment booked successfully!', null);
     } catch (err) {
         console.error('Appointment booking error:', err.message);
 
         const statusCode = err.statusCode || 500;
-        return res.status(statusCode).json({ success: false, error: err.message });
+        return sendResponse(res, statusCode, err.message || 'Failed to book appointment', null);
     }
 };
 
 exports.getUserAppointments = catchAsync(async (req, res) => {
     const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'user');
-    res.json({ appointment: appointment || null });
+    return sendResponse(res, 200, 'User appointment fetched successfully', { appointment: appointment || null });
 });
 
 exports.startAppointment = catchAsync(async (req, res) => {
     const result = await appointmentService.startAppointment(req.params.id, req.user.id);
-    res.json({ roomId: result.room_id });
+    return sendResponse(res, 200, 'Appointment started successfully', { roomId: result.room_id });
 });
 
 exports.getDoctorAppointments = catchAsync(async (req, res) => {
     const appointment = await appointmentService.getUserActiveAppointment(req.user.id, 'doctor');
-    res.json({ appointment: appointment || null });
+    return sendResponse(res, 200, 'Doctor appointment fetched successfully', { appointment: appointment || null });
 });
 
 exports.getDoctorAllAppointments = catchAsync(async (req, res) => {
     const appointments = await appointmentService.getDoctorAllAppointments(req.user.id);
-    res.json({ appointments });
+    return sendResponse(res, 200, 'Doctor appointments fetched successfully', { appointments });
 });
 
 exports.getAvailableDoctors = catchAsync(async (req, res) => {
     const doctors = await appointmentService.getAvailableDoctors();
-    res.json(doctors);
+    return sendResponse(res, 200, 'Available doctors fetched successfully', doctors);
 });
 
 exports.completeAppointment = catchAsync(async (req, res) => {
     await appointmentService.completeAppointment(req.params.id, req.user.id);
-    res.json({
-        success: true,
-        data: null,
-        error: null,
-        message: 'Appointment marked as completed'
-    });
+    return sendResponse(res, 200, 'Appointment marked as completed', null);
 });
 
 exports.getAppointmentStatus = catchAsync(async (req, res) => {
     const status = await appointmentService.getAppointmentStatus(req.params.id, req.user.id, req.user.role);
-    res.json({ status });
+    return sendResponse(res, 200, 'Appointment status fetched successfully', { status });
 });
 
 exports.getRecentPrescription = catchAsync(async (req, res) => {
     const appointment = await appointmentService.getRecentCompletedAppointment(req.user.id);
     if (!appointment) {
-        return res.status(404).json({ error: 'No recent completed appointment found' });
+        return sendResponse(res, 404, 'No recent completed appointment found', null);
     }
-    res.json({
+    return sendResponse(res, 200, 'Recent prescription fetched successfully', {
         appointment: {
             id: appointment.id,
             room_id: appointment.room_id
@@ -118,24 +114,24 @@ exports.cancelAppointment = async (req, res) => {
             timestamp: new Date().toISOString()
         });
 
-        res.json({ success: true, message: result.message });
+        return sendResponse(res, 200, result.message || 'Appointment cancelled successfully', null);
     } catch (err) {
         console.error('Cancel appointment error:', err);
 
         if (err.message.includes('not found')) {
-            return res.status(404).json({ error: err.message });
+            return sendResponse(res, 404, err.message, null);
         }
         if (err.message.includes('Cannot cancel') || err.message.includes('already cancelled')) {
-            return res.status(400).json({ error: err.message });
+            return sendResponse(res, 400, err.message, null);
         }
 
-        res.status(500).json({ error: err.message || 'Failed to cancel appointment' });
+        return sendResponse(res, 500, err.message || 'Failed to cancel appointment', null);
     }
 };
 
 exports.getCancelledAppointments = catchAsync(async (req, res) => {
     const appointments = await appointmentService.getCancelledAppointments(req.user.id, req.user.role);
-    res.json(appointments);
+    return sendResponse(res, 200, 'Cancelled appointments fetched successfully', appointments);
 });
 
 exports.rescheduleAppointment = async (req, res) => {
@@ -149,22 +145,22 @@ exports.rescheduleAppointment = async (req, res) => {
             req.body.lockToken,
             req.body.symptoms
         );
-        res.json(result);
+        return sendResponse(res, 200, 'Appointment rescheduled successfully', result);
     } catch (err) {
         console.error('Reschedule error:', err);
         const statusCode = err.statusCode || 500;
-        res.status(statusCode).json({ error: err.message });
+        return sendResponse(res, statusCode, err.message || 'Failed to reschedule appointment', null);
     }
 };
 
 exports.getUpcomingAppointments = catchAsync(async (req, res) => {
     const { page, limit } = req.validated?.query || { page: 1, limit: 10 };
     const appointments = await appointmentService.getUpcomingAppointments(req.user.id, req.user.role, page, limit);
-    res.json({ appointments });
+    return sendResponse(res, 200, 'Upcoming appointments fetched successfully', { appointments });
 });
 
 exports.getAppointmentHistory = catchAsync(async (req, res) => {
     const { page, limit } = req.validated?.query || { page: 1, limit: 10 };
     const appointments = await appointmentService.getAppointmentHistory(req.user.id, req.user.role, page, limit);
-    res.json(appointments);
+    return sendResponse(res, 200, 'Appointment history fetched successfully', appointments);
 });

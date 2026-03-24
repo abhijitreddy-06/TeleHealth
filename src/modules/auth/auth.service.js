@@ -6,14 +6,8 @@ const AuthModel = require('./auth.model');
 const { AppError, AuthError, ValidationError } = require('../../utils/AppError');
 
 class AuthService {
-    _getRolePaths(role) {
-        const isDoctor = role === 'doctor';
-        return {
-            frontendRole: isDoctor ? 'doctor' : 'patient',
-            homePath: isDoctor ? '/doctor/home' : '/patient/home',
-            profileCreatePath: isDoctor ? '/doctor/profile/create' : '/patient/profile/create',
-            authPath: isDoctor ? '/auth/doctor' : '/auth/patient'
-        };
+    _toApiRole(role) {
+        return role === 'user' ? 'patient' : role;
     }
 
     validatePassword(password) {
@@ -111,18 +105,82 @@ class AuthService {
             : AuthModel.hasUserProfile(userId);
     }
 
-    async getPostAuthState(userId, role) {
-        const paths = this._getRolePaths(role);
+    async buildSessionState(userId, role) {
         const profileComplete = await this.hasCompletedProfile(userId, role);
 
         return {
-            role: paths.frontendRole,
+            userId,
+            role: this._toApiRole(role),
             backendRole: role,
-            profileComplete,
-            homePath: paths.homePath,
-            profileCreatePath: paths.profileCreatePath,
-            authPath: paths.authPath,
-            redirect: profileComplete ? paths.homePath : paths.profileCreatePath
+            profileComplete
+        };
+    }
+
+    async signup(phone, password, confirmPassword, role) {
+        this.validatePassword(password);
+        this.validatePasswordMatch(password, confirmPassword);
+
+        const user = await this.register(phone, password, role);
+        const tokens = await this.generateTokens(user);
+        const session = await this.buildSessionState(user.id, user.role);
+
+        return { tokens, session };
+    }
+
+    async login(phone, password, role) {
+        const user = await this.authenticate(phone, password, role);
+        const tokens = await this.generateTokens(user);
+        const session = await this.buildSessionState(user.id, user.role);
+
+        return { tokens, session };
+    }
+
+    async refreshSession(refreshToken) {
+        const user = await this.verifyRefreshToken(refreshToken);
+        await this.revokeRefreshToken(refreshToken);
+
+        const tokens = await this.generateTokens(user);
+        const session = await this.buildSessionState(user.id, user.role);
+
+        return { tokens, session };
+    }
+
+    async resolveSession(accessToken, refreshToken) {
+        if (!accessToken && !refreshToken) {
+            return { authenticated: false, clearCookies: false };
+        }
+
+        let user = null;
+        let tokens = null;
+
+        if (accessToken) {
+            try {
+                const payload = await this.verifyAccessToken(accessToken);
+                user = { id: payload.id, role: payload.role };
+            } catch (err) {
+                user = null;
+            }
+        }
+
+        if (!user && refreshToken) {
+            try {
+                const session = await this.refreshSession(refreshToken);
+                user = { id: session.session.userId, role: session.session.backendRole };
+                tokens = session.tokens;
+            } catch (err) {
+                return { authenticated: false, clearCookies: true };
+            }
+        }
+
+        if (!user) {
+            return { authenticated: false, clearCookies: true };
+        }
+
+        return {
+            authenticated: true,
+            clearCookies: false,
+            tokens,
+            session: await this.buildSessionState(user.id, user.role)
         };
     }
 

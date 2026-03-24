@@ -1,7 +1,7 @@
 ================================================================================
                     TELEHEALTH PRODUCTION - COMPREHENSIVE DOCUMENTATION
                               Full-Stack Telemedicine Platform
-                                  Version 1.0.0
+                                  Version 1.1.0
 ================================================================================
 
 Table of Contents:
@@ -55,6 +55,12 @@ DEPLOYMENT READY:
 - Security headers via Helmet (CSP, HSTS, X-Frame-Options)
 - CORS configuration for production HTTPS endpoints
 - Environment-based configuration management
+
+MARCH 2026 ARCHITECTURE UPDATES:
+✓ Backend route compatibility layer: all module APIs accessible under `/api/v1/*`
+✓ Legacy endpoint compatibility retained (no route removals)
+✓ Controller responses normalized to `success`, `message`, `data` contract via `sendResponse`
+✓ Frontend pharmacy navigation migrated to client-side router navigation (no full reload redirects)
 
 ================================================================================
 2. TECHNOLOGY STACK & ARCHITECTURE
@@ -205,8 +211,9 @@ C. API RESPONSE OPTIMIZATION:
 
 3. Response Normalization:
    - Consistent JSON contract across all endpoints
-   - Format: { success: boolean, data: any, error: string|null, message: string }
+  - Format: { success: boolean, message: string, data: any }
    - Automatic status code inference
+  - Exception: binary download endpoints (PDF/files) return streamed/buffer data
 
 D. CONCURRENCY CONTROL (Race Condition Protection):
 ──────────────────────────────────────────────────
@@ -935,6 +942,11 @@ Relationships:
 ================================================================================
 6. BACKEND API ENDPOINTS (COMPLETE LIST)
 ================================================================================
+
+API VERSIONING NOTE:
+- All active module endpoints are accessible under `/api/v1/*`.
+- Legacy endpoint paths are still supported for backward compatibility.
+- Alias translation is performed in backend middleware (`src/app.js`) before route handling.
 
 6.1 AUTHENTICATION ENDPOINTS (6 total)
 --------------------------------------

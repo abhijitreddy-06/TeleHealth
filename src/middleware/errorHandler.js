@@ -1,6 +1,7 @@
 const multer = require('multer');
 const { AppError } = require('../utils/AppError');
 const logger = require('../utils/logger');
+const sendResponse = require('../utils/sendResponse');
 
 function errorHandler(err, req, res, next) {
     err.statusCode = err.statusCode || 500;
@@ -32,27 +33,17 @@ function errorHandler(err, req, res, next) {
 
     const message = err.isOperational ? err.message : 'Internal Server Error';
 
-    const acceptHeader = req.get('Accept') || '';
-    const isApiRequest = req.xhr || acceptHeader.includes('application/json') || req.path.startsWith('/api/');
+    const data = {
+        requestId: req.id,
+        ...(process.env.NODE_ENV === 'development' ? { stack: err.stack } : {})
+    };
 
-    if (isApiRequest) {
-        return res.status(err.statusCode).json({
-            message,
-            error: message,
-            ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-        });
-    }
-
-    res.status(err.statusCode).json({
-        message,
-        error: message,
-        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-    });
+    return sendResponse(res, err.statusCode, message, data);
 }
 
 function notFoundHandler(req, res) {
     logger.warn(`404: ${req.method} ${req.originalUrl}`);
-    res.status(404).json({ message: 'Route not found', error: 'Route not found' });
+    return sendResponse(res, 404, 'Route not found', null);
 }
 
 module.exports = { errorHandler, notFoundHandler };

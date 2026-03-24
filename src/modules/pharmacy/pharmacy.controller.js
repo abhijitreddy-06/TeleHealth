@@ -1,67 +1,68 @@
 const pharmacyService = require('./pharmacy.service');
 const catchAsync = require('../../utils/catchAsync');
+const sendResponse = require('../../utils/sendResponse');
 
 // ── API Endpoints ──
 
 exports.apiGetCategories = catchAsync(async (req, res) => {
     const categories = await pharmacyService.getCategories();
-    res.json({ success: true, categories });
+    return sendResponse(res, 200, 'Categories fetched successfully', { categories });
 });
 
 exports.apiListProducts = catchAsync(async (req, res) => {
     const data = await pharmacyService.listProducts(req.query);
-    res.json({ success: true, ...data });
+    return sendResponse(res, 200, 'Products fetched successfully', data);
 });
 
 exports.apiGetProduct = catchAsync(async (req, res) => {
     const data = await pharmacyService.getProduct(req.params.slug, req.user?.id);
-    res.json({ success: true, ...data });
+    return sendResponse(res, 200, 'Product fetched successfully', data);
 });
 
 exports.apiAddToCart = catchAsync(async (req, res) => {
     const { productId, quantity } = req.validated.body;
     const result = await pharmacyService.addToCart(req.user.id, productId, quantity);
-    res.json({ success: true, message: 'Added to cart', ...result });
+    return sendResponse(res, 200, 'Added to cart', result);
 });
 
 exports.apiUpdateCart = catchAsync(async (req, res) => {
     const { productId, quantity } = req.validated.body;
     const result = await pharmacyService.updateCartItem(req.user.id, productId, quantity);
-    res.json({ success: true, message: 'Cart updated', ...result });
+    return sendResponse(res, 200, 'Cart updated', result);
 });
 
 exports.apiRemoveFromCart = catchAsync(async (req, res) => {
     const productId = parseInt(req.params.productId);
     const result = await pharmacyService.removeFromCart(req.user.id, productId);
-    res.json({ success: true, message: 'Removed from cart', ...result });
+    return sendResponse(res, 200, 'Removed from cart', result);
 });
 
 exports.apiGetCart = catchAsync(async (req, res) => {
     const cart = await pharmacyService.getCart(req.user.id);
-    res.json({ success: true, ...cart });
+    return sendResponse(res, 200, 'Cart fetched successfully', cart);
 });
 
 exports.apiPlaceOrder = catchAsync(async (req, res) => {
     const shippingInfo = req.validated.body;
     const order = await pharmacyService.placeOrder(req.user.id, shippingInfo);
-    res.json({ success: true, message: 'Order placed successfully!', order });
+    return sendResponse(res, 200, 'Order placed successfully!', { order });
 });
 
 exports.apiGetOrders = catchAsync(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const orders = await pharmacyService.getOrders(req.user.id, page);
-    res.json({ success: true, orders });
+    return sendResponse(res, 200, 'Orders fetched successfully', { orders });
 });
 
 exports.apiGetOrderDetail = catchAsync(async (req, res) => {
     const order = await pharmacyService.getOrderDetail(parseInt(req.params.id), req.user.id);
-    res.json({ success: true, order });
+    return sendResponse(res, 200, 'Order detail fetched successfully', { order });
 });
 
 exports.apiSubmitReview = catchAsync(async (req, res) => {
     const { productId, rating, title, comment } = req.validated.body;
     const review = await pharmacyService.submitReview(req.user.id, productId, rating, title, comment);
-    res.json({ success: true, message: 'Review submitted', review });
+    return sendResponse(res, 200, 'Review submitted', { review });
 });
 
 exports.apiGetReviews = catchAsync(async (req, res) => {
@@ -69,16 +70,16 @@ exports.apiGetReviews = catchAsync(async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const PharmacyModel = require('./pharmacy.model');
     const reviews = await PharmacyModel.getProductReviews(productId, page, 10);
-    res.json({ success: true, reviews });
+    return sendResponse(res, 200, 'Reviews fetched successfully', { reviews });
 });
 
 exports.apiToggleWishlist = catchAsync(async (req, res) => {
     const { productId } = req.validated.body;
     const result = await pharmacyService.toggleWishlist(req.user.id, productId);
-    res.json({ success: true, ...result });
+    return sendResponse(res, 200, 'Wishlist updated successfully', result);
 });
 
 exports.apiGetWishlist = catchAsync(async (req, res) => {
     const wishlist = await pharmacyService.getWishlist(req.user.id);
-    res.json({ success: true, wishlist });
+    return sendResponse(res, 200, 'Wishlist fetched successfully', { wishlist });
 });
