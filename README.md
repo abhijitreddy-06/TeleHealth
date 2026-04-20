@@ -10,7 +10,6 @@ A production-grade full-stack telemedicine platform enabling real-time video con
 - 💊 **Integrated Pharmacy** - Product catalog, cart, orders, and reviews
 - 📋 **Digital Prescriptions** - PDF generation and download
 - 🏥 **Medical Records Vault** - Cloud storage with encryption
-- 🤖 **AI Symptom Analyzer** - Clinical BERT disease prediction
 - 📊 **Admin Dashboard** - Real-time statistics and management
 - 🔄 **Real-time Updates** - Socket.IO for live notifications
 - 📱 **Fully Responsive** - Dark/light theme support
@@ -25,6 +24,7 @@ A production-grade full-stack telemedicine platform enabling real-time video con
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - PostgreSQL 12+
 - Redis 5+
@@ -48,6 +48,7 @@ cd ..
 ### Environment Setup
 
 Create `.env` in root:
+
 ```
 NODE_ENV=development
 PORT=10000
@@ -64,6 +65,7 @@ EMAILJS_PUBLIC_KEY=your_emailjs_key
 ```
 
 Create `telehealth-frontend/.env.local`:
+
 ```
 NEXT_PUBLIC_API_URL=http://localhost:10000
 NEXT_PUBLIC_SOCKET_URL=http://localhost:10000
@@ -82,11 +84,6 @@ npm --prefix telehealth-frontend run local:dev
 
 # Terminal 3: Redis (if not running as service)
 redis-server
-
-# Terminal 4: AI Model (Optional)
-cd disease-predictor/ai-model
-python app.py
-# Flask runs on http://localhost:7860
 ```
 
 ## � Project Structure
@@ -111,14 +108,13 @@ telehealth/
 │   ├── src/app/                  # App Router pages
 │   ├── src/components/           # React components
 │   └── src/lib/                  # API client, utilities
-├── disease-predictor/            # Python AI model
-│   └── ai-model/                 # Flask server
 └── package.json
 ```
 
 ## 🔧 API Endpoints
 
 ### Core Endpoints
+
 - **Auth**: Signup, login, logout, refresh token
 - **Appointments**: Book, cancel, reschedule, list
 - **Video**: WebRTC room management with Socket.IO signaling
@@ -126,11 +122,13 @@ telehealth/
 - **Admin**: Dashboard, user management, pharmacy management
 
 ### API Versioning & Compatibility
+
 - Primary API surface is available under `/api/v1/*`.
 - Legacy routes under `/api/*`, `/appointments/*`, `/vault/*`, `/patient/*`, and `/doctor/*` remain active for backward compatibility.
 - Route aliasing is handled in backend middleware in `src/app.js`.
 
 ### Response Contract
+
 - Standard JSON contract for API responses:
   - `success`
   - `message`
@@ -193,6 +191,7 @@ npm run build
 ## 📊 Database
 
 PostgreSQL with:
+
 - Connection pooling (max 3 connections)
 - Advisory locks for appointment booking
 - Full-text search on pharmacy products
@@ -202,7 +201,9 @@ PostgreSQL with:
 ## 🚀 Production Deployment
 
 ### Environment Variables
+
 Set all required env vars in production:
+
 - `DATABASE_URL` - PostgreSQL connection
 - `REDIS_URL` - Redis connection
 - `ACCESS_TOKEN_SECRET` - JWT secret
@@ -212,6 +213,7 @@ Set all required env vars in production:
 - `NEXT_SERVER_API_URL` - Required for frontend production build (must be HTTPS)
 
 ### Render + Vercel Deployment Notes
+
 - Backend (Render): run `npm start` from repository root.
 - Frontend (Vercel): set project root to `telehealth-frontend`.
 - Vercel required env:
@@ -222,6 +224,7 @@ Set all required env vars in production:
 - Backend CORS must allow your Vercel domain and send credentials.
 
 ### PM2 Process Management
+
 ```bash
 pm2 start ecosystem.config.js
 pm2 startup
@@ -229,6 +232,7 @@ pm2 save
 ```
 
 ### Nginx Reverse Proxy
+
 ```nginx
 upstream backend {
   server localhost:10000;
@@ -241,18 +245,18 @@ upstream frontend {
 server {
   listen 443 ssl http2;
   server_name yourdomain.com;
-  
+
   location /api {
     proxy_pass http://backend;
   }
-  
+
   location /socket.io {
     proxy_pass http://backend;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "upgrade";
   }
-  
+
   location / {
     proxy_pass http://frontend;
   }
